@@ -13,6 +13,7 @@ import {
   CircleIcon,
   ClockIcon,
   DotIcon as DotsHorizontalIcon,
+  ChevronLeftIcon,
 } from "lucide-react"
 
 import {
@@ -224,6 +225,19 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
       {/* Task Header - Exact same placement as main drawer record header */}
       <div className="border-b bg-background px-6 py-2">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (parentTask && onBackToParent) {
+                onBackToParent()
+              } else {
+                onBack()
+              }
+            }}
+          >
+            <ChevronLeftIcon className="h-4 w-4" />
+          </Button>
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <CheckSquareIcon className="h-4 w-4" />
           </div>
@@ -254,7 +268,19 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
               </h2>
             )}
             <p className="text-sm text-muted-foreground">
-              {parentTask ? `Subtask of ${parentTask.title}` : `Task in ${recordName}`}
+              {parentTask ? (
+                <>
+                  <span
+                    className="cursor-pointer text-blue-600 hover:underline"
+                    onClick={() => onBackToParent && onBackToParent()}
+                  >
+                    {parentTask.title}
+                  </span>
+                  {" → Subtask"}
+                </>
+              ) : (
+                `Task in ${recordName}`
+              )}
             </p>
           </div>
         </div>
