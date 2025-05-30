@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { GitBranch, Zap, FileCheck, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { GitBranch, Zap, FileCheck, Plus, ChevronLeftIcon } from "lucide-react"
 import { WorkflowCreator } from "./workflow-creator"
 
 const workflowTemplates = [
@@ -111,72 +112,99 @@ export function WorkflowTemplateDialog({ isOpen, onClose }: WorkflowTemplateDial
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader>
-            <DialogTitle>Choose a Workflow Template</DialogTitle>
-            <DialogDescription>
-              Select a pre-built template to get started quickly, or create a workflow from scratch.
-            </DialogDescription>
-          </DialogHeader>
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={onClose}>
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="outline" className="bg-background">
+                Workflow Template
+              </Badge>
+            </div>
+          </div>
 
-          <div className="grid gap-4 py-4">
-            {/* Start from Scratch Option */}
-            <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={handleStartFromScratch}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Plus className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Start from Scratch</CardTitle>
-                    <CardDescription>Create a custom workflow tailored to your specific needs</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
+          {/* Record Header */}
+          <div className="border-b bg-background px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                W
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Choose a Workflow Template</h2>
+                <p className="text-sm text-muted-foreground">
+                  Select a pre-built template to get started quickly, or create a workflow from scratch.
+                </p>
+              </div>
+            </div>
+          </div>
 
-            {/* Template Options */}
-            <div className="grid gap-4 md:grid-cols-1">
-              {workflowTemplates.map((template) => (
-                <Card
-                  key={template.id}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleTemplateSelect(template)}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="space-y-4">
+              {/* Start from Scratch Option */}
+              <Card
+                className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]"
+                onClick={handleStartFromScratch}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Plus className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-base font-medium">Start from Scratch</CardTitle>
+                      <CardDescription className="text-sm">
+                        Create a custom workflow tailored to your specific needs
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+
+              {/* Template Options */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-muted-foreground">Templates</h3>
+                {workflowTemplates.map((template) => (
+                  <Card
+                    key={template.id}
+                    className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]"
+                    onClick={() => handleTemplateSelect(template)}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                           <template.icon className="h-5 w-5 text-primary" />
                         </div>
-                        <div>
-                          <CardTitle className="text-lg">{template.name}</CardTitle>
-                          <CardDescription className="mt-1">{template.description}</CardDescription>
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-base font-medium">{template.name}</CardTitle>
+                          <CardDescription className="text-sm mt-1">{template.description}</CardDescription>
                         </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {template.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{template.stages.length} stages</span>
-                      <span>{template.attributes.length} attributes</span>
-                      <span className="capitalize">{template.objectType.replace("-", " ")} tracking</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {template.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>{template.stages.length} stages</span>
+                        <span>{template.attributes.length} attributes</span>
+                        <span className="capitalize">{template.objectType.replace("-", " ")} tracking</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       <WorkflowCreator
         isOpen={isCreatorOpen}
