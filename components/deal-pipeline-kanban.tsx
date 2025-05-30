@@ -17,21 +17,11 @@ import { CSS } from "@dnd-kit/utilities"
 import {
   MoreVerticalIcon,
   PlusIcon,
-  ExpandIcon,
-  ChevronLeftIcon,
-  MailIcon,
-  BuildingIcon,
   DollarSignIcon,
   CalendarIcon,
   UserIcon,
   MapPinIcon,
-  PhoneIcon,
-  GlobeIcon,
   TrendingUpIcon,
-  FileTextIcon,
-  UsersIcon,
-  CheckCircleIcon,
-  FolderIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -44,9 +34,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Label } from "@/components/ui/label"
-import { companiesData } from "./companies-table"
+import { OpportunityNameCell, type Opportunity } from "./opportunities-table"
 
 interface Deal {
   id: string
@@ -160,18 +148,74 @@ const stages = [
 
 // Separate the card UI from the sortable wrapper
 function DealCard({ deal }: { deal: Deal }) {
-  // Find the corresponding company in companiesData
-  const company = companiesData.find((c) => c.name === deal.companyName)
+  // Convert deal to opportunity format
+  const opportunity: Opportunity = {
+    id: Number.parseInt(deal.id),
+    name: `${deal.fundingRound} Investment - ${deal.companyName}`,
+    company: {
+      name: deal.companyName,
+      type: "Issuer",
+    },
+    contact: {
+      name: deal.owner,
+      role: "Deal Owner",
+    },
+    legalEntity: {
+      name: "Investment Fund",
+      type: "Investment Vehicle",
+    },
+    stage:
+      deal.stage === "awareness"
+        ? "Initial Contact"
+        : deal.stage === "initial-contact"
+          ? "Proposal"
+          : deal.stage === "work-in-progress"
+            ? "Due Diligence"
+            : deal.stage === "term-sheet"
+              ? "Term Sheet"
+              : deal.stage === "due-diligence"
+                ? "Due Diligence"
+                : deal.stage === "invested"
+                  ? "Closed Won"
+                  : deal.stage === "passed"
+                    ? "Closed Lost"
+                    : "Initial Contact",
+    amount: deal.targetRaise,
+    probability:
+      deal.stage === "awareness"
+        ? 20
+        : deal.stage === "initial-contact"
+          ? 40
+          : deal.stage === "work-in-progress"
+            ? 60
+            : deal.stage === "term-sheet"
+              ? 80
+              : deal.stage === "due-diligence"
+                ? 85
+                : deal.stage === "invested"
+                  ? 100
+                  : deal.stage === "passed"
+                    ? 0
+                    : 30,
+    expectedClose: deal.nextMeeting || "TBD",
+    lastActivity: "2 days ago",
+    priority: "High",
+    status: deal.stage === "invested" ? "Closed" : deal.stage === "passed" ? "Cancelled" : "Active",
+    description: deal.description || `${deal.fundingRound} investment opportunity in ${deal.sector}`,
+    fundingRound: deal.fundingRound,
+    valuation: deal.valuation || "TBD",
+    sector: deal.sector,
+    geography: "North America",
+  }
 
-  if (!company) {
-    // Fallback to the original card if company not found
-    return (
+  return (
+    <div onClick={(e) => e.stopPropagation()}>
       <Card className="cursor-pointer hover:shadow-md transition-shadow">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h4 className="font-medium text-sm">{deal.companyName}</h4>
-              <p className="text-xs text-muted-foreground">{deal.sector}</p>
+            <div className="flex-1" onClick={(e) => e.stopPropagation()}>
+              <OpportunityNameCell opportunity={opportunity} />
+              <p className="text-xs text-muted-foreground mt-1">{deal.sector}</p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -218,70 +262,7 @@ function DealCard({ deal }: { deal: Deal }) {
           </div>
         </CardContent>
       </Card>
-    )
-  }
-
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">{deal.companyName}</h4>
-                <p className="text-xs text-muted-foreground">{deal.sector}</p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <MoreVerticalIcon className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-2">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs">
-                <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Funding:</span>
-                <span>{deal.fundingRound}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Target:</span>
-                <span>{deal.targetRaise}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <UserIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Owner:</span>
-                <span>{deal.owner}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <MapPinIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Location:</span>
-                <span>{deal.location}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Next:</span>
-                <span>{deal.nextMeeting}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-        {/* This will render the company drawer content */}
-        <CompanyDrawerContent company={company} />
-      </SheetContent>
-    </Sheet>
+    </div>
   )
 }
 
@@ -300,309 +281,6 @@ function SortableDealCard({ deal }: { deal: Deal }) {
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
       <DealCard deal={deal} />
-    </div>
-  )
-}
-
-// Add this new component to render the company drawer content
-function CompanyDrawerContent({ company }: { company: any }) {
-  const [activeTab, setActiveTab] = React.useState("details")
-
-  const tabs = [
-    { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 5, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 12, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 8, icon: FileTextIcon },
-    { id: "meetings", label: "Meetings", count: 6, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 15, icon: FolderIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
-  ]
-
-  return (
-    <>
-      {/* Header */}
-      <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => document.querySelector('[data-state="open"]')?.click()}>
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-          <Badge variant="outline" className="bg-background">
-            {company.name}
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <ExpandIcon className="h-4 w-4" />
-            Full screen
-          </Button>
-          <Button variant="outline" size="sm">
-            <MailIcon className="h-4 w-4" />
-            Compose email
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Record Header */}
-        <div className="border-b bg-background px-6 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-              {company.name.charAt(0)}
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">{company.name}</h2>
-              <p className="text-sm text-muted-foreground">
-                {company.industry} • {company.stage}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b bg-background px-6">
-          <div className="flex gap-8 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? "border-b-2 border-primary text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tab.icon && <tab.icon className="h-4 w-4" />}
-                {tab.label}
-                {tab.count !== null && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                    {tab.count}
-                  </Badge>
-                )}
-                {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === "details" ? (
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Company Details</h4>
-
-              <div className="rounded-lg border border-muted bg-muted/10 p-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Company Name</Label>
-                      <p className="text-sm font-medium">{company.name}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Industry</Label>
-                      <p className="text-sm">{company.industry}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Revenue</Label>
-                      <p className="text-sm">{company.revenue}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <UsersIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Employees</Label>
-                      <p className="text-sm">{company.employees}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <GlobeIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Website</Label>
-                      <p className="text-sm text-blue-600">{company.website}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Location</Label>
-                      <p className="text-sm">{company.location}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Description</Label>
-                      <p className="text-sm">{company.description}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>
-                No {activeTab} found for {company.name}
-              </p>
-              <p className="text-sm">Add some {activeTab} to get started</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  )
-}
-
-function DealDetails({ deal, isFullScreen }: { deal: Deal; isFullScreen: boolean }) {
-  return (
-    <div className="p-6">
-      {/* Record Header */}
-      <div className="border-b bg-background pb-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-            {deal.companyName.charAt(0)}
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold">{deal.companyName}</h2>
-            <p className="text-sm text-muted-foreground">
-              {deal.sector} • {deal.fundingRound}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Deal Details */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-medium">Deal Details</h4>
-
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Company</Label>
-                  <p className="text-sm font-medium">{deal.companyName}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Funding Round</Label>
-                  <p className="text-sm">{deal.fundingRound}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Target Raise</Label>
-                  <p className="text-sm">{deal.targetRaise}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <UserIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Deal Owner</Label>
-                  <p className="text-sm">{deal.owner}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Location</Label>
-                  <p className="text-sm">{deal.location}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <GlobeIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Website</Label>
-                  <p className="text-sm text-blue-600">{deal.website}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <MailIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Email</Label>
-                  <p className="text-sm text-blue-600">{deal.email}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Phone</Label>
-                  <p className="text-sm">{deal.phone}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Last Contact</Label>
-                  <p className="text-sm">{deal.lastContact}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Next Meeting</Label>
-                  <p className="text-sm">{deal.nextMeeting}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 pt-4 border-t">
-            <div className="flex items-start gap-2">
-              <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Description</Label>
-                <p className="text-sm">{deal.description}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 pt-4 border-t">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <Label className="text-xs text-muted-foreground">Valuation</Label>
-                <p className="text-sm font-medium">{deal.valuation}</p>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Revenue</Label>
-                <p className="text-sm font-medium">{deal.revenue}</p>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Employees</Label>
-                <p className="text-sm font-medium">{deal.employees}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
