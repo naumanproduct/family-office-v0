@@ -356,6 +356,29 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
       {selectedTask && (
         <Sheet open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
           <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" onClick={() => setSelectedTask(null)}>
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <Badge variant="outline" className="bg-background">
+                  Task
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <ExpandIcon className="h-4 w-4" />
+                  Full screen
+                </Button>
+                <Button variant="outline" size="sm">
+                  <MailIcon className="h-4 w-4" />
+                  Compose email
+                </Button>
+              </div>
+            </div>
+
+            {/* Task Details View */}
             <TaskDetailsView
               task={selectedTask}
               onBack={() => setSelectedTask(null)}
