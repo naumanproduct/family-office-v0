@@ -1,3 +1,7 @@
+import { AppSidebar } from "../../components/app-sidebar"
+import { SiteHeader } from "../../components/site-header"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { CapitalCallKanban } from "../../components/capital-call-kanban"
 import { WorkflowHeader } from "../../components/workflows/workflow-header"
 
 const workflowConfig = {
@@ -22,23 +26,34 @@ const workflowConfig = {
 
 export default function CapitalCallTrackingPage() {
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Capital Call Tracking</h1>
-          <p className="text-muted-foreground">Track and manage capital call requests</p>
+    <SidebarProvider>
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="px-4 lg:px-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold">Capital Call Tracking</h1>
+                    <p className="text-muted-foreground">Monitor and manage capital call requests and commitments</p>
+                  </div>
+                  <WorkflowHeader
+                    workflowName="Capital Call Tracking"
+                    workflowConfig={workflowConfig}
+                    onSave={(workflow) => {
+                      console.log("Workflow updated:", workflow)
+                      // Handle workflow updates here
+                    }}
+                  />
+                </div>
+                <CapitalCallKanban />
+              </div>
+            </div>
+          </div>
         </div>
-        <WorkflowHeader
-          workflowName="Capital Call Tracking"
-          workflowConfig={workflowConfig}
-          onSave={(workflow) => {
-            console.log("Workflow updated:", workflow)
-            // Handle workflow updates here
-          }}
-        />
-      </div>
-
-      {/* rest of code here */}
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
