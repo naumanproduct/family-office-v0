@@ -1,42 +1,79 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import * as React from "react"
+import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  DragOverlay,
+} from "@dnd-kit/core"
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import {
+  MoreVerticalIcon,
+  PlusIcon,
+  ExpandIcon,
+  ChevronLeftIcon,
+  MailIcon,
+  BuildingIcon,
+  DollarSignIcon,
+  CalendarIcon,
+  UserIcon,
+  MapPinIcon,
+  FileTextIcon,
+  CheckCircleIcon,
+  FolderIcon,
+  AlertTriangleIcon,
+} from "lucide-react"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Calendar, Building2, User, AlertTriangle } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MasterDrawer } from "@/components/master-drawer"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Label } from "@/components/ui/label"
 
 interface ComplianceItem {
   id: string
   complianceType: string
   entity: string
   jurisdiction: string
-  dueDate: string
-  filedDate?: string
   assignedTo: string
-  status: "pending" | "in-progress" | "under-review" | "approved" | "filed" | "overdue"
-  priority: "low" | "medium" | "high" | "critical"
-  description: string
-  requirements: string[]
-  filingFee?: number
+  dueDate: string
+  stage: string
+  // Additional fields for detailed view
+  description?: string
+  filedDate?: string
+  filingFee?: string
+  priority?: string
+  requirements?: string[]
   notes?: string
 }
 
-const mockComplianceItems: ComplianceItem[] = [
+const initialComplianceItems: ComplianceItem[] = [
   {
     id: "1",
     complianceType: "Annual Report",
     entity: "Venture Fund I LP",
     jurisdiction: "Delaware",
-    dueDate: "2024-03-01",
     assignedTo: "Sarah Johnson",
-    status: "pending",
-    priority: "high",
+    dueDate: "2024-03-01",
+    stage: "pending",
     description: "Annual report filing for Delaware LP",
+    filingFee: "$300",
+    priority: "High",
     requirements: ["Financial statements", "Partner information", "Registered agent confirmation"],
-    filingFee: 300,
     notes: "Waiting for final financial statements",
   },
   {
@@ -44,13 +81,13 @@ const mockComplianceItems: ComplianceItem[] = [
     complianceType: "Tax Filing",
     entity: "Growth Fund II LP",
     jurisdiction: "California",
-    dueDate: "2024-04-15",
     assignedTo: "Michael Chen",
-    status: "in-progress",
-    priority: "critical",
+    dueDate: "2024-04-15",
+    stage: "in-progress",
     description: "State tax return filing",
+    filingFee: "$800",
+    priority: "Critical",
     requirements: ["Form 565", "K-1 schedules", "Payment voucher"],
-    filingFee: 800,
     notes: "Tax preparation in progress",
   },
   {
@@ -58,13 +95,13 @@ const mockComplianceItems: ComplianceItem[] = [
     complianceType: "Regulatory Update",
     entity: "Real Estate Fund LP",
     jurisdiction: "New York",
-    dueDate: "2024-02-28",
     assignedTo: "Lisa Wang",
-    status: "under-review",
-    priority: "medium",
+    dueDate: "2024-02-28",
+    stage: "under-review",
     description: "Investment adviser registration update",
+    filingFee: "$150",
+    priority: "Medium",
     requirements: ["Form ADV amendment", "Updated disclosure documents"],
-    filingFee: 150,
     notes: "Pending legal review",
   },
   {
@@ -72,11 +109,11 @@ const mockComplianceItems: ComplianceItem[] = [
     complianceType: "Board Resolution",
     entity: "Tech Fund III LP",
     jurisdiction: "Delaware",
-    dueDate: "2024-03-15",
     assignedTo: "David Kim",
-    status: "approved",
-    priority: "low",
+    dueDate: "2024-03-15",
+    stage: "approved",
     description: "Annual board resolutions",
+    priority: "Low",
     requirements: ["Meeting minutes", "Signed resolutions", "Corporate records update"],
     notes: "Board meeting completed, filing pending",
   },
@@ -85,14 +122,14 @@ const mockComplianceItems: ComplianceItem[] = [
     complianceType: "Annual Report",
     entity: "Bond Fund LP",
     jurisdiction: "Nevada",
-    dueDate: "2024-01-31",
-    filedDate: "2024-01-28",
     assignedTo: "Jennifer Lee",
-    status: "filed",
-    priority: "medium",
+    dueDate: "2024-01-31",
+    stage: "filed",
     description: "Nevada annual report filing",
+    filedDate: "2024-01-28",
+    filingFee: "$125",
+    priority: "Medium",
     requirements: ["Annual report form", "Filing fee", "Registered agent info"],
-    filingFee: 125,
     notes: "Successfully filed on time",
   },
   {
@@ -100,231 +137,425 @@ const mockComplianceItems: ComplianceItem[] = [
     complianceType: "Tax Filing",
     entity: "Infrastructure Fund LP",
     jurisdiction: "Texas",
-    dueDate: "2024-01-15",
     assignedTo: "Robert Wilson",
-    status: "overdue",
-    priority: "critical",
+    dueDate: "2024-01-15",
+    stage: "overdue",
     description: "Franchise tax report",
+    filingFee: "$300",
+    priority: "Critical",
     requirements: ["Public information report", "Franchise tax payment"],
-    filingFee: 300,
     notes: "OVERDUE - Penalties may apply",
   },
 ]
 
-const statusConfig = {
-  pending: { label: "Pending", color: "bg-gray-100 text-gray-800" },
-  "in-progress": { label: "In Progress", color: "bg-blue-100 text-blue-800" },
-  "under-review": { label: "Under Review", color: "bg-yellow-100 text-yellow-800" },
-  approved: { label: "Approved", color: "bg-green-100 text-green-800" },
-  filed: { label: "Filed", color: "bg-purple-100 text-purple-800" },
-  overdue: { label: "Overdue", color: "bg-red-100 text-red-800" },
-}
+const stages = [
+  { id: "pending", title: "Pending", color: "bg-gray-100" },
+  { id: "in-progress", title: "In Progress", color: "bg-blue-100" },
+  { id: "under-review", title: "Under Review", color: "bg-yellow-100" },
+  { id: "approved", title: "Approved", color: "bg-green-100" },
+  { id: "filed", title: "Filed", color: "bg-purple-100" },
+  { id: "overdue", title: "Overdue", color: "bg-red-100" },
+]
 
-const priorityConfig = {
-  low: { label: "Low", color: "bg-green-100 text-green-800" },
-  medium: { label: "Medium", color: "bg-yellow-100 text-yellow-800" },
-  high: { label: "High", color: "bg-orange-100 text-orange-800" },
-  critical: { label: "Critical", color: "bg-red-100 text-red-800" },
-}
+// Separate the card UI from the sortable wrapper
+function ComplianceCard({ item }: { item: ComplianceItem }) {
+  const isOverdue = item.stage === "overdue" || (new Date(item.dueDate) < new Date() && item.stage !== "filed")
 
-export function EntityComplianceKanban() {
-  const [selectedItem, setSelectedItem] = useState<ComplianceItem | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-
-  const handleItemClick = (item: ComplianceItem) => {
-    setSelectedItem(item)
-    setIsDrawerOpen(true)
-  }
-
-  const getItemsByStatus = (status: ComplianceItem["status"]) => {
-    return mockComplianceItems.filter((item) => item.status === status)
-  }
-
-  const isOverdue = (dueDate: string) => {
-    return new Date(dueDate) < new Date()
-  }
-
-  const ComplianceCard = ({ item }: { item: ComplianceItem }) => (
-    <Card className="mb-3 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleItemClick(item)}>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-sm font-medium">{item.complianceType}</CardTitle>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Building2 className="h-3 w-3" />
-              {item.entity}
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium text-sm">{item.complianceType}</h4>
+                <p className="text-xs text-muted-foreground">{item.jurisdiction}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <MoreVerticalIcon className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem>Assign to User</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Mark as Cancelled</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                <MoreHorizontal className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit Item</DropdownMenuItem>
-              <DropdownMenuItem>Assign to User</DropdownMenuItem>
-              <DropdownMenuItem>Set Reminder</DropdownMenuItem>
-              <DropdownMenuItem>View History</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">Mark as Cancelled</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="font-medium">{item.jurisdiction}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <User className="h-3 w-3 text-muted-foreground" />
-            <span>{item.assignedTo}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs">
-            <Calendar className="h-3 w-3 text-muted-foreground" />
-            <span>Due: {new Date(item.dueDate).toLocaleDateString()}</span>
-            {isOverdue(item.dueDate) && item.status !== "filed" && <AlertTriangle className="h-3 w-3 text-red-500" />}
-          </div>
-          {item.filedDate && (
-            <div className="flex items-center gap-2 text-xs">
-              <Calendar className="h-3 w-3 text-muted-foreground" />
-              <span>Filed: {new Date(item.filedDate).toLocaleDateString()}</span>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-xs">
+                <BuildingIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Entity:</span>
+                <span>{item.entity}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <UserIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Assigned:</span>
+                <span>{item.assignedTo}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <CalendarIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Due:</span>
+                <span>{item.dueDate}</span>
+                {isOverdue && <AlertTriangleIcon className="h-3 w-3 text-red-500" />}
+              </div>
+              {item.filedDate && (
+                <div className="flex items-center gap-2 text-xs">
+                  <CheckCircleIcon className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Filed:</span>
+                  <span>{item.filedDate}</span>
+                </div>
+              )}
+              {item.filingFee && (
+                <div className="flex items-center gap-2 text-xs">
+                  <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Fee:</span>
+                  <span>{item.filingFee}</span>
+                </div>
+              )}
             </div>
-          )}
-          <div className="flex items-center justify-between pt-2">
-            <Badge variant="secondary" className={`text-xs ${priorityConfig[item.priority].color}`}>
-              {priorityConfig[item.priority].label}
-            </Badge>
-            {item.filingFee && <span className="text-xs text-muted-foreground">Fee: ${item.filingFee}</span>}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      </SheetTrigger>
+      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
+        <ComplianceDrawerContent item={item} />
+      </SheetContent>
+    </Sheet>
   )
+}
 
-  const StatusColumn = ({
-    status,
-    title,
-    items,
-  }: {
-    status: ComplianceItem["status"]
-    title: string
-    items: ComplianceItem[]
-  }) => (
-    <div className="flex-1 min-w-[300px]">
-      <div className="mb-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm">{title}</h3>
-          <Badge variant="secondary" className="text-xs">
-            {items.length}
-          </Badge>
-        </div>
-      </div>
-      <div className="space-y-2">
-        {items.map((item) => (
-          <ComplianceCard key={item.id} item={item} />
-        ))}
-      </div>
+function SortableComplianceCard({ item }: { item: ComplianceItem }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1 : 0,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
+      <ComplianceCard item={item} />
     </div>
   )
+}
+
+function ComplianceDrawerContent({ item }: { item: ComplianceItem }) {
+  const [activeTab, setActiveTab] = React.useState("details")
+
+  const tabs = [
+    { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "requirements", label: "Requirements", count: item.requirements?.length || 0, icon: CheckCircleIcon },
+    { id: "history", label: "History", count: 4, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 3, icon: FolderIcon },
+  ]
 
   return (
     <>
-      <div className="flex gap-6 overflow-x-auto pb-4">
-        <StatusColumn status="pending" title="Pending" items={getItemsByStatus("pending")} />
-        <StatusColumn status="in-progress" title="In Progress" items={getItemsByStatus("in-progress")} />
-        <StatusColumn status="under-review" title="Under Review" items={getItemsByStatus("under-review")} />
-        <StatusColumn status="approved" title="Approved" items={getItemsByStatus("approved")} />
-        <StatusColumn status="filed" title="Filed" items={getItemsByStatus("filed")} />
-        <StatusColumn status="overdue" title="Overdue" items={getItemsByStatus("overdue")} />
+      {/* Header */}
+      <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => document.querySelector('[data-state="open"]')?.click()}>
+            <ChevronLeftIcon className="h-4 w-4" />
+          </Button>
+          <Badge variant="outline" className="bg-background">
+            {item.complianceType}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <ExpandIcon className="h-4 w-4" />
+            Full screen
+          </Button>
+          <Button variant="outline" size="sm">
+            <MailIcon className="h-4 w-4" />
+            Send reminder
+          </Button>
+        </div>
       </div>
 
-      <MasterDrawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        title={selectedItem ? `${selectedItem.complianceType} - ${selectedItem.entity}` : ""}
-      >
-        {selectedItem && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Compliance Type</label>
-                <p className="text-sm">{selectedItem.complianceType}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Entity</label>
-                <p className="text-sm">{selectedItem.entity}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Jurisdiction</label>
-                <p className="text-sm">{selectedItem.jurisdiction}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Assigned To</label>
-                <p className="text-sm">{selectedItem.assignedTo}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Due Date</label>
-                <p className="text-sm">{new Date(selectedItem.dueDate).toLocaleDateString()}</p>
-              </div>
-              {selectedItem.filedDate && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Filed Date</label>
-                  <p className="text-sm">{new Date(selectedItem.filedDate).toLocaleDateString()}</p>
-                </div>
-              )}
-              {selectedItem.filingFee && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Filing Fee</label>
-                  <p className="text-sm">${selectedItem.filingFee}</p>
-                </div>
-              )}
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Record Header */}
+        <div className="border-b bg-background px-6 py-2">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+              {item.complianceType.charAt(0)}
             </div>
-
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Description</label>
-              <p className="text-sm mt-1">{selectedItem.description}</p>
+              <h2 className="text-lg font-semibold">{item.complianceType}</h2>
+              <p className="text-sm text-muted-foreground">
+                {item.entity} • {item.jurisdiction}
+              </p>
             </div>
-
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Status</label>
-              <div className="mt-1">
-                <Badge className={statusConfig[selectedItem.status].color}>
-                  {statusConfig[selectedItem.status].label}
-                </Badge>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Priority</label>
-              <div className="mt-1">
-                <Badge className={priorityConfig[selectedItem.priority].color}>
-                  {priorityConfig[selectedItem.priority].label}
-                </Badge>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Requirements</label>
-              <ul className="text-sm mt-1 space-y-1">
-                {selectedItem.requirements.map((req, index) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <span className="w-1 h-1 bg-muted-foreground rounded-full"></span>
-                    {req}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {selectedItem.notes && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Notes</label>
-                <p className="text-sm mt-1">{selectedItem.notes}</p>
-              </div>
-            )}
           </div>
-        )}
-      </MasterDrawer>
+        </div>
+
+        {/* Tabs */}
+        <div className="border-b bg-background px-6">
+          <div className="flex gap-8 overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
+                  activeTab === tab.id
+                    ? "border-b-2 border-primary text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.icon && <tab.icon className="h-4 w-4" />}
+                {tab.label}
+                {tab.count !== null && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                    {tab.count}
+                  </Badge>
+                )}
+                {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === "details" ? (
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Compliance Details</h4>
+
+              <div className="rounded-lg border border-muted bg-muted/10 p-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Compliance Type</Label>
+                      <p className="text-sm font-medium">{item.complianceType}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Entity</Label>
+                      <p className="text-sm">{item.entity}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <MapPinIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Jurisdiction</Label>
+                      <p className="text-sm">{item.jurisdiction}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Assigned To</Label>
+                      <p className="text-sm">{item.assignedTo}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Due Date</Label>
+                      <p className="text-sm">{item.dueDate}</p>
+                    </div>
+                  </div>
+
+                  {item.filedDate && (
+                    <div className="flex items-center gap-2">
+                      <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Filed Date</Label>
+                        <p className="text-sm">{item.filedDate}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {item.filingFee && (
+                    <div className="flex items-center gap-2">
+                      <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Filing Fee</Label>
+                        <p className="text-sm">{item.filingFee}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {item.description && (
+                    <div className="flex items-start gap-2">
+                      <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Description</Label>
+                        <p className="text-sm">{item.description}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {item.notes && (
+                    <div className="flex items-start gap-2">
+                      <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Notes</Label>
+                        <p className="text-sm">{item.notes}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "requirements" && item.requirements ? (
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Requirements</h4>
+              <div className="space-y-2">
+                {item.requirements.map((requirement, index) => (
+                  <div key={index} className="flex items-center gap-2 p-2 rounded border">
+                    <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{requirement}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>
+                No {activeTab} found for {item.complianceType}
+              </p>
+              <p className="text-sm">Add some {activeTab} to get started</p>
+            </div>
+          )}
+        </div>
+      </div>
     </>
+  )
+}
+
+function DroppableColumn({ stage, items }: { stage: (typeof stages)[0]; items: ComplianceItem[] }) {
+  const { setNodeRef, isOver } = useSortable({
+    id: stage.id,
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex flex-col min-h-[600px] w-80 ${isOver ? "ring-2 ring-primary ring-opacity-50 bg-muted/20" : ""}`}
+    >
+      <div className={`rounded-t-lg p-3 ${stage.color}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-sm">{stage.title}</h3>
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs">
+              {items.length}
+            </Badge>
+          </div>
+          <Button variant="ghost" size="icon" className="h-6 w-6">
+            <PlusIcon className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+      <div className="flex-1 bg-gray-50 rounded-b-lg p-3 space-y-3">
+        <SortableContext items={items.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+          {items.map((item) => (
+            <SortableComplianceCard key={item.id} item={item} />
+          ))}
+        </SortableContext>
+      </div>
+    </div>
+  )
+}
+
+export function EntityComplianceKanban() {
+  const [items, setItems] = React.useState(initialComplianceItems)
+  const [activeItem, setActiveItem] = React.useState<ComplianceItem | null>(null)
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor),
+  )
+
+  function handleDragStart(event: any) {
+    const { active } = event
+    const activeId = active.id as string
+    const item = items.find((d) => d.id === activeId)
+    if (item) {
+      setActiveItem(item)
+    }
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveItem(null)
+    const { active, over } = event
+
+    if (!over) return
+
+    const activeId = active.id as string
+    const overId = over.id as string
+
+    const activeItem = items.find((d) => d.id === activeId)
+    if (!activeItem) return
+
+    // Find which stage the item is being dropped on
+    let targetStage = overId
+
+    // If dropping on another item, find its stage
+    if (!stages.some((s) => s.id === overId)) {
+      const targetItem = items.find((d) => d.id === overId)
+      if (targetItem) {
+        targetStage = targetItem.stage
+      }
+    }
+
+    // Update the item's stage if it's different
+    if (activeItem.stage !== targetStage && stages.some((s) => s.id === targetStage)) {
+      setItems(items.map((item) => (item.id === activeId ? { ...item, stage: targetStage } : item)))
+    }
+  }
+
+  const itemsByStage = stages.map((stage) => ({
+    stage,
+    items: items.filter((item) => item.stage === stage.id),
+  }))
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {itemsByStage.map(({ stage, items }) => (
+          <DroppableColumn key={stage.id} stage={stage} items={items} />
+        ))}
+      </div>
+      <DragOverlay>
+        {activeItem ? (
+          <div className="w-80 opacity-80 shadow-lg">
+            <ComplianceCard item={activeItem} />
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   )
 }
