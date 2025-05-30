@@ -1,7 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { Settings2Icon, GripVerticalIcon, PlusIcon, XIcon, EditIcon, CheckIcon } from "lucide-react"
+import {
+  Settings2Icon,
+  GripVerticalIcon,
+  PlusIcon,
+  XIcon,
+  EditIcon,
+  CheckIcon,
+  DollarSignIcon,
+  CalendarIcon,
+  UserIcon,
+  FileTextIcon,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -88,13 +99,15 @@ function SortableAttributeItem({
     setIsEditing(false)
   }
 
+  const Icon = getAttributeIcon(attribute.type)
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center space-x-3 rounded-xl border p-4 cursor-pointer transition-all duration-200 ${
+      className={`group flex items-center space-x-3 rounded-lg border p-3 cursor-pointer transition-all duration-200 ${
         isSelected
-          ? "border-blue-200 bg-blue-50/50 shadow-sm ring-1 ring-blue-100"
+          ? "border-white bg-white shadow-sm"
           : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
       }`}
       onClick={!isEditing ? onToggle : undefined}
@@ -107,14 +120,16 @@ function SortableAttributeItem({
         <GripVerticalIcon className="h-4 w-4" />
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <Icon className="h-4 w-4 text-gray-400" />
+
         {isEditing ? (
-          <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+          <div className="space-y-2 flex-1" onClick={(e) => e.stopPropagation()}>
             <Input
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               className="h-8 text-sm"
-              placeholder="Attribute name"
+              placeholder="Field name"
             />
             <Select value={editType} onValueChange={setEditType}>
               <SelectTrigger className="h-8 text-sm">
@@ -133,16 +148,14 @@ function SortableAttributeItem({
             </Select>
           </div>
         ) : (
-          <>
+          <div className="flex-1 min-w-0">
             <div className="font-medium text-sm text-gray-900">{attribute.name}</div>
             <div className="text-xs text-gray-500 capitalize">{attribute.type}</div>
-          </>
+          </div>
         )}
       </div>
 
       <div className="flex items-center space-x-1">
-        {isSelected && <div className="w-2 h-2 rounded-full bg-blue-500" />}
-
         {isEditing ? (
           <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
             <Button
@@ -165,31 +178,29 @@ function SortableAttributeItem({
         ) : (
           <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {attribute.isCustom && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setIsEditing(true)
-                  }}
-                >
-                  <EditIcon className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-gray-400 hover:text-red-600 hover:bg-red-50"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onDelete(attribute.id)
-                  }}
-                >
-                  <XIcon className="h-3 w-3" />
-                </Button>
-              </>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsEditing(true)
+                }}
+              >
+                <EditIcon className="h-3 w-3" />
+              </Button>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-gray-400 hover:text-red-600 hover:bg-red-50"
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(attribute.id)
+              }}
+            >
+              <XIcon className="h-3 w-3" />
+            </Button>
           </div>
         )}
       </div>
@@ -257,7 +268,7 @@ function SortableStageItem({
         <GripVerticalIcon className="h-4 w-4" />
       </div>
 
-      <div className={`w-4 h-4 rounded-full ${stage.color} border border-gray-200`} />
+      <div className={`w-6 h-6 rounded-md ${stage.color} border border-gray-200 flex-shrink-0`} />
 
       <div className="flex-1 min-w-0">
         {isEditing ? (
@@ -332,12 +343,86 @@ function SortableStageItem({
   )
 }
 
+// Helper function to get attributes based on object type
+function getAttributesForObjectType(objectType: string): WorkflowAttribute[] {
+  switch (objectType) {
+    case "task":
+      return [
+        { id: "title", name: "Title", type: "text" },
+        { id: "description", name: "Description", type: "text" },
+        { id: "status", name: "Status", type: "select" },
+        { id: "priority", name: "Priority", type: "select" },
+        { id: "assignee", name: "Assignee", type: "user" },
+        { id: "dueDate", name: "Due Date", type: "date" },
+        { id: "createdAt", name: "Created At", type: "date" },
+        { id: "updatedAt", name: "Updated At", type: "date" },
+        { id: "tags", name: "Tags", type: "tags" },
+      ]
+    case "opportunity":
+      return [
+        { id: "name", name: "Name", type: "text" },
+        { id: "company", name: "Company", type: "relation" },
+        { id: "amount", name: "Amount", type: "currency" },
+        { id: "stage", name: "Stage", type: "select" },
+        { id: "owner", name: "Owner", type: "user" },
+        { id: "probability", name: "Probability", type: "number" },
+        { id: "expectedClose", name: "Expected Close", type: "date" },
+        { id: "source", name: "Source", type: "select" },
+        { id: "description", name: "Description", type: "text" },
+        { id: "lastContact", name: "Last Contact", type: "date" },
+        { id: "nextStep", name: "Next Step", type: "text" },
+      ]
+    case "capital-call":
+      return [
+        { id: "fundName", name: "Fund Name", type: "text" },
+        { id: "callNumber", name: "Call Number", type: "text" },
+        { id: "callAmount", name: "Call Amount", type: "currency" },
+        { id: "commitmentAmount", name: "Commitment Amount", type: "currency" },
+        { id: "dueDate", name: "Due Date", type: "date" },
+        { id: "noticeDate", name: "Notice Date", type: "date" },
+        { id: "investor", name: "Investor", type: "relation" },
+        { id: "fundManager", name: "Fund Manager", type: "text" },
+        { id: "purpose", name: "Purpose", type: "text" },
+        { id: "remainingCommitment", name: "Remaining Commitment", type: "currency" },
+      ]
+    case "document":
+      return [
+        { id: "name", name: "Name", type: "text" },
+        { id: "type", name: "Type", type: "select" },
+        { id: "status", name: "Status", type: "select" },
+        { id: "owner", name: "Owner", type: "user" },
+        { id: "createdAt", name: "Created At", type: "date" },
+        { id: "updatedAt", name: "Updated At", type: "date" },
+        { id: "size", name: "Size", type: "number" },
+        { id: "tags", name: "Tags", type: "tags" },
+      ]
+    default:
+      return []
+  }
+}
+
+const getAttributeIcon = (type: string) => {
+  switch (type) {
+    case "currency":
+      return DollarSignIcon
+    case "date":
+      return CalendarIcon
+    case "user":
+    case "relation":
+      return UserIcon
+    case "text":
+    default:
+      return FileTextIcon
+  }
+}
+
 export function WorkflowHeader({ workflowName, workflowConfig, onSave }: WorkflowHeaderProps) {
   const [open, setOpen] = React.useState(false)
   const [config, setConfig] = React.useState<WorkflowConfig>(workflowConfig)
   const [newAttributeName, setNewAttributeName] = React.useState("")
   const [newAttributeType, setNewAttributeType] = React.useState("text")
   const [showAddAttribute, setShowAddAttribute] = React.useState(false)
+  const [showAvailableFields, setShowAvailableFields] = React.useState(true)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -456,6 +541,11 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     })
   }
 
+  const getAvailableAttributes = () => {
+    const allAttributes = getAttributesForObjectType(config.objectType)
+    return allAttributes.filter((attr) => !config.attributes.some((selected) => selected.id === attr.id))
+  }
+
   const allAttributes = getAttributesForObjectType(config.objectType)
   const isAttributeSelected = (attributeId: string) => {
     return config.attributes.some((attr) => attr.id === attributeId)
@@ -543,150 +633,255 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
               </TabsContent>
 
               <TabsContent value="attributes" className="p-6 space-y-6 m-0">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">Selected Attributes</h3>
-                      <p className="text-xs text-gray-500 mt-1">Drag to reorder how they appear on cards</p>
+                <div className="space-y-6">
+                  {/* Card Preview Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-gray-900">Card Preview</h3>
+                      <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                        {config.attributes.length} fields
+                      </Badge>
                     </div>
-                    <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-                      {config.attributes.length} selected
-                    </Badge>
+
+                    <div className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
+                      <div className="pb-3 border-b border-gray-100 mb-3">
+                        <h4 className="font-semibold text-sm text-gray-900">Sample Card Title</h4>
+                        <p className="text-xs text-gray-500 mt-1">Preview how your cards will appear</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        {config.attributes.length > 0 ? (
+                          config.attributes.map((attribute) => {
+                            const Icon = getAttributeIcon(attribute.type)
+                            return (
+                              <div key={attribute.id} className="flex items-center gap-2 text-xs group">
+                                <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                <span className="text-gray-500">{attribute.name}:</span>
+                                <span className="text-gray-900">Sample value</span>
+                                <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-5 w-5 text-gray-400 hover:text-gray-600"
+                                    onClick={() => deleteAttribute(attribute.id)}
+                                  >
+                                    <XIcon className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )
+                          })
+                        ) : (
+                          <div className="text-center py-2 text-sm text-gray-500">
+                            No fields selected. Add some below.
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAttributeDragEnd}>
-                    <SortableContext
-                      items={config.attributes.map((attr) => attr.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {config.attributes.map((attribute) => (
-                          <SortableAttributeItem
-                            key={attribute.id}
-                            attribute={attribute}
-                            isSelected={true}
-                            onToggle={() => {}}
-                            onEdit={editAttribute}
-                            onDelete={deleteAttribute}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-
-                  <div className="border-t border-gray-100 pt-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-medium text-gray-900">Available Attributes</h3>
+                  {/* Selected Fields Section with Reordering */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-gray-900">Selected Fields</h3>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowAddAttribute(!showAddAttribute)}
-                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                        onClick={() => setShowAvailableFields(!showAvailableFields)}
+                        className="text-gray-600 border-gray-200 hover:bg-gray-50"
                       >
-                        <PlusIcon className="h-3 w-3 mr-1" />
-                        Add Custom
+                        {showAvailableFields ? "Hide Available Fields" : "Add More Fields"}
                       </Button>
                     </div>
 
-                    {showAddAttribute && (
-                      <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="flex space-x-2">
-                          <Input
-                            placeholder="Attribute name"
-                            value={newAttributeName}
-                            onChange={(e) => setNewAttributeName(e.target.value)}
-                            className="flex-1 h-8 text-sm"
-                          />
-                          <Select value={newAttributeType} onValueChange={setNewAttributeType}>
-                            <SelectTrigger className="w-32 h-8 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="text">Text</SelectItem>
-                              <SelectItem value="number">Number</SelectItem>
-                              <SelectItem value="date">Date</SelectItem>
-                              <SelectItem value="currency">Currency</SelectItem>
-                              <SelectItem value="select">Select</SelectItem>
-                              <SelectItem value="user">User</SelectItem>
-                              <SelectItem value="relation">Relation</SelectItem>
-                              <SelectItem value="tags">Tags</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button
-                            size="sm"
-                            onClick={addCustomAttribute}
-                            disabled={!newAttributeName.trim()}
-                            className="h-8 px-3"
-                          >
-                            Add
-                          </Button>
-                        </div>
+                    {config.attributes.length > 0 ? (
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleAttributeDragEnd}
+                      >
+                        <SortableContext
+                          items={config.attributes.map((attr) => attr.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div className="space-y-2 max-h-48 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-2">
+                            {config.attributes.map((attribute) => (
+                              <SortableAttributeItem
+                                key={attribute.id}
+                                attribute={attribute}
+                                isSelected={true}
+                                onToggle={() => {}}
+                                onEdit={editAttribute}
+                                onDelete={deleteAttribute}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
+                    ) : (
+                      <div className="text-center py-4 border border-dashed border-gray-200 rounded-lg bg-gray-50">
+                        <p className="text-sm text-gray-500">No fields selected yet</p>
+                        <p className="text-xs text-gray-400 mt-1">Select fields from the list below</p>
                       </div>
                     )}
-
-                    <ScrollArea className="h-64">
-                      <div className="space-y-2">
-                        {allAttributes.map((attribute) => (
-                          <div
-                            key={attribute.id}
-                            className={`flex items-center space-x-3 rounded-lg border p-3 cursor-pointer transition-all duration-200 ${
-                              isAttributeSelected(attribute.id)
-                                ? "border-blue-200 bg-blue-50/30 opacity-50"
-                                : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
-                            }`}
-                            onClick={() => !isAttributeSelected(attribute.id) && toggleAttribute(attribute.id)}
-                          >
-                            <div className="flex-1">
-                              <div className="font-medium text-sm text-gray-900">{attribute.name}</div>
-                              <div className="text-xs text-gray-500 capitalize">{attribute.type}</div>
-                            </div>
-                            {isAttributeSelected(attribute.id) && (
-                              <div className="text-xs text-blue-600 font-medium">Selected</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
                   </div>
+
+                  {/* Available Fields Section (Collapsible) */}
+                  {showAvailableFields && (
+                    <div className="space-y-3 border-t border-gray-100 pt-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-medium text-gray-900">Available Fields</h3>
+                        {config.objectType === "custom" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowAddAttribute(!showAddAttribute)}
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                          >
+                            <PlusIcon className="h-3 w-3 mr-1" />
+                            Add Custom Field
+                          </Button>
+                        )}
+                      </div>
+
+                      {showAddAttribute && (
+                        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="flex space-x-2">
+                            <Input
+                              placeholder="Field name"
+                              value={newAttributeName}
+                              onChange={(e) => setNewAttributeName(e.target.value)}
+                              className="flex-1 h-8 text-sm"
+                            />
+                            <Select value={newAttributeType} onValueChange={setNewAttributeType}>
+                              <SelectTrigger className="w-32 h-8 text-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="text">Text</SelectItem>
+                                <SelectItem value="number">Number</SelectItem>
+                                <SelectItem value="date">Date</SelectItem>
+                                <SelectItem value="currency">Currency</SelectItem>
+                                <SelectItem value="select">Select</SelectItem>
+                                <SelectItem value="user">User</SelectItem>
+                                <SelectItem value="relation">Relation</SelectItem>
+                                <SelectItem value="tags">Tags</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              size="sm"
+                              onClick={addCustomAttribute}
+                              disabled={!newAttributeName.trim()}
+                              className="h-8 px-3"
+                            >
+                              Add
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Note: Custom fields will be available to all workflows using this object type
+                          </p>
+                        </div>
+                      )}
+
+                      <ScrollArea className="h-64 border border-gray-200 rounded-lg">
+                        <div className="p-2 space-y-2">
+                          {getAvailableAttributes().map((attribute) => (
+                            <div
+                              key={attribute.id}
+                              className="flex items-center space-x-3 rounded-lg border border-gray-200 p-3 cursor-pointer transition-all duration-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                              onClick={() => toggleAttribute(attribute.id)}
+                            >
+                              <div className="flex-1">
+                                <div className="font-medium text-sm text-gray-900">{attribute.name}</div>
+                                <div className="text-xs text-gray-500 capitalize">{attribute.type}</div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs border-gray-200 hover:bg-gray-50"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleAttribute(attribute.id)
+                                }}
+                              >
+                                Add
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+
+                      {getAvailableAttributes().length === 0 && (
+                        <div className="text-center py-4 text-sm text-gray-500">
+                          All available fields have been selected
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </TabsContent>
 
               <TabsContent value="stages" className="p-6 space-y-6 m-0">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">Workflow Stages</h3>
-                      <p className="text-xs text-gray-500 mt-1">Drag to reorder columns on your kanban board</p>
+                <div className="space-y-6">
+                  {/* Stage Preview Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-gray-900">Kanban Board Preview</h3>
+                      <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                        {config.stages.length} columns
+                      </Badge>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={addStage}
-                      className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                    >
-                      <PlusIcon className="h-3 w-3 mr-1" />
-                      Add Stage
-                    </Button>
+
+                    <div className="flex gap-3 overflow-x-auto pb-2">
+                      {config.stages.map((stage) => (
+                        <div key={stage.id} className="flex-shrink-0 w-32">
+                          <div className={`rounded-t-lg p-2 ${stage.color} border border-gray-200`}>
+                            <div className="text-sm font-medium truncate">{stage.name}</div>
+                          </div>
+                          <div className="h-16 bg-gray-50 border-l border-r border-b border-gray-200 rounded-b-lg"></div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
-                    <SortableContext
-                      items={config.stages.map((stage) => stage.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div className="space-y-2">
-                        {config.stages.map((stage) => (
-                          <SortableStageItem
-                            key={stage.id}
-                            stage={stage}
-                            onEdit={editStage}
-                            onDelete={deleteStage}
-                            canDelete={config.stages.length > 1}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
+                  {/* Stages Reordering Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium text-gray-900">Workflow Stages</h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={addStage}
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                      >
+                        <PlusIcon className="h-3 w-3 mr-1" />
+                        Add Stage
+                      </Button>
+                    </div>
+
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
+                      <SortableContext
+                        items={config.stages.map((stage) => stage.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-2">
+                          {config.stages.map((stage) => (
+                            <SortableStageItem
+                              key={stage.id}
+                              stage={stage}
+                              onEdit={editStage}
+                              onDelete={deleteStage}
+                              canDelete={config.stages.length > 1}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+
+                    <p className="text-xs text-gray-500 italic">
+                      Drag to reorder stages. Changes will affect how columns appear on your kanban board.
+                    </p>
+                  </div>
                 </div>
               </TabsContent>
             </div>
@@ -704,62 +899,4 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
       </Dialog>
     </>
   )
-}
-
-// Helper function to get attributes based on object type
-function getAttributesForObjectType(objectType: string): WorkflowAttribute[] {
-  switch (objectType) {
-    case "task":
-      return [
-        { id: "title", name: "Title", type: "text" },
-        { id: "description", name: "Description", type: "text" },
-        { id: "status", name: "Status", type: "select" },
-        { id: "priority", name: "Priority", type: "select" },
-        { id: "assignee", name: "Assignee", type: "user" },
-        { id: "dueDate", name: "Due Date", type: "date" },
-        { id: "createdAt", name: "Created At", type: "date" },
-        { id: "updatedAt", name: "Updated At", type: "date" },
-        { id: "tags", name: "Tags", type: "tags" },
-      ]
-    case "opportunity":
-      return [
-        { id: "name", name: "Name", type: "text" },
-        { id: "company", name: "Company", type: "relation" },
-        { id: "amount", name: "Amount", type: "currency" },
-        { id: "stage", name: "Stage", type: "select" },
-        { id: "owner", name: "Owner", type: "user" },
-        { id: "probability", name: "Probability", type: "number" },
-        { id: "expectedClose", name: "Expected Close", type: "date" },
-        { id: "source", name: "Source", type: "select" },
-        { id: "description", name: "Description", type: "text" },
-        { id: "lastContact", name: "Last Contact", type: "date" },
-        { id: "nextStep", name: "Next Step", type: "text" },
-      ]
-    case "capital-call":
-      return [
-        { id: "fundName", name: "Fund Name", type: "text" },
-        { id: "callNumber", name: "Call Number", type: "text" },
-        { id: "callAmount", name: "Call Amount", type: "currency" },
-        { id: "commitmentAmount", name: "Commitment Amount", type: "currency" },
-        { id: "dueDate", name: "Due Date", type: "date" },
-        { id: "noticeDate", name: "Notice Date", type: "date" },
-        { id: "investor", name: "Investor", type: "relation" },
-        { id: "fundManager", name: "Fund Manager", type: "text" },
-        { id: "purpose", name: "Purpose", type: "text" },
-        { id: "remainingCommitment", name: "Remaining Commitment", type: "currency" },
-      ]
-    case "document":
-      return [
-        { id: "name", name: "Name", type: "text" },
-        { id: "type", name: "Type", type: "select" },
-        { id: "status", name: "Status", type: "select" },
-        { id: "owner", name: "Owner", type: "user" },
-        { id: "createdAt", name: "Created At", type: "date" },
-        { id: "updatedAt", name: "Updated At", type: "date" },
-        { id: "size", name: "Size", type: "number" },
-        { id: "tags", name: "Tags", type: "tags" },
-      ]
-    default:
-      return []
-  }
 }
