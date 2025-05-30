@@ -20,16 +20,10 @@ import {
   ExpandIcon,
   ChevronLeftIcon,
   MailIcon,
-  BuildingIcon,
   DollarSignIcon,
   CalendarIcon,
   UserIcon,
-  PhoneIcon,
-  GlobeIcon,
-  TrendingUpIcon,
   FileTextIcon,
-  FolderIcon,
-  ClockIcon,
   AlertCircleIcon,
 } from "lucide-react"
 
@@ -186,14 +180,37 @@ const initialCapitalCalls: CapitalCall[] = [
   },
 ]
 
-const stages = [
-  { id: "new", title: "New", color: "bg-gray-100" },
-  { id: "in-progress", title: "In Progress", color: "bg-blue-100" },
-  { id: "done", title: "Done", color: "bg-green-100" },
+interface CapitalCallKanbanProps {
+  workflowConfig?: {
+    attributes: Array<{ id: string; name: string; type: string }>
+    stages: Array<{ id: string; name: string; color: string }>
+  }
+}
+
+// Default stages if no config provided
+const defaultStages = [
+  { id: "new", name: "New", color: "bg-gray-100" },
+  { id: "in-progress", name: "In Progress", color: "bg-blue-100" },
+  { id: "done", name: "Done", color: "bg-green-100" },
+]
+
+// Default attributes if no config provided
+const defaultAttributes = [
+  { id: "fundName", name: "Fund Name", type: "text" },
+  { id: "callAmount", name: "Call Amount", type: "currency" },
+  { id: "investor", name: "Investor", type: "text" },
+  { id: "dueDate", name: "Due Date", type: "date" },
+  { id: "noticeDate", name: "Notice Date", type: "date" },
 ]
 
 // Replace the CapitalCallCard component with this new implementation that opens the task drawer
-function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
+function CapitalCallCard({
+  capitalCall,
+  attributes = defaultAttributes,
+}: {
+  capitalCall: CapitalCall
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
   const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "done"
 
   // Create a task object that matches the structure expected by TaskDetailsView
@@ -288,19 +305,50 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
 
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
 
+  // Function to get the appropriate icon for each attribute type
+  const getAttributeIcon = (type: string) => {
+    switch (type) {
+      case "currency":
+        return DollarSignIcon
+      case "date":
+        return CalendarIcon
+      case "user":
+      case "relation":
+        return UserIcon
+      case "text":
+      default:
+        return FileTextIcon
+    }
+  }
+
+  // Function to render attribute value based on type
+  const renderAttributeValue = (attribute: any, value: any) => {
+    if (!value) return "—"
+
+    switch (attribute.type) {
+      case "date":
+        const isOverdueDate = attribute.id === "dueDate" && new Date(value) < new Date() && capitalCall.stage !== "done"
+        return <span className={isOverdueDate ? "text-red-600 font-medium" : ""}>{value}</span>
+      case "currency":
+        return <span className="font-medium">{value}</span>
+      default:
+        return value
+    }
+  }
+
   return (
     <>
       <Card
-        className="cursor-pointer hover:shadow-md transition-shadow"
+        className="cursor-pointer hover:shadow-md transition-all duration-200 border-gray-200 hover:border-gray-300"
         onClick={() => setSelectedTask(capitalCallTask)}
       >
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h4 className="font-medium text-sm">{capitalCall.fundName}</h4>
-              <p className="text-xs text-muted-foreground">{capitalCall.callNumber}</p>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-sm text-gray-900 truncate">{capitalCall.fundName}</h4>
+              <p className="text-xs text-gray-500 mt-1">{capitalCall.callNumber}</p>
               {isOverdue && (
-                <Badge variant="destructive" className="mt-1 text-xs">
+                <Badge variant="destructive" className="mt-2 text-xs">
                   <AlertCircleIcon className="h-3 w-3 mr-1" />
                   Overdue
                 </Badge>
@@ -308,7 +356,7 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600">
                   <MoreVerticalIcon className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
@@ -322,32 +370,21 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
           </div>
         </CardHeader>
         <CardContent className="pt-0 space-y-2">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs">
-              <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Amount:</span>
-              <span className="font-medium">{capitalCall.callAmount}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Commitment:</span>
-              <span>{capitalCall.commitmentAmount}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <UserIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Investor:</span>
-              <span>{capitalCall.investor}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Due:</span>
-              <span className={isOverdue ? "text-red-600 font-medium" : ""}>{capitalCall.dueDate}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <ClockIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Notice:</span>
-              <span>{capitalCall.noticeDate}</span>
-            </div>
+          <div className="space-y-2">
+            {attributes.map((attribute) => {
+              const Icon = getAttributeIcon(attribute.type)
+              const value = (capitalCall as any)[attribute.id]
+
+              if (!value) return null
+
+              return (
+                <div key={attribute.id} className="flex items-center gap-2 text-xs">
+                  <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                  <span className="text-gray-500 truncate">{attribute.name}:</span>
+                  <span className="truncate">{renderAttributeValue(attribute, value)}</span>
+                </div>
+              )
+            })}
           </div>
         </CardContent>
       </Card>
@@ -390,8 +427,21 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
   )
 }
 
-function SortableCapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+function SortableCapitalCallCard({
+  capitalCall,
+  attributes,
+}: {
+  capitalCall: CapitalCall
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
+  const {
+    attributes: dndAttributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: capitalCall.id,
   })
 
@@ -403,247 +453,21 @@ function SortableCapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) 
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
-      <CapitalCallCard capitalCall={capitalCall} />
+    <div ref={setNodeRef} style={style} {...dndAttributes} {...listeners} className="touch-manipulation">
+      <CapitalCallCard capitalCall={capitalCall} attributes={attributes} />
     </div>
   )
 }
 
-// Add this new component to render the capital call drawer content
-function CapitalCallDrawerContent({ capitalCall }: { capitalCall: CapitalCall }) {
-  const [activeTab, setActiveTab] = React.useState("details")
-
-  const tabs = [
-    { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "documents", label: "Documents", count: 8, icon: FolderIcon },
-    { id: "communications", label: "Communications", count: 12, icon: MailIcon },
-    { id: "history", label: "History", count: 6, icon: CalendarIcon },
-    { id: "notes", label: "Notes", count: 3, icon: FileTextIcon },
-  ]
-
-  return (
-    <>
-      {/* Header */}
-      <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => document.querySelector('[data-state="open"]')?.click()}>
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-          <Badge variant="outline" className="bg-background">
-            {capitalCall.fundName}
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <ExpandIcon className="h-4 w-4" />
-            Full screen
-          </Button>
-          <Button variant="outline" size="sm">
-            <MailIcon className="h-4 w-4" />
-            Send reminder
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Record Header */}
-        <div className="border-b bg-background px-6 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-              {capitalCall.fundName.charAt(0)}
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">{capitalCall.fundName}</h2>
-              <p className="text-sm text-muted-foreground">
-                {capitalCall.callNumber} • {capitalCall.fundType}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b bg-background px-6">
-          <div className="flex gap-8 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? "border-b-2 border-primary text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tab.icon && <tab.icon className="h-4 w-4" />}
-                {tab.label}
-                {tab.count !== null && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                    {tab.count}
-                  </Badge>
-                )}
-                {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === "details" ? (
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Capital Call Details</h4>
-
-              <div className="rounded-lg border border-muted bg-muted/10 p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Fund Name</Label>
-                        <p className="text-sm font-medium">{capitalCall.fundName}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Call Number</Label>
-                        <p className="text-sm">{capitalCall.callNumber}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Call Amount</Label>
-                        <p className="text-sm font-medium">{capitalCall.callAmount}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Total Commitment</Label>
-                        <p className="text-sm">{capitalCall.commitmentAmount}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <UserIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Investor</Label>
-                        <p className="text-sm">{capitalCall.investor}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Fund Manager</Label>
-                        <p className="text-sm">{capitalCall.fundManager}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Due Date</Label>
-                        <p className="text-sm">{capitalCall.dueDate}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <ClockIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Notice Date</Label>
-                        <p className="text-sm">{capitalCall.noticeDate}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <GlobeIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Website</Label>
-                        <p className="text-sm text-blue-600">{capitalCall.website}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <MailIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Email</Label>
-                        <p className="text-sm text-blue-600">{capitalCall.email}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Phone</Label>
-                        <p className="text-sm">{capitalCall.phone}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Fund Type</Label>
-                        <p className="text-sm">{capitalCall.fundType}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t">
-                  <div className="flex items-start gap-2">
-                    <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Purpose</Label>
-                      <p className="text-sm">{capitalCall.purpose}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t">
-                  <div className="grid grid-cols-4 gap-4 text-center">
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Fund Size</Label>
-                      <p className="text-sm font-medium">{capitalCall.totalFundSize}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Vintage</Label>
-                      <p className="text-sm font-medium">{capitalCall.vintage}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Previous Calls</Label>
-                      <p className="text-sm font-medium">{capitalCall.previousCalls}</p>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-muted-foreground">Remaining</Label>
-                      <p className="text-sm font-medium">{capitalCall.remainingCommitment}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>
-                No {activeTab} found for {capitalCall.fundName}
-              </p>
-              <p className="text-sm">Add some {activeTab} to get started</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  )
-}
-
-function DroppableColumn({ stage, capitalCalls }: { stage: (typeof stages)[0]; capitalCalls: CapitalCall[] }) {
+function DroppableColumn({
+  stage,
+  capitalCalls,
+  attributes,
+}: {
+  stage: { id: string; name: string; color: string }
+  capitalCalls: CapitalCall[]
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
   const { setNodeRef, isOver } = useSortable({
     id: stage.id,
   })
@@ -651,25 +475,27 @@ function DroppableColumn({ stage, capitalCalls }: { stage: (typeof stages)[0]; c
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col min-h-[600px] w-80 ${isOver ? "ring-2 ring-primary ring-opacity-50 bg-muted/20" : ""}`}
+      className={`flex flex-col min-h-[600px] w-80 transition-all duration-200 ${
+        isOver ? "ring-2 ring-blue-500 ring-opacity-30 bg-blue-50/20" : ""
+      }`}
     >
-      <div className={`rounded-t-lg p-3 ${stage.color}`}>
+      <div className={`rounded-t-xl p-4 border border-gray-200 ${stage.color}`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-sm">{stage.title}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs">
+          <div className="flex items-center gap-3">
+            <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
               {capitalCalls.length}
             </Badge>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6">
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 hover:text-gray-700">
             <PlusIcon className="h-3 w-3" />
           </Button>
         </div>
       </div>
-      <div className="flex-1 bg-gray-50 rounded-b-lg p-3 space-y-3">
+      <div className="flex-1 bg-gray-50/50 rounded-b-xl border-l border-r border-b border-gray-200 p-3 space-y-3">
         <SortableContext items={capitalCalls.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           {capitalCalls.map((capitalCall) => (
-            <SortableCapitalCallCard key={capitalCall.id} capitalCall={capitalCall} />
+            <SortableCapitalCallCard key={capitalCall.id} capitalCall={capitalCall} attributes={attributes} />
           ))}
         </SortableContext>
       </div>
@@ -684,11 +510,11 @@ function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
       <Button
         variant="ghost"
         size="icon"
-        className="h-10 w-10 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
+        className="h-12 w-12 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
         onClick={onAddColumn}
         title="Add Column"
       >
-        <PlusIcon className="h-5 w-5 text-gray-500" />
+        <PlusIcon className="h-5 w-5 text-gray-400" />
       </Button>
     </div>
   )
@@ -716,6 +542,17 @@ function AddColumnDialog({
     }
   }
 
+  const colorOptions = [
+    { value: "bg-gray-100", label: "Gray" },
+    { value: "bg-blue-100", label: "Blue" },
+    { value: "bg-green-100", label: "Green" },
+    { value: "bg-yellow-100", label: "Yellow" },
+    { value: "bg-purple-100", label: "Purple" },
+    { value: "bg-red-100", label: "Red" },
+    { value: "bg-orange-100", label: "Orange" },
+    { value: "bg-pink-100", label: "Pink" },
+  ]
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -731,27 +568,22 @@ function AddColumnDialog({
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., In Review"
               autoFocus
+              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
           <div className="space-y-2">
             <Label>Column Color</Label>
             <div className="grid grid-cols-4 gap-2">
-              {[
-                "bg-gray-100",
-                "bg-blue-100",
-                "bg-green-100",
-                "bg-yellow-100",
-                "bg-purple-100",
-                "bg-red-100",
-                "bg-orange-100",
-                "bg-pink-100",
-              ].map((c) => (
+              {colorOptions.map((option) => (
                 <div
-                  key={c}
-                  className={`h-8 rounded-md cursor-pointer ${c} ${
-                    color === c ? "ring-2 ring-primary ring-offset-2" : ""
+                  key={option.value}
+                  className={`h-10 rounded-lg cursor-pointer ${option.value} border-2 transition-all ${
+                    color === option.value
+                      ? "border-blue-500 scale-105 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => setColor(c)}
+                  onClick={() => setColor(option.value)}
+                  title={option.label}
                 />
               ))}
             </div>
@@ -760,7 +592,7 @@ function AddColumnDialog({
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim()}>
+            <Button type="submit" disabled={!name.trim()} className="bg-blue-600 hover:bg-blue-700">
               Add Column
             </Button>
           </div>
@@ -770,11 +602,18 @@ function AddColumnDialog({
   )
 }
 
-export function CapitalCallKanban() {
+export function CapitalCallKanban({ workflowConfig }: CapitalCallKanbanProps) {
   const [capitalCalls, setCapitalCalls] = React.useState(initialCapitalCalls)
   const [activeCapitalCall, setActiveCapitalCall] = React.useState<CapitalCall | null>(null)
-  const [stagesList, setStagesList] = React.useState(stages)
+  const [stagesList, setStagesList] = React.useState(workflowConfig?.stages || defaultStages)
   const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)
+
+  // Update stages when workflow config changes
+  React.useEffect(() => {
+    if (workflowConfig?.stages) {
+      setStagesList(workflowConfig.stages)
+    }
+  }, [workflowConfig?.stages])
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -836,7 +675,7 @@ export function CapitalCallKanban() {
   const handleAddColumn = (name: string, color: string) => {
     const newStage = {
       id: `stage-${Date.now()}`,
-      title: name,
+      name: name,
       color: color,
     }
     setStagesList([...stagesList, newStage])
@@ -847,6 +686,8 @@ export function CapitalCallKanban() {
     capitalCalls: capitalCalls.filter((capitalCall) => capitalCall.stage === stage.id),
   }))
 
+  const attributes = workflowConfig?.attributes || defaultAttributes
+
   return (
     <DndContext
       sensors={sensors}
@@ -856,14 +697,14 @@ export function CapitalCallKanban() {
     >
       <div className="flex gap-4 overflow-x-auto pb-4">
         {capitalCallsByStage.map(({ stage, capitalCalls }) => (
-          <DroppableColumn key={stage.id} stage={stage} capitalCalls={capitalCalls} />
+          <DroppableColumn key={stage.id} stage={stage} capitalCalls={capitalCalls} attributes={attributes} />
         ))}
         <AddColumnButton onAddColumn={() => setAddColumnDialogOpen(true)} />
       </div>
       <DragOverlay>
         {activeCapitalCall ? (
           <div className="w-80 opacity-80 shadow-lg">
-            <CapitalCallCard capitalCall={activeCapitalCall} />
+            <CapitalCallCard capitalCall={activeCapitalCall} attributes={attributes} />
           </div>
         ) : null}
       </DragOverlay>

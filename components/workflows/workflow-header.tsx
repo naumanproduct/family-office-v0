@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Settings2Icon } from "lucide-react"
+import { Settings2Icon, GripVerticalIcon, PlusIcon, XIcon, EditIcon, CheckIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -10,11 +10,25 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 
 interface WorkflowAttribute {
   id: string
   name: string
   type: string
+  isCustom?: boolean
 }
 
 interface WorkflowStage {
@@ -37,189 +51,654 @@ interface WorkflowHeaderProps {
   onSave: (config: WorkflowConfig) => void
 }
 
+// Sortable attribute item component
+function SortableAttributeItem({
+  attribute,
+  isSelected,
+  onToggle,
+  onEdit,
+  onDelete,
+}: {
+  attribute: WorkflowAttribute
+  isSelected: boolean
+  onToggle: () => void
+  onEdit: (id: string, name: string, type: string) => void
+  onDelete: (id: string) => void
+}) {
+  const [isEditing, setIsEditing] = React.useState(false)
+  const [editName, setEditName] = React.useState(attribute.name)
+  const [editType, setEditType] = React.useState(attribute.type)
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: attribute.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const handleSaveEdit = () => {
+    onEdit(attribute.id, editName, editType)
+    setIsEditing(false)
+  }
+
+  const handleCancelEdit = () => {
+    setEditName(attribute.name)
+    setEditType(attribute.type)
+    setIsEditing(false)
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group flex items-center space-x-3 rounded-xl border p-4 cursor-pointer transition-all duration-200 ${
+        isSelected
+          ? "border-blue-200 bg-blue-50/50 shadow-sm ring-1 ring-blue-100"
+          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+      }`}
+      onClick={!isEditing ? onToggle : undefined}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <GripVerticalIcon className="h-4 w-4" />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        {isEditing ? (
+          <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="h-8 text-sm"
+              placeholder="Attribute name"
+            />
+            <Select value={editType} onValueChange={setEditType}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="text">Text</SelectItem>
+                <SelectItem value="number">Number</SelectItem>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="currency">Currency</SelectItem>
+                <SelectItem value="select">Select</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="relation">Relation</SelectItem>
+                <SelectItem value="tags">Tags</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          <>
+            <div className="font-medium text-sm text-gray-900">{attribute.name}</div>
+            <div className="text-xs text-gray-500 capitalize">{attribute.type}</div>
+          </>
+        )}
+      </div>
+
+      <div className="flex items-center space-x-1">
+        {isSelected && <div className="w-2 h-2 rounded-full bg-blue-500" />}
+
+        {isEditing ? (
+          <div className="flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-green-600 hover:text-green-700 hover:bg-green-50"
+              onClick={handleSaveEdit}
+            >
+              <CheckIcon className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+              onClick={handleCancelEdit}
+            >
+              <XIcon className="h-3 w-3" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {attribute.isCustom && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsEditing(true)
+                  }}
+                >
+                  <EditIcon className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(attribute.id)
+                  }}
+                >
+                  <XIcon className="h-3 w-3" />
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Sortable stage item component
+function SortableStageItem({
+  stage,
+  onEdit,
+  onDelete,
+  canDelete,
+}: {
+  stage: WorkflowStage
+  onEdit: (id: string, name: string, color: string) => void
+  onDelete: (id: string) => void
+  canDelete: boolean
+}) {
+  const [isEditing, setIsEditing] = React.useState(false)
+  const [editName, setEditName] = React.useState(stage.name)
+  const [editColor, setEditColor] = React.useState(stage.color)
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: stage.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const handleSaveEdit = () => {
+    onEdit(stage.id, editName, editColor)
+    setIsEditing(false)
+  }
+
+  const handleCancelEdit = () => {
+    setEditName(stage.name)
+    setEditColor(stage.color)
+    setIsEditing(false)
+  }
+
+  const colorOptions = [
+    { value: "bg-gray-100", label: "Gray", color: "bg-gray-100" },
+    { value: "bg-blue-100", label: "Blue", color: "bg-blue-100" },
+    { value: "bg-green-100", label: "Green", color: "bg-green-100" },
+    { value: "bg-yellow-100", label: "Yellow", color: "bg-yellow-100" },
+    { value: "bg-purple-100", label: "Purple", color: "bg-purple-100" },
+    { value: "bg-red-100", label: "Red", color: "bg-red-100" },
+    { value: "bg-orange-100", label: "Orange", color: "bg-orange-100" },
+    { value: "bg-pink-100", label: "Pink", color: "bg-pink-100" },
+  ]
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="group flex items-center space-x-3 rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-300 hover:shadow-sm transition-all duration-200"
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <GripVerticalIcon className="h-4 w-4" />
+      </div>
+
+      <div className={`w-4 h-4 rounded-full ${stage.color} border border-gray-200`} />
+
+      <div className="flex-1 min-w-0">
+        {isEditing ? (
+          <div className="space-y-3">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="h-8 text-sm"
+              placeholder="Stage name"
+            />
+            <div className="grid grid-cols-4 gap-2">
+              {colorOptions.map((option) => (
+                <div
+                  key={option.value}
+                  className={`h-8 rounded-md cursor-pointer ${option.color} border-2 transition-all ${
+                    editColor === option.value ? "border-blue-500 scale-105" : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setEditColor(option.value)}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="font-medium text-sm text-gray-900">{stage.name}</div>
+        )}
+      </div>
+
+      <div className="flex items-center space-x-1">
+        {isEditing ? (
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-green-600 hover:text-green-700 hover:bg-green-50"
+              onClick={handleSaveEdit}
+            >
+              <CheckIcon className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+              onClick={handleCancelEdit}
+            >
+              <XIcon className="h-3 w-3" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+              onClick={() => setIsEditing(true)}
+            >
+              <EditIcon className="h-3 w-3" />
+            </Button>
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                onClick={() => onDelete(stage.id)}
+              >
+                <XIcon className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function WorkflowHeader({ workflowName, workflowConfig, onSave }: WorkflowHeaderProps) {
   const [open, setOpen] = React.useState(false)
   const [config, setConfig] = React.useState<WorkflowConfig>(workflowConfig)
+  const [newAttributeName, setNewAttributeName] = React.useState("")
+  const [newAttributeType, setNewAttributeType] = React.useState("text")
+  const [showAddAttribute, setShowAddAttribute] = React.useState(false)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
 
   const handleSave = () => {
     onSave(config)
     setOpen(false)
   }
 
+  const handleAttributeDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      const oldIndex = config.attributes.findIndex((attr) => attr.id === active.id)
+      const newIndex = config.attributes.findIndex((attr) => attr.id === over.id)
+
+      setConfig({
+        ...config,
+        attributes: arrayMove(config.attributes, oldIndex, newIndex),
+      })
+    }
+  }
+
+  const handleStageDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      const oldIndex = config.stages.findIndex((stage) => stage.id === active.id)
+      const newIndex = config.stages.findIndex((stage) => stage.id === over.id)
+
+      setConfig({
+        ...config,
+        stages: arrayMove(config.stages, oldIndex, newIndex),
+      })
+    }
+  }
+
+  const toggleAttribute = (attributeId: string) => {
+    const isSelected = config.attributes.some((attr) => attr.id === attributeId)
+
+    if (isSelected) {
+      setConfig({
+        ...config,
+        attributes: config.attributes.filter((attr) => attr.id !== attributeId),
+      })
+    } else {
+      const attribute = getAttributesForObjectType(config.objectType).find((attr) => attr.id === attributeId)
+      if (attribute) {
+        setConfig({
+          ...config,
+          attributes: [...config.attributes, { ...attribute }],
+        })
+      }
+    }
+  }
+
+  const addCustomAttribute = () => {
+    if (newAttributeName.trim()) {
+      const newAttribute: WorkflowAttribute = {
+        id: `custom-${Date.now()}`,
+        name: newAttributeName,
+        type: newAttributeType,
+        isCustom: true,
+      }
+      setConfig({
+        ...config,
+        attributes: [...config.attributes, newAttribute],
+      })
+      setNewAttributeName("")
+      setNewAttributeType("text")
+      setShowAddAttribute(false)
+    }
+  }
+
+  const editAttribute = (id: string, name: string, type: string) => {
+    setConfig({
+      ...config,
+      attributes: config.attributes.map((attr) => (attr.id === id ? { ...attr, name, type } : attr)),
+    })
+  }
+
+  const deleteAttribute = (id: string) => {
+    setConfig({
+      ...config,
+      attributes: config.attributes.filter((attr) => attr.id !== id),
+    })
+  }
+
+  const editStage = (id: string, name: string, color: string) => {
+    setConfig({
+      ...config,
+      stages: config.stages.map((stage) => (stage.id === id ? { ...stage, name, color } : stage)),
+    })
+  }
+
+  const deleteStage = (id: string) => {
+    setConfig({
+      ...config,
+      stages: config.stages.filter((stage) => stage.id !== id),
+    })
+  }
+
+  const addStage = () => {
+    const newStage: WorkflowStage = {
+      id: `stage-${Date.now()}`,
+      name: "New Stage",
+      color: "bg-gray-100",
+    }
+    setConfig({
+      ...config,
+      stages: [...config.stages, newStage],
+    })
+  }
+
+  const allAttributes = getAttributesForObjectType(config.objectType)
+  const isAttributeSelected = (attributeId: string) => {
+    return config.attributes.some((attr) => attr.id === attributeId)
+  }
+
   return (
     <>
-      <Button variant="ghost" size="icon" onClick={() => setOpen(true)} className="h-8 w-8" title="Configure Workflow">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setOpen(true)}
+        className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+        title="Configure Workflow"
+      >
         <Settings2Icon className="h-4 w-4" />
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Configure Workflow: {workflowName}</DialogTitle>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] p-0">
+          <DialogHeader className="px-6 py-4 border-b border-gray-100">
+            <DialogTitle className="text-lg font-semibold text-gray-900">Configure: {workflowName}</DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="general" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="attributes">Card Attributes</TabsTrigger>
-              <TabsTrigger value="stages">Stages</TabsTrigger>
-            </TabsList>
-            <TabsContent value="general" className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Workflow Name</Label>
-                <Input id="name" value={config.name} onChange={(e) => setConfig({ ...config, name: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={config.description}
-                  onChange={(e) => setConfig({ ...config, description: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="objectType">Object Type</Label>
-                <select
-                  id="objectType"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  value={config.objectType}
-                  onChange={(e) => setConfig({ ...config, objectType: e.target.value })}
-                >
-                  <option value="task">Task</option>
-                  <option value="opportunity">Opportunity</option>
-                  <option value="capital-call">Capital Call</option>
-                  <option value="document">Document</option>
-                </select>
-              </div>
-            </TabsContent>
-            <TabsContent value="attributes" className="space-y-4 pt-4">
-              <div className="space-y-4">
-                <Label>Select Attributes to Display on Cards</Label>
-                <ScrollArea className="h-[300px] rounded-md border p-4">
-                  <div className="space-y-4">
-                    {getAttributesForObjectType(config.objectType).map((attr) => {
-                      const isSelected = config.attributes.some((a) => a.id === attr.id)
-                      return (
-                        <div key={attr.id} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id={`attr-${attr.id}`}
-                            checked={isSelected}
-                            onChange={() => {
-                              if (isSelected) {
-                                setConfig({
-                                  ...config,
-                                  attributes: config.attributes.filter((a) => a.id !== attr.id),
-                                })
-                              } else {
-                                setConfig({
-                                  ...config,
-                                  attributes: [...config.attributes, attr],
-                                })
-                              }
-                            }}
-                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                          />
-                          <Label htmlFor={`attr-${attr.id}`} className="text-sm font-normal">
-                            {attr.name}
-                          </Label>
-                          <Badge variant="outline" className="ml-2">
-                            {attr.type}
-                          </Badge>
-                        </div>
-                      )
-                    })}
+
+          <Tabs defaultValue="general" className="flex-1">
+            <div className="px-6 py-2 border-b border-gray-100">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-50">
+                <TabsTrigger value="general" className="data-[state=active]:bg-white">
+                  General
+                </TabsTrigger>
+                <TabsTrigger value="attributes" className="data-[state=active]:bg-white">
+                  Card Attributes
+                </TabsTrigger>
+                <TabsTrigger value="stages" className="data-[state=active]:bg-white">
+                  Stages
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <div className="flex-1 overflow-hidden">
+              <TabsContent value="general" className="p-6 space-y-6 m-0">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                      Workflow Name
+                    </Label>
+                    <Input
+                      id="name"
+                      value={config.name}
+                      onChange={(e) => setConfig({ ...config, name: e.target.value })}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    />
                   </div>
-                </ScrollArea>
-              </div>
-              <div className="pt-2">
-                <Label className="mb-2 block">Selected Attributes</Label>
-                <div className="flex flex-wrap gap-2">
-                  {config.attributes.map((attr) => (
-                    <Badge key={attr.id} variant="secondary">
-                      {attr.name}
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                      Description
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={config.description}
+                      onChange={(e) => setConfig({ ...config, description: e.target.value })}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 resize-none"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="objectType" className="text-sm font-medium text-gray-700">
+                      Object Type
+                    </Label>
+                    <Select
+                      value={config.objectType}
+                      onValueChange={(value) => setConfig({ ...config, objectType: value })}
+                    >
+                      <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="task">Task</SelectItem>
+                        <SelectItem value="opportunity">Opportunity</SelectItem>
+                        <SelectItem value="capital-call">Capital Call</SelectItem>
+                        <SelectItem value="document">Document</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="attributes" className="p-6 space-y-6 m-0">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">Selected Attributes</h3>
+                      <p className="text-xs text-gray-500 mt-1">Drag to reorder how they appear on cards</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                      {config.attributes.length} selected
                     </Badge>
-                  ))}
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="stages" className="space-y-4 pt-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label>Workflow Stages</Label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setConfig({
-                        ...config,
-                        stages: [
-                          ...config.stages,
-                          {
-                            id: `stage-${Date.now()}`,
-                            name: "New Stage",
-                            color: "bg-gray-100",
-                          },
-                        ],
-                      })
-                    }}
-                  >
-                    Add Stage
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {config.stages.map((stage, index) => (
-                    <div key={stage.id} className="flex items-center space-x-2">
-                      <div className={`h-4 w-4 rounded ${stage.color}`}></div>
-                      <Input
-                        value={stage.name}
-                        onChange={(e) => {
-                          const newStages = [...config.stages]
-                          newStages[index] = { ...stage, name: e.target.value }
-                          setConfig({ ...config, stages: newStages })
-                        }}
-                        className="flex-1"
-                      />
-                      <select
-                        value={stage.color}
-                        onChange={(e) => {
-                          const newStages = [...config.stages]
-                          newStages[index] = { ...stage, color: e.target.value }
-                          setConfig({ ...config, stages: newStages })
-                        }}
-                        className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      >
-                        <option value="bg-gray-100">Gray</option>
-                        <option value="bg-blue-100">Blue</option>
-                        <option value="bg-green-100">Green</option>
-                        <option value="bg-yellow-100">Yellow</option>
-                        <option value="bg-purple-100">Purple</option>
-                        <option value="bg-red-100">Red</option>
-                        <option value="bg-orange-100">Orange</option>
-                      </select>
+                  </div>
+
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAttributeDragEnd}>
+                    <SortableContext
+                      items={config.attributes.map((attr) => attr.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {config.attributes.map((attribute) => (
+                          <SortableAttributeItem
+                            key={attribute.id}
+                            attribute={attribute}
+                            isSelected={true}
+                            onToggle={() => {}}
+                            onEdit={editAttribute}
+                            onDelete={deleteAttribute}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+
+                  <div className="border-t border-gray-100 pt-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-medium text-gray-900">Available Attributes</h3>
                       <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setConfig({
-                            ...config,
-                            stages: config.stages.filter((_, i) => i !== index),
-                          })
-                        }}
-                        disabled={config.stages.length <= 1}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAddAttribute(!showAddAttribute)}
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
                       >
-                        ×
+                        <PlusIcon className="h-3 w-3 mr-1" />
+                        Add Custom
                       </Button>
                     </div>
-                  ))}
+
+                    {showAddAttribute && (
+                      <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex space-x-2">
+                          <Input
+                            placeholder="Attribute name"
+                            value={newAttributeName}
+                            onChange={(e) => setNewAttributeName(e.target.value)}
+                            className="flex-1 h-8 text-sm"
+                          />
+                          <Select value={newAttributeType} onValueChange={setNewAttributeType}>
+                            <SelectTrigger className="w-32 h-8 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text">Text</SelectItem>
+                              <SelectItem value="number">Number</SelectItem>
+                              <SelectItem value="date">Date</SelectItem>
+                              <SelectItem value="currency">Currency</SelectItem>
+                              <SelectItem value="select">Select</SelectItem>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="relation">Relation</SelectItem>
+                              <SelectItem value="tags">Tags</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            size="sm"
+                            onClick={addCustomAttribute}
+                            disabled={!newAttributeName.trim()}
+                            className="h-8 px-3"
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    <ScrollArea className="h-64">
+                      <div className="space-y-2">
+                        {allAttributes.map((attribute) => (
+                          <div
+                            key={attribute.id}
+                            className={`flex items-center space-x-3 rounded-lg border p-3 cursor-pointer transition-all duration-200 ${
+                              isAttributeSelected(attribute.id)
+                                ? "border-blue-200 bg-blue-50/30 opacity-50"
+                                : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                            }`}
+                            onClick={() => !isAttributeSelected(attribute.id) && toggleAttribute(attribute.id)}
+                          >
+                            <div className="flex-1">
+                              <div className="font-medium text-sm text-gray-900">{attribute.name}</div>
+                              <div className="text-xs text-gray-500 capitalize">{attribute.type}</div>
+                            </div>
+                            {isAttributeSelected(attribute.id) && (
+                              <div className="text-xs text-blue-600 font-medium">Selected</div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
+              </TabsContent>
+
+              <TabsContent value="stages" className="p-6 space-y-6 m-0">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">Workflow Stages</h3>
+                      <p className="text-xs text-gray-500 mt-1">Drag to reorder columns on your kanban board</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={addStage}
+                      className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    >
+                      <PlusIcon className="h-3 w-3 mr-1" />
+                      Add Stage
+                    </Button>
+                  </div>
+
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
+                    <SortableContext
+                      items={config.stages.map((stage) => stage.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-2">
+                        {config.stages.map((stage) => (
+                          <SortableStageItem
+                            key={stage.id}
+                            stage={stage}
+                            onEdit={editStage}
+                            onDelete={deleteStage}
+                            canDelete={config.stages.length > 1}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                </div>
+              </TabsContent>
+            </div>
           </Tabs>
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+
+          <div className="flex justify-end space-x-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <Button variant="outline" onClick={() => setOpen(false)} className="border-gray-300">
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save Changes</Button>
+            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+              Save Changes
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

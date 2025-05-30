@@ -145,18 +145,41 @@ const initialDeals: Deal[] = [
   },
 ]
 
-const stages = [
-  { id: "awareness", title: "Awareness", color: "bg-gray-100" },
-  { id: "initial-contact", title: "Initial Contact", color: "bg-blue-100" },
-  { id: "work-in-progress", title: "Work in Progress", color: "bg-yellow-100" },
-  { id: "term-sheet", title: "Term Sheet", color: "bg-purple-100" },
-  { id: "due-diligence", title: "Due Diligence", color: "bg-orange-100" },
-  { id: "invested", title: "Invested", color: "bg-green-100" },
-  { id: "passed", title: "Passed", color: "bg-red-100" },
+interface DealPipelineKanbanProps {
+  workflowConfig?: {
+    attributes: Array<{ id: string; name: string; type: string }>
+    stages: Array<{ id: string; name: string; color: string }>
+  }
+}
+
+// Default stages if no config provided
+const defaultStages = [
+  { id: "awareness", name: "Awareness", color: "bg-gray-100" },
+  { id: "initial-contact", name: "Initial Contact", color: "bg-blue-100" },
+  { id: "work-in-progress", name: "Work in Progress", color: "bg-yellow-100" },
+  { id: "term-sheet", name: "Term Sheet", color: "bg-purple-100" },
+  { id: "due-diligence", name: "Due Diligence", color: "bg-orange-100" },
+  { id: "invested", name: "Invested", color: "bg-green-100" },
+  { id: "passed", name: "Passed", color: "bg-red-100" },
+]
+
+// Default attributes if no config provided
+const defaultAttributes = [
+  { id: "companyName", name: "Company", type: "text" },
+  { id: "fundingRound", name: "Funding Round", type: "text" },
+  { id: "targetRaise", name: "Target Raise", type: "currency" },
+  { id: "owner", name: "Owner", type: "user" },
+  { id: "nextMeeting", name: "Next Meeting", type: "date" },
 ]
 
 // Separate the card UI from the sortable wrapper
-function DealCard({ deal }: { deal: Deal }) {
+function DealCard({
+  deal,
+  attributes = defaultAttributes,
+}: {
+  deal: Deal
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
   // Map stage to opportunity stage
   const opportunityStage =
     deal.stage === "awareness"
@@ -318,19 +341,47 @@ function DealCard({ deal }: { deal: Deal }) {
     )
   }
 
+  // Function to get the appropriate icon for each attribute type
+  const getAttributeIcon = (type: string) => {
+    switch (type) {
+      case "currency":
+        return DollarSignIcon
+      case "date":
+        return CalendarIcon
+      case "user":
+      case "relation":
+        return UserIcon
+      case "text":
+      default:
+        return FileTextIcon
+    }
+  }
+
+  // Function to render attribute value based on type
+  const renderAttributeValue = (attribute: any, value: any) => {
+    if (!value) return "—"
+
+    switch (attribute.type) {
+      case "currency":
+        return <span className="font-medium">{value}</span>
+      default:
+        return value
+    }
+  }
+
   return (
     <MasterDrawer
       trigger={
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2">
+        <Card className="cursor-pointer hover:shadow-md transition-all duration-200 border-gray-200 hover:border-gray-300">
+          <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">{deal.companyName}</h4>
-                <p className="text-xs text-muted-foreground">{deal.sector}</p>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-sm text-gray-900 truncate">{deal.companyName}</h4>
+                <p className="text-xs text-gray-500 mt-1">{deal.sector}</p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600">
                     <MoreVerticalIcon className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -344,32 +395,21 @@ function DealCard({ deal }: { deal: Deal }) {
             </div>
           </CardHeader>
           <CardContent className="pt-0 space-y-2">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs">
-                <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Funding:</span>
-                <span>{deal.fundingRound}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Target:</span>
-                <span>{deal.targetRaise}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <UserIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Owner:</span>
-                <span>{deal.owner}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <MapPinIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Location:</span>
-                <span>{deal.location}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Next:</span>
-                <span>{deal.nextMeeting}</span>
-              </div>
+            <div className="space-y-2">
+              {attributes.map((attribute) => {
+                const Icon = getAttributeIcon(attribute.type)
+                const value = (deal as any)[attribute.id]
+
+                if (!value) return null
+
+                return (
+                  <div key={attribute.id} className="flex items-center gap-2 text-xs">
+                    <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-500 truncate">{attribute.name}:</span>
+                    <span className="truncate">{renderAttributeValue(attribute, value)}</span>
+                  </div>
+                )
+              })}
             </div>
           </CardContent>
         </Card>
@@ -385,8 +425,21 @@ function DealCard({ deal }: { deal: Deal }) {
   )
 }
 
-function SortableDealCard({ deal }: { deal: Deal }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+function SortableDealCard({
+  deal,
+  attributes,
+}: {
+  deal: Deal
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
+  const {
+    attributes: dndAttributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: deal.id,
   })
 
@@ -398,13 +451,21 @@ function SortableDealCard({ deal }: { deal: Deal }) {
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
-      <DealCard deal={deal} />
+    <div ref={setNodeRef} style={style} {...dndAttributes} {...listeners} className="touch-manipulation">
+      <DealCard deal={deal} attributes={attributes} />
     </div>
   )
 }
 
-function DroppableColumn({ stage, deals }: { stage: (typeof stages)[0]; deals: Deal[] }) {
+function DroppableColumn({
+  stage,
+  deals,
+  attributes,
+}: {
+  stage: { id: string; name: string; color: string }
+  deals: Deal[]
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
   const { setNodeRef, isOver } = useSortable({
     id: stage.id,
   })
@@ -412,25 +473,27 @@ function DroppableColumn({ stage, deals }: { stage: (typeof stages)[0]; deals: D
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col min-h-[600px] w-80 ${isOver ? "ring-2 ring-primary ring-opacity-50 bg-muted/20" : ""}`}
+      className={`flex flex-col min-h-[600px] w-80 transition-all duration-200 ${
+        isOver ? "ring-2 ring-blue-500 ring-opacity-30 bg-blue-50/20" : ""
+      }`}
     >
-      <div className={`rounded-t-lg p-3 ${stage.color}`}>
+      <div className={`rounded-t-xl p-4 border border-gray-200 ${stage.color}`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-sm">{stage.title}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs">
+          <div className="flex items-center gap-3">
+            <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
               {deals.length}
             </Badge>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6">
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 hover:text-gray-700">
             <PlusIcon className="h-3 w-3" />
           </Button>
         </div>
       </div>
-      <div className="flex-1 bg-gray-50 rounded-b-lg p-3 space-y-3">
+      <div className="flex-1 bg-gray-50/50 rounded-b-xl border-l border-r border-b border-gray-200 p-3 space-y-3">
         <SortableContext items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
           {deals.map((deal) => (
-            <SortableDealCard key={deal.id} deal={deal} />
+            <SortableDealCard key={deal.id} deal={deal} attributes={attributes} />
           ))}
         </SortableContext>
       </div>
@@ -445,11 +508,11 @@ function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
       <Button
         variant="ghost"
         size="icon"
-        className="h-10 w-10 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
+        className="h-12 w-12 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
         onClick={onAddColumn}
         title="Add Column"
       >
-        <PlusIcon className="h-5 w-5 text-gray-500" />
+        <PlusIcon className="h-5 w-5 text-gray-400" />
       </Button>
     </div>
   )
@@ -477,6 +540,17 @@ function AddColumnDialog({
     }
   }
 
+  const colorOptions = [
+    { value: "bg-gray-100", label: "Gray" },
+    { value: "bg-blue-100", label: "Blue" },
+    { value: "bg-green-100", label: "Green" },
+    { value: "bg-yellow-100", label: "Yellow" },
+    { value: "bg-purple-100", label: "Purple" },
+    { value: "bg-red-100", label: "Red" },
+    { value: "bg-orange-100", label: "Orange" },
+    { value: "bg-pink-100", label: "Pink" },
+  ]
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -492,27 +566,22 @@ function AddColumnDialog({
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., In Review"
               autoFocus
+              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
           <div className="space-y-2">
             <Label>Column Color</Label>
             <div className="grid grid-cols-4 gap-2">
-              {[
-                "bg-gray-100",
-                "bg-blue-100",
-                "bg-green-100",
-                "bg-yellow-100",
-                "bg-purple-100",
-                "bg-red-100",
-                "bg-orange-100",
-                "bg-pink-100",
-              ].map((c) => (
+              {colorOptions.map((option) => (
                 <div
-                  key={c}
-                  className={`h-8 rounded-md cursor-pointer ${c} ${
-                    color === c ? "ring-2 ring-primary ring-offset-2" : ""
+                  key={option.value}
+                  className={`h-10 rounded-lg cursor-pointer ${option.value} border-2 transition-all ${
+                    color === option.value
+                      ? "border-blue-500 scale-105 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => setColor(c)}
+                  onClick={() => setColor(option.value)}
+                  title={option.label}
                 />
               ))}
             </div>
@@ -521,7 +590,7 @@ function AddColumnDialog({
             <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim()}>
+            <Button type="submit" disabled={!name.trim()} className="bg-blue-600 hover:bg-blue-700">
               Add Column
             </Button>
           </div>
@@ -531,11 +600,18 @@ function AddColumnDialog({
   )
 }
 
-export function DealPipelineKanban() {
+export function DealPipelineKanban({ workflowConfig }: DealPipelineKanbanProps) {
   const [deals, setDeals] = React.useState(initialDeals)
   const [activeDeal, setActiveDeal] = React.useState<Deal | null>(null)
-  const [stagesList, setStagesList] = React.useState(stages)
+  const [stagesList, setStagesList] = React.useState(workflowConfig?.stages || defaultStages)
   const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)
+
+  // Update stages when workflow config changes
+  React.useEffect(() => {
+    if (workflowConfig?.stages) {
+      setStagesList(workflowConfig.stages)
+    }
+  }, [workflowConfig?.stages])
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -593,7 +669,7 @@ export function DealPipelineKanban() {
   const handleAddColumn = (name: string, color: string) => {
     const newStage = {
       id: `stage-${Date.now()}`,
-      title: name,
+      name: name,
       color: color,
     }
     setStagesList([...stagesList, newStage])
@@ -604,6 +680,8 @@ export function DealPipelineKanban() {
     deals: deals.filter((deal) => deal.stage === stage.id),
   }))
 
+  const attributes = workflowConfig?.attributes || defaultAttributes
+
   return (
     <DndContext
       sensors={sensors}
@@ -613,14 +691,14 @@ export function DealPipelineKanban() {
     >
       <div className="flex gap-4 overflow-x-auto pb-4">
         {dealsByStage.map(({ stage, deals }) => (
-          <DroppableColumn key={stage.id} stage={stage} deals={deals} />
+          <DroppableColumn key={stage.id} stage={stage} deals={deals} attributes={attributes} />
         ))}
         <AddColumnButton onAddColumn={() => setAddColumnDialogOpen(true)} />
       </div>
       <DragOverlay>
         {activeDeal ? (
           <div className="w-80 opacity-80 shadow-lg">
-            <DealCard deal={activeDeal} />
+            <DealCard deal={activeDeal} attributes={attributes} />
           </div>
         ) : null}
       </DragOverlay>
