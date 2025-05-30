@@ -131,7 +131,6 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   const [isEditingSubject, setIsEditingSubject] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
-  const [showFullThread, setShowFullThread] = React.useState(false)
   const [replyText, setReplyText] = React.useState("")
   const [isReplying, setIsReplying] = React.useState(false)
 
@@ -141,28 +140,101 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
     { name: "budget.xlsx", size: "156 KB", type: "Excel" },
   ]
 
-  // Create a single email object instead of an array
-  const emailData = {
-    id: email?.id || "email-1",
-    from: email?.from || "sender@example.com",
-    to: email?.to || ["recipient@example.com"],
-    cc: email?.cc || [],
-    subject: email?.subject || "No Subject",
-    date: email?.sentAt || new Date().toISOString(),
-    body: email?.body || email?.preview || "No content available",
-    attachments: email?.attachments || mockAttachments,
-    isOriginal: true,
-  }
+  // Create email thread with multiple emails
+  const emailThread = React.useMemo(
+    () => [
+      {
+        id: email?.id || "email-1",
+        from: email?.from || "sarah.johnson@company.com",
+        to: email?.to || ["john.doe@client.com"],
+        cc: email?.cc || [],
+        subject: email?.subject || "Project Proposal Discussion",
+        date: email?.sentAt || new Date().toISOString(),
+        body:
+          email?.body ||
+          email?.preview ||
+          `Hi John,
+
+I hope this email finds you well. I wanted to follow up on our conversation from last week regarding the new project proposal.
+
+I've attached the updated proposal document with the revisions we discussed. The key changes include:
+- Updated timeline reflecting the Q2 delivery date
+- Revised budget allocation for the development phase
+- Additional resources for the testing phase
+
+Please review the document and let me know if you have any questions or need further clarification on any of the points.
+
+Looking forward to your feedback.
+
+Best regards,
+Sarah`,
+        attachments: email?.attachments || [
+          { name: "proposal-v2.pdf", size: "2.4 MB", type: "PDF" },
+          { name: "budget-breakdown.xlsx", size: "156 KB", type: "Excel" },
+        ],
+        isOriginal: true,
+      },
+      {
+        id: "email-2",
+        from: "john.doe@client.com",
+        to: ["sarah.johnson@company.com"],
+        cc: [],
+        subject: "Re: Project Proposal Discussion",
+        date: new Date(new Date(email?.sentAt || new Date()).getTime() - 86400000).toISOString(),
+        body: `Hi Sarah,
+
+Thank you for sending the updated proposal. I've had a chance to review it with my team.
+
+Overall, we're very pleased with the revisions. The timeline looks much more realistic, and the budget breakdown is exactly what we needed to see.
+
+I do have a couple of questions:
+1. Can we discuss the testing phase timeline in more detail?
+2. What's the process for change requests during development?
+
+Would you be available for a call this Thursday to discuss these points?
+
+Best,
+John`,
+        attachments: [],
+        isOriginal: false,
+      },
+      {
+        id: "email-3",
+        from: "sarah.johnson@company.com",
+        to: ["john.doe@client.com"],
+        cc: ["mike.wilson@company.com"],
+        subject: "Re: Project Proposal Discussion",
+        date: new Date(new Date(email?.sentAt || new Date()).getTime() - 172800000).toISOString(),
+        body: `Hi John,
+
+Great to hear that you're pleased with the revisions!
+
+To answer your questions:
+1. The testing phase is structured in three stages: unit testing (week 1), integration testing (week 2), and user acceptance testing (week 3). I'll send you a detailed testing plan separately.
+2. We have a formal change request process that includes impact assessment and approval workflow. Minor changes can usually be accommodated within the existing timeline.
+
+Thursday works perfectly for me. How about 2 PM EST? I'll send a calendar invite.
+
+I'm also CC'ing Mike Wilson, our project manager, who will be your main point of contact during the development phase.
+
+Best regards,
+Sarah`,
+        attachments: [{ name: "testing-plan.pdf", size: "890 KB", type: "PDF" }],
+        isOriginal: false,
+      },
+    ],
+    [email],
+  )
 
   // Simplified field values
   const [fieldValues, setFieldValues] = React.useState({
-    from: email?.from || "sender@example.com",
-    to: email?.to || ["recipient@example.com"],
-    cc: email?.cc || [],
-    sentAt: email?.sentAt || new Date().toISOString(),
+    from: emailThread[0]?.from || "sender@example.com",
+    to: emailThread[0]?.to || ["recipient@example.com"],
+    cc: emailThread[0]?.cc || [],
+    sentAt: emailThread[0]?.date || new Date().toISOString(),
     priority: email?.priority || "Normal",
     status: email?.status || "Received",
-    attachments: email?.attachments || mockAttachments,
+    attachments: emailThread[0]?.attachments || [],
   })
 
   const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
@@ -228,7 +300,7 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
                 {emailSubject}
               </h2>
             )}
-            <p className="text-sm text-muted-foreground">Email • {emailData.id}</p>
+            <p className="text-sm text-muted-foreground">Email • {emailThread[0]?.id}</p>
           </div>
         </div>
       </div>
@@ -375,11 +447,16 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
 
             {/* Email content section */}
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Email Content</h4>
+              <h4 className="text-sm font-medium">Email Thread ({emailThread.length} messages)</h4>
 
               {/* Email content with proper formatting */}
-              <div className="rounded-lg border border-muted p-4">
-                <EmailContent emailItem={emailData} />
+              <div className="rounded-lg border border-muted p-4 space-y-6">
+                {emailThread.map((emailItem, index) => (
+                  <div key={emailItem.id}>
+                    <EmailContent emailItem={emailItem} />
+                    {index < emailThread.length - 1 && <Separator className="my-6" />}
+                  </div>
+                ))}
               </div>
             </div>
 
