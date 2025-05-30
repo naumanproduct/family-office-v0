@@ -81,7 +81,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-02-15",
     noticeDate: "2024-01-15",
     investor: "Pension Fund Alpha",
-    stage: "initiated",
+    stage: "new",
     description: "Capital call for follow-on investments in portfolio companies",
     fundManager: "TechVentures Management",
     email: "capital@techventures.com",
@@ -103,7 +103,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-02-20",
     noticeDate: "2024-01-20",
     investor: "Insurance Corp Beta",
-    stage: "notice-sent",
+    stage: "in-progress",
     description: "Capital call for new investment opportunities",
     fundManager: "Growth Equity Management",
     email: "calls@growthequity.com",
@@ -125,7 +125,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-02-10",
     noticeDate: "2024-01-10",
     investor: "Endowment Fund Gamma",
-    stage: "pending-response",
+    stage: "in-progress",
     description: "Capital call for property acquisition",
     fundManager: "Real Estate Partners",
     email: "capital@realestate.com",
@@ -147,7 +147,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-02-25",
     noticeDate: "2024-01-25",
     investor: "Sovereign Wealth Fund",
-    stage: "committed",
+    stage: "in-progress",
     description: "Capital call for infrastructure project funding",
     fundManager: "Infrastructure Capital",
     email: "calls@infrastructure.com",
@@ -169,7 +169,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-01-30",
     noticeDate: "2024-01-01",
     investor: "Family Office Delta",
-    stage: "funded",
+    stage: "done",
     description: "Capital call for credit facility deployment",
     fundManager: "Private Credit Partners",
     email: "capital@privatecredit.com",
@@ -185,17 +185,14 @@ const initialCapitalCalls: CapitalCall[] = [
 ]
 
 const stages = [
-  { id: "initiated", title: "Initiated", color: "bg-gray-100" },
-  { id: "notice-sent", title: "Notice Sent", color: "bg-blue-100" },
-  { id: "pending-response", title: "Pending Response", color: "bg-yellow-100" },
-  { id: "committed", title: "Committed", color: "bg-purple-100" },
-  { id: "funded", title: "Funded", color: "bg-green-100" },
-  { id: "overdue", title: "Overdue", color: "bg-red-100" },
+  { id: "new", title: "New", color: "bg-gray-100" },
+  { id: "in-progress", title: "In Progress", color: "bg-blue-100" },
+  { id: "done", title: "Done", color: "bg-green-100" },
 ]
 
 // Replace the CapitalCallCard component with this new implementation that opens the task drawer
 function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
-  const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "funded"
+  const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "done"
 
   // Create a task object that matches the structure expected by TaskDetailsView
   const capitalCallTask = {
@@ -203,7 +200,7 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
     title: "Capital Call",
     description: `Process capital call for ${capitalCall.fundName}`,
     priority: "High",
-    status: capitalCall.stage === "funded" ? "Completed" : capitalCall.stage === "committed" ? "In Progress" : "To Do",
+    status: capitalCall.stage === "done" ? "Completed" : capitalCall.stage === "in-progress" ? "In Progress" : "To Do",
     assignee: "You",
     dueDate: capitalCall.dueDate,
     subtasks: [
@@ -233,7 +230,7 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
         id: "CC-3",
         title: "Record in System",
         description: "Log in accounting system or ledger",
-        status: capitalCall.stage === "funded" || capitalCall.stage === "committed" ? "Completed" : "In Progress",
+        status: capitalCall.stage === "done" || capitalCall.stage === "in-progress" ? "Completed" : "In Progress",
         priority: "Medium",
         assignee: "You",
         dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 3 * 24 * 60 * 60 * 1000)
@@ -244,7 +241,7 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
         id: "CC-4",
         title: "Notify Accountant",
         description: "Forward or tag accountant for payment setup",
-        status: capitalCall.stage === "funded" ? "Completed" : "To Do",
+        status: capitalCall.stage === "done" ? "Completed" : "To Do",
         priority: "Medium",
         assignee: "Sarah Johnson",
         dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 2 * 24 * 60 * 60 * 1000)
@@ -255,7 +252,7 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
         id: "CC-5",
         title: "Confirm Wire Date",
         description: "Align on when funds will be sent",
-        status: capitalCall.stage === "funded" ? "Completed" : "To Do",
+        status: capitalCall.stage === "done" ? "Completed" : "To Do",
         priority: "High",
         assignee: "You",
         dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 1 * 24 * 60 * 60 * 1000)
@@ -266,7 +263,7 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
         id: "CC-6",
         title: "Follow-Up if Not Funded",
         description: "If deadline passes, notify appropriate party",
-        status: capitalCall.stage === "funded" ? "Completed" : "To Do",
+        status: capitalCall.stage === "done" ? "Completed" : "To Do",
         priority: "Medium",
         assignee: "You",
         dueDate: new Date(new Date(capitalCall.dueDate).getTime() + 1 * 24 * 60 * 60 * 1000)
@@ -277,7 +274,7 @@ function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
         id: "CC-7",
         title: "Mark as Complete",
         description: "Close the call internally",
-        status: capitalCall.stage === "funded" ? "Completed" : "To Do",
+        status: capitalCall.stage === "done" ? "Completed" : "To Do",
         priority: "Low",
         assignee: "You",
         dueDate: new Date(new Date(capitalCall.dueDate).getTime() + 2 * 24 * 60 * 60 * 1000)
