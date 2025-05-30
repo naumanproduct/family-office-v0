@@ -1,6 +1,7 @@
 "use client"
 
 import type * as React from "react"
+import { useState } from "react"
 import {
   ArrowUpCircleIcon,
   FileIcon,
@@ -43,6 +44,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronsUpDownIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { WorkflowTemplateDialog } from "./workflows/workflow-template-dialog"
 
 const data = {
   user: {
@@ -159,6 +162,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     window.location.href = url
   }
 
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -233,7 +238,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         {data.navGroups.map((group) => (
           <SidebarGroup key={group.title}>
-            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+            <div className="relative group">
+              <SidebarGroupLabel className="flex items-center justify-between">
+                {group.title}
+                {group.title === "Workflows" && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setIsTemplateDialogOpen(true)}
+                  >
+                    <PlusCircleIcon className="h-3 w-3" />
+                  </Button>
+                )}
+              </SidebarGroupLabel>
+            </div>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (
@@ -275,6 +294,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
+      <WorkflowTemplateDialog isOpen={isTemplateDialogOpen} onClose={() => setIsTemplateDialogOpen(false)} />
     </Sidebar>
   )
 }

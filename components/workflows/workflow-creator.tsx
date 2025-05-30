@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -136,15 +136,36 @@ interface WorkflowCreatorProps {
 
 export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: WorkflowCreatorProps) {
   const [activeTab, setActiveTab] = useState("basic")
-  const [workflow, setWorkflow] = useState(
-    existingWorkflow || {
+  const [workflow, setWorkflow] = useState(() => {
+    if (existingWorkflow) {
+      return {
+        name: existingWorkflow.name || "",
+        description: existingWorkflow.description || "",
+        objectType: existingWorkflow.objectType || "",
+        attributes: existingWorkflow.attributes || [],
+        stages: existingWorkflow.stages || [],
+      }
+    }
+    return {
       name: "",
       description: "",
       objectType: "",
       attributes: [],
       stages: [],
-    },
-  )
+    }
+  })
+
+  useEffect(() => {
+    if (existingWorkflow) {
+      setWorkflow({
+        name: existingWorkflow.name || "",
+        description: existingWorkflow.description || "",
+        objectType: existingWorkflow.objectType || "",
+        attributes: existingWorkflow.attributes || [],
+        stages: existingWorkflow.stages || [],
+      })
+    }
+  }, [existingWorkflow])
 
   const handleObjectTypeChange = (type: string) => {
     setWorkflow({

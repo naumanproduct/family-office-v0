@@ -1,30 +1,36 @@
-import { AppSidebar } from "../../components/app-sidebar"
-import { SiteHeader } from "../../components/site-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { CapitalCallKanban } from "../../components/capital-call-kanban"
+import { WorkflowHeader } from "@/components/workflows/workflow-header"
 
-export default function CapitalCallTrackingPage() {
+const workflowConfig = {
+  name: "Capital Call Tracking",
+  description: "Track capital call processes with automated notifications and document generation",
+  objectType: "capital-call",
+  attributes: [
+    { id: "fund", name: "Fund", type: "relation" },
+    { id: "amount", name: "Amount", type: "currency" },
+    { id: "dueDate", name: "Due Date", type: "date" },
+    { id: "status", name: "Status", type: "select" },
+    { id: "investor", name: "Investor", type: "relation" },
+    { id: "percentOfCommitment", name: "% of Commitment", type: "number" },
+    { id: "callNumber", name: "Call Number", type: "number" },
+  ],
+  stages: [
+    { id: "new", name: "New", color: "bg-gray-100" },
+    { id: "in-progress", name: "In Progress", color: "bg-blue-100" },
+    { id: "done", name: "Done", color: "bg-green-100" },
+  ],
+}
+
+export default function Page() {
   return (
-    <SidebarProvider>
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <div className="px-4 lg:px-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h1 className="text-2xl font-semibold">Capital Call Tracking</h1>
-                    <p className="text-muted-foreground">Monitor and manage capital call requests and commitments</p>
-                  </div>
-                </div>
-                <CapitalCallKanban />
-              </div>
-            </div>
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <main className="flex min-h-screen flex-col items-center p-24">
+      <WorkflowHeader
+        workflowName="Capital Call Tracking"
+        workflowConfig={workflowConfig}
+        onSave={(workflow) => {
+          console.log("Workflow updated:", workflow)
+          // Handle workflow updates here
+        }}
+      />
+    </main>
   )
 }
