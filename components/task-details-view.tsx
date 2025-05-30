@@ -84,6 +84,7 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
   )
   const [newSubtaskTitle, setNewSubtaskTitle] = React.useState("")
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false)
+  const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
 
   const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
 
@@ -150,6 +151,14 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
     setSubtasks(subtasks.filter((subtask) => subtask.id !== subtaskId))
   }
 
+  const handleSubtaskClick = (subtask: any) => {
+    setSelectedSubtask(subtask)
+  }
+
+  const handleBackFromSubtask = () => {
+    setSelectedSubtask(null)
+  }
+
   const renderEditableField = (field: string, value: string, icon: React.ReactNode, label: string, isBadge = false) => {
     const isEditing = editingField === field
 
@@ -194,6 +203,19 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
           </div>
         </div>
       </div>
+    )
+  }
+
+  // If a subtask is selected, render the subtask view
+  if (selectedSubtask) {
+    return (
+      <TaskDetailsView
+        task={selectedSubtask}
+        onBack={handleBackFromSubtask}
+        recordName={recordName}
+        parentTask={task}
+        onBackToParent={onBack}
+      />
     )
   }
 
@@ -326,158 +348,166 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
               </Button>
             </div>
 
-            {/* Subtasks Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">Subtasks ({subtasks.length})</h4>
-                <Button variant="outline" size="sm" onClick={() => setIsAddingSubtask(true)} className="h-8">
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Add Subtask
-                </Button>
-              </div>
+            {/* Subtasks Section - Only show for main tasks, not subtasks */}
+            {!parentTask && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium">Subtasks ({subtasks.length})</h4>
+                  <Button variant="outline" size="sm" onClick={() => setIsAddingSubtask(true)} className="h-8">
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Add Subtask
+                  </Button>
+                </div>
 
-              <div className="space-y-2">
-                {subtasks.map((subtask) => (
-                  <div
-                    key={subtask.id}
-                    className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
-                            handleSubtaskStatusChange(subtask.id, newStatus)
-                          }}
+                <div className="space-y-2">
+                  {subtasks.map((subtask) => (
+                    <div
+                      key={subtask.id}
+                      className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div
+                          className="flex items-center gap-3 flex-1 cursor-pointer"
+                          onClick={() => handleSubtaskClick(subtask)}
                         >
-                          {subtask.status === "Completed" ? (
-                            <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                          ) : subtask.status === "In Progress" ? (
-                            <ClockIcon className="h-4 w-4 text-blue-500" />
-                          ) : (
-                            <CircleIcon className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </Button>
-                        <div className="flex-1">
-                          <div
-                            className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
-                          >
-                            {subtask.title}
-                          </div>
-                          <div className="flex items-center gap-4 mt-1">
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <UserIcon className="h-3 w-3" />
-                              {subtask.assignee}
-                            </div>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <CalendarIcon className="h-3 w-3" />
-                              {new Date(subtask.dueDate).toLocaleDateString()}
-                            </div>
-                            <Badge
-                              variant={
-                                subtask.status === "Completed"
-                                  ? "default"
-                                  : subtask.status === "In Progress"
-                                    ? "secondary"
-                                    : "outline"
-                              }
-                              className="text-xs"
-                            >
-                              {subtask.status}
-                            </Badge>
-                            <Badge className={`text-xs ${getPriorityColor(subtask.priority)}`}>
-                              {subtask.priority}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="h-6 w-6 p-0"
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
+                              handleSubtaskStatusChange(subtask.id, newStatus)
+                            }}
                           >
-                            <DotsHorizontalIcon className="h-3 w-3" />
+                            {subtask.status === "Completed" ? (
+                              <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                            ) : subtask.status === "In Progress" ? (
+                              <ClockIcon className="h-4 w-4 text-blue-500" />
+                            ) : (
+                              <CircleIcon className="h-4 w-4 text-muted-foreground" />
+                            )}
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
-                            Mark as To Do
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "In Progress")}>
-                            Mark as In Progress
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "Completed")}>
-                            Mark as Completed
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteSubtask(subtask.id)}
-                            className="text-destructive"
-                          >
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          <div className="flex-1">
+                            <div
+                              className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
+                            >
+                              {subtask.title}
+                            </div>
+                            <div className="flex items-center gap-4 mt-1">
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <UserIcon className="h-3 w-3" />
+                                {subtask.assignee}
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <CalendarIcon className="h-3 w-3" />
+                                {new Date(subtask.dueDate).toLocaleDateString()}
+                              </div>
+                              <Badge
+                                variant={
+                                  subtask.status === "Completed"
+                                    ? "default"
+                                    : subtask.status === "In Progress"
+                                      ? "secondary"
+                                      : "outline"
+                                }
+                                className="text-xs"
+                              >
+                                {subtask.status}
+                              </Badge>
+                              <Badge className={`text-xs ${getPriorityColor(subtask.priority)}`}>
+                                {subtask.priority}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <DotsHorizontalIcon className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>
+                              Open Details
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
+                              Mark as To Do
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "In Progress")}>
+                              Mark as In Progress
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "Completed")}>
+                              Mark as Completed
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteSubtask(subtask.id)}
+                              className="text-destructive"
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                {/* Add New Subtask */}
-                {isAddingSubtask && (
-                  <div className="rounded-lg border border-muted bg-muted/10 p-3">
-                    <div className="flex items-center gap-2">
-                      <CircleIcon className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        value={newSubtaskTitle}
-                        onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                        placeholder="Enter subtask title..."
-                        className="flex-1 h-8"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleAddSubtask()
-                          }
-                          if (e.key === "Escape") {
+                  {/* Add New Subtask */}
+                  {isAddingSubtask && (
+                    <div className="rounded-lg border border-muted bg-muted/10 p-3">
+                      <div className="flex items-center gap-2">
+                        <CircleIcon className="h-4 w-4 text-muted-foreground" />
+                        <Input
+                          value={newSubtaskTitle}
+                          onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                          placeholder="Enter subtask title..."
+                          className="flex-1 h-8"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleAddSubtask()
+                            }
+                            if (e.key === "Escape") {
+                              setIsAddingSubtask(false)
+                              setNewSubtaskTitle("")
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <Button size="sm" onClick={handleAddSubtask} className="h-8">
+                          Add
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
                             setIsAddingSubtask(false)
                             setNewSubtaskTitle("")
-                          }
-                        }}
-                        autoFocus
-                      />
-                      <Button size="sm" onClick={handleAddSubtask} className="h-8">
-                        Add
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setIsAddingSubtask(false)
-                          setNewSubtaskTitle("")
-                        }}
-                        className="h-8"
-                      >
-                        Cancel
-                      </Button>
+                          }}
+                          className="h-8"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {subtasks.length === 0 && !isAddingSubtask && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <CheckSquareIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No subtasks yet</p>
-                    <p className="text-xs">Break down this task into smaller steps</p>
-                  </div>
-                )}
+                  {subtasks.length === 0 && !isAddingSubtask && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <CheckSquareIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No subtasks yet</p>
+                      <p className="text-xs">Break down this task into smaller steps</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Comments Section */}
             <div className="space-y-4">
