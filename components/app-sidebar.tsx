@@ -17,6 +17,7 @@ import {
   TrendingUpIcon,
   TargetIcon,
   PlusCircleIcon,
+  GitBranchIcon,
 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
@@ -110,6 +111,11 @@ const data = {
     {
       title: "Workflows",
       items: [
+        {
+          title: "Manage Workflows",
+          url: "/workflows",
+          icon: GitBranchIcon,
+        },
         {
           title: "Deal Pipeline",
           url: "/deal-pipeline",
