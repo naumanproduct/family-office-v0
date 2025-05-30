@@ -1,5 +1,22 @@
 "use client"
+
+import * as React from "react"
 import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  DragOverlay,
+} from "@dnd-kit/core"
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import {
+  MoreVerticalIcon,
+  PlusIcon,
   DollarSignIcon,
   CalendarIcon,
   UserIcon,
@@ -12,7 +29,21 @@ import {
   MailIcon,
   BuildingIcon,
 } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { MasterDrawer } from "./master-drawer"
 import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 interface Deal {
   id: string
@@ -274,4 +305,326 @@ function DealCard({ deal }: { deal: Deal }) {
   const renderTabContent = (
     activeTab: string,
     viewMode: "card" | "list" | "table",
-    setSelectedTask?: (task:\
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p>No {activeTab} found for this opportunity</p>
+        <p className="text-sm">Add some {activeTab} to get started</p>
+      </div>
+    )
+  }
+
+  return (
+    <MasterDrawer
+      trigger={
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium text-sm">{deal.companyName}</h4>
+                <p className="text-xs text-muted-foreground">{deal.sector}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <MoreVerticalIcon className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-xs">
+                <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Funding:</span>
+                <span>{deal.fundingRound}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Target:</span>
+                <span>{deal.targetRaise}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <UserIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Owner:</span>
+                <span>{deal.owner}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <MapPinIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Location:</span>
+                <span>{deal.location}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <CalendarIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Next:</span>
+                <span>{deal.nextMeeting}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      }
+      title={opportunityTitle}
+      recordType="Opportunity"
+      subtitle={opportunitySubtitle}
+      tabs={tabs}
+      children={renderTabContent}
+      detailsPanel={detailsPanel}
+      onComposeEmail={() => {}}
+    />
+  )
+}
+
+function SortableDealCard({ deal }: { deal: Deal }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: deal.id,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1 : 0,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
+      <DealCard deal={deal} />
+    </div>
+  )
+}
+
+function DroppableColumn({ stage, deals }: { stage: (typeof stages)[0]; deals: Deal[] }) {
+  const { setNodeRef, isOver } = useSortable({
+    id: stage.id,
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex flex-col min-h-[600px] w-80 ${isOver ? "ring-2 ring-primary ring-opacity-50 bg-muted/20" : ""}`}
+    >
+      <div className={`rounded-t-lg p-3 ${stage.color}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-sm">{stage.title}</h3>
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs">
+              {deals.length}
+            </Badge>
+          </div>
+          <Button variant="ghost" size="icon" className="h-6 w-6">
+            <PlusIcon className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+      <div className="flex-1 bg-gray-50 rounded-b-lg p-3 space-y-3">
+        <SortableContext items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+          {deals.map((deal) => (
+            <SortableDealCard key={deal.id} deal={deal} />
+          ))}
+        </SortableContext>
+      </div>
+    </div>
+  )
+}
+
+// New component for adding a column
+function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
+  return (
+    <div className="flex flex-col min-h-[600px] w-16 justify-center items-center">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-10 w-10 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
+        onClick={onAddColumn}
+        title="Add Column"
+      >
+        <PlusIcon className="h-5 w-5 text-gray-500" />
+      </Button>
+    </div>
+  )
+}
+
+// New dialog for adding a column
+function AddColumnDialog({
+  open,
+  onOpenChange,
+  onAddColumn,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onAddColumn: (name: string, color: string) => void
+}) {
+  const [name, setName] = React.useState("")
+  const [color, setColor] = React.useState("bg-gray-100")
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (name.trim()) {
+      onAddColumn(name, color)
+      setName("")
+      onOpenChange(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Column</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="column-name">Column Name</Label>
+            <Input
+              id="column-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., In Review"
+              autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Column Color</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                "bg-gray-100",
+                "bg-blue-100",
+                "bg-green-100",
+                "bg-yellow-100",
+                "bg-purple-100",
+                "bg-red-100",
+                "bg-orange-100",
+                "bg-pink-100",
+              ].map((c) => (
+                <div
+                  key={c}
+                  className={`h-8 rounded-md cursor-pointer ${c} ${
+                    color === c ? "ring-2 ring-primary ring-offset-2" : ""
+                  }`}
+                  onClick={() => setColor(c)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!name.trim()}>
+              Add Column
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export function DealPipelineKanban() {
+  const [deals, setDeals] = React.useState(initialDeals)
+  const [activeDeal, setActiveDeal] = React.useState<Deal | null>(null)
+  const [stagesList, setStagesList] = React.useState(stages)
+  const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor),
+  )
+
+  function handleDragStart(event: any) {
+    const { active } = event
+    const activeId = active.id as string
+    const deal = deals.find((d) => d.id === activeId)
+    if (deal) {
+      setActiveDeal(deal)
+    }
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveDeal(null)
+    const { active, over } = event
+
+    if (!over) return
+
+    const activeId = active.id as string
+    const overId = over.id as string
+
+    const activeDeal = deals.find((d) => d.id === activeId)
+    if (!activeDeal) return
+
+    // Find which stage the item is being dropped on
+    let targetStage = overId
+
+    // If dropping on another deal, find its stage
+    if (!stagesList.some((s) => s.id === overId)) {
+      const targetDeal = deals.find((d) => d.id === overId)
+      if (targetDeal) {
+        targetStage = targetDeal.stage
+      }
+    }
+
+    // Update the deal's stage if it's different
+    if (activeDeal.stage !== targetStage && stagesList.some((s) => s.id === targetStage)) {
+      setDeals(deals.map((deal) => (deal.id === activeId ? { ...deal, stage: targetStage } : deal)))
+    }
+  }
+
+  const handleAddColumn = (name: string, color: string) => {
+    const newStage = {
+      id: `stage-${Date.now()}`,
+      title: name,
+      color: color,
+    }
+    setStagesList([...stagesList, newStage])
+  }
+
+  const dealsByStage = stagesList.map((stage) => ({
+    stage,
+    deals: deals.filter((deal) => deal.stage === stage.id),
+  }))
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {dealsByStage.map(({ stage, deals }) => (
+          <DroppableColumn key={stage.id} stage={stage} deals={deals} />
+        ))}
+        <AddColumnButton onAddColumn={() => setAddColumnDialogOpen(true)} />
+      </div>
+      <DragOverlay>
+        {activeDeal ? (
+          <div className="w-80 opacity-80 shadow-lg">
+            <DealCard deal={activeDeal} />
+          </div>
+        ) : null}
+      </DragOverlay>
+      <AddColumnDialog open={addColumnDialogOpen} onOpenChange={setAddColumnDialogOpen} onAddColumn={handleAddColumn} />
+    </DndContext>
+  )
+}
