@@ -34,7 +34,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { OpportunityNameCell, type Opportunity } from "./opportunities-table"
+import { MasterDrawer } from "./master-drawer"
 
 interface Deal {
   id: string
@@ -148,8 +148,8 @@ const stages = [
 
 // Separate the card UI from the sortable wrapper
 function DealCard({ deal }: { deal: Deal }) {
-  // Convert deal to opportunity format
-  const opportunity: Opportunity = {
+  // Convert deal to opportunity format for the drawer
+  const opportunityData = {
     id: Number.parseInt(deal.id),
     name: `${deal.fundingRound} Investment - ${deal.companyName}`,
     company: {
@@ -209,60 +209,64 @@ function DealCard({ deal }: { deal: Deal }) {
   }
 
   return (
-    <div onClick={(e) => e.stopPropagation()}>
-      <Card className="cursor-pointer hover:shadow-md transition-shadow">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <div className="flex-1" onClick={(e) => e.stopPropagation()}>
-              <OpportunityNameCell opportunity={opportunity} />
-              <p className="text-xs text-muted-foreground mt-1">{deal.sector}</p>
+    <MasterDrawer
+      trigger={
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium text-sm">{deal.companyName}</h4>
+                <p className="text-xs text-muted-foreground">{deal.sector}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <MoreVerticalIcon className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <MoreVerticalIcon className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Edit</DropdownMenuItem>
-                <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-2">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs">
-              <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Funding:</span>
-              <span>{deal.fundingRound}</span>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-xs">
+                <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Funding:</span>
+                <span>{deal.fundingRound}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Target:</span>
+                <span>{deal.targetRaise}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <UserIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Owner:</span>
+                <span>{deal.owner}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <MapPinIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Location:</span>
+                <span>{deal.location}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <CalendarIcon className="h-3 w-3 text-muted-foreground" />
+                <span className="text-muted-foreground">Next:</span>
+                <span>{deal.nextMeeting}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Target:</span>
-              <span>{deal.targetRaise}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <UserIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Owner:</span>
-              <span>{deal.owner}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <MapPinIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Location:</span>
-              <span>{deal.location}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Next:</span>
-              <span>{deal.nextMeeting}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      }
+      data={opportunityData}
+      type="opportunity"
+    />
   )
 }
 
