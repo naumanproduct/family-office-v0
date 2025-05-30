@@ -43,8 +43,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
+import { TaskDetailsView } from "@/components/task-details-view"
 
 interface CapitalCall {
   id: string
@@ -192,76 +193,178 @@ const stages = [
   { id: "overdue", title: "Overdue", color: "bg-red-100" },
 ]
 
-// Separate the card UI from the sortable wrapper
+// Replace the CapitalCallCard component with this new implementation that opens the task drawer
 function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
   const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "funded"
 
+  // Create a task object that matches the structure expected by TaskDetailsView
+  const capitalCallTask = {
+    id: capitalCall.id,
+    title: "Capital Call",
+    description: `Process capital call for ${capitalCall.fundName}`,
+    priority: "High",
+    status: capitalCall.stage === "funded" ? "Completed" : capitalCall.stage === "committed" ? "In Progress" : "To Do",
+    assignee: "You",
+    dueDate: capitalCall.dueDate,
+    subtasks: [
+      {
+        id: "CC-1",
+        title: "Review Capital Call Notice PDF",
+        description: "Open and understand key terms (amount, due date)",
+        status: "Completed",
+        priority: "High",
+        assignee: "You",
+        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 5 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+      },
+      {
+        id: "CC-2",
+        title: "Validate with Principal",
+        description: "Confirm LP or internal commitment matches",
+        status: "Completed",
+        priority: "High",
+        assignee: "You",
+        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 4 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+      },
+      {
+        id: "CC-3",
+        title: "Record in System",
+        description: "Log in accounting system or ledger",
+        status: capitalCall.stage === "funded" || capitalCall.stage === "committed" ? "Completed" : "In Progress",
+        priority: "Medium",
+        assignee: "You",
+        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 3 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+      },
+      {
+        id: "CC-4",
+        title: "Notify Accountant",
+        description: "Forward or tag accountant for payment setup",
+        status: capitalCall.stage === "funded" ? "Completed" : "To Do",
+        priority: "Medium",
+        assignee: "Sarah Johnson",
+        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 2 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+      },
+      {
+        id: "CC-5",
+        title: "Confirm Wire Date",
+        description: "Align on when funds will be sent",
+        status: capitalCall.stage === "funded" ? "Completed" : "To Do",
+        priority: "High",
+        assignee: "You",
+        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 1 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+      },
+      {
+        id: "CC-6",
+        title: "Follow-Up if Not Funded",
+        description: "If deadline passes, notify appropriate party",
+        status: capitalCall.stage === "funded" ? "Completed" : "To Do",
+        priority: "Medium",
+        assignee: "You",
+        dueDate: new Date(new Date(capitalCall.dueDate).getTime() + 1 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+      },
+      {
+        id: "CC-7",
+        title: "Mark as Complete",
+        description: "Close the call internally",
+        status: capitalCall.stage === "funded" ? "Completed" : "To Do",
+        priority: "Low",
+        assignee: "You",
+        dueDate: new Date(new Date(capitalCall.dueDate).getTime() + 2 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+      },
+    ],
+  }
+
+  const [selectedTask, setSelectedTask] = React.useState<any>(null)
+
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">{capitalCall.fundName}</h4>
-                <p className="text-xs text-muted-foreground">{capitalCall.callNumber}</p>
-                {isOverdue && (
-                  <Badge variant="destructive" className="mt-1 text-xs">
-                    <AlertCircleIcon className="h-3 w-3 mr-1" />
-                    Overdue
-                  </Badge>
-                )}
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <MoreVerticalIcon className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem>Send Reminder</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Cancel Call</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+    <>
+      <Card
+        className="cursor-pointer hover:shadow-md transition-shadow"
+        onClick={() => setSelectedTask(capitalCallTask)}
+      >
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h4 className="font-medium text-sm">{capitalCall.fundName}</h4>
+              <p className="text-xs text-muted-foreground">{capitalCall.callNumber}</p>
+              {isOverdue && (
+                <Badge variant="destructive" className="mt-1 text-xs">
+                  <AlertCircleIcon className="h-3 w-3 mr-1" />
+                  Overdue
+                </Badge>
+              )}
             </div>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-2">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs">
-                <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Amount:</span>
-                <span className="font-medium">{capitalCall.callAmount}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Commitment:</span>
-                <span>{capitalCall.commitmentAmount}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <UserIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Investor:</span>
-                <span>{capitalCall.investor}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Due:</span>
-                <span className={isOverdue ? "text-red-600 font-medium" : ""}>{capitalCall.dueDate}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <ClockIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Notice:</span>
-                <span>{capitalCall.noticeDate}</span>
-              </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <MoreVerticalIcon className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Edit</DropdownMenuItem>
+                <DropdownMenuItem>Send Reminder</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-600">Cancel Call</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-2">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs">
+              <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Amount:</span>
+              <span className="font-medium">{capitalCall.callAmount}</span>
             </div>
-          </CardContent>
-        </Card>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-        <CapitalCallDrawerContent capitalCall={capitalCall} />
-      </SheetContent>
-    </Sheet>
+            <div className="flex items-center gap-2 text-xs">
+              <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Commitment:</span>
+              <span>{capitalCall.commitmentAmount}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <UserIcon className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Investor:</span>
+              <span>{capitalCall.investor}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <CalendarIcon className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Due:</span>
+              <span className={isOverdue ? "text-red-600 font-medium" : ""}>{capitalCall.dueDate}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <ClockIcon className="h-3 w-3 text-muted-foreground" />
+              <span className="text-muted-foreground">Notice:</span>
+              <span>{capitalCall.noticeDate}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedTask && (
+        <Sheet open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
+          <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
+            <TaskDetailsView
+              task={selectedTask}
+              onBack={() => setSelectedTask(null)}
+              recordName={capitalCall.fundName}
+            />
+          </SheetContent>
+        </Sheet>
+      )}
+    </>
   )
 }
 
