@@ -13,6 +13,7 @@ import {
   CircleIcon,
   ClockIcon,
   DotIcon as DotsHorizontalIcon,
+  ChevronLeftIcon,
 } from "lucide-react"
 
 import {
@@ -33,47 +34,93 @@ interface TaskDetailsViewProps {
   task: any
   onBack: () => void
   recordName: string
+  parentTask?: any
+  onBackToParent?: () => void
 }
 
-export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewProps) {
+export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackToParent }: TaskDetailsViewProps) {
   const [commentText, setCommentText] = React.useState("")
   const [taskTitle, setTaskTitle] = React.useState(task.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
-    description: task.description,
-    priority: task.priority,
-    status: task.status,
-    assignee: task.assignee,
-    dueDate: task.dueDate,
+    description: task.description || "Complete due diligence review for the investment opportunity",
+    priority: task.priority || "High",
+    status: task.status || "In Progress",
+    assignee: task.assignee || "John Smith",
+    dueDate: task.dueDate || "2023-05-25",
   })
 
-  const [subtasks, setSubtasks] = React.useState([
-    {
-      id: "SUBTASK-1",
-      title: "Review financial statements",
-      status: "Completed",
-      assignee: "John Smith",
-      dueDate: "2023-05-18T17:00:00Z",
-    },
-    {
-      id: "SUBTASK-2",
-      title: "Analyze market conditions",
-      status: "In Progress",
-      assignee: "Sarah Johnson",
-      dueDate: "2023-05-20T17:00:00Z",
-    },
-    {
-      id: "SUBTASK-3",
-      title: "Prepare investment memo",
-      status: "To Do",
-      assignee: "Michael Brown",
-      dueDate: "2023-05-22T17:00:00Z",
-    },
-  ])
+  const [subtasks, setSubtasks] = React.useState(
+    task.subtasks || [
+      {
+        id: "SUBTASK-1",
+        title: "Review financial statements",
+        description: "Analyze the company's financial performance over the last 3 years",
+        status: "Completed",
+        priority: "High",
+        assignee: "John Smith",
+        dueDate: "2023-05-18",
+        subtasks: [
+          {
+            id: "SUBTASK-1-1",
+            title: "Review balance sheet",
+            description: "Examine assets, liabilities, and equity",
+            status: "Completed",
+            priority: "Medium",
+            assignee: "John Smith",
+            dueDate: "2023-05-16",
+            subtasks: [],
+          },
+          {
+            id: "SUBTASK-1-2",
+            title: "Analyze cash flow statements",
+            description: "Review operating, investing, and financing activities",
+            status: "Completed",
+            priority: "Medium",
+            assignee: "John Smith",
+            dueDate: "2023-05-17",
+            subtasks: [],
+          },
+        ],
+      },
+      {
+        id: "SUBTASK-2",
+        title: "Analyze market conditions",
+        description: "Research industry trends and competitive landscape",
+        status: "In Progress",
+        priority: "Medium",
+        assignee: "Sarah Johnson",
+        dueDate: "2023-05-20",
+        subtasks: [
+          {
+            id: "SUBTASK-2-1",
+            title: "Industry analysis",
+            description: "Research market size, growth trends, and key players",
+            status: "In Progress",
+            priority: "High",
+            assignee: "Sarah Johnson",
+            dueDate: "2023-05-19",
+            subtasks: [],
+          },
+        ],
+      },
+      {
+        id: "SUBTASK-3",
+        title: "Prepare investment memo",
+        description: "Draft comprehensive investment recommendation",
+        status: "To Do",
+        priority: "High",
+        assignee: "Michael Brown",
+        dueDate: "2023-05-22",
+        subtasks: [],
+      },
+    ],
+  )
   const [newSubtaskTitle, setNewSubtaskTitle] = React.useState("")
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false)
+  const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
 
   const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
 
@@ -98,6 +145,8 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
         return "bg-yellow-100 text-yellow-800"
       case "in progress":
         return "bg-blue-100 text-blue-800"
+      case "to do":
+        return "bg-gray-100 text-gray-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
@@ -118,9 +167,12 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
       const newSubtask = {
         id: `SUBTASK-${Date.now()}`,
         title: newSubtaskTitle.trim(),
+        description: "",
         status: "To Do",
+        priority: "Medium",
         assignee: "Unassigned",
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        subtasks: [],
       }
       setSubtasks([...subtasks, newSubtask])
       setNewSubtaskTitle("")
@@ -134,6 +186,14 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
 
   const handleDeleteSubtask = (subtaskId: string) => {
     setSubtasks(subtasks.filter((subtask) => subtask.id !== subtaskId))
+  }
+
+  const handleSubtaskClick = (subtask: any) => {
+    setSelectedSubtask(subtask)
+  }
+
+  const handleBackFromSubtask = () => {
+    setSelectedSubtask(null)
   }
 
   const renderEditableField = (field: string, value: string, icon: React.ReactNode, label: string, isBadge = false) => {
@@ -183,11 +243,29 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
     )
   }
 
+  // If a subtask is selected, render the subtask view
+  if (selectedSubtask) {
+    return (
+      <TaskDetailsView
+        task={selectedSubtask}
+        onBack={handleBackFromSubtask}
+        recordName={recordName}
+        parentTask={task}
+        onBackToParent={onBack}
+      />
+    )
+  }
+
   return (
     <div className="flex flex-col flex-1">
       {/* Task Header - Exact same placement as main drawer record header */}
       <div className="border-b bg-background px-6 py-2">
         <div className="flex items-center gap-3">
+          {parentTask && (
+            <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8">
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+          )}
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <CheckSquareIcon className="h-4 w-4" />
           </div>
@@ -217,7 +295,9 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
                 {taskTitle || "Untitled"}
               </h2>
             )}
-            <p className="text-sm text-muted-foreground">Task in {recordName}</p>
+            <p className="text-sm text-muted-foreground">
+              {parentTask ? `Subtask of ${parentTask.title}` : `Task in ${recordName}`}
+            </p>
           </div>
         </div>
       </div>
@@ -298,7 +378,7 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
                     <div className="flex-1">
                       <div className="flex items-center gap-4">
                         <Label className="text-xs text-muted-foreground">Related to</Label>
-                        <p className="text-sm">{recordName}</p>
+                        <p className="text-sm">{parentTask ? parentTask.title : recordName}</p>
                       </div>
                     </div>
                   </div>
@@ -322,14 +402,21 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
 
               <div className="space-y-2">
                 {subtasks.map((subtask) => (
-                  <div key={subtask.id} className="rounded-lg border border-muted bg-muted/10 p-3">
+                  <div
+                    key={subtask.id}
+                    className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
+                  >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
+                      <div
+                        className="flex items-center gap-3 flex-1 cursor-pointer"
+                        onClick={() => handleSubtaskClick(subtask)}
+                      >
                         <Button
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation()
                             const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
                             handleSubtaskStatusChange(subtask.id, newStatus)
                           }}
@@ -347,6 +434,11 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
                             className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
                           >
                             {subtask.title}
+                            {subtask.subtasks && subtask.subtasks.length > 0 && (
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                ({subtask.subtasks.length} subtasks)
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-4 mt-1">
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -369,16 +461,26 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
                             >
                               {subtask.status}
                             </Badge>
+                            <Badge className={`text-xs ${getPriorityColor(subtask.priority)}`}>
+                              {subtask.priority}
+                            </Badge>
                           </div>
                         </div>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <DotsHorizontalIcon className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>Open Details</DropdownMenuItem>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
                             Mark as To Do
                           </DropdownMenuItem>
