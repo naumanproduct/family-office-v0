@@ -634,64 +634,26 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
               <TabsContent value="attributes" className="p-6 space-y-6 m-0">
                 <div className="space-y-6">
-                  {/* Card Preview Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-gray-900">Card Preview</h3>
-                      <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-                        {config.attributes.length} fields
-                      </Badge>
-                    </div>
-
-                    <div className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm">
-                      <div className="pb-3 border-b border-gray-100 mb-3">
-                        <h4 className="font-semibold text-sm text-gray-900">Sample Card Title</h4>
-                        <p className="text-xs text-gray-500 mt-1">Preview how your cards will appear</p>
-                      </div>
-
-                      <div className="space-y-2">
-                        {config.attributes.length > 0 ? (
-                          config.attributes.map((attribute) => {
-                            const Icon = getAttributeIcon(attribute.type)
-                            return (
-                              <div key={attribute.id} className="flex items-center gap-2 text-xs group">
-                                <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                                <span className="text-gray-500">{attribute.name}:</span>
-                                <span className="text-gray-900">Sample value</span>
-                                <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-5 w-5 text-gray-400 hover:text-gray-600"
-                                    onClick={() => deleteAttribute(attribute.id)}
-                                  >
-                                    <XIcon className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            )
-                          })
-                        ) : (
-                          <div className="text-center py-2 text-sm text-gray-500">
-                            No fields selected. Add some below.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Selected Fields Section with Reordering */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-gray-900">Selected Fields</h3>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowAvailableFields(!showAvailableFields)}
-                        className="text-gray-600 border-gray-200 hover:bg-gray-50"
-                      >
-                        {showAvailableFields ? "Hide Available Fields" : "Add More Fields"}
-                      </Button>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900">Selected Fields</h3>
+                        <p className="text-xs text-gray-500 mt-1">Drag to reorder how they appear on cards</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                          {config.attributes.length} selected
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowAvailableFields(!showAvailableFields)}
+                          className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                        >
+                          {showAvailableFields ? "Hide Available Fields" : "Add More Fields"}
+                        </Button>
+                      </div>
                     </div>
 
                     {config.attributes.length > 0 ? (
@@ -704,7 +666,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                           items={config.attributes.map((attr) => attr.id)}
                           strategy={verticalListSortingStrategy}
                         >
-                          <div className="space-y-2 max-h-48 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-2">
+                          <div className="space-y-2 max-h-64 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-2">
                             {config.attributes.map((attribute) => (
                               <SortableAttributeItem
                                 key={attribute.id}
@@ -719,7 +681,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         </SortableContext>
                       </DndContext>
                     ) : (
-                      <div className="text-center py-4 border border-dashed border-gray-200 rounded-lg bg-gray-50">
+                      <div className="text-center py-8 border border-dashed border-gray-200 rounded-lg bg-gray-50">
                         <p className="text-sm text-gray-500">No fields selected yet</p>
                         <p className="text-xs text-gray-400 mt-1">Select fields from the list below</p>
                       </div>
@@ -823,40 +785,27 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
               <TabsContent value="stages" className="p-6 space-y-6 m-0">
                 <div className="space-y-6">
-                  {/* Stage Preview Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-gray-900">Kanban Board Preview</h3>
-                      <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-                        {config.stages.length} columns
-                      </Badge>
-                    </div>
-
-                    <div className="flex gap-3 overflow-x-auto pb-2">
-                      {config.stages.map((stage) => (
-                        <div key={stage.id} className="flex-shrink-0 w-32">
-                          <div className={`rounded-t-lg p-2 ${stage.color} border border-gray-200`}>
-                            <div className="text-sm font-medium truncate">{stage.name}</div>
-                          </div>
-                          <div className="h-16 bg-gray-50 border-l border-r border-b border-gray-200 rounded-b-lg"></div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Stages Reordering Section */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-gray-900">Workflow Stages</h3>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={addStage}
-                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                      >
-                        <PlusIcon className="h-3 w-3 mr-1" />
-                        Add Stage
-                      </Button>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900">Workflow Stages</h3>
+                        <p className="text-xs text-gray-500 mt-1">Drag to reorder columns on your kanban board</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                          {config.stages.length} stages
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={addStage}
+                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                        >
+                          <PlusIcon className="h-3 w-3 mr-1" />
+                          Add Stage
+                        </Button>
+                      </div>
                     </div>
 
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
@@ -877,10 +826,6 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         </div>
                       </SortableContext>
                     </DndContext>
-
-                    <p className="text-xs text-gray-500 italic">
-                      Drag to reorder stages. Changes will affect how columns appear on your kanban board.
-                    </p>
                   </div>
                 </div>
               </TabsContent>
