@@ -12,6 +12,7 @@ import {
   CalendarIcon,
   UserIcon,
   FileTextIcon,
+  SearchIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -22,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   DndContext,
   closestCenter,
@@ -62,17 +64,13 @@ interface WorkflowHeaderProps {
   onSave: (config: WorkflowConfig) => void
 }
 
-// Sortable attribute item component
-function SortableAttributeItem({
+// Sortable attribute item component for selected fields
+function SelectedAttributeItem({
   attribute,
-  isSelected,
-  onToggle,
   onEdit,
   onDelete,
 }: {
   attribute: WorkflowAttribute
-  isSelected: boolean
-  onToggle: () => void
   onEdit: (id: string, name: string, type: string) => void
   onDelete: (id: string) => void
 }) {
@@ -105,12 +103,7 @@ function SortableAttributeItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center space-x-3 rounded-lg border p-3 cursor-pointer transition-all duration-200 ${
-        isSelected
-          ? "border-white bg-white shadow-sm"
-          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
-      }`}
-      onClick={!isEditing ? onToggle : undefined}
+      className="group flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3 hover:border-gray-300 hover:shadow-sm transition-all duration-200"
     >
       <div
         {...attributes}
@@ -121,7 +114,7 @@ function SortableAttributeItem({
       </div>
 
       <div className="flex items-center gap-2 flex-1 min-w-0">
-        <Icon className="h-4 w-4 text-gray-400" />
+        <Icon className="h-4 w-4 text-gray-400 flex-shrink-0" />
 
         {isEditing ? (
           <div className="space-y-2 flex-1" onClick={(e) => e.stopPropagation()}>
@@ -205,6 +198,145 @@ function SortableAttributeItem({
         )}
       </div>
     </div>
+  )
+}
+
+// Add Field Popover Component
+function AddFieldPopover({
+  availableFields,
+  onAddField,
+  onCreateCustomField,
+  children,
+}: {
+  availableFields: WorkflowAttribute[]
+  onAddField: (field: WorkflowAttribute) => void
+  onCreateCustomField: (name: string, type: string) => void
+  children: React.ReactNode
+}) {
+  const [open, setOpen] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState("")
+  const [showCreateCustom, setShowCreateCustom] = React.useState(false)
+  const [customName, setCustomName] = React.useState("")
+  const [customType, setCustomType] = React.useState("text")
+
+  const filteredFields = availableFields.filter((field) => field.name.toLowerCase().includes(searchQuery.toLowerCase()))
+
+  const handleAddField = (field: WorkflowAttribute) => {
+    onAddField(field)
+    setOpen(false)
+    setSearchQuery("")
+  }
+
+  const handleCreateCustom = () => {
+    if (customName.trim()) {
+      onCreateCustomField(customName, customType)
+      setCustomName("")
+      setCustomType("text")
+      setShowCreateCustom(false)
+      setOpen(false)
+    }
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent className="w-80 p-0" align="start">
+        <div className="p-3 border-b border-gray-100">
+          <div className="relative">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search fields..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-8 text-sm border-gray-200"
+            />
+          </div>
+        </div>
+
+        <ScrollArea className="max-h-64">
+          <div className="p-2">
+            {filteredFields.length > 0 ? (
+              <div className="space-y-1">
+                {filteredFields.map((field) => {
+                  const Icon = getAttributeIcon(field.type)
+                  return (
+                    <div
+                      key={field.id}
+                      className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => handleAddField(field)}
+                    >
+                      <Icon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900">{field.name}</div>
+                        <div className="text-xs text-gray-500 capitalize">{field.type}</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-sm text-gray-500">
+                {searchQuery ? "No fields match your search" : "No available fields"}
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        <div className="border-t border-gray-100 p-2">
+          {!showCreateCustom ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowCreateCustom(true)}
+              className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            >
+              <PlusIcon className="h-3 w-3 mr-2" />
+              Create Custom Field
+            </Button>
+          ) : (
+            <div className="space-y-2">
+              <Input
+                placeholder="Field name"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                className="h-8 text-sm"
+              />
+              <div className="flex gap-2">
+                <Select value={customType} onValueChange={setCustomType}>
+                  <SelectTrigger className="h-8 text-sm flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="currency">Currency</SelectItem>
+                    <SelectItem value="select">Select</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="relation">Relation</SelectItem>
+                    <SelectItem value="tags">Tags</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button size="sm" onClick={handleCreateCustom} disabled={!customName.trim()} className="h-8 px-3">
+                  Add
+                </Button>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowCreateCustom(false)
+                  setCustomName("")
+                }}
+                className="w-full h-7 text-xs"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -419,10 +551,6 @@ const getAttributeIcon = (type: string) => {
 export function WorkflowHeader({ workflowName, workflowConfig, onSave }: WorkflowHeaderProps) {
   const [open, setOpen] = React.useState(false)
   const [config, setConfig] = React.useState<WorkflowConfig>(workflowConfig)
-  const [newAttributeName, setNewAttributeName] = React.useState("")
-  const [newAttributeType, setNewAttributeType] = React.useState("text")
-  const [showAddAttribute, setShowAddAttribute] = React.useState(false)
-  const [showAvailableFields, setShowAvailableFields] = React.useState(true)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -464,41 +592,24 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     }
   }
 
-  const toggleAttribute = (attributeId: string) => {
-    const isSelected = config.attributes.some((attr) => attr.id === attributeId)
-
-    if (isSelected) {
-      setConfig({
-        ...config,
-        attributes: config.attributes.filter((attr) => attr.id !== attributeId),
-      })
-    } else {
-      const attribute = getAttributesForObjectType(config.objectType).find((attr) => attr.id === attributeId)
-      if (attribute) {
-        setConfig({
-          ...config,
-          attributes: [...config.attributes, { ...attribute }],
-        })
-      }
-    }
+  const addField = (field: WorkflowAttribute) => {
+    setConfig({
+      ...config,
+      attributes: [...config.attributes, { ...field }],
+    })
   }
 
-  const addCustomAttribute = () => {
-    if (newAttributeName.trim()) {
-      const newAttribute: WorkflowAttribute = {
-        id: `custom-${Date.now()}`,
-        name: newAttributeName,
-        type: newAttributeType,
-        isCustom: true,
-      }
-      setConfig({
-        ...config,
-        attributes: [...config.attributes, newAttribute],
-      })
-      setNewAttributeName("")
-      setNewAttributeType("text")
-      setShowAddAttribute(false)
+  const createCustomField = (name: string, type: string) => {
+    const newAttribute: WorkflowAttribute = {
+      id: `custom-${Date.now()}`,
+      name,
+      type,
+      isCustom: true,
     }
+    setConfig({
+      ...config,
+      attributes: [...config.attributes, newAttribute],
+    })
   }
 
   const editAttribute = (id: string, name: string, type: string) => {
@@ -541,14 +652,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     })
   }
 
-  const getAvailableAttributes = () => {
-    const allAttributes = getAttributesForObjectType(config.objectType)
-    return allAttributes.filter((attr) => !config.attributes.some((selected) => selected.id === attr.id))
-  }
-
-  const allAttributes = getAttributesForObjectType(config.objectType)
-  const isAttributeSelected = (attributeId: string) => {
-    return config.attributes.some((attr) => attr.id === attributeId)
+  const getAvailableFields = () => {
+    const allFields = getAttributesForObjectType(config.objectType)
+    return allFields.filter((field) => !config.attributes.some((selected) => selected.id === field.id))
   }
 
   return (
@@ -633,151 +739,79 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
               </TabsContent>
 
               <TabsContent value="attributes" className="p-6 space-y-6 m-0">
-                <div className="space-y-6">
-                  {/* Selected Fields Section with Reordering */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">Selected Fields</h3>
-                        <p className="text-xs text-gray-500 mt-1">Drag to reorder how they appear on cards</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-                          {config.attributes.length} selected
-                        </Badge>
+                <div className="space-y-4">
+                  {/* Header with Add Field Button */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">Card Fields</h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {config.attributes.length > 0
+                          ? "Drag to reorder how they appear on cards"
+                          : "Add fields to display on your cards"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                        {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
+                      </Badge>
+                      <AddFieldPopover
+                        availableFields={getAvailableFields()}
+                        onAddField={addField}
+                        onCreateCustomField={createCustomField}
+                      >
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowAvailableFields(!showAvailableFields)}
-                          className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                          disabled={getAvailableFields().length === 0}
                         >
-                          {showAvailableFields ? "Hide Available Fields" : "Add More Fields"}
+                          <PlusIcon className="h-3 w-3 mr-1" />
+                          Add Field
                         </Button>
-                      </div>
+                      </AddFieldPopover>
                     </div>
-
-                    {config.attributes.length > 0 ? (
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleAttributeDragEnd}
-                      >
-                        <SortableContext
-                          items={config.attributes.map((attr) => attr.id)}
-                          strategy={verticalListSortingStrategy}
-                        >
-                          <div className="space-y-2 max-h-64 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-2">
-                            {config.attributes.map((attribute) => (
-                              <SortableAttributeItem
-                                key={attribute.id}
-                                attribute={attribute}
-                                isSelected={true}
-                                onToggle={() => {}}
-                                onEdit={editAttribute}
-                                onDelete={deleteAttribute}
-                              />
-                            ))}
-                          </div>
-                        </SortableContext>
-                      </DndContext>
-                    ) : (
-                      <div className="text-center py-8 border border-dashed border-gray-200 rounded-lg bg-gray-50">
-                        <p className="text-sm text-gray-500">No fields selected yet</p>
-                        <p className="text-xs text-gray-400 mt-1">Select fields from the list below</p>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Available Fields Section (Collapsible) */}
-                  {showAvailableFields && (
-                    <div className="space-y-3 border-t border-gray-100 pt-6">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium text-gray-900">Available Fields</h3>
-                        {config.objectType === "custom" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowAddAttribute(!showAddAttribute)}
-                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                          >
-                            <PlusIcon className="h-3 w-3 mr-1" />
-                            Add Custom Field
-                          </Button>
-                        )}
-                      </div>
-
-                      {showAddAttribute && (
-                        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                          <div className="flex space-x-2">
-                            <Input
-                              placeholder="Field name"
-                              value={newAttributeName}
-                              onChange={(e) => setNewAttributeName(e.target.value)}
-                              className="flex-1 h-8 text-sm"
-                            />
-                            <Select value={newAttributeType} onValueChange={setNewAttributeType}>
-                              <SelectTrigger className="w-32 h-8 text-sm">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="text">Text</SelectItem>
-                                <SelectItem value="number">Number</SelectItem>
-                                <SelectItem value="date">Date</SelectItem>
-                                <SelectItem value="currency">Currency</SelectItem>
-                                <SelectItem value="select">Select</SelectItem>
-                                <SelectItem value="user">User</SelectItem>
-                                <SelectItem value="relation">Relation</SelectItem>
-                                <SelectItem value="tags">Tags</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Button
-                              size="sm"
-                              onClick={addCustomAttribute}
-                              disabled={!newAttributeName.trim()}
-                              className="h-8 px-3"
-                            >
-                              Add
-                            </Button>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            Note: Custom fields will be available to all workflows using this object type
-                          </p>
-                        </div>
-                      )}
-
-                      <ScrollArea className="h-64 border border-gray-200 rounded-lg">
-                        <div className="p-2 space-y-2">
-                          {getAvailableAttributes().map((attribute) => (
-                            <div
+                  {/* Selected Fields List */}
+                  {config.attributes.length > 0 ? (
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAttributeDragEnd}>
+                      <SortableContext
+                        items={config.attributes.map((attr) => attr.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                          {config.attributes.map((attribute) => (
+                            <SelectedAttributeItem
                               key={attribute.id}
-                              className="flex items-center space-x-3 rounded-lg border border-gray-200 p-3 cursor-pointer transition-all duration-200 bg-white hover:border-gray-300 hover:shadow-sm"
-                              onClick={() => toggleAttribute(attribute.id)}
-                            >
-                              <div className="flex-1">
-                                <div className="font-medium text-sm text-gray-900">{attribute.name}</div>
-                                <div className="text-xs text-gray-500 capitalize">{attribute.type}</div>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 text-xs border-gray-200 hover:bg-gray-50"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  toggleAttribute(attribute.id)
-                                }}
-                              >
-                                Add
-                              </Button>
-                            </div>
+                              attribute={attribute}
+                              onEdit={editAttribute}
+                              onDelete={deleteAttribute}
+                            />
                           ))}
                         </div>
-                      </ScrollArea>
-
-                      {getAvailableAttributes().length === 0 && (
-                        <div className="text-center py-4 text-sm text-gray-500">
-                          All available fields have been selected
+                      </SortableContext>
+                    </DndContext>
+                  ) : (
+                    <div className="text-center py-12 border border-dashed border-gray-200 rounded-lg bg-gray-50">
+                      <div className="max-w-sm mx-auto">
+                        <div className="text-gray-400 mb-3">
+                          <FileTextIcon className="h-8 w-8 mx-auto" />
                         </div>
-                      )}
+                        <h4 className="text-sm font-medium text-gray-900 mb-1">No fields selected</h4>
+                        <p className="text-xs text-gray-500 mb-4">
+                          Choose which fields to display on your kanban cards
+                        </p>
+                        <AddFieldPopover
+                          availableFields={getAvailableFields()}
+                          onAddField={addField}
+                          onCreateCustomField={createCustomField}
+                        >
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                            <PlusIcon className="h-3 w-3 mr-1" />
+                            Add Your First Field
+                          </Button>
+                        </AddFieldPopover>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -785,7 +819,6 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
               <TabsContent value="stages" className="p-6 space-y-6 m-0">
                 <div className="space-y-6">
-                  {/* Stages Reordering Section */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
