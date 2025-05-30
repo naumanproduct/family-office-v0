@@ -13,6 +13,8 @@ import {
   UserIcon,
   FileTextIcon,
   SearchIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -21,9 +23,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   DndContext,
   closestCenter,
@@ -198,145 +198,6 @@ function SelectedAttributeItem({
         )}
       </div>
     </div>
-  )
-}
-
-// Add Field Popover Component
-function AddFieldPopover({
-  availableFields,
-  onAddField,
-  onCreateCustomField,
-  children,
-}: {
-  availableFields: WorkflowAttribute[]
-  onAddField: (field: WorkflowAttribute) => void
-  onCreateCustomField: (name: string, type: string) => void
-  children: React.ReactNode
-}) {
-  const [open, setOpen] = React.useState(false)
-  const [searchQuery, setSearchQuery] = React.useState("")
-  const [showCreateCustom, setShowCreateCustom] = React.useState(false)
-  const [customName, setCustomName] = React.useState("")
-  const [customType, setCustomType] = React.useState("text")
-
-  const filteredFields = availableFields.filter((field) => field.name.toLowerCase().includes(searchQuery.toLowerCase()))
-
-  const handleAddField = (field: WorkflowAttribute) => {
-    onAddField(field)
-    setOpen(false)
-    setSearchQuery("")
-  }
-
-  const handleCreateCustom = () => {
-    if (customName.trim()) {
-      onCreateCustomField(customName, customType)
-      setCustomName("")
-      setCustomType("text")
-      setShowCreateCustom(false)
-      setOpen(false)
-    }
-  }
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
-        <div className="p-3 border-b border-gray-100">
-          <div className="relative">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search fields..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-8 text-sm border-gray-200"
-            />
-          </div>
-        </div>
-
-        <ScrollArea className="max-h-64">
-          <div className="p-2">
-            {filteredFields.length > 0 ? (
-              <div className="space-y-1">
-                {filteredFields.map((field) => {
-                  const Icon = getAttributeIcon(field.type)
-                  return (
-                    <div
-                      key={field.id}
-                      className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => handleAddField(field)}
-                    >
-                      <Icon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-gray-900">{field.name}</div>
-                        <div className="text-xs text-gray-500 capitalize">{field.type}</div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-4 text-sm text-gray-500">
-                {searchQuery ? "No fields match your search" : "No available fields"}
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-
-        <div className="border-t border-gray-100 p-2">
-          {!showCreateCustom ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowCreateCustom(true)}
-              className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-            >
-              <PlusIcon className="h-3 w-3 mr-2" />
-              Create Custom Field
-            </Button>
-          ) : (
-            <div className="space-y-2">
-              <Input
-                placeholder="Field name"
-                value={customName}
-                onChange={(e) => setCustomName(e.target.value)}
-                className="h-8 text-sm"
-              />
-              <div className="flex gap-2">
-                <Select value={customType} onValueChange={setCustomType}>
-                  <SelectTrigger className="h-8 text-sm flex-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">Text</SelectItem>
-                    <SelectItem value="number">Number</SelectItem>
-                    <SelectItem value="date">Date</SelectItem>
-                    <SelectItem value="currency">Currency</SelectItem>
-                    <SelectItem value="select">Select</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="relation">Relation</SelectItem>
-                    <SelectItem value="tags">Tags</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button size="sm" onClick={handleCreateCustom} disabled={!customName.trim()} className="h-8 px-3">
-                  Add
-                </Button>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowCreateCustom(false)
-                  setCustomName("")
-                }}
-                className="w-full h-7 text-xs"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
   )
 }
 
@@ -551,6 +412,11 @@ const getAttributeIcon = (type: string) => {
 export function WorkflowHeader({ workflowName, workflowConfig, onSave }: WorkflowHeaderProps) {
   const [open, setOpen] = React.useState(false)
   const [config, setConfig] = React.useState<WorkflowConfig>(workflowConfig)
+  const [showAddFields, setShowAddFields] = React.useState(false)
+  const [showCustomField, setShowCustomField] = React.useState(false)
+  const [customName, setCustomName] = React.useState("")
+  const [customType, setCustomType] = React.useState("text")
+  const [searchQuery, setSearchQuery] = React.useState("")
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -599,17 +465,22 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     })
   }
 
-  const createCustomField = (name: string, type: string) => {
-    const newAttribute: WorkflowAttribute = {
-      id: `custom-${Date.now()}`,
-      name,
-      type,
-      isCustom: true,
+  const createCustomField = () => {
+    if (customName.trim()) {
+      const newAttribute: WorkflowAttribute = {
+        id: `custom-${Date.now()}`,
+        name: customName,
+        type: customType,
+        isCustom: true,
+      }
+      setConfig({
+        ...config,
+        attributes: [...config.attributes, newAttribute],
+      })
+      setCustomName("")
+      setCustomType("text")
+      setShowCustomField(false)
     }
-    setConfig({
-      ...config,
-      attributes: [...config.attributes, newAttribute],
-    })
   }
 
   const editAttribute = (id: string, name: string, type: string) => {
@@ -656,6 +527,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     const allFields = getAttributesForObjectType(config.objectType)
     return allFields.filter((field) => !config.attributes.some((selected) => selected.id === field.id))
   }
+
+  const filteredAvailableFields = getAvailableFields().filter((field) =>
+    field.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
   return (
     <>
@@ -738,9 +613,8 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                 </div>
               </TabsContent>
 
-              <TabsContent value="attributes" className="p-6 space-y-6 m-0">
-                <div className="space-y-4">
-                  {/* Header with Add Field Button */}
+              <TabsContent value="attributes" className="p-0 m-0 flex flex-col h-full">
+                <div className="p-6 pb-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-medium text-gray-900">Card Fields</h3>
@@ -750,36 +624,21 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                           : "Add fields to display on your cards"}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-                        {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
-                      </Badge>
-                      <AddFieldPopover
-                        availableFields={getAvailableFields()}
-                        onAddField={addField}
-                        onCreateCustomField={createCustomField}
-                      >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                          disabled={getAvailableFields().length === 0}
-                        >
-                          <PlusIcon className="h-3 w-3 mr-1" />
-                          Add Field
-                        </Button>
-                      </AddFieldPopover>
-                    </div>
+                    <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                      {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
+                    </Badge>
                   </div>
+                </div>
 
-                  {/* Selected Fields List */}
+                {/* Selected Fields List */}
+                <div className="px-6 flex-1 overflow-auto">
                   {config.attributes.length > 0 ? (
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAttributeDragEnd}>
                       <SortableContext
                         items={config.attributes.map((attr) => attr.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        <div className="space-y-2">
                           {config.attributes.map((attribute) => (
                             <SelectedAttributeItem
                               key={attribute.id}
@@ -801,16 +660,146 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         <p className="text-xs text-gray-500 mb-4">
                           Choose which fields to display on your kanban cards
                         </p>
-                        <AddFieldPopover
-                          availableFields={getAvailableFields()}
-                          onAddField={addField}
-                          onCreateCustomField={createCustomField}
+                        <Button
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700"
+                          onClick={() => setShowAddFields(true)}
                         >
-                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                            <PlusIcon className="h-3 w-3 mr-1" />
-                            Add Your First Field
-                          </Button>
-                        </AddFieldPopover>
+                          <PlusIcon className="h-3 w-3 mr-1" />
+                          Add Your First Field
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Add Field Section - Inline at the bottom */}
+                <div className="border-t border-gray-100 mt-auto">
+                  <div
+                    className={`p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors ${
+                      showAddFields ? "bg-gray-50" : ""
+                    }`}
+                    onClick={() => setShowAddFields(!showAddFields)}
+                  >
+                    <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
+                      <PlusIcon className="h-4 w-4" />
+                      Add Field
+                    </div>
+                    <div>
+                      {showAddFields ? (
+                        <ChevronUpIcon className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  {showAddFields && (
+                    <div className="p-4 border-t border-gray-100 bg-gray-50">
+                      {/* Search and Custom Field Toggle */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="relative flex-1">
+                          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="Search fields..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9 h-8 text-sm border-gray-200"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowCustomField(!showCustomField)}
+                          className="whitespace-nowrap h-8 text-xs border-gray-200"
+                        >
+                          {showCustomField ? "Cancel" : "Create Custom"}
+                        </Button>
+                      </div>
+
+                      {/* Custom Field Creator */}
+                      {showCustomField && (
+                        <div className="mb-4 p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                          <div className="space-y-3">
+                            <div>
+                              <Label htmlFor="customName" className="text-xs font-medium text-gray-700">
+                                Field Name
+                              </Label>
+                              <Input
+                                id="customName"
+                                placeholder="Enter field name"
+                                value={customName}
+                                onChange={(e) => setCustomName(e.target.value)}
+                                className="h-8 text-sm mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="customType" className="text-xs font-medium text-gray-700">
+                                Field Type
+                              </Label>
+                              <Select value={customType} onValueChange={setCustomType}>
+                                <SelectTrigger id="customType" className="h-8 text-sm mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="text">Text</SelectItem>
+                                  <SelectItem value="number">Number</SelectItem>
+                                  <SelectItem value="date">Date</SelectItem>
+                                  <SelectItem value="currency">Currency</SelectItem>
+                                  <SelectItem value="select">Select</SelectItem>
+                                  <SelectItem value="user">User</SelectItem>
+                                  <SelectItem value="relation">Relation</SelectItem>
+                                  <SelectItem value="tags">Tags</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="pt-1">
+                              <Button
+                                size="sm"
+                                onClick={createCustomField}
+                                disabled={!customName.trim()}
+                                className="w-full"
+                              >
+                                Create Field
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Available Fields List */}
+                      <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white">
+                        {filteredAvailableFields.length > 0 ? (
+                          <div className="divide-y divide-gray-100">
+                            {filteredAvailableFields.map((field) => {
+                              const Icon = getAttributeIcon(field.type)
+                              return (
+                                <div
+                                  key={field.id}
+                                  className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                                  onClick={() => addField(field)}
+                                >
+                                  <Icon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium text-gray-900">{field.name}</div>
+                                    <div className="text-xs text-gray-500 capitalize">{field.type}</div>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                  >
+                                    <PlusIcon className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        ) : (
+                          <div className="text-center py-4 text-sm text-gray-500">
+                            {searchQuery ? "No fields match your search" : "All available fields have been added"}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
