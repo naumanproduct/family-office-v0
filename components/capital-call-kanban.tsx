@@ -46,6 +46,8 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
 import { TaskDetailsView } from "@/components/task-details-view"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 interface CapitalCall {
   id: string
@@ -675,9 +677,104 @@ function DroppableColumn({ stage, capitalCalls }: { stage: (typeof stages)[0]; c
   )
 }
 
+// New component for adding a column
+function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
+  return (
+    <div className="flex flex-col min-h-[600px] w-16 justify-center items-center">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-10 w-10 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
+        onClick={onAddColumn}
+        title="Add Column"
+      >
+        <PlusIcon className="h-5 w-5 text-gray-500" />
+      </Button>
+    </div>
+  )
+}
+
+// New dialog for adding a column
+function AddColumnDialog({
+  open,
+  onOpenChange,
+  onAddColumn,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onAddColumn: (name: string, color: string) => void
+}) {
+  const [name, setName] = React.useState("")
+  const [color, setColor] = React.useState("bg-gray-100")
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (name.trim()) {
+      onAddColumn(name, color)
+      setName("")
+      onOpenChange(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Column</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="column-name">Column Name</Label>
+            <Input
+              id="column-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., In Review"
+              autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Column Color</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                "bg-gray-100",
+                "bg-blue-100",
+                "bg-green-100",
+                "bg-yellow-100",
+                "bg-purple-100",
+                "bg-red-100",
+                "bg-orange-100",
+                "bg-pink-100",
+              ].map((c) => (
+                <div
+                  key={c}
+                  className={`h-8 rounded-md cursor-pointer ${c} ${
+                    color === c ? "ring-2 ring-primary ring-offset-2" : ""
+                  }`}
+                  onClick={() => setColor(c)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!name.trim()}>
+              Add Column
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export function CapitalCallKanban() {
   const [capitalCalls, setCapitalCalls] = React.useState(initialCapitalCalls)
   const [activeCapitalCall, setActiveCapitalCall] = React.useState<CapitalCall | null>(null)
+  const [stagesList, setStagesList] = React.useState(stages)
+  const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -719,7 +816,7 @@ export function CapitalCallKanban() {
     let targetStage = overId
 
     // If dropping on another capital call, find its stage
-    if (!stages.some((s) => s.id === overId)) {
+    if (!stagesList.some((s) => s.id === overId)) {
       const targetCapitalCall = capitalCalls.find((c) => c.id === overId)
       if (targetCapitalCall) {
         targetStage = targetCapitalCall.stage
@@ -727,7 +824,7 @@ export function CapitalCallKanban() {
     }
 
     // Update the capital call's stage if it's different
-    if (activeCapitalCall.stage !== targetStage && stages.some((s) => s.id === targetStage)) {
+    if (activeCapitalCall.stage !== targetStage && stagesList.some((s) => s.id === targetStage)) {
       setCapitalCalls(
         capitalCalls.map((capitalCall) =>
           capitalCall.id === activeId ? { ...capitalCall, stage: targetStage } : capitalCall,
@@ -736,7 +833,16 @@ export function CapitalCallKanban() {
     }
   }
 
-  const capitalCallsByStage = stages.map((stage) => ({
+  const handleAddColumn = (name: string, color: string) => {
+    const newStage = {
+      id: `stage-${Date.now()}`,
+      title: name,
+      color: color,
+    }
+    setStagesList([...stagesList, newStage])
+  }
+
+  const capitalCallsByStage = stagesList.map((stage) => ({
     stage,
     capitalCalls: capitalCalls.filter((capitalCall) => capitalCall.stage === stage.id),
   }))
@@ -752,6 +858,7 @@ export function CapitalCallKanban() {
         {capitalCallsByStage.map(({ stage, capitalCalls }) => (
           <DroppableColumn key={stage.id} stage={stage} capitalCalls={capitalCalls} />
         ))}
+        <AddColumnButton onAddColumn={() => setAddColumnDialogOpen(true)} />
       </div>
       <DragOverlay>
         {activeCapitalCall ? (
@@ -760,6 +867,7 @@ export function CapitalCallKanban() {
           </div>
         ) : null}
       </DragOverlay>
+      <AddColumnDialog open={addColumnDialogOpen} onOpenChange={setAddColumnDialogOpen} onAddColumn={handleAddColumn} />
     </DndContext>
   )
 }
