@@ -80,7 +80,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-02-15",
     noticeDate: "2024-01-15",
     investor: "Pension Fund Alpha",
-    stage: "new",
+    stage: "initiated",
     description: "Capital call for follow-on investments in portfolio companies",
     fundManager: "TechVentures Management",
     email: "capital@techventures.com",
@@ -102,7 +102,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-02-20",
     noticeDate: "2024-01-20",
     investor: "Insurance Corp Beta",
-    stage: "in-progress",
+    stage: "notice-sent",
     description: "Capital call for new investment opportunities",
     fundManager: "Growth Equity Management",
     email: "calls@growthequity.com",
@@ -124,7 +124,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-02-10",
     noticeDate: "2024-01-10",
     investor: "Endowment Fund Gamma",
-    stage: "in-progress",
+    stage: "pending-response",
     description: "Capital call for property acquisition",
     fundManager: "Real Estate Partners",
     email: "capital@realestate.com",
@@ -146,7 +146,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-02-25",
     noticeDate: "2024-01-25",
     investor: "Sovereign Wealth Fund",
-    stage: "in-progress",
+    stage: "committed",
     description: "Capital call for infrastructure project funding",
     fundManager: "Infrastructure Capital",
     email: "calls@infrastructure.com",
@@ -168,7 +168,7 @@ const initialCapitalCalls: CapitalCall[] = [
     dueDate: "2024-01-30",
     noticeDate: "2024-01-01",
     investor: "Family Office Delta",
-    stage: "done",
+    stage: "funded",
     description: "Capital call for credit facility deployment",
     fundManager: "Private Credit Partners",
     email: "capital@privatecredit.com",
@@ -184,14 +184,17 @@ const initialCapitalCalls: CapitalCall[] = [
 ]
 
 const stages = [
-  { id: "new", title: "New", color: "bg-gray-100" },
-  { id: "in-progress", title: "In Progress", color: "bg-blue-100" },
-  { id: "done", title: "Done", color: "bg-green-100" },
+  { id: "initiated", title: "Initiated", color: "bg-gray-100" },
+  { id: "notice-sent", title: "Notice Sent", color: "bg-blue-100" },
+  { id: "pending-response", title: "Pending Response", color: "bg-yellow-100" },
+  { id: "committed", title: "Committed", color: "bg-purple-100" },
+  { id: "funded", title: "Funded", color: "bg-green-100" },
+  { id: "overdue", title: "Overdue", color: "bg-red-100" },
 ]
 
 // Separate the card UI from the sortable wrapper
 function CapitalCallCard({ capitalCall }: { capitalCall: CapitalCall }) {
-  const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "done"
+  const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "funded"
 
   return (
     <Sheet>
