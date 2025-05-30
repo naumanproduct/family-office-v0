@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import React from "react"
 
 const notes = [
   {
@@ -83,7 +84,8 @@ const notes = [
   },
 ]
 
-export function NotesTable() {
+export function NotesTable({ onNoteSelect }: { onNoteSelect?: (note: any) => void }) {
+  const [selectedNote, setSelectedNote] = React.useState<any>(null)
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -153,7 +155,11 @@ export function NotesTable() {
             </TableHeader>
             <TableBody>
               {notes.map((note) => (
-                <TableRow key={note.id}>
+                <TableRow
+                  key={note.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => onNoteSelect?.(note)}
+                >
                   <TableCell>
                     <div>
                       <div className="font-medium">{note.title}</div>

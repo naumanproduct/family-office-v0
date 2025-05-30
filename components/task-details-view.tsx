@@ -1,7 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { CheckCircleIcon, CalendarIcon, UserIcon, AlertTriangleIcon, FileTextIcon, CheckSquareIcon } from "lucide-react"
+import {
+  CheckCircleIcon,
+  CalendarIcon,
+  UserIcon,
+  AlertTriangleIcon,
+  FileTextIcon,
+  CheckSquareIcon,
+  InfoIcon,
+} from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,6 +26,18 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
   const [commentText, setCommentText] = React.useState("")
   const [isFocused, setIsFocused] = React.useState(false)
   const [taskTitle, setTaskTitle] = React.useState(task.title || "")
+  const [isEditingTitle, setIsEditingTitle] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState("details")
+  const [editingField, setEditingField] = React.useState<string | null>(null)
+  const [fieldValues, setFieldValues] = React.useState({
+    description: task.description,
+    priority: task.priority,
+    status: task.status,
+    assignee: task.assignee,
+    dueDate: task.dueDate,
+  })
+
+  const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
@@ -45,6 +65,58 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
     }
   }
 
+  const handleFieldEdit = (field: string, value: string) => {
+    setFieldValues((prev) => ({ ...prev, [field]: value }))
+    setEditingField(null)
+  }
+
+  const renderEditableField = (field: string, value: string, icon: React.ReactNode, label: string, isBadge = false) => {
+    const isEditing = editingField === field
+
+    return (
+      <div className="flex items-center gap-2">
+        {icon}
+        <div className="flex-1">
+          <div className="flex items-center gap-4">
+            <Label className="text-xs text-muted-foreground">{label}</Label>
+            {isEditing ? (
+              <Input
+                value={value}
+                onChange={(e) => setFieldValues((prev) => ({ ...prev, [field]: e.target.value }))}
+                onBlur={() => handleFieldEdit(field, value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleFieldEdit(field, value)
+                  }
+                  if (e.key === "Escape") {
+                    setEditingField(null)
+                  }
+                }}
+                className="h-6 text-sm w-32"
+                autoFocus
+              />
+            ) : (
+              <div
+                className="cursor-pointer hover:bg-muted/50 px-2 py-1 rounded text-sm"
+                onClick={() => setEditingField(field)}
+              >
+                {isBadge ? (
+                  <Badge
+                    className={`text-xs ${field === "priority" ? getPriorityColor(value) : getStatusColor(value)}`}
+                  >
+                    {value}
+                  </Badge>
+                ) : (
+                  value
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col flex-1">
       {/* Task Header - Exact same placement as main drawer record header */}
@@ -54,131 +126,182 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
             <CheckSquareIcon className="h-4 w-4" />
           </div>
           <div className="flex-1">
-            <Input
-              value={taskTitle}
-              onChange={(e) => setTaskTitle(e.target.value)}
-              placeholder="Untitled"
-              className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
+            {isEditingTitle ? (
+              <Input
+                value={taskTitle}
+                onChange={(e) => setTaskTitle(e.target.value)}
+                onBlur={() => setIsEditingTitle(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setIsEditingTitle(false)
+                  }
+                  if (e.key === "Escape") {
+                    setTaskTitle(task.title || "")
+                    setIsEditingTitle(false)
+                  }
+                }}
+                className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                autoFocus
+              />
+            ) : (
+              <h2
+                className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
+                onClick={() => setIsEditingTitle(true)}
+              >
+                {taskTitle || "Untitled"}
+              </h2>
+            )}
             <p className="text-sm text-muted-foreground">Task in {recordName}</p>
           </div>
         </div>
       </div>
 
-      {/* Task Content - With proper padding */}
+      {/* Tabs - Exact same styling as main drawer tabs */}
+      <div className="border-b bg-background px-6 py-1">
+        <div className="flex gap-6 overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+                {activeTab === tab.id && (
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Tab Content */}
       <div className="p-6 space-y-6">
-        {/* Task Details */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium">Task Details</h4>
+        {activeTab === "details" && (
+          <>
+            {/* Task Details */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Task Details</h4>
 
-          <div className="rounded-lg border border-muted bg-muted/10 p-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Description</Label>
-                  <p className="text-sm">{task.description}</p>
+              <div className="rounded-lg border border-muted bg-muted/10 p-4">
+                <div className="space-y-3">
+                  {renderEditableField(
+                    "description",
+                    fieldValues.description,
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Description",
+                  )}
+
+                  {renderEditableField(
+                    "priority",
+                    fieldValues.priority,
+                    <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Priority",
+                    true,
+                  )}
+
+                  {renderEditableField(
+                    "status",
+                    fieldValues.status,
+                    <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Status",
+                    true,
+                  )}
+
+                  {renderEditableField(
+                    "assignee",
+                    fieldValues.assignee,
+                    <UserIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Assignee",
+                  )}
+
+                  {renderEditableField(
+                    "dueDate",
+                    fieldValues.dueDate,
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Due Date",
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4">
+                        <Label className="text-xs text-muted-foreground">Related to</Label>
+                        <p className="text-sm">{recordName}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Priority</Label>
-                  <Badge className={`text-xs mt-1 ${getPriorityColor(task.priority)}`}>{task.priority}</Badge>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Status</Label>
-                  <Badge className={`text-xs mt-1 ${getStatusColor(task.status)}`}>{task.status}</Badge>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <UserIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Assignee</Label>
-                  <p className="text-sm">{task.assignee}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Due Date</Label>
-                  <p className="text-sm">{task.dueDate}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Related to</Label>
-                  <p className="text-sm">{recordName}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-            Show all values
-          </Button>
-        </div>
-
-        {/* Comments Section */}
-        <div className="space-y-4">
-          {/* Comment Input */}
-          <div className="space-y-3">
-            <div
-              className={`min-h-[100px] p-3 rounded-lg transition-all ${
-                isFocused ? "border border-input bg-background" : "bg-muted/30"
-              }`}
-            >
-              <textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => {
-                  if (!commentText.trim()) {
-                    setIsFocused(false)
-                  }
-                }}
-                placeholder="Enter text or type '/' for commands"
-                className="w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-muted-foreground text-sm"
-              />
+              <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+                Show all values
+              </Button>
             </div>
 
-            {isFocused && (
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    // Handle comment submission here
-                    console.log("Adding comment:", commentText)
-                    setCommentText("")
-                    setIsFocused(false)
-                  }}
-                  disabled={!commentText.trim()}
+            {/* Comments Section */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Add Comment</h4>
+
+              {/* Comment Input */}
+              <div className="space-y-3">
+                <div
+                  className={`min-h-[100px] p-3 rounded-lg transition-all ${
+                    isFocused ? "border border-input bg-background" : "bg-muted/30"
+                  }`}
                 >
-                  Add comment
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setCommentText("")
-                    setIsFocused(false)
-                  }}
-                >
-                  Cancel
-                </Button>
+                  <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => {
+                      if (!commentText.trim()) {
+                        setIsFocused(false)
+                      }
+                    }}
+                    placeholder="Add a comment about this task..."
+                    className="w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-muted-foreground text-sm"
+                  />
+                </div>
+
+                {isFocused && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        // Handle comment submission here
+                        console.log("Adding comment:", commentText)
+                        setCommentText("")
+                        setIsFocused(false)
+                      }}
+                      disabled={!commentText.trim()}
+                    >
+                      Add comment
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCommentText("")
+                        setIsFocused(false)
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+
+              {/* Existing Comments (placeholder) */}
+              <div className="text-center py-4 text-muted-foreground text-sm">No comments yet</div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
