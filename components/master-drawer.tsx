@@ -17,6 +17,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { TaskDetailsView } from "./task-details-view"
+import { NoteDetailsView } from "./note-details-view"
+import { MeetingDetailsView } from "./meeting-details-view"
+import { EmailDetailsView } from "./email-details-view"
 
 interface Tab {
   id: string
@@ -35,6 +38,9 @@ interface MasterDrawerProps {
     activeTab: string,
     viewMode: "card" | "list" | "table",
     setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
   ) => React.ReactNode
   detailsPanel: (isFullScreen?: boolean) => React.ReactNode
   onComposeEmail?: () => void
@@ -56,6 +62,9 @@ export function MasterDrawer({
   const [activeTab, setActiveTab] = React.useState(isFullScreen ? "activity" : "details")
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("list")
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
+  const [selectedNote, setSelectedNote] = React.useState<any>(null)
+  const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
+  const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
 
   React.useEffect(() => {
     if (isFullScreen && activeTab !== "activity") {
@@ -108,8 +117,23 @@ export function MasterDrawer({
       return <TaskDetailsView task={selectedTask} onBack={() => setSelectedTask(null)} recordName={title} />
     }
 
-    // For other tabs, return the children with the setSelectedTask callback
-    return children(activeTab, viewMode, setSelectedTask)
+    // Handle note details view
+    if (activeTab === "notes" && selectedNote) {
+      return <NoteDetailsView note={selectedNote} onBack={() => setSelectedNote(null)} />
+    }
+
+    // Handle meeting details view
+    if (activeTab === "meetings" && selectedMeeting) {
+      return <MeetingDetailsView meeting={selectedMeeting} onBack={() => setSelectedMeeting(null)} />
+    }
+
+    // Handle email details view
+    if (activeTab === "emails" && selectedEmail) {
+      return <EmailDetailsView email={selectedEmail} onBack={() => setSelectedEmail(null)} />
+    }
+
+    // For other tabs, return the children with the setSelectedTask and setSelectedNote callbacks
+    return children(activeTab, viewMode, setSelectedTask, setSelectedNote, setSelectedMeeting, setSelectedEmail)
   }
 
   const FullScreenContent = () => {
@@ -119,7 +143,15 @@ export function MasterDrawer({
         <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
           <div className="flex items-center gap-3">
             <Badge variant="outline" className="bg-background">
-              {selectedTask ? "Task" : recordType}
+              {selectedTask
+                ? "Task"
+                : selectedNote
+                  ? "Note"
+                  : selectedMeeting
+                    ? "Meeting"
+                    : selectedEmail
+                      ? "Email"
+                      : recordType}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
@@ -147,7 +179,7 @@ export function MasterDrawer({
           {/* Right Panel - Main Content */}
           <div className="flex-1 overflow-y-auto">
             {/* Record Header */}
-            {!selectedTask && (
+            {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && (
               <div className="border-b bg-background px-6 py-2">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
@@ -162,7 +194,7 @@ export function MasterDrawer({
             )}
 
             {/* Tabs */}
-            {!selectedTask && (
+            {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && (
               <div className="border-b bg-background px-6">
                 <div className="flex gap-8 overflow-x-auto">
                   {tabs.map((tab) => (
@@ -190,8 +222,8 @@ export function MasterDrawer({
             )}
 
             {/* Tab Content */}
-            <div className={selectedTask ? "flex-1" : "p-6"}>
-              {!selectedTask && (
+            <div className={selectedTask || selectedNote ? "flex-1" : "p-6"}>
+              {!selectedTask && !selectedNote && (
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
                   <div className="flex items-center gap-2">
@@ -238,6 +270,12 @@ export function MasterDrawer({
               onClick={() => {
                 if (selectedTask) {
                   setSelectedTask(null)
+                } else if (selectedNote) {
+                  setSelectedNote(null)
+                } else if (selectedMeeting) {
+                  setSelectedMeeting(null)
+                } else if (selectedEmail) {
+                  setSelectedEmail(null)
                 } else {
                   document.querySelector('[data-state="open"]')?.click()
                 }
@@ -246,7 +284,15 @@ export function MasterDrawer({
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
             <Badge variant="outline" className="bg-background">
-              {selectedTask ? "Task" : recordType}
+              {selectedTask
+                ? "Task"
+                : selectedNote
+                  ? "Note"
+                  : selectedMeeting
+                    ? "Meeting"
+                    : selectedEmail
+                      ? "Email"
+                      : recordType}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
@@ -269,7 +315,7 @@ export function MasterDrawer({
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           {/* Record Header */}
-          {!selectedTask && (
+          {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && (
             <div className="border-b bg-background px-6 py-2">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
@@ -284,7 +330,7 @@ export function MasterDrawer({
           )}
 
           {/* Tabs */}
-          {!selectedTask && (
+          {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && (
             <div className="border-b bg-background px-6">
               <div className="flex gap-8 overflow-x-auto">
                 {tabs.map((tab) => (
@@ -312,8 +358,8 @@ export function MasterDrawer({
           )}
 
           {/* Tab Content */}
-          <div className={selectedTask ? "flex-1" : "p-6"}>
-            {!selectedTask && (
+          <div className={selectedTask || selectedNote ? "flex-1" : "p-6"}>
+            {!selectedTask && !selectedNote && (
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
                 <div className="flex items-center gap-2">

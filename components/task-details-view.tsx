@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { TypableArea } from "@/components/typable-area"
 
 interface TaskDetailsViewProps {
   task: any
@@ -24,7 +25,6 @@ interface TaskDetailsViewProps {
 
 export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewProps) {
   const [commentText, setCommentText] = React.useState("")
-  const [isFocused, setIsFocused] = React.useState(false)
   const [taskTitle, setTaskTitle] = React.useState(task.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
@@ -68,6 +68,11 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
   const handleFieldEdit = (field: string, value: string) => {
     setFieldValues((prev) => ({ ...prev, [field]: value }))
     setEditingField(null)
+  }
+
+  const handleCommentSubmit = (comment: string) => {
+    console.log("Adding comment:", comment)
+    // Handle comment submission here
   }
 
   const renderEditableField = (field: string, value: string, icon: React.ReactNode, label: string, isBadge = false) => {
@@ -248,57 +253,14 @@ export function TaskDetailsView({ task, onBack, recordName }: TaskDetailsViewPro
             <div className="space-y-4">
               <h4 className="text-sm font-medium">Add Comment</h4>
 
-              {/* Comment Input */}
-              <div className="space-y-3">
-                <div
-                  className={`min-h-[100px] p-3 rounded-lg transition-all ${
-                    isFocused ? "border border-input bg-background" : "bg-muted/30"
-                  }`}
-                >
-                  <textarea
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => {
-                      if (!commentText.trim()) {
-                        setIsFocused(false)
-                      }
-                    }}
-                    placeholder="Add a comment about this task..."
-                    className="w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-muted-foreground text-sm"
-                  />
-                </div>
-
-                {isFocused && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        // Handle comment submission here
-                        console.log("Adding comment:", commentText)
-                        setCommentText("")
-                        setIsFocused(false)
-                      }}
-                      disabled={!commentText.trim()}
-                    >
-                      Add comment
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setCommentText("")
-                        setIsFocused(false)
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Existing Comments (placeholder) */}
-              <div className="text-center py-4 text-muted-foreground text-sm">No comments yet</div>
+              <TypableArea
+                value={commentText}
+                onChange={setCommentText}
+                placeholder="Add a comment about this task..."
+                onSubmit={handleCommentSubmit}
+                showButtons={true}
+                submitLabel="Add comment"
+              />
             </div>
           </>
         )}

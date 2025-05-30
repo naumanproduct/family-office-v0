@@ -195,6 +195,9 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     activeTab: string,
     viewMode: "card" | "list" | "table",
     setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
   ) => {
     if (activeTab === "details") {
       return <AssetDetailsPanel asset={asset} isFullScreen={false} />
@@ -208,14 +211,41 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     const data = getAssetTabData(activeTab, asset)
 
     if (viewMode === "table") {
-      return <TableView data={data} activeTab={activeTab} onTaskClick={setSelectedTask} />
+      return (
+        <TableView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
     }
 
     if (viewMode === "card") {
-      return <CardView data={data} activeTab={activeTab} onTaskClick={setSelectedTask} />
+      return (
+        <CardView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
     }
 
-    return <ListView data={data} activeTab={activeTab} onTaskClick={setSelectedTask} />
+    return (
+      <ListView
+        data={data}
+        activeTab={activeTab}
+        onTaskClick={setSelectedTask}
+        onNoteClick={setSelectedNote}
+        onMeetingClick={setSelectedMeeting}
+        onEmailClick={setSelectedEmail}
+      />
+    )
   }
 
   const renderDetailsPanel = (isFullScreen = false) => {
@@ -535,7 +565,17 @@ function TableView({
   data,
   activeTab,
   onTaskClick,
-}: { data: any[]; activeTab: string; onTaskClick?: (task: any) => void }) {
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
   return (
     <div className="rounded-lg border">
       <Table>
@@ -551,8 +591,22 @@ function TableView({
           {data.map((item) => (
             <TableRow
               key={item.id}
-              className={activeTab === "tasks" ? "cursor-pointer hover:bg-muted/50" : ""}
-              onClick={() => activeTab === "tasks" && onTaskClick?.(item)}
+              className={
+                activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails"
+                  ? "cursor-pointer hover:bg-muted/50"
+                  : ""
+              }
+              onClick={() => {
+                if (activeTab === "tasks") {
+                  onTaskClick?.(item)
+                } else if (activeTab === "notes") {
+                  onNoteClick?.(item)
+                } else if (activeTab === "meetings") {
+                  onMeetingClick?.(item)
+                } else if (activeTab === "emails") {
+                  onEmailClick?.(item)
+                }
+              }}
             >
               <TableCell>{item.title || item.subject || item.name}</TableCell>
               <TableCell>{item.date || item.uploadedDate}</TableCell>
@@ -586,14 +640,38 @@ function CardView({
   data,
   activeTab,
   onTaskClick,
-}: { data: any[]; activeTab: string; onTaskClick?: (task: any) => void }) {
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {data.map((item) => (
         <Card
           key={item.id}
-          className={activeTab === "tasks" ? "cursor-pointer hover:bg-muted/50" : ""}
-          onClick={() => activeTab === "tasks" && onTaskClick?.(item)}
+          className={
+            activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails"
+              ? "cursor-pointer hover:bg-muted/50"
+              : ""
+          }
+          onClick={() => {
+            if (activeTab === "tasks") {
+              onTaskClick?.(item)
+            } else if (activeTab === "notes") {
+              onNoteClick?.(item)
+            } else if (activeTab === "meetings") {
+              onMeetingClick?.(item)
+            } else if (activeTab === "emails") {
+              onEmailClick?.(item)
+            }
+          }}
         >
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
@@ -630,14 +708,34 @@ function ListView({
   data,
   activeTab,
   onTaskClick,
-}: { data: any[]; activeTab: string; onTaskClick?: (task: any) => void }) {
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
   return (
     <div className="space-y-4">
       {data.map((item) => (
         <div
           key={item.id}
-          className={`rounded-lg border p-4 ${activeTab === "tasks" ? "cursor-pointer hover:bg-muted/50" : ""}`}
-          onClick={() => activeTab === "tasks" && onTaskClick?.(item)}
+          className={`rounded-lg border p-4 ${activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails" ? "cursor-pointer hover:bg-muted/50" : ""}`}
+          onClick={() => {
+            if (activeTab === "tasks") {
+              onTaskClick?.(item)
+            } else if (activeTab === "notes") {
+              onNoteClick?.(item)
+            } else if (activeTab === "meetings") {
+              onMeetingClick?.(item)
+            } else if (activeTab === "emails") {
+              onEmailClick?.(item)
+            }
+          }}
         >
           <div className="flex items-start gap-3">
             <div className="flex-1">

@@ -4,12 +4,12 @@ import * as React from "react"
 import {
   CalendarIcon,
   UserIcon,
-  AlertTriangleIcon,
+  MapPinIcon,
+  ClockIcon,
   FileTextIcon,
-  StickyNoteIcon,
+  VideoIcon,
   InfoIcon,
-  TagIcon,
-  BuildingIcon,
+  UsersIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -19,40 +19,43 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
 
-interface NoteDetailsViewProps {
-  note: any
+interface MeetingDetailsViewProps {
+  meeting: any
   onBack: () => void
 }
 
-export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
-  const [noteTitle, setNoteTitle] = React.useState(note.title || "")
+export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps) {
+  const [meetingTitle, setMeetingTitle] = React.useState(meeting.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
-    content: note?.content || "",
-    priority: note?.priority || "Normal",
-    author: note?.author || "",
-    createdAt: note?.createdAt || new Date().toISOString(),
-    updatedAt: note?.updatedAt || new Date().toISOString(),
-    tags: note?.tags || [],
-    relatedTo: note?.relatedTo || { type: "", name: "" },
+    agenda: meeting?.agenda || "",
+    location: meeting?.location || "",
+    startTime: meeting?.startTime || "",
+    endTime: meeting?.endTime || "",
+    attendees: meeting?.attendees || [],
+    organizer: meeting?.organizer || "",
+    meetingType: meeting?.meetingType || "In-person",
+    status: meeting?.status || "Scheduled",
   })
 
-  const [noteText, setNoteText] = React.useState("")
+  const [meetingNotes, setMeetingNotes] = React.useState("")
 
   const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
 
-  const getPriorityColor = (priority: string | undefined | null) => {
-    if (!priority) return "bg-gray-100 text-gray-800"
+  const getStatusColor = (status: string | undefined | null) => {
+    if (!status) return "bg-gray-100 text-gray-800"
 
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "bg-red-100 text-red-800"
-      case "medium":
-        return "bg-yellow-100 text-yellow-800"
-      case "low":
+    switch (status.toLowerCase()) {
+      case "completed":
         return "bg-green-100 text-green-800"
+      case "scheduled":
+        return "bg-blue-100 text-blue-800"
+      case "cancelled":
+        return "bg-red-100 text-red-800"
+      case "in progress":
+        return "bg-yellow-100 text-yellow-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
@@ -116,13 +119,13 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
                 onClick={() => setEditingField(field)}
               >
                 {isBadge ? (
-                  <Badge className={`text-xs ${getPriorityColor(value)}`}>{value}</Badge>
-                ) : field === "tags" ? (
+                  <Badge className={`text-xs ${getStatusColor(value)}`}>{value}</Badge>
+                ) : field === "attendees" ? (
                   <div className="flex flex-wrap gap-1">
                     {Array.isArray(value) ? (
-                      value.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
+                      value.map((attendee) => (
+                        <Badge key={attendee} variant="secondary" className="text-xs">
+                          {attendee}
                         </Badge>
                       ))
                     ) : (
@@ -131,8 +134,8 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
                       </Badge>
                     )}
                   </div>
-                ) : field === "createdAt" || field === "updatedAt" ? (
-                  new Date(value).toLocaleDateString()
+                ) : field === "startTime" || field === "endTime" ? (
+                  new Date(value).toLocaleString()
                 ) : (
                   value
                 )}
@@ -146,24 +149,24 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Note Header - Same placement as task header */}
+      {/* Meeting Header - Same placement as task header */}
       <div className="border-b bg-background px-6 py-2">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <StickyNoteIcon className="h-4 w-4" />
+            <VideoIcon className="h-4 w-4" />
           </div>
           <div className="flex-1">
             {isEditingTitle ? (
               <Input
-                value={noteTitle}
-                onChange={(e) => setNoteTitle(e.target.value)}
+                value={meetingTitle}
+                onChange={(e) => setMeetingTitle(e.target.value)}
                 onBlur={() => setIsEditingTitle(false)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     setIsEditingTitle(false)
                   }
                   if (e.key === "Escape") {
-                    setNoteTitle(note.title || "")
+                    setMeetingTitle(meeting.title || "")
                     setIsEditingTitle(false)
                   }
                 }}
@@ -175,10 +178,10 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
                 className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
                 onClick={() => setIsEditingTitle(true)}
               >
-                {noteTitle || "Untitled"}
+                {meetingTitle || "Untitled"}
               </h2>
             )}
-            <p className="text-sm text-muted-foreground">Note • {note.id}</p>
+            <p className="text-sm text-muted-foreground">Meeting • {meeting.id}</p>
           </div>
         </div>
       </div>
@@ -211,67 +214,68 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
       <div className="p-6 space-y-6">
         {activeTab === "details" && (
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">Note Details</h4>
+            <h4 className="text-sm font-medium">Meeting Details</h4>
 
             <div className="rounded-lg border border-muted bg-muted/10 p-4">
               <div className="space-y-4">
                 {renderEditableField(
-                  "content",
-                  fieldValues.content,
+                  "agenda",
+                  fieldValues.agenda,
                   <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Content",
+                  "Agenda",
                   false,
                   true,
                 )}
 
                 {renderEditableField(
-                  "priority",
-                  fieldValues.priority,
-                  <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Priority",
+                  "startTime",
+                  fieldValues.startTime,
+                  <ClockIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Start Time",
+                )}
+
+                {renderEditableField(
+                  "endTime",
+                  fieldValues.endTime,
+                  <ClockIcon className="h-4 w-4 text-muted-foreground" />,
+                  "End Time",
+                )}
+
+                {renderEditableField(
+                  "location",
+                  fieldValues.location,
+                  <MapPinIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Location",
+                )}
+
+                {renderEditableField(
+                  "organizer",
+                  fieldValues.organizer,
+                  <UserIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Organizer",
+                )}
+
+                {renderEditableField(
+                  "attendees",
+                  fieldValues.attendees,
+                  <UsersIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Attendees",
+                )}
+
+                {renderEditableField(
+                  "meetingType",
+                  fieldValues.meetingType,
+                  <VideoIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Type",
+                )}
+
+                {renderEditableField(
+                  "status",
+                  fieldValues.status,
+                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Status",
                   true,
                 )}
-
-                {renderEditableField(
-                  "author",
-                  fieldValues.author,
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Author",
-                )}
-
-                {renderEditableField(
-                  "createdAt",
-                  fieldValues.createdAt,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Created",
-                )}
-
-                {renderEditableField(
-                  "updatedAt",
-                  fieldValues.updatedAt,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Updated",
-                )}
-
-                {renderEditableField(
-                  "tags",
-                  fieldValues.tags,
-                  <TagIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Tags",
-                )}
-
-                <div className="flex items-center gap-2">
-                  <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4">
-                      <Label className="text-xs text-muted-foreground">Related to</Label>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{fieldValues.relatedTo?.type || "N/A"}</span>
-                        <span className="text-sm font-medium">{fieldValues.relatedTo?.name || "N/A"}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -280,7 +284,12 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
             </Button>
 
             {/* Typable Area */}
-            <TypableArea value={noteText} onChange={setNoteText} placeholder="Add notes..." showButtons={false} />
+            <TypableArea
+              value={meetingNotes}
+              onChange={setMeetingNotes}
+              placeholder="Add meeting notes..."
+              showButtons={false}
+            />
           </div>
         )}
       </div>
