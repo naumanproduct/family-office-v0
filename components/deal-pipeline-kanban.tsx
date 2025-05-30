@@ -22,6 +22,12 @@ import {
   UserIcon,
   MapPinIcon,
   TrendingUpIcon,
+  FileTextIcon,
+  UsersIcon,
+  CheckCircleIcon,
+  FolderIcon,
+  MailIcon,
+  BuildingIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -35,6 +41,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MasterDrawer } from "./master-drawer"
+import { Label } from "@/components/ui/label"
 
 interface Deal {
   id: string
@@ -148,64 +155,165 @@ const stages = [
 
 // Separate the card UI from the sortable wrapper
 function DealCard({ deal }: { deal: Deal }) {
-  // Convert deal to opportunity format for the drawer
-  const opportunityData = {
-    id: Number.parseInt(deal.id),
-    name: `${deal.fundingRound} Investment - ${deal.companyName}`,
-    company: {
-      name: deal.companyName,
-      type: "Issuer",
-    },
-    contact: {
-      name: deal.owner,
-      role: "Deal Owner",
-    },
-    legalEntity: {
-      name: "Investment Fund",
-      type: "Investment Vehicle",
-    },
-    stage:
-      deal.stage === "awareness"
-        ? "Initial Contact"
-        : deal.stage === "initial-contact"
-          ? "Proposal"
-          : deal.stage === "work-in-progress"
-            ? "Due Diligence"
-            : deal.stage === "term-sheet"
-              ? "Term Sheet"
-              : deal.stage === "due-diligence"
-                ? "Due Diligence"
-                : deal.stage === "invested"
-                  ? "Closed Won"
-                  : deal.stage === "passed"
-                    ? "Closed Lost"
-                    : "Initial Contact",
-    amount: deal.targetRaise,
-    probability:
-      deal.stage === "awareness"
-        ? 20
-        : deal.stage === "initial-contact"
-          ? 40
-          : deal.stage === "work-in-progress"
-            ? 60
-            : deal.stage === "term-sheet"
-              ? 80
-              : deal.stage === "due-diligence"
-                ? 85
-                : deal.stage === "invested"
-                  ? 100
-                  : deal.stage === "passed"
-                    ? 0
-                    : 30,
-    expectedClose: deal.nextMeeting || "TBD",
-    lastActivity: "2 days ago",
-    priority: "High",
-    status: deal.stage === "invested" ? "Closed" : deal.stage === "passed" ? "Cancelled" : "Active",
-    description: deal.description || `${deal.fundingRound} investment opportunity in ${deal.sector}`,
-    fundingRound: deal.fundingRound,
-    valuation: deal.valuation || "TBD",
-    sector: deal.sector,
-    geography: "North America",
+  // Map stage to opportunity stage
+  const opportunityStage =
+    deal.stage === "awareness"
+      ? "Initial Contact"
+      : deal.stage === "initial-contact"
+        ? "Proposal"
+        : deal.stage === "work-in-progress"
+          ? "Due Diligence"
+          : deal.stage === "term-sheet"
+            ? "Term Sheet"
+            : deal.stage === "due-diligence"
+              ? "Due Diligence"
+              : deal.stage === "invested"
+                ? "Closed Won"
+                : deal.stage === "passed"
+                  ? "Closed Lost"
+                  : "Initial Contact"
+
+  // Create opportunity title
+  const opportunityTitle = `${deal.fundingRound} Investment - ${deal.companyName}`
+
+  // Create opportunity subtitle
+  const opportunitySubtitle = `${deal.sector} • ${opportunityStage}`
+
+  // Define tabs for the drawer
+  const tabs = [
+    { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "contacts", label: "Contacts", count: 3, icon: UsersIcon },
+    { id: "emails", label: "Emails", count: 5, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 4, icon: FileTextIcon },
+    { id: "meetings", label: "Meetings", count: 2, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 7, icon: FolderIcon },
+    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+  ]
+
+  // Create details panel function
+  const detailsPanel = (isFullScreen = false) => (
+    <div className="p-6">
+      {/* Deal Details */}
+      <div className="space-y-4">
+        <h4 className="text-sm font-medium">Opportunity Details</h4>
+
+        <div className="rounded-lg border border-muted bg-muted/10 p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Company</Label>
+                  <p className="text-sm font-medium">{deal.companyName}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Funding Round</Label>
+                  <p className="text-sm">{deal.fundingRound}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Target Raise</Label>
+                  <p className="text-sm">{deal.targetRaise}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <UserIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Deal Owner</Label>
+                  <p className="text-sm">{deal.owner}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <MapPinIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Location</Label>
+                  <p className="text-sm">{deal.location}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Stage</Label>
+                  <p className="text-sm">{opportunityStage}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <MailIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Email</Label>
+                  <p className="text-sm text-blue-600">{deal.email}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Last Contact</Label>
+                  <p className="text-sm">{deal.lastContact}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Next Meeting</Label>
+                  <p className="text-sm">{deal.nextMeeting}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Valuation</Label>
+                  <p className="text-sm">{deal.valuation || "TBD"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-start gap-2">
+              <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Description</Label>
+                <p className="text-sm">{deal.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Create children function for tabs
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p>No {activeTab} found for this opportunity</p>
+        <p className="text-sm">Add some {activeTab} to get started</p>
+      </div>
+    )
   }
 
   return (
@@ -264,8 +372,13 @@ function DealCard({ deal }: { deal: Deal }) {
           </CardContent>
         </Card>
       }
-      data={opportunityData}
-      type="opportunity"
+      title={opportunityTitle}
+      recordType="Opportunity"
+      subtitle={opportunitySubtitle}
+      tabs={tabs}
+      children={renderTabContent}
+      detailsPanel={detailsPanel}
+      onComposeEmail={() => {}}
     />
   )
 }
