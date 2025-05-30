@@ -61,28 +61,6 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
         priority: "High",
         assignee: "John Smith",
         dueDate: "2023-05-18",
-        subtasks: [
-          {
-            id: "SUBTASK-1-1",
-            title: "Review balance sheet",
-            description: "Examine assets, liabilities, and equity",
-            status: "Completed",
-            priority: "Medium",
-            assignee: "John Smith",
-            dueDate: "2023-05-16",
-            subtasks: [],
-          },
-          {
-            id: "SUBTASK-1-2",
-            title: "Analyze cash flow statements",
-            description: "Review operating, investing, and financing activities",
-            status: "Completed",
-            priority: "Medium",
-            assignee: "John Smith",
-            dueDate: "2023-05-17",
-            subtasks: [],
-          },
-        ],
       },
       {
         id: "SUBTASK-2",
@@ -92,18 +70,6 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
         priority: "Medium",
         assignee: "Sarah Johnson",
         dueDate: "2023-05-20",
-        subtasks: [
-          {
-            id: "SUBTASK-2-1",
-            title: "Industry analysis",
-            description: "Research market size, growth trends, and key players",
-            status: "In Progress",
-            priority: "High",
-            assignee: "Sarah Johnson",
-            dueDate: "2023-05-19",
-            subtasks: [],
-          },
-        ],
       },
       {
         id: "SUBTASK-3",
@@ -113,13 +79,11 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
         priority: "High",
         assignee: "Michael Brown",
         dueDate: "2023-05-22",
-        subtasks: [],
       },
     ],
   )
   const [newSubtaskTitle, setNewSubtaskTitle] = React.useState("")
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false)
-  const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
 
   const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
 
@@ -171,7 +135,6 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
         priority: "Medium",
         assignee: "Unassigned",
         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-        subtasks: [],
       }
       setSubtasks([...subtasks, newSubtask])
       setNewSubtaskTitle("")
@@ -185,14 +148,6 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
 
   const handleDeleteSubtask = (subtaskId: string) => {
     setSubtasks(subtasks.filter((subtask) => subtask.id !== subtaskId))
-  }
-
-  const handleSubtaskClick = (subtask: any) => {
-    setSelectedSubtask(subtask)
-  }
-
-  const handleBackFromSubtask = () => {
-    setSelectedSubtask(null)
   }
 
   const renderEditableField = (field: string, value: string, icon: React.ReactNode, label: string, isBadge = false) => {
@@ -239,19 +194,6 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
           </div>
         </div>
       </div>
-    )
-  }
-
-  // If a subtask is selected, render the subtask view
-  if (selectedSubtask) {
-    return (
-      <TaskDetailsView
-        task={selectedSubtask}
-        onBack={handleBackFromSubtask}
-        recordName={recordName}
-        parentTask={task}
-        onBackToParent={onBack}
-      />
     )
   }
 
@@ -401,10 +343,7 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
                     className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
                   >
                     <div className="flex items-center justify-between">
-                      <div
-                        className="flex items-center gap-3 flex-1 cursor-pointer"
-                        onClick={() => handleSubtaskClick(subtask)}
-                      >
+                      <div className="flex items-center gap-3 flex-1">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -428,11 +367,6 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
                             className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
                           >
                             {subtask.title}
-                            {subtask.subtasks && subtask.subtasks.length > 0 && (
-                              <span className="ml-2 text-xs text-muted-foreground">
-                                ({subtask.subtasks.length} subtasks)
-                              </span>
-                            )}
                           </div>
                           <div className="flex items-center gap-4 mt-1">
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -473,7 +407,6 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>Open Details</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
                             Mark as To Do
