@@ -339,8 +339,6 @@ Sarah`,
           <div className="space-y-6">
             {/* Email metadata */}
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Email Details</h4>
-
               <div className="rounded-lg border border-muted bg-muted/10 p-4">
                 <div className="space-y-4">
                   {/* From field */}
@@ -451,8 +449,6 @@ Sarah`,
 
             {/* Email content section */}
             <div className="space-y-4">
-              <h4 className="text-sm font-medium">Email Thread ({emailThread.length} messages)</h4>
-
               {/* Email content with proper formatting */}
               <div className="rounded-lg border border-muted p-4 space-y-6">
                 {emailThread.map((emailItem, index) => (
