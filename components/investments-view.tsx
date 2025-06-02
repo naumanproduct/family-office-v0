@@ -1,42 +1,34 @@
 "use client"
-
-import * as React from "react"
-import { Button } from "@/components/ui/button"
-import { TrendingUpIcon, TrendingDownIcon } from "lucide-react"
-import { AssetsTable } from "./assets-table"
-import { LiabilitiesTable } from "./liabilities-table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AssetsTable, assetsData } from "./assets-table"
+import { LiabilitiesTable, liabilitiesData } from "./liabilities-table"
+import { Badge } from "@/components/ui/badge"
 
 export function InvestmentsView() {
-  const [view, setView] = React.useState<"assets" | "liabilities">("assets")
-
   return (
-    <div className="space-y-4">
-      {/* View Toggle */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-1 rounded-lg bg-muted p-1">
-          <Button
-            variant={view === "assets" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setView("assets")}
-            className="h-8 px-3"
-          >
-            <TrendingUpIcon className="h-4 w-4 mr-2" />
-            Assets
-          </Button>
-          <Button
-            variant={view === "liabilities" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setView("liabilities")}
-            className="h-8 px-3"
-          >
-            <TrendingDownIcon className="h-4 w-4 mr-2" />
-            Liabilities
-          </Button>
-        </div>
-      </div>
+    <Tabs defaultValue="assets" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="assets" className="flex items-center gap-2">
+          Assets
+          <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+            {assetsData.length}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger value="liabilities" className="flex items-center gap-2">
+          Liabilities
+          <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+            {liabilitiesData.length}
+          </Badge>
+        </TabsTrigger>
+      </TabsList>
 
-      {/* Content */}
-      {view === "assets" ? <AssetsTable /> : <LiabilitiesTable />}
-    </div>
+      <TabsContent value="assets" className="space-y-4">
+        <AssetsTable />
+      </TabsContent>
+
+      <TabsContent value="liabilities" className="space-y-4">
+        <LiabilitiesTable />
+      </TabsContent>
+    </Tabs>
   )
 }
