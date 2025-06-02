@@ -28,7 +28,15 @@ import {
   SearchIcon,
   SortAscIcon,
   SortDescIcon,
-  ArrowLeftIcon,
+  FileTextIcon,
+  MailIcon,
+  CheckCircleIcon,
+  CalendarIcon,
+  FolderIcon,
+  UsersIcon,
+  BuildingIcon,
+  DollarSignIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -46,10 +54,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useIsMobile } from "@/hooks/use-is-mobile"
+import { Card, CardContent } from "@/components/ui/card"
+import { MasterDrawer } from "./master-drawer"
+import { Label } from "@/components/ui/label"
 
 export const liabilitySchema = z.object({
   id: z.number(),
@@ -168,132 +175,499 @@ const getStatusColor = (status: string) => {
   }
 }
 
-function LiabilityDrawer({
-  liability,
-  open,
-  onOpenChange,
-}: { liability: Liability; open: boolean; onOpenChange: (open: boolean) => void }) {
-  const isMobile = useIsMobile()
+function LiabilityNameCell({ liability }: { liability: Liability }) {
+  const tabs = [
+    { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 1, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
+    { id: "meetings", label: "Meetings", count: 3, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 4, icon: FolderIcon },
+    { id: "team", label: "Team", count: 3, icon: UsersIcon },
+    { id: "company", label: "Company", count: null, icon: BuildingIcon },
+  ]
 
-  const drawerContent = (
-    <>
-      <div className="bg-muted px-4 py-3 border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="h-8 w-8 p-0">
-              <ArrowLeftIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="secondary">Liabilities</Badge>
-          </div>
-        </div>
-      </div>
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    if (activeTab === "details") {
+      return <LiabilityDetailsPanel liability={liability} isFullScreen={false} />
+    }
 
-      <div className="px-4 py-2">
-        <div className="space-y-1">
-          <h2 className="text-xl font-semibold">{liability.name}</h2>
-          <p className="text-sm text-muted-foreground">{liability.type}</p>
-        </div>
-      </div>
+    // For other tabs, return generic content similar to assets
+    const data = getLiabilityTabData(activeTab, liability)
 
-      <Tabs defaultValue="details" className="flex-1">
-        <TabsList className="grid w-full grid-cols-3 mx-4">
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-        </TabsList>
+    if (viewMode === "table") {
+      return (
+        <TableView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
 
-        <TabsContent value="details" className="px-4 py-4 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Liability Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Current Balance</label>
-                  <p className="text-sm">{liability.currentBalance}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Original Amount</label>
-                  <p className="text-sm">{liability.originalAmount}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Interest Rate</label>
-                  <p className="text-sm">{liability.interestRate}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Maturity Date</label>
-                  <p className="text-sm">{liability.maturityDate}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Entity</label>
-                  <p className="text-sm">{liability.entity}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Lender</label>
-                  <p className="text-sm">{liability.lender}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+    if (viewMode === "card") {
+      return (
+        <CardView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
 
-        <TabsContent value="payments" className="px-4 py-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Payment Schedule</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Next Payment</label>
-                  <p className="text-sm">{liability.nextPayment}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Payment Amount</label>
-                  <p className="text-sm">{liability.paymentAmount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="activity" className="px-4 py-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">No recent activity</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </>
-  )
-
-  if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh]">
-          <DrawerHeader className="sr-only">
-            <DrawerTitle>Liability Details</DrawerTitle>
-          </DrawerHeader>
-          {drawerContent}
-        </DrawerContent>
-      </Drawer>
+      <ListView
+        data={data}
+        activeTab={activeTab}
+        onTaskClick={setSelectedTask}
+        onNoteClick={setSelectedNote}
+        onMeetingClick={setSelectedMeeting}
+        onEmailClick={setSelectedEmail}
+      />
     )
   }
 
+  const renderDetailsPanel = (isFullScreen = false) => {
+    return <LiabilityDetailsPanel liability={liability} isFullScreen={isFullScreen} />
+  }
+
+  const customActions = [
+    <Button key="payment" variant="outline" size="sm">
+      <DollarSignIcon className="h-4 w-4" />
+      Make Payment
+    </Button>,
+  ]
+
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[90vh] max-w-4xl mx-auto">
-        <DrawerHeader className="sr-only">
-          <DrawerTitle>Liability Details</DrawerTitle>
-        </DrawerHeader>
-        {drawerContent}
-      </DrawerContent>
-    </Drawer>
+    <MasterDrawer
+      trigger={
+        <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium">
+              {liability.name.charAt(0)}
+            </div>
+            <span className="font-medium">{liability.name}</span>
+          </div>
+        </Button>
+      }
+      title={liability.name}
+      recordType="Liabilities"
+      subtitle={`${liability.type} • ${liability.category}`}
+      tabs={tabs}
+      detailsPanel={renderDetailsPanel}
+      customActions={customActions}
+    >
+      {renderTabContent}
+    </MasterDrawer>
+  )
+}
+
+function getLiabilityTabData(activeTab: string, liability: Liability) {
+  switch (activeTab) {
+    case "emails":
+      return [
+        {
+          id: 1,
+          subject: "Payment Reminder",
+          from: "lender@bank.com",
+          date: "1 day ago",
+          status: "Unread",
+          preview: "Upcoming payment due for " + liability.name,
+          type: "received",
+        },
+        {
+          id: 2,
+          subject: "Payment Confirmation",
+          from: "me@company.com",
+          date: "3 days ago",
+          status: "Sent",
+          preview: "Payment processed for " + liability.name,
+          type: "sent",
+        },
+      ]
+    case "tasks":
+      return [
+        {
+          id: 1,
+          title: "Process monthly payment",
+          priority: "High",
+          status: "pending",
+          assignee: "You",
+          dueDate: "Tomorrow",
+          description: "Process monthly payment for " + liability.name,
+        },
+      ]
+    case "notes":
+      return [
+        {
+          id: 1,
+          title: "Refinancing opportunity",
+          date: "1 week ago",
+          content: `Potential to refinance ${liability.name} at lower rate.`,
+          tags: ["Refinancing", "Cost Savings"],
+        },
+      ]
+    case "meetings":
+      return [
+        {
+          id: 1,
+          title: "Lender Review Meeting",
+          date: "Next week",
+          time: "10:00 AM - 11:00 AM",
+          status: "Scheduled",
+          location: "Conference Room B",
+          attendees: 3,
+          description: `Annual review meeting for ${liability.name}.`,
+        },
+      ]
+    case "files":
+      return [
+        {
+          id: 1,
+          name: "Loan_Agreement.pdf",
+          size: "3.2 MB",
+          uploadedBy: "Legal Team",
+          uploadedDate: "1 week ago",
+          type: "pdf",
+          description: "Original loan agreement and terms.",
+        },
+      ]
+    case "team":
+      return [
+        {
+          id: 1,
+          name: "Michael Chen",
+          role: "Debt Manager",
+          email: "michael.chen@company.com",
+          phone: "+1 (555) 987-6543",
+          department: "Finance",
+          joinDate: "2022-08-20",
+          status: "Active",
+        },
+      ]
+    default:
+      return []
+  }
+}
+
+function LiabilityDetailsPanel({ liability, isFullScreen = false }: { liability: Liability; isFullScreen?: boolean }) {
+  return (
+    <div className="p-6">
+      {/* Details Tab */}
+      <div className="mb-6 border-b">
+        <div className="flex gap-6">
+          <button className="relative border-b-2 border-primary pb-3 text-sm font-medium text-primary">
+            Details
+            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
+          </button>
+          <button className="relative pb-3 text-sm text-muted-foreground hover:text-foreground">
+            Comments
+            <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
+              0
+            </Badge>
+          </button>
+        </div>
+      </div>
+
+      {/* Liability Details */}
+      <div className="space-y-4">
+        <h4 className="text-sm font-medium">Liability Details</h4>
+
+        <div className="rounded-lg border border-muted bg-muted/10 p-4">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Liability Name</Label>
+                <p className="text-sm font-medium">{liability.name}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Type</Label>
+                <p className="text-sm">{liability.type}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Category</Label>
+                <p className="text-sm">{liability.category}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Current Balance</Label>
+                <p className="text-sm font-medium">{liability.currentBalance}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Original Amount</Label>
+                <p className="text-sm">{liability.originalAmount}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Interest Rate</Label>
+                <p className="text-sm">{liability.interestRate}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Maturity Date</Label>
+                <p className="text-sm">{liability.maturityDate}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Lender</Label>
+                <p className="text-sm">{liability.lender}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Entity</Label>
+                <p className="text-sm">{liability.entity}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+          Show all values
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function TableView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  return (
+    <div className="rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="w-12"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((item) => (
+            <TableRow
+              key={item.id}
+              className={
+                activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails"
+                  ? "cursor-pointer hover:bg-muted/50"
+                  : ""
+              }
+              onClick={() => {
+                if (activeTab === "tasks") {
+                  onTaskClick?.(item)
+                } else if (activeTab === "notes") {
+                  onNoteClick?.(item)
+                } else if (activeTab === "meetings") {
+                  onMeetingClick?.(item)
+                } else if (activeTab === "emails") {
+                  onEmailClick?.(item)
+                }
+              }}
+            >
+              <TableCell>{item.title || item.subject || item.name}</TableCell>
+              <TableCell>{item.date || item.uploadedDate}</TableCell>
+              <TableCell>
+                <Badge variant="outline">{item.status || item.priority}</Badge>
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+function CardView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {data.map((item) => (
+        <Card
+          key={item.id}
+          className={
+            activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails"
+              ? "cursor-pointer hover:bg-muted/50"
+              : ""
+          }
+          onClick={() => {
+            if (activeTab === "tasks") {
+              onTaskClick?.(item)
+            } else if (activeTab === "notes") {
+              onNoteClick?.(item)
+            } else if (activeTab === "meetings") {
+              onMeetingClick?.(item)
+            } else if (activeTab === "emails") {
+              onEmailClick?.(item)
+            }
+          }}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium">{item.title || item.subject || item.name}</h4>
+                <p className="text-sm text-muted-foreground mt-1">{item.description || item.preview || item.content}</p>
+                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>{item.date || item.uploadedDate}</span>
+                  {item.size && <span>• {item.size}</span>}
+                </div>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function ListView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  return (
+    <div className="space-y-4">
+      {data.map((item) => (
+        <div
+          key={item.id}
+          className={`rounded-lg border p-4 ${activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails" ? "cursor-pointer hover:bg-muted/50" : ""}`}
+          onClick={() => {
+            if (activeTab === "tasks") {
+              onTaskClick?.(item)
+            } else if (activeTab === "notes") {
+              onNoteClick?.(item)
+            } else if (activeTab === "meetings") {
+              onMeetingClick?.(item)
+            } else if (activeTab === "emails") {
+              onEmailClick?.(item)
+            }
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">{item.title || item.subject || item.name}</p>
+                  {item.assignee && <p className="text-xs text-muted-foreground">Assigned to: {item.assignee}</p>}
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">{item.date || item.uploadedDate}</p>
+                  {item.status && (
+                    <Badge variant="outline" className="text-xs mt-1">
+                      {item.status}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">{item.description || item.preview || item.content}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -331,12 +705,7 @@ const columns: ColumnDef<Liability>[] = [
         ) : null}
       </Button>
     ),
-    cell: ({ row }) => (
-      <div>
-        <p className="text-sm font-medium">{row.original.name}</p>
-        <p className="text-xs text-muted-foreground">{row.original.type}</p>
-      </div>
-    ),
+    cell: ({ row }) => <LiabilityNameCell liability={row.original} />,
     enableHiding: false,
   },
   {
@@ -414,8 +783,6 @@ export function LiabilitiesTable() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState("")
-  const [selectedLiability, setSelectedLiability] = React.useState<Liability | null>(null)
-  const [drawerOpen, setDrawerOpen] = React.useState(false)
 
   const table = useReactTable({
     data: liabilitiesData,
@@ -444,11 +811,6 @@ export function LiabilitiesTable() {
       },
     },
   })
-
-  const handleRowClick = (liability: Liability) => {
-    setSelectedLiability(liability)
-    setDrawerOpen(true)
-  }
 
   return (
     <div className="space-y-4">
@@ -539,7 +901,6 @@ export function LiabilitiesTable() {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className="h-12 cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleRowClick(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-2">
@@ -629,11 +990,6 @@ export function LiabilitiesTable() {
           </div>
         </div>
       </div>
-
-      {/* Drawer */}
-      {selectedLiability && (
-        <LiabilityDrawer liability={selectedLiability} open={drawerOpen} onOpenChange={setDrawerOpen} />
-      )}
     </div>
   )
 }
