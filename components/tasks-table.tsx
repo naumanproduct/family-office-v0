@@ -1,241 +1,374 @@
 "use client"
+
+import * as React from "react"
 import {
-  CalendarIcon,
-  CheckCircleIcon,
   ChevronDownIcon,
-  CircleIcon,
-  ClockIcon,
-  DotIcon as DotsHorizontalIcon,
+  FilterIcon,
+  MoreVerticalIcon,
+  PlusIcon,
   SearchIcon,
-  SortAscIcon,
-  TagIcon,
-  UserIcon,
-  BuildingIcon,
+  LayoutGridIcon,
+  ListIcon,
+  TableIcon,
+  FileTextIcon,
+  CalendarIcon,
+  UsersIcon,
 } from "lucide-react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { TaskDetailsView } from "./task-details-view"
 
-const tasks = [
+// Task data - extended from investment tab but across all objects
+const tasksData = [
   {
-    id: "TASK-1234",
-    title: "Review Acme Corp Investment Proposal",
-    description: "Complete detailed review of the investment proposal for Acme Corp Series B funding",
-    dueDate: "2023-05-20T17:00:00Z",
-    assignee: "John Smith",
-    status: "To Do",
+    id: 1,
+    title: "Review quarterly performance",
     priority: "High",
-    relatedTo: { type: "Company", name: "Acme Corp" },
-    workflow: "Deal Pipeline",
+    status: "pending",
+    assignee: "You",
+    dueDate: "Tomorrow",
+    description: "Review Q3 performance metrics and prepare summary report.",
+    relatedTo: { type: "Investment", name: "TechFlow Ventures Series C" },
   },
   {
-    id: "TASK-1235",
-    title: "Prepare Due Diligence Report",
-    description: "Compile findings from the due diligence process for XYZ Holdings acquisition",
-    dueDate: "2023-05-25T17:00:00Z",
+    id: 2,
+    title: "Update valuation model",
+    priority: "Medium",
+    status: "completed",
+    assignee: "You",
+    dueDate: "2 days ago",
+    description: "Updated valuation model with latest market data.",
+    relatedTo: { type: "Investment", name: "MedInnovate Seed Round" },
+  },
+  {
+    id: 3,
+    title: "Capital Call Processing",
+    priority: "High",
+    status: "In Progress",
     assignee: "Sarah Johnson",
-    status: "In Progress",
-    priority: "Medium",
-    relatedTo: { type: "Entity", name: "XYZ Holdings" },
-    workflow: "Entity Compliance & Legal Tasks",
+    dueDate: "2024-01-15",
+    description: "Process capital call for TechFlow Ventures Series C investment",
+    relatedTo: { type: "Investment", name: "TechFlow Ventures Series C" },
   },
   {
-    id: "TASK-1236",
-    title: "Schedule Q2 Planning Meeting",
-    description: "Coordinate with stakeholders to schedule the Q2 planning meeting for Tech Innovations Inc",
-    dueDate: "2023-05-18T12:00:00Z",
-    assignee: "Michael Brown",
-    status: "To Do",
+    id: 4,
+    title: "Legal Document Review",
+    priority: "Medium",
+    status: "pending",
+    assignee: "Legal Team",
+    dueDate: "Next week",
+    description: "Review partnership agreement for Global Ventures",
+    relatedTo: { type: "Entity", name: "Global Ventures LLC" },
+  },
+  {
+    id: 5,
+    title: "Compliance Check",
     priority: "Low",
-    relatedTo: { type: "Company", name: "Tech Innovations Inc" },
-    workflow: null,
-  },
-  {
-    id: "TASK-1237",
-    title: "Follow up on Partnership Agreement",
-    description: "Contact Global Ventures legal team regarding the partnership agreement revisions",
-    dueDate: "2023-05-16T15:00:00Z",
-    assignee: "Emily Davis",
-    status: "Completed",
-    priority: "Medium",
-    relatedTo: { type: "Entity", name: "Global Ventures" },
-    workflow: null,
-  },
-  {
-    id: "TASK-1238",
-    title: "Finalize Acquisition Terms",
-    description: "Review and finalize the terms for the Sunrise Manufacturing acquisition",
-    dueDate: "2023-05-30T17:00:00Z",
-    assignee: "Robert Wilson",
-    status: "In Progress",
-    priority: "High",
-    relatedTo: { type: "Company", name: "Sunrise Manufacturing" },
-    workflow: "Deal Pipeline",
+    status: "pending",
+    assignee: "Compliance Team",
+    dueDate: "End of month",
+    description: "Annual compliance review for Meridian Capital Fund III",
+    relatedTo: { type: "Entity", name: "Meridian Capital Fund III" },
   },
 ]
 
-export function TasksTable() {
+function TaskTableView({
+  data,
+  onTaskClick,
+}: {
+  data: any[]
+  onTaskClick?: (task: any) => void
+}) {
+  return (
+    <div className="rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Due Date</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead>Assignee</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="w-12"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((item) => (
+            <TableRow
+              key={item.id}
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => onTaskClick?.(item)}
+            >
+              <TableCell className="font-medium">{item.title}</TableCell>
+              <TableCell>{item.dueDate}</TableCell>
+              <TableCell>
+                <Badge 
+                  variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                >
+                  {item.priority}
+                </Badge>
+              </TableCell>
+              <TableCell>{item.assignee}</TableCell>
+              <TableCell>
+                <Badge variant="outline">{item.status}</Badge>
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+function TaskCardView({
+  data,
+  onTaskClick,
+}: {
+  data: any[]
+  onTaskClick?: (task: any) => void
+}) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {data.map((item) => (
+        <Card
+          key={item.id}
+          className="cursor-pointer hover:bg-muted/50"
+          onClick={() => onTaskClick?.(item)}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium">{item.title}</h4>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Due:</span>
+                    <span>{item.dueDate}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Assignee:</span>
+                    <span>{item.assignee}</span>
+                  </div>
+                  {item.relatedTo && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Related to:</span>
+                      <span className="text-blue-600">{item.relatedTo.name}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Badge 
+                      variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {item.priority}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {item.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function TaskListView({
+  data,
+  onTaskClick,
+}: {
+  data: any[]
+  onTaskClick?: (task: any) => void
+}) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full max-w-sm">
-          <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="Search tasks..." className="w-full bg-background pl-8" />
+      {data.map((item) => (
+        <div
+          key={item.id}
+          className="rounded-lg border p-4 cursor-pointer hover:bg-muted/50"
+          onClick={() => onTaskClick?.(item)}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{item.title}</p>
+                  <p className="text-xs text-muted-foreground">Assigned to: {item.assignee}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Due: {item.dueDate}</p>
+                  <div className="mt-1 flex items-center gap-1">
+                    <Badge 
+                      variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {item.priority}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {item.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.description}</p>
+              {item.relatedTo && (
+                <p className="mt-2 text-xs text-blue-600">Related to: {item.relatedTo.name}</p>
+              )}
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                  <MoreVerticalIcon className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>View</DropdownMenuItem>
+                <DropdownMenuItem>Edit</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+      ))}
+    </div>
+  )
+}
+
+export function TasksTable() {
+  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("list")
+  const [globalFilter, setGlobalFilter] = React.useState("")
+  const [selectedTask, setSelectedTask] = React.useState<any>(null)
+
+  const ViewModeSelector = () => (
+    <div className="flex items-center gap-1 rounded-lg border p-1">
+      <Button
+        variant={viewMode === "card" ? "secondary" : "ghost"}
+        size="sm"
+        onClick={() => setViewMode("card")}
+        className="h-7 px-2"
+      >
+        <LayoutGridIcon className="h-3 w-3" />
+      </Button>
+      <Button
+        variant={viewMode === "list" ? "secondary" : "ghost"}
+        size="sm"
+        onClick={() => setViewMode("list")}
+        className="h-7 px-2"
+      >
+        <ListIcon className="h-3 w-3" />
+      </Button>
+      <Button
+        variant={viewMode === "table" ? "secondary" : "ghost"}
+        size="sm"
+        onClick={() => setViewMode("table")}
+        className="h-7 px-2"
+      >
+        <TableIcon className="h-3 w-3" />
+      </Button>
+    </div>
+  )
+
+  const renderTaskContent = () => {
+    if (viewMode === "table") {
+      return <TaskTableView data={tasksData} onTaskClick={setSelectedTask} />
+    }
+    if (viewMode === "card") {
+      return <TaskCardView data={tasksData} onTaskClick={setSelectedTask} />
+    }
+    return <TaskListView data={tasksData} onTaskClick={setSelectedTask} />
+  }
+
+  if (selectedTask) {
+    return <TaskDetailsView task={selectedTask} onBack={() => setSelectedTask(null)} recordName="All Tasks" />
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <SearchIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search tasks..."
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="pl-8 w-[300px]"
+            />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8">
-                <SortAscIcon className="mr-2 h-3.5 w-3.5" />
-                Sort
-                <ChevronDownIcon className="ml-2 h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>Due Date (soonest first)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Due Date (latest first)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Title (A-Z)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Title (Z-A)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Priority (High-Low)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Priority (Low-High)</DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8">
-                <TagIcon className="mr-2 h-3.5 w-3.5" />
+              <Button variant="outline" size="sm">
+                <FilterIcon className="mr-2 h-4 w-4" />
                 Filter
-                <ChevronDownIcon className="ml-2 h-3.5 w-3.5" />
+                <ChevronDownIcon className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
+            <DropdownMenuContent align="start" className="w-[200px]">
+              <DropdownMenuCheckboxItem>High priority</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>In progress</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Overdue</DropdownMenuCheckboxItem>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs">Status</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem>To Do</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>In Progress</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Completed</DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs">Priority</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem>High</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Medium</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Low</DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs">Workflow</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem>Deal Pipeline</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Entity Compliance & Legal Tasks</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Capital Call Tracking</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Tax Document Collection & Filing</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Investment related</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem>Entity related</DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        </div>
+        <div className="flex items-center space-x-2">
+          <ViewModeSelector />
+          <Button size="sm">
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add Task
+          </Button>
         </div>
       </div>
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Assignee</TableHead>
-                <TableHead>Related To</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tasks.map((task) => (
-                <TableRow key={task.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{task.title}</div>
-                      <div className="text-sm text-muted-foreground line-clamp-1">{task.description}</div>
-                      {task.workflow && (
-                        <div className="mt-1">
-                          <Badge variant="secondary" className="text-xs">
-                            {task.workflow}
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                      <span>{new Date(task.dueDate).toLocaleDateString()}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <UserIcon className="h-4 w-4 text-muted-foreground" />
-                      <span>{task.assignee}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {task.relatedTo.type === "Company" ? (
-                        <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                      )}
-                      <span>{task.relatedTo.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {task.status === "To Do" && <CircleIcon className="h-4 w-4 text-muted-foreground" />}
-                      {task.status === "In Progress" && <ClockIcon className="h-4 w-4 text-blue-500" />}
-                      {task.status === "Completed" && <CheckCircleIcon className="h-4 w-4 text-green-500" />}
-                      <span>{task.status}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        task.priority === "High" ? "destructive" : task.priority === "Medium" ? "default" : "outline"
-                      }
-                    >
-                      {task.priority}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <DotsHorizontalIcon className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Mark as Completed</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+
+      {/* Task Content */}
+      {renderTaskContent()}
     </div>
   )
 }

@@ -66,6 +66,22 @@ export function MasterDrawer({
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
   const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
 
+  // ESC key handler for full screen mode
+  React.useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isFullScreen) {
+        setIsFullScreen(false)
+      }
+    }
+
+    if (isFullScreen) {
+      document.addEventListener('keydown', handleEscKey)
+      return () => {
+        document.removeEventListener('keydown', handleEscKey)
+      }
+    }
+  }, [isFullScreen])
+
   React.useEffect(() => {
     if (isFullScreen && activeTab !== "activity") {
       setActiveTab("activity")
@@ -142,6 +158,13 @@ export function MasterDrawer({
         {/* Full Screen Header */}
         <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
           <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsFullScreen(false)}
+            >
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
             <Badge variant="outline" className="bg-background">
               {selectedTask
                 ? "Task"
@@ -164,9 +187,8 @@ export function MasterDrawer({
                 Compose email
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(false)}>
+            <Button variant="outline" size="icon" onClick={() => setIsFullScreen(false)}>
               <XIcon className="h-4 w-4" />
-              Close
             </Button>
           </div>
         </div>
@@ -299,9 +321,8 @@ export function MasterDrawer({
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(true)}>
+            <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
               <ExpandIcon className="h-4 w-4" />
-              Full screen
             </Button>
             {customActions.map((action, index) => (
               <React.Fragment key={index}>{action}</React.Fragment>

@@ -7,11 +7,9 @@ import {
   FileIcon,
   FileTextIcon,
   HelpCircleIcon,
-  LayoutDashboardIcon,
   SearchIcon,
   SettingsIcon,
   CheckCircleIcon,
-  MailIcon,
   BuildingIcon,
   UsersIcon,
   Building2Icon,
@@ -59,11 +57,6 @@ const data = {
       icon: TrendingUpIcon,
     },
     {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboardIcon,
-    },
-    {
       title: "Entities",
       url: "/entities",
       icon: Building2Icon,
@@ -87,11 +80,6 @@ const data = {
       title: "Notes",
       url: "/notes",
       icon: FileIcon,
-    },
-    {
-      title: "Emails",
-      url: "/emails",
-      icon: MailIcon,
     },
   ],
   navGroups: [
@@ -186,14 +174,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 sideOffset={4}
               >
                 <DropdownMenuLabel className="text-xs text-muted-foreground">Entity</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => handleNavigation("/dashboard")}>
+                <DropdownMenuItem onClick={() => handleNavigation("/investments")}>
                   <div className="flex size-6 items-center justify-center rounded-sm border">
                     <ArrowUpCircleIcon className="size-4 shrink-0" />
                   </div>
                   Acme Inc.
                   <DropdownMenuShortcut>⌘1</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigation("/dashboard")}>
+                <DropdownMenuItem onClick={() => handleNavigation("/investments")}>
                   <div className="flex size-6 items-center justify-center rounded-sm border">
                     <Building2Icon className="size-4 shrink-0" />
                   </div>

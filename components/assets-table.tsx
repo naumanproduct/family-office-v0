@@ -257,12 +257,7 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     return <AssetDetailsPanel asset={asset} isFullScreen={isFullScreen} />
   }
 
-  const customActions = [
-    <Button key="performance" variant="outline" size="sm">
-      <BarChart3Icon className="h-4 w-4" />
-      Performance
-    </Button>,
-  ]
+  const customActions: React.ReactNode[] = []
 
   return (
     <MasterDrawer
@@ -468,11 +463,9 @@ function getAssetTabData(activeTab: string, asset: Asset) {
 
 function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
   return (
-    <div className="p-6">
+    <div className="px-6 pt-2 pb-6">
       {/* Asset Details */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-medium">Asset Details</h4>
-
+      <div>
         <div className="rounded-lg border border-muted bg-muted/10 p-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -991,6 +984,332 @@ function TableView({
   onMeetingClick?: (meeting: any) => void
   onEmailClick?: (email: any) => void
 }) {
+  // Handle team tab differently
+  if (activeTab === "team") {
+    return (
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-medium">{item.name}</TableCell>
+                <TableCell>{item.role}</TableCell>
+                <TableCell>
+                  <a href={`mailto:${item.email}`} className="text-blue-600 hover:underline">
+                    {item.email}
+                  </a>
+                </TableCell>
+                <TableCell>{item.phone}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View details</DropdownMenuItem>
+                      <DropdownMenuItem>Edit member</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Remove</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )
+  }
+
+  // Handle meetings tab
+  if (activeTab === "meetings") {
+    return (
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Date & Time</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item) => (
+              <TableRow
+                key={item.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => onMeetingClick?.(item)}
+              >
+                <TableCell className="font-medium">{item.title}</TableCell>
+                <TableCell>{item.date} {item.time && `• ${item.time}`}</TableCell>
+                <TableCell>{item.location}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{item.status}</Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )
+  }
+
+  // Handle notes tab
+  if (activeTab === "notes") {
+    return (
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Last Modified</TableHead>
+              <TableHead>Tags</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item) => (
+              <TableRow
+                key={item.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => onNoteClick?.(item)}
+              >
+                <TableCell className="font-medium">{item.title}</TableCell>
+                <TableCell>{item.date}</TableCell>
+                <TableCell>{item.lastModified || item.date}</TableCell>
+                <TableCell>
+                  <div className="flex gap-1">
+                    {item.tags?.map((tag: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )
+  }
+
+  // Handle tasks tab
+  if (activeTab === "tasks") {
+    return (
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Due Date</TableHead>
+              <TableHead>Priority</TableHead>
+              <TableHead>Assignee</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item) => (
+              <TableRow
+                key={item.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => onTaskClick?.(item)}
+              >
+                <TableCell className="font-medium">{item.title}</TableCell>
+                <TableCell>{item.dueDate}</TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                  >
+                    {item.priority}
+                  </Badge>
+                </TableCell>
+                <TableCell>{item.assignee}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{item.status}</Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )
+  }
+
+  // Handle emails tab
+  if (activeTab === "emails") {
+    return (
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Subject</TableHead>
+              <TableHead>From</TableHead>
+              <TableHead>To</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item) => (
+              <TableRow
+                key={item.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => onEmailClick?.(item)}
+              >
+                <TableCell className="font-medium">{item.subject}</TableCell>
+                <TableCell>{item.from}</TableCell>
+                <TableCell>{item.to || 'me@company.com'}</TableCell>
+                <TableCell>{item.date}</TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={item.status === 'Unread' ? 'default' : 'secondary'}
+                  >
+                    {item.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Reply</DropdownMenuItem>
+                      <DropdownMenuItem>Forward</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )
+  }
+
+  // Handle files tab
+  if (activeTab === "files") {
+    return (
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Size</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Uploaded</TableHead>
+              <TableHead>Uploaded By</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                    {item.name}
+                  </div>
+                </TableCell>
+                <TableCell>{item.size}</TableCell>
+                <TableCell>
+                  <Badge variant="secondary" className="text-xs">
+                    {item.type?.toUpperCase() || 'FILE'}
+                  </Badge>
+                </TableCell>
+                <TableCell>{item.uploadedDate}</TableCell>
+                <TableCell>{item.uploadedBy}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Download</DropdownMenuItem>
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Share</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )
+  }
+
+  // Generic table for other tabs
   return (
     <div className="rounded-lg border">
       <Table>
@@ -1066,6 +1385,321 @@ function CardView({
   onMeetingClick?: (meeting: any) => void
   onEmailClick?: (email: any) => void
 }) {
+  // Handle team tab differently
+  if (activeTab === "team") {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {data.map((item) => (
+          <Card key={item.id}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium text-base">{item.name}</h4>
+                  <p className="text-sm text-muted-foreground">{item.role}</p>
+                  <div className="mt-3 space-y-1">
+                    <p className="text-sm">
+                      <a href={`mailto:${item.email}`} className="text-blue-600 hover:underline">
+                        {item.email}
+                      </a>
+                    </p>
+                    <p className="text-sm text-muted-foreground">{item.phone}</p>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View details</DropdownMenuItem>
+                    <DropdownMenuItem>Edit member</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Remove</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle meetings tab
+  if (activeTab === "meetings") {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((item) => (
+          <Card
+            key={item.id}
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => onMeetingClick?.(item)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                      <span>{item.date} {item.time && `• ${item.time}`}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{item.location}</span>
+                      {item.attendees && <span>• {item.attendees} attendees</span>}
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <Badge variant="outline">{item.status}</Badge>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle notes tab
+  if (activeTab === "notes") {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((item) => (
+          <Card
+            key={item.id}
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => onNoteClick?.(item)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.content}</p>
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>Created: {item.date}</span>
+                    </div>
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="flex gap-1 flex-wrap">
+                        {item.tags.map((tag: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle tasks tab
+  if (activeTab === "tasks") {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((item) => (
+          <Card
+            key={item.id}
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => onTaskClick?.(item)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Due:</span>
+                      <span>{item.dueDate}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Assignee:</span>
+                      <span>{item.assignee}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge 
+                        variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {item.priority}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle emails tab
+  if (activeTab === "emails") {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((item) => (
+          <Card
+            key={item.id}
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => onEmailClick?.(item)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{item.subject}</h4>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.preview}</p>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">From:</span>
+                      <span>{item.from}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">To:</span>
+                      <span>{item.to || 'me@company.com'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{item.date}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <Badge 
+                      variant={item.status === 'Unread' ? 'default' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {item.status}
+                    </Badge>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Reply</DropdownMenuItem>
+                    <DropdownMenuItem>Forward</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle files tab
+  if (activeTab === "files") {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((item) => (
+          <Card key={item.id}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <FileTextIcon className="h-5 w-5 text-muted-foreground" />
+                    <h4 className="font-medium">{item.name}</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Size:</span>
+                      <span>{item.size}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Uploaded:</span>
+                      <span>{item.uploadedDate}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>By: {item.uploadedBy}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <Badge variant="secondary" className="text-xs">
+                      {item.type?.toUpperCase() || 'FILE'}
+                    </Badge>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Download</DropdownMenuItem>
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Share</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Generic card view for other tabs
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {data.map((item) => (
@@ -1134,6 +1768,312 @@ function ListView({
   onMeetingClick?: (meeting: any) => void
   onEmailClick?: (email: any) => void
 }) {
+  // Handle team tab differently
+  if (activeTab === "team") {
+    return (
+      <div className="space-y-4">
+        {data.map((item) => (
+          <div key={item.id} className="rounded-lg border p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.name}</p>
+                    <p className="text-xs text-muted-foreground">{item.role}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs">
+                      <a href={`mailto:${item.email}`} className="text-blue-600 hover:underline">
+                        {item.email}
+                      </a>
+                    </p>
+                    <p className="text-xs text-muted-foreground">{item.phone}</p>
+                  </div>
+                </div>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View details</DropdownMenuItem>
+                  <DropdownMenuItem>Edit member</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Remove</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle meetings tab
+  if (activeTab === "meetings") {
+    return (
+      <div className="space-y-4">
+        {data.map((item) => (
+          <div
+            key={item.id}
+            className="rounded-lg border p-4 cursor-pointer hover:bg-muted/50"
+            onClick={() => onMeetingClick?.(item)}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.title}</p>
+                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{item.date} {item.time && `• ${item.time}`}</p>
+                    <div className="mt-1 flex items-center gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>{item.location}</span>
+                  {item.attendees && <span>• {item.attendees} attendees</span>}
+                </div>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle notes tab
+  if (activeTab === "notes") {
+    return (
+      <div className="space-y-4">
+        {data.map((item) => (
+          <div
+            key={item.id}
+            className="rounded-lg border p-4 cursor-pointer hover:bg-muted/50"
+            onClick={() => onNoteClick?.(item)}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.title}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{item.content}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Created: {item.date}</p>
+                    {item.lastModified && item.lastModified !== item.date && (
+                      <p className="text-xs text-muted-foreground">Modified: {item.lastModified}</p>
+                    )}
+                  </div>
+                </div>
+                {item.tags && item.tags.length > 0 && (
+                  <div className="mt-2 flex gap-1 flex-wrap">
+                    {item.tags.map((tag: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle tasks tab
+  if (activeTab === "tasks") {
+    return (
+      <div className="space-y-4">
+        {data.map((item) => (
+          <div
+            key={item.id}
+            className="rounded-lg border p-4 cursor-pointer hover:bg-muted/50"
+            onClick={() => onTaskClick?.(item)}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.title}</p>
+                    <p className="text-xs text-muted-foreground">Assigned to: {item.assignee}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Due: {item.dueDate}</p>
+                    <div className="mt-1 flex items-center gap-1">
+                      <Badge 
+                        variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {item.priority}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.description}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle emails tab
+  if (activeTab === "emails") {
+    return (
+      <div className="space-y-4">
+        {data.map((item) => (
+          <div
+            key={item.id}
+            className="rounded-lg border p-4 cursor-pointer hover:bg-muted/50"
+            onClick={() => onEmailClick?.(item)}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.subject}</p>
+                    <p className="text-xs text-muted-foreground">From: {item.from} → To: {item.to || 'me@company.com'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{item.date}</p>
+                    <div className="mt-1">
+                      <Badge 
+                        variant={item.status === 'Unread' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.preview}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Reply</DropdownMenuItem>
+                  <DropdownMenuItem>Forward</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Handle files tab
+  if (activeTab === "files") {
+    return (
+      <div className="space-y-4">
+        {data.map((item) => (
+          <div key={item.id} className="rounded-lg border p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm font-medium">{item.name}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{item.uploadedDate}</p>
+                    <div className="mt-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {item.type?.toUpperCase() || 'FILE'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>Size: {item.size}</span>
+                  <span>• Uploaded by: {item.uploadedBy}</span>
+                </div>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Download</DropdownMenuItem>
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Share</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Generic list view for other tabs
   return (
     <div className="space-y-4">
       {data.map((item) => (

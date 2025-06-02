@@ -1,10 +1,10 @@
 import type React from "react"
 
 interface EmailsTableProps {
-  isDetailView: boolean
+  isDetailView?: boolean
 }
 
-const EmailsTable: React.FC<EmailsTableProps> = ({ isDetailView }) => {
+export const EmailsTable: React.FC<EmailsTableProps> = ({ isDetailView = false }) => {
   return (
     <div>
       {!isDetailView && (
@@ -48,5 +48,3 @@ const EmailsTable: React.FC<EmailsTableProps> = ({ isDetailView }) => {
     </div>
   )
 }
-
-export default EmailsTable
