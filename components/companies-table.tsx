@@ -1712,4 +1712,3 @@ export function CompaniesTable() {
     </div>
   )
 }
-

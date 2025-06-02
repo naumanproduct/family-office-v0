@@ -520,4 +520,4 @@ export function EntityComplianceKanban() {
       </DragOverlay>
     </DndContext>
   )
-} 
+}

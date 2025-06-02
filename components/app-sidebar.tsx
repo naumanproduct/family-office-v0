@@ -92,7 +92,7 @@ const data = {
           icon: BuildingIcon,
         },
         {
-          title: "Contacts",
+          title: "People",
           url: "/contacts",
           icon: UsersIcon,
         },
