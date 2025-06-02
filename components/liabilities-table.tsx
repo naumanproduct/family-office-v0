@@ -56,6 +56,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { MasterDrawer } from "./master-drawer"
 import { Label } from "@/components/ui/label"
+import { AddLiabilityDialog } from "./add-liability-dialog"
 
 export const liabilitySchema = z.object({
   id: z.number(),
@@ -846,10 +847,12 @@ export function LiabilitiesTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm">
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Add Liability
-          </Button>
+          <AddLiabilityDialog>
+            <Button size="sm">
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Add Liability
+            </Button>
+          </AddLiabilityDialog>
         </div>
       </div>
 

@@ -1,10 +1,10 @@
 "use client"
-import { AssetsTable, assetsData } from "./assets-table"
-import { LiabilitiesTable, liabilitiesData } from "./liabilities-table"
-import { Badge } from "@/components/ui/badge"
+
+import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { TrendingUpIcon, TrendingDownIcon } from "lucide-react"
-import * as React from "react"
+import { AssetsTable } from "./assets-table"
+import { LiabilitiesTable } from "./liabilities-table"
 
 export function InvestmentsView() {
   const [view, setView] = React.useState<"assets" | "liabilities">("assets")
@@ -18,25 +18,19 @@ export function InvestmentsView() {
             variant={view === "assets" ? "default" : "ghost"}
             size="sm"
             onClick={() => setView("assets")}
-            className="h-8 px-3 flex items-center gap-2"
+            className="h-8 px-3"
           >
-            <TrendingUpIcon className="h-4 w-4" />
+            <TrendingUpIcon className="h-4 w-4 mr-2" />
             Assets
-            <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-              {assetsData.length}
-            </Badge>
           </Button>
           <Button
             variant={view === "liabilities" ? "default" : "ghost"}
             size="sm"
             onClick={() => setView("liabilities")}
-            className="h-8 px-3 flex items-center gap-2"
+            className="h-8 px-3"
           >
-            <TrendingDownIcon className="h-4 w-4" />
+            <TrendingDownIcon className="h-4 w-4 mr-2" />
             Liabilities
-            <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-              {liabilitiesData.length}
-            </Badge>
           </Button>
         </div>
       </div>
