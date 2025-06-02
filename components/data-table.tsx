@@ -1869,22 +1869,6 @@ function ListView({ data, activeTab }: { data: any[]; activeTab: string }) {
 function DetailsPanel({ item, isFullScreen = false }: { item: z.infer<typeof schema>; isFullScreen?: boolean }) {
   return (
     <div className="p-6">
-      {/* Details Tab */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-6">
-          <button className="relative border-b-2 border-primary pb-3 text-sm font-medium text-primary">
-            Details
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
-          </button>
-          <button className="relative pb-3 text-sm text-muted-foreground hover:text-foreground">
-            Comments
-            <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-              0
-            </Badge>
-          </button>
-        </div>
-      </div>
-
       {/* Record Details */}
       <div className="space-y-4">
         <h4 className="text-sm font-medium">Record Details</h4>
