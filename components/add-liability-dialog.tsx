@@ -17,40 +17,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { PlusIcon, CreditCardIcon, BuildingIcon, TrendingDownIcon, DollarSignIcon } from "lucide-react"
+import { PlusIcon, CreditCardIcon, BuildingIcon, DollarSignIcon, TrendingDownIcon } from "lucide-react"
 
 const liabilityCategories = [
   {
     id: "operating-debt",
     name: "Operating Debt",
-    description: "Debt for day-to-day operations",
+    description: "Short-term debt for operations",
     icon: CreditCardIcon,
-    types: ["Credit Line", "Working Capital Loan", "Equipment Financing", "Trade Credit", "Revolving Credit Facility"],
+    types: ["Credit Line", "Working Capital Loan", "Trade Payables", "Accrued Expenses", "Short-term Notes"],
   },
   {
     id: "investment-debt",
     name: "Investment Debt",
-    description: "Debt for investment activities",
+    description: "Debt used for investment purposes",
     icon: TrendingDownIcon,
-    types: [
-      "Acquisition Financing",
-      "Leveraged Buyout Loan",
-      "Bridge Financing",
-      "Mezzanine Financing",
-      "Development Loan",
-    ],
+    types: ["Acquisition Financing", "Bridge Loan", "Mezzanine Debt", "Convertible Debt", "Investment Notes"],
   },
   {
     id: "capital-call-facility",
     name: "Capital Call Facility",
-    description: "Credit facilities backed by LP commitments",
+    description: "Credit facilities for capital calls",
     icon: DollarSignIcon,
     types: [
       "Subscription Credit Line",
+      "LP Facility",
       "Capital Call Bridge",
-      "LP Commitment Facility",
-      "Fund Credit Line",
-      "Drawdown Facility",
+      "Commitment Facility",
+      "Draw-down Facility",
     ],
   },
   {
@@ -60,10 +54,10 @@ const liabilityCategories = [
     icon: BuildingIcon,
     types: [
       "Real Estate Mortgage",
-      "Equipment Loan",
+      "Equipment Financing",
       "Asset-Backed Securities",
       "Collateralized Loan",
-      "Secured Term Loan",
+      "Secured Notes",
     ],
   },
 ]
@@ -79,13 +73,13 @@ export function AddLiabilityDialog({ children }: AddLiabilityDialogProps) {
   const [selectedType, setSelectedType] = React.useState<string>("")
   const [formData, setFormData] = React.useState({
     name: "",
-    originalAmount: "",
+    principalAmount: "",
     currentBalance: "",
     interestRate: "",
     maturityDate: "",
     entity: "",
     lender: "",
-    collateral: "",
+    purpose: "",
     description: "",
   })
 
@@ -117,13 +111,13 @@ export function AddLiabilityDialog({ children }: AddLiabilityDialogProps) {
     setSelectedType("")
     setFormData({
       name: "",
-      originalAmount: "",
+      principalAmount: "",
       currentBalance: "",
       interestRate: "",
       maturityDate: "",
       entity: "",
       lender: "",
-      collateral: "",
+      purpose: "",
       description: "",
     })
   }
@@ -244,11 +238,11 @@ export function AddLiabilityDialog({ children }: AddLiabilityDialogProps) {
               </div>
 
               <div>
-                <Label htmlFor="originalAmount">Original Amount</Label>
+                <Label htmlFor="principalAmount">Principal Amount</Label>
                 <Input
-                  id="originalAmount"
-                  value={formData.originalAmount}
-                  onChange={(e) => setFormData({ ...formData, originalAmount: e.target.value })}
+                  id="principalAmount"
+                  value={formData.principalAmount}
+                  onChange={(e) => setFormData({ ...formData, principalAmount: e.target.value })}
                   placeholder="$0.00"
                 />
               </div>
@@ -264,12 +258,12 @@ export function AddLiabilityDialog({ children }: AddLiabilityDialogProps) {
               </div>
 
               <div>
-                <Label htmlFor="interestRate">Interest Rate</Label>
+                <Label htmlFor="interestRate">Interest Rate (%)</Label>
                 <Input
                   id="interestRate"
                   value={formData.interestRate}
                   onChange={(e) => setFormData({ ...formData, interestRate: e.target.value })}
-                  placeholder="0.00%"
+                  placeholder="0.00"
                 />
               </div>
 
@@ -309,14 +303,23 @@ export function AddLiabilityDialog({ children }: AddLiabilityDialogProps) {
                 />
               </div>
 
-              <div className="col-span-2">
-                <Label htmlFor="collateral">Collateral</Label>
-                <Input
-                  id="collateral"
-                  value={formData.collateral}
-                  onChange={(e) => setFormData({ ...formData, collateral: e.target.value })}
-                  placeholder="Enter collateral description"
-                />
+              <div>
+                <Label htmlFor="purpose">Purpose</Label>
+                <Select
+                  value={formData.purpose}
+                  onValueChange={(value) => setFormData({ ...formData, purpose: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select purpose" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="acquisition">Acquisition</SelectItem>
+                    <SelectItem value="working-capital">Working Capital</SelectItem>
+                    <SelectItem value="expansion">Expansion</SelectItem>
+                    <SelectItem value="refinancing">Refinancing</SelectItem>
+                    <SelectItem value="bridge-financing">Bridge Financing</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="col-span-2">
