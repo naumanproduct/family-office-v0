@@ -17,21 +17,17 @@ import { CSS } from "@dnd-kit/utilities"
 import {
   MoreVerticalIcon,
   PlusIcon,
-  ExpandIcon,
-  ChevronLeftIcon,
-  MailIcon,
-  BuildingIcon,
   DollarSignIcon,
   CalendarIcon,
   UserIcon,
   MapPinIcon,
-  PhoneIcon,
-  GlobeIcon,
   TrendingUpIcon,
   FileTextIcon,
   UsersIcon,
   CheckCircleIcon,
   FolderIcon,
+  MailIcon,
+  BuildingIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -44,9 +40,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { MasterDrawer } from "./master-drawer"
 import { Label } from "@/components/ui/label"
-import { companiesData } from "./companies-table"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 interface Deal {
   id: string
@@ -148,345 +145,83 @@ const initialDeals: Deal[] = [
   },
 ]
 
-const stages = [
-  { id: "awareness", title: "Awareness", color: "bg-gray-100" },
-  { id: "initial-contact", title: "Initial Contact", color: "bg-blue-100" },
-  { id: "work-in-progress", title: "Work in Progress", color: "bg-yellow-100" },
-  { id: "term-sheet", title: "Term Sheet", color: "bg-purple-100" },
-  { id: "due-diligence", title: "Due Diligence", color: "bg-orange-100" },
-  { id: "invested", title: "Invested", color: "bg-green-100" },
-  { id: "passed", title: "Passed", color: "bg-red-100" },
+interface DealPipelineKanbanProps {
+  workflowConfig?: {
+    attributes: Array<{ id: string; name: string; type: string }>
+    stages: Array<{ id: string; name: string; color: string }>
+  }
+}
+
+// Default stages if no config provided
+const defaultStages = [
+  { id: "awareness", name: "Awareness", color: "bg-gray-100" },
+  { id: "initial-contact", name: "Initial Contact", color: "bg-blue-100" },
+  { id: "work-in-progress", name: "Work in Progress", color: "bg-yellow-100" },
+  { id: "term-sheet", name: "Term Sheet", color: "bg-purple-100" },
+  { id: "due-diligence", name: "Due Diligence", color: "bg-orange-100" },
+  { id: "invested", name: "Invested", color: "bg-green-100" },
+  { id: "passed", name: "Passed", color: "bg-red-100" },
+]
+
+// Default attributes if no config provided
+const defaultAttributes = [
+  { id: "companyName", name: "Company", type: "text" },
+  { id: "fundingRound", name: "Funding Round", type: "text" },
+  { id: "targetRaise", name: "Target Raise", type: "currency" },
+  { id: "owner", name: "Owner", type: "user" },
+  { id: "nextMeeting", name: "Next Meeting", type: "date" },
 ]
 
 // Separate the card UI from the sortable wrapper
-function DealCard({ deal }: { deal: Deal }) {
-  // Find the corresponding company in companiesData
-  const company = companiesData.find((c) => c.name === deal.companyName)
+function DealCard({
+  deal,
+  attributes = defaultAttributes,
+}: {
+  deal: Deal
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
+  // Map stage to opportunity stage
+  const opportunityStage =
+    deal.stage === "awareness"
+      ? "Initial Contact"
+      : deal.stage === "initial-contact"
+        ? "Proposal"
+        : deal.stage === "work-in-progress"
+          ? "Due Diligence"
+          : deal.stage === "term-sheet"
+            ? "Term Sheet"
+            : deal.stage === "due-diligence"
+              ? "Due Diligence"
+              : deal.stage === "invested"
+                ? "Closed Won"
+                : deal.stage === "passed"
+                  ? "Closed Lost"
+                  : "Initial Contact"
 
-  if (!company) {
-    // Fallback to the original card if company not found
-    return (
-      <Card className="cursor-pointer hover:shadow-md transition-shadow">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h4 className="font-medium text-sm">{deal.companyName}</h4>
-              <p className="text-xs text-muted-foreground">{deal.sector}</p>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <MoreVerticalIcon className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Edit</DropdownMenuItem>
-                <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-2">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs">
-              <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Funding:</span>
-              <span>{deal.fundingRound}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Target:</span>
-              <span>{deal.targetRaise}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <UserIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Owner:</span>
-              <span>{deal.owner}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <MapPinIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Location:</span>
-              <span>{deal.location}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Next:</span>
-              <span>{deal.nextMeeting}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+  // Create opportunity title
+  const opportunityTitle = `${deal.fundingRound} Investment - ${deal.companyName}`
 
-  return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">{deal.companyName}</h4>
-                <p className="text-xs text-muted-foreground">{deal.sector}</p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <MoreVerticalIcon className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-2">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs">
-                <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Funding:</span>
-                <span>{deal.fundingRound}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Target:</span>
-                <span>{deal.targetRaise}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <UserIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Owner:</span>
-                <span>{deal.owner}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <MapPinIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Location:</span>
-                <span>{deal.location}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Next:</span>
-                <span>{deal.nextMeeting}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-        {/* This will render the company drawer content */}
-        <CompanyDrawerContent company={company} />
-      </SheetContent>
-    </Sheet>
-  )
-}
+  // Create opportunity subtitle
+  const opportunitySubtitle = `${deal.sector} • ${opportunityStage}`
 
-function SortableDealCard({ deal }: { deal: Deal }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: deal.id,
-  })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 1 : 0,
-  }
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
-      <DealCard deal={deal} />
-    </div>
-  )
-}
-
-// Add this new component to render the company drawer content
-function CompanyDrawerContent({ company }: { company: any }) {
-  const [activeTab, setActiveTab] = React.useState("details")
-
+  // Define tabs for the drawer
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 5, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 12, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 8, icon: FileTextIcon },
-    { id: "meetings", label: "Meetings", count: 6, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 15, icon: FolderIcon },
+    { id: "contacts", label: "Contacts", count: 3, icon: UsersIcon },
+    { id: "emails", label: "Emails", count: 5, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 4, icon: FileTextIcon },
+    { id: "meetings", label: "Meetings", count: 2, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 7, icon: FolderIcon },
     { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
-  return (
-    <>
-      {/* Header */}
-      <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => document.querySelector('[data-state="open"]')?.click()}>
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-          <Badge variant="outline" className="bg-background">
-            {company.name}
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <ExpandIcon className="h-4 w-4" />
-            Full screen
-          </Button>
-          <Button variant="outline" size="sm">
-            <MailIcon className="h-4 w-4" />
-            Compose email
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Record Header */}
-        <div className="border-b bg-background px-6 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-              {company.name.charAt(0)}
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">{company.name}</h2>
-              <p className="text-sm text-muted-foreground">
-                {company.industry} • {company.stage}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b bg-background px-6">
-          <div className="flex gap-8 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? "border-b-2 border-primary text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tab.icon && <tab.icon className="h-4 w-4" />}
-                {tab.label}
-                {tab.count !== null && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                    {tab.count}
-                  </Badge>
-                )}
-                {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === "details" ? (
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Company Details</h4>
-
-              <div className="rounded-lg border border-muted bg-muted/10 p-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Company Name</Label>
-                      <p className="text-sm font-medium">{company.name}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Industry</Label>
-                      <p className="text-sm">{company.industry}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Revenue</Label>
-                      <p className="text-sm">{company.revenue}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <UsersIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Employees</Label>
-                      <p className="text-sm">{company.employees}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <GlobeIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Website</Label>
-                      <p className="text-sm text-blue-600">{company.website}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Location</Label>
-                      <p className="text-sm">{company.location}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2">
-                    <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Description</Label>
-                      <p className="text-sm">{company.description}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>
-                No {activeTab} found for {company.name}
-              </p>
-              <p className="text-sm">Add some {activeTab} to get started</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  )
-}
-
-function DealDetails({ deal, isFullScreen }: { deal: Deal; isFullScreen: boolean }) {
-  return (
+  // Create details panel function
+  const detailsPanel = (isFullScreen = false) => (
     <div className="p-6">
-      {/* Record Header */}
-      <div className="border-b bg-background pb-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-            {deal.companyName.charAt(0)}
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold">{deal.companyName}</h2>
-            <p className="text-sm text-muted-foreground">
-              {deal.sector} • {deal.fundingRound}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Deal Details */}
       <div className="space-y-4">
-        <h4 className="text-sm font-medium">Deal Details</h4>
+        <h4 className="text-sm font-medium">Opportunity Details</h4>
 
         <div className="rounded-lg border border-muted bg-muted/10 p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -534,10 +269,10 @@ function DealDetails({ deal, isFullScreen }: { deal: Deal; isFullScreen: boolean
 
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <GlobeIcon className="h-4 w-4 text-muted-foreground" />
+                <FileTextIcon className="h-4 w-4 text-muted-foreground" />
                 <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Website</Label>
-                  <p className="text-sm text-blue-600">{deal.website}</p>
+                  <Label className="text-xs text-muted-foreground">Stage</Label>
+                  <p className="text-sm">{opportunityStage}</p>
                 </div>
               </div>
 
@@ -546,14 +281,6 @@ function DealDetails({ deal, isFullScreen }: { deal: Deal; isFullScreen: boolean
                 <div className="flex-1">
                   <Label className="text-xs text-muted-foreground">Email</Label>
                   <p className="text-sm text-blue-600">{deal.email}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Phone</Label>
-                  <p className="text-sm">{deal.phone}</p>
                 </div>
               </div>
 
@@ -572,6 +299,14 @@ function DealDetails({ deal, isFullScreen }: { deal: Deal; isFullScreen: boolean
                   <p className="text-sm">{deal.nextMeeting}</p>
                 </div>
               </div>
+
+              <div className="flex items-center gap-2">
+                <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Valuation</Label>
+                  <p className="text-sm">{deal.valuation || "TBD"}</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -584,30 +319,153 @@ function DealDetails({ deal, isFullScreen }: { deal: Deal; isFullScreen: boolean
               </div>
             </div>
           </div>
-
-          <div className="mt-4 pt-4 border-t">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <Label className="text-xs text-muted-foreground">Valuation</Label>
-                <p className="text-sm font-medium">{deal.valuation}</p>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Revenue</Label>
-                <p className="text-sm font-medium">{deal.revenue}</p>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Employees</Label>
-                <p className="text-sm font-medium">{deal.employees}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   )
+
+  // Create children function for tabs
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p>No {activeTab} found for this opportunity</p>
+        <p className="text-sm">Add some {activeTab} to get started</p>
+      </div>
+    )
+  }
+
+  // Function to get the appropriate icon for each attribute type
+  const getAttributeIcon = (type: string) => {
+    switch (type) {
+      case "currency":
+        return DollarSignIcon
+      case "date":
+        return CalendarIcon
+      case "user":
+      case "relation":
+        return UserIcon
+      case "text":
+      default:
+        return FileTextIcon
+    }
+  }
+
+  // Function to render attribute value based on type
+  const renderAttributeValue = (attribute: any, value: any) => {
+    if (!value) return "—"
+
+    switch (attribute.type) {
+      case "currency":
+        return <span className="font-medium">{value}</span>
+      default:
+        return value
+    }
+  }
+
+  return (
+    <MasterDrawer
+      trigger={
+        <Card className="cursor-pointer hover:shadow-md transition-all duration-200 border-gray-200 hover:border-gray-300">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-sm text-gray-900 truncate">{deal.companyName}</h4>
+                <p className="text-xs text-gray-500 mt-1">{deal.sector}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600">
+                    <MoreVerticalIcon className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            <div className="space-y-2">
+              {attributes.map((attribute) => {
+                const Icon = getAttributeIcon(attribute.type)
+                const value = (deal as any)[attribute.id]
+
+                if (!value) return null
+
+                return (
+                  <div key={attribute.id} className="flex items-center gap-2 text-xs">
+                    <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-500 truncate">{attribute.name}:</span>
+                    <span className="truncate">{renderAttributeValue(attribute, value)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      }
+      title={opportunityTitle}
+      recordType="Opportunity"
+      subtitle={opportunitySubtitle}
+      tabs={tabs}
+      children={renderTabContent}
+      detailsPanel={detailsPanel}
+      onComposeEmail={() => {}}
+    />
+  )
 }
 
-function DroppableColumn({ stage, deals }: { stage: (typeof stages)[0]; deals: Deal[] }) {
+function SortableDealCard({
+  deal,
+  attributes,
+}: {
+  deal: Deal
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
+  const {
+    attributes: dndAttributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: deal.id,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1 : 0,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} {...dndAttributes} {...listeners} className="touch-manipulation">
+      <DealCard deal={deal} attributes={attributes} />
+    </div>
+  )
+}
+
+function DroppableColumn({
+  stage,
+  deals,
+  attributes,
+}: {
+  stage: { id: string; name: string; color: string }
+  deals: Deal[]
+  attributes?: Array<{ id: string; name: string; type: string }>
+}) {
   const { setNodeRef, isOver } = useSortable({
     id: stage.id,
   })
@@ -615,25 +473,27 @@ function DroppableColumn({ stage, deals }: { stage: (typeof stages)[0]; deals: D
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col min-h-[600px] w-80 ${isOver ? "ring-2 ring-primary ring-opacity-50 bg-muted/20" : ""}`}
+      className={`flex flex-col min-h-[600px] w-80 transition-all duration-200 ${
+        isOver ? "ring-2 ring-blue-500 ring-opacity-30 bg-blue-50/20" : ""
+      }`}
     >
-      <div className={`rounded-t-lg p-3 ${stage.color}`}>
+      <div className={`rounded-t-xl p-4 border border-gray-200 ${stage.color}`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-sm">{stage.title}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs">
+          <div className="flex items-center gap-3">
+            <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
               {deals.length}
             </Badge>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6">
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 hover:text-gray-700">
             <PlusIcon className="h-3 w-3" />
           </Button>
         </div>
       </div>
-      <div className="flex-1 bg-gray-50 rounded-b-lg p-3 space-y-3">
+      <div className="flex-1 bg-gray-50/50 rounded-b-xl border-l border-r border-b border-gray-200 p-3 space-y-3">
         <SortableContext items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
           {deals.map((deal) => (
-            <SortableDealCard key={deal.id} deal={deal} />
+            <SortableDealCard key={deal.id} deal={deal} attributes={attributes} />
           ))}
         </SortableContext>
       </div>
@@ -641,9 +501,117 @@ function DroppableColumn({ stage, deals }: { stage: (typeof stages)[0]; deals: D
   )
 }
 
-export function DealPipelineKanban() {
+// New component for adding a column
+function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
+  return (
+    <div className="flex flex-col min-h-[600px] w-16 justify-center items-center">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-12 w-12 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+        onClick={onAddColumn}
+        title="Add Column"
+      >
+        <PlusIcon className="h-5 w-5 text-gray-400" />
+      </Button>
+    </div>
+  )
+}
+
+// New dialog for adding a column
+function AddColumnDialog({
+  open,
+  onOpenChange,
+  onAddColumn,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onAddColumn: (name: string, color: string) => void
+}) {
+  const [name, setName] = React.useState("")
+  const [color, setColor] = React.useState("bg-gray-100")
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (name.trim()) {
+      onAddColumn(name, color)
+      setName("")
+      onOpenChange(false)
+    }
+  }
+
+  const colorOptions = [
+    { value: "bg-gray-100", label: "Gray" },
+    { value: "bg-blue-100", label: "Blue" },
+    { value: "bg-green-100", label: "Green" },
+    { value: "bg-yellow-100", label: "Yellow" },
+    { value: "bg-purple-100", label: "Purple" },
+    { value: "bg-red-100", label: "Red" },
+    { value: "bg-orange-100", label: "Orange" },
+    { value: "bg-pink-100", label: "Pink" },
+  ]
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Column</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="column-name">Column Name</Label>
+            <Input
+              id="column-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., In Review"
+              autoFocus
+              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Column Color</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {colorOptions.map((option) => (
+                <div
+                  key={option.value}
+                  className={`h-10 rounded-lg cursor-pointer ${option.value} border-2 transition-all ${
+                    color === option.value
+                      ? "border-blue-500 scale-105 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setColor(option.value)}
+                  title={option.label}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!name.trim()} className="bg-blue-600 hover:bg-blue-700">
+              Add Column
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export function DealPipelineKanban({ workflowConfig }: DealPipelineKanbanProps) {
   const [deals, setDeals] = React.useState(initialDeals)
   const [activeDeal, setActiveDeal] = React.useState<Deal | null>(null)
+  const [stagesList, setStagesList] = React.useState(workflowConfig?.stages || defaultStages)
+  const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)
+
+  // Update stages when workflow config changes
+  React.useEffect(() => {
+    if (workflowConfig?.stages) {
+      setStagesList(workflowConfig.stages)
+    }
+  }, [workflowConfig?.stages])
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -685,7 +653,7 @@ export function DealPipelineKanban() {
     let targetStage = overId
 
     // If dropping on another deal, find its stage
-    if (!stages.some((s) => s.id === overId)) {
+    if (!stagesList.some((s) => s.id === overId)) {
       const targetDeal = deals.find((d) => d.id === overId)
       if (targetDeal) {
         targetStage = targetDeal.stage
@@ -693,15 +661,26 @@ export function DealPipelineKanban() {
     }
 
     // Update the deal's stage if it's different
-    if (activeDeal.stage !== targetStage && stages.some((s) => s.id === targetStage)) {
+    if (activeDeal.stage !== targetStage && stagesList.some((s) => s.id === targetStage)) {
       setDeals(deals.map((deal) => (deal.id === activeId ? { ...deal, stage: targetStage } : deal)))
     }
   }
 
-  const dealsByStage = stages.map((stage) => ({
+  const handleAddColumn = (name: string, color: string) => {
+    const newStage = {
+      id: `stage-${Date.now()}`,
+      name: name,
+      color: color,
+    }
+    setStagesList([...stagesList, newStage])
+  }
+
+  const dealsByStage = stagesList.map((stage) => ({
     stage,
     deals: deals.filter((deal) => deal.stage === stage.id),
   }))
+
+  const attributes = workflowConfig?.attributes || defaultAttributes
 
   return (
     <DndContext
@@ -712,16 +691,18 @@ export function DealPipelineKanban() {
     >
       <div className="flex gap-4 overflow-x-auto pb-4">
         {dealsByStage.map(({ stage, deals }) => (
-          <DroppableColumn key={stage.id} stage={stage} deals={deals} />
+          <DroppableColumn key={stage.id} stage={stage} deals={deals} attributes={attributes} />
         ))}
+        <AddColumnButton onAddColumn={() => setAddColumnDialogOpen(true)} />
       </div>
       <DragOverlay>
         {activeDeal ? (
           <div className="w-80 opacity-80 shadow-lg">
-            <DealCard deal={activeDeal} />
+            <DealCard deal={activeDeal} attributes={attributes} />
           </div>
         ) : null}
       </DragOverlay>
+      <AddColumnDialog open={addColumnDialogOpen} onOpenChange={setAddColumnDialogOpen} onAddColumn={handleAddColumn} />
     </DndContext>
   )
 }
