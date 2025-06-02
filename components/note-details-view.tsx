@@ -211,6 +211,8 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
       <div className="p-6 space-y-6">
         {activeTab === "details" && (
           <div className="space-y-4">
+            <h4 className="text-sm font-medium">Note Details</h4>
+
             <div className="rounded-lg border border-muted bg-muted/10 p-4">
               <div className="space-y-4">
                 {renderEditableField(

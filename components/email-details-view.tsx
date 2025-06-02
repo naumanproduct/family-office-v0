@@ -19,7 +19,6 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
@@ -272,44 +271,10 @@ Sarah`,
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Email Header - Exact same placement as task header */}
-      <div className="border-b bg-background px-6 py-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <MailIcon className="h-4 w-4" />
-          </div>
-          <div className="flex-1">
-            {isEditingSubject ? (
-              <Input
-                value={emailSubject}
-                onChange={(e) => setEmailSubject(e.target.value)}
-                onBlur={() => setIsEditingSubject(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setIsEditingSubject(false)
-                  }
-                  if (e.key === "Escape") {
-                    setEmailSubject(email?.subject || "No Subject")
-                    setIsEditingSubject(false)
-                  }
-                }}
-                className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                autoFocus
-              />
-            ) : (
-              <h2
-                className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
-                onClick={() => setIsEditingSubject(true)}
-              >
-                {emailSubject}
-              </h2>
-            )}
-            <p className="text-sm text-muted-foreground">Email • {emailThread[0]?.id}</p>
-          </div>
-        </div>
-      </div>
+      {/* Email Header */}
+      {/* Remove the Email Header section */}
 
-      {/* Tabs - Exact same styling as task tabs */}
+      {/* Tabs */}
       <div className="border-b bg-background px-6 py-1">
         <div className="flex gap-6 overflow-x-auto">
           {tabs.map((tab) => {
@@ -339,6 +304,8 @@ Sarah`,
           <div className="space-y-6">
             {/* Email metadata */}
             <div className="space-y-4">
+              <h4 className="text-sm font-medium">Email Details</h4>
+
               <div className="rounded-lg border border-muted bg-muted/10 p-4">
                 <div className="space-y-4">
                   {/* From field */}
@@ -449,6 +416,8 @@ Sarah`,
 
             {/* Email content section */}
             <div className="space-y-4">
+              <h4 className="text-sm font-medium">Email Thread ({emailThread.length} messages)</h4>
+
               {/* Email content with proper formatting */}
               <div className="rounded-lg border border-muted p-4 space-y-6">
                 {emailThread.map((emailItem, index) => (
