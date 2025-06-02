@@ -55,6 +55,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { MasterDrawer } from "./master-drawer"
+import { AddAssetDialog } from "./add-asset-dialog"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -920,6 +921,7 @@ export function AssetsTable() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState("")
+  const [isAddAssetDialogOpen, setIsAddAssetDialogOpen] = React.useState(false)
 
   const table = useReactTable({
     data: assetsData,
@@ -1008,7 +1010,7 @@ export function AssetsTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setIsAddAssetDialogOpen(true)}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Asset
           </Button>
@@ -1123,6 +1125,7 @@ export function AssetsTable() {
           </div>
         </div>
       </div>
+      <AddAssetDialog isOpen={isAddAssetDialogOpen} onClose={() => setIsAddAssetDialogOpen(false)} />
     </div>
   )
 }
