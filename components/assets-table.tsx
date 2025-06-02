@@ -55,7 +55,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { MasterDrawer } from "./master-drawer"
-import { AddAssetDialog } from "./add-asset-dialog"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -559,6 +558,46 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
         <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
           Show all values
         </Button>
+
+        {/* Lists and Activity Section */}
+        <div className="space-y-4 mt-6">
+          <h4 className="text-sm font-medium">Lists and Activity</h4>
+
+          <div className="rounded-lg border border-muted bg-muted/10 p-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Lists</Label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    <Badge variant="secondary" className="text-xs">
+                      Portfolio Assets
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      High Performers
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <Label className="text-xs text-muted-foreground">Recent Activity</Label>
+                  <div className="space-y-2 mt-1">
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium">Valuation updated</span> • 2 days ago
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium">Performance review completed</span> • 1 week ago
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-medium">Added to portfolio</span> • 2 weeks ago
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -1009,12 +1048,10 @@ export function AssetsTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <AddAssetDialog>
-            <Button size="sm">
-              <PlusIcon className="mr-2 h-4 w-4" />
-              Add Asset
-            </Button>
-          </AddAssetDialog>
+          <Button size="sm">
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add Asset
+          </Button>
         </div>
       </div>
 
