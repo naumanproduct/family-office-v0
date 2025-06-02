@@ -52,7 +52,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { MasterDrawer } from "./master-drawer"
 import { AddAssetDialog } from "./add-asset-dialog"
@@ -189,7 +189,6 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
     { id: "files", label: "Files", count: 5, icon: FolderIcon },
     { id: "team", label: "Team", count: 6, icon: UsersIcon },
-    { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
   const renderTabContent = (
@@ -793,203 +792,9 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
   )
 }
 
-function AssetCompanyContent({ asset }: { asset: Asset }) {
-  // Map asset data to company information
-  const getCompanyName = () => {
-    if (asset.name.includes("TechFlow")) return "TechFlow Ventures"
-    if (asset.name.includes("MedInnovate")) return "MedInnovate Inc."
-    if (asset.name.includes("PayFlow")) return "PayFlow Solutions"
-    if (asset.name.includes("Urban Development")) return "Urban Development Partners"
-    if (asset.name.includes("Green Energy")) return "Green Energy Corp"
-    return asset.name.split(" ")[0] + " Inc."
-  }
-
-  const getCompanyInitials = () => {
-    const name = getCompanyName()
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .substring(0, 2)
-  }
-
-  const getCompanyDescription = () => {
-    switch (asset.sector) {
-      case "Enterprise Software":
-        return "Leading provider of enterprise software solutions for project management and team collaboration. Serving Fortune 500 companies with innovative cloud-based platforms that streamline business operations and enhance productivity."
-      case "Healthcare Technology":
-        return "Innovative healthcare technology company developing cutting-edge medical devices and digital health solutions. Focused on improving patient outcomes through advanced diagnostics and personalized treatment platforms."
-      case "Financial Technology":
-        return "Financial technology company specializing in payment processing and digital banking solutions. Providing secure, scalable fintech infrastructure for businesses and consumers worldwide."
-      case "Real Estate":
-        return "Real estate development and investment company focused on sustainable urban development projects. Creating mixed-use communities that combine residential, commercial, and retail spaces."
-      case "Clean Energy":
-        return "Clean energy infrastructure company developing renewable energy projects including solar, wind, and energy storage solutions. Committed to accelerating the transition to sustainable energy."
-      default:
-        return (
-          "Innovative company operating in the " +
-          asset.sector.toLowerCase() +
-          " sector with a focus on growth and market leadership."
-        )
-    }
-  }
-
-  const getEmployeeRange = () => {
-    switch (asset.sector) {
-      case "Enterprise Software":
-        return "500-1000"
-      case "Healthcare Technology":
-        return "100-250"
-      case "Financial Technology":
-        return "250-500"
-      case "Real Estate":
-        return "50-100"
-      case "Clean Energy":
-        return "200-500"
-      default:
-        return "100-500"
-    }
-  }
-
-  const getRevenueRange = () => {
-    switch (asset.sector) {
-      case "Enterprise Software":
-        return "$50M - $100M"
-      case "Healthcare Technology":
-        return "$10M - $25M"
-      case "Financial Technology":
-        return "$25M - $50M"
-      case "Real Estate":
-        return "$100M - $250M"
-      case "Clean Energy":
-        return "$75M - $150M"
-      default:
-        return "$25M - $75M"
-    }
-  }
-
-  const getWebsite = () => {
-    return (
-      getCompanyName()
-        .toLowerCase()
-        .replace(/\s+/g, "")
-        .replace(/[^a-z]/g, "") + ".com"
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-start gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary text-primary-foreground text-2xl font-bold">
-              {getCompanyInitials()}
-            </div>
-            <div className="flex-1">
-              <CardTitle className="text-xl">{getCompanyName()}</CardTitle>
-              <CardDescription className="mt-1">
-                {asset.sector} • {asset.geography}
-              </CardDescription>
-              <div className="mt-3 flex items-center gap-4">
-                <Badge variant="outline">Portfolio Company</Badge>
-                <Badge
-                  variant="outline"
-                  className={getStatusColor(asset.status).includes("green") ? "text-green-600" : "text-yellow-600"}
-                >
-                  {asset.status}
-                </Badge>
-                <span className="text-sm text-muted-foreground">Investment: {asset.acquisitionDate}</span>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h4 className="text-sm font-medium mb-2">Company Overview</h4>
-            <p className="text-sm text-muted-foreground">{getCompanyDescription()}</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h4 className="text-sm font-medium mb-2">Key Details</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Industry:</span>
-                  <span>{asset.sector}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Employees:</span>
-                  <span>{getEmployeeRange()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Revenue:</span>
-                  <span>{getRevenueRange()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Website:</span>
-                  <span className="text-blue-600">{getWebsite()}</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-medium mb-2">Investment Info</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Investment Type:</span>
-                  <span>{asset.type}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Category:</span>
-                  <span>{asset.category}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Current Value:</span>
-                  <span>{asset.currentValue}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Original Cost:</span>
-                  <span>{asset.originalCost}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-medium mb-2">Recent Activity</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <div
-                  className={`h-2 w-2 rounded-full ${asset.percentageGain > 0 ? "bg-green-500" : "bg-red-500"}`}
-                ></div>
-                <span>Valuation updated to {asset.currentValue}</span>
-                <span className="text-muted-foreground">• {asset.lastValuation}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                <span>Quarterly board meeting completed</span>
-                <span className="text-muted-foreground">• 2 weeks ago</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-                <span>Investment committee review</span>
-                <span className="text-muted-foreground">• 1 month ago</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
 function AssetTabContent({ activeTab, asset }: { activeTab: string; asset: Asset }) {
   if (activeTab === "details") {
     return <AssetDetailsPanel asset={asset} isFullScreen={false} />
-  }
-
-  if (activeTab === "company") {
-    return <AssetCompanyContent asset={asset} />
   }
 
   if (activeTab === "performance") {
