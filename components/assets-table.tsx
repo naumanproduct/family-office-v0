@@ -465,22 +465,6 @@ function getAssetTabData(activeTab: string, asset: Asset) {
 function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
   return (
     <div className="p-6">
-      {/* Details Tab */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-6">
-          <button className="relative border-b-2 border-primary pb-3 text-sm font-medium text-primary">
-            Details
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
-          </button>
-          <button className="relative pb-3 text-sm text-muted-foreground hover:text-foreground">
-            Comments
-            <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-              0
-            </Badge>
-          </button>
-        </div>
-      </div>
-
       {/* Asset Details */}
       <div className="space-y-4">
         <h4 className="text-sm font-medium">Asset Details</h4>
@@ -498,43 +482,27 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
             <div className="flex items-center gap-2">
               <BuildingIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Type</Label>
+                <Label className="text-xs text-muted-foreground">Asset Type</Label>
                 <p className="text-sm">{asset.type}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-start gap-2">
+              <TrendingUpIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Category</Label>
-                <p className="text-sm">{asset.category}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Current Value</Label>
-                <p className="text-sm">{asset.currentValue}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Original Cost</Label>
-                <p className="text-sm">{asset.originalCost}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Unrealized Gain/Loss</Label>
-                <p className={`text-sm ${getGainColor(asset.percentageGain)}`}>
-                  {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
-                  {asset.percentageGain}%)
+                <Label className="text-xs text-muted-foreground">Investment Thesis</Label>
+                <p className="text-sm">
+                  Strategic investment in {asset.sector} sector with strong growth potential and market leadership
+                  position...
                 </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Owning Entity</Label>
+                <p className="text-sm text-blue-600">{asset.entity}</p>
               </div>
             </div>
 
@@ -547,10 +515,21 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
             </div>
 
             <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Entity</Label>
-                <p className="text-sm">{asset.entity}</p>
+                <Label className="text-xs text-muted-foreground">Current Value</Label>
+                <p className="text-sm">{asset.currentValue}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Performance</Label>
+                <p className={`text-sm ${getGainColor(asset.percentageGain)}`}>
+                  {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
+                  {asset.percentageGain}%)
+                </p>
               </div>
             </div>
           </div>
@@ -560,6 +539,256 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
           Show all values
         </Button>
       </div>
+
+      {/* Portfolios Section */}
+      <div className="mt-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h4 className="text-sm font-medium">Portfolios</h4>
+          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+            Add to portfolio
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">This asset has not been added to any portfolios</p>
+      </div>
+
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <AssetActivityContent asset={asset} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AssetActivityContent({ asset }: { asset: Asset }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+
+  const activities = [
+    {
+      id: 1,
+      type: "valuation",
+      actor: "Portfolio Team",
+      action: "updated valuation for",
+      target: asset.name,
+      timestamp: "2 days ago",
+      date: "2025-01-28",
+      details: {
+        previousValue: "$17.2M",
+        newValue: asset.currentValue,
+        reason: "Q4 2024 performance review and market comparables analysis",
+        methodology: "DCF and comparable company analysis",
+      },
+    },
+    {
+      id: 2,
+      type: "distribution",
+      actor: asset.name,
+      action: "distributed",
+      target: "$500K",
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        amount: "$500,000",
+        type: "Quarterly Distribution",
+        perShare: "$2.50",
+        totalShares: "200,000",
+        paymentDate: "2025-01-25",
+      },
+    },
+    {
+      id: 3,
+      type: "investment",
+      actor: "Investment Committee",
+      action: "approved investment in",
+      target: asset.name,
+      timestamp: "6 months ago",
+      date: "2024-08-15",
+      details: {
+        amount: asset.originalCost,
+        investmentType: asset.type,
+        sector: asset.sector,
+        geography: asset.geography,
+        approvalDate: "2024-08-10",
+        fundingDate: "2024-08-15",
+      },
+    },
+  ]
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "valuation":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      case "distribution":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      case "investment":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
+
+  const formatActivityText = (activity: any) => {
+    switch (activity.type) {
+      case "valuation":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <Badge variant="outline" className="text-xs mx-1">
+              {activity.target}
+            </Badge>
+          </span>
+        )
+      case "distribution":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium text-green-600">{activity.target}</span>
+          </span>
+        )
+      case "investment":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium">{activity.target}</span>
+          </span>
+        )
+      default:
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium">{activity.target}</span>
+          </span>
+        )
+    }
+  }
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "valuation":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Valuation Update</h5>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Value:</span>{" "}
+                  <span>{activity.details.previousValue}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Value:</span>{" "}
+                  <span className="font-medium">{activity.details.newValue}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Methodology</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.methodology}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+          </div>
+        )
+      case "distribution":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Distribution Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Per Share:</span> <span>{activity.details.perShare}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Total Shares:</span>{" "}
+                  <span>{activity.details.totalShares}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Payment Date</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.paymentDate}</p>
+            </div>
+          </div>
+        )
+      case "investment":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Investment Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.investmentType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Sector:</span> <span>{activity.details.sector}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Geography:</span> <span>{activity.details.geography}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Approval Date:</span>{" "}
+                <span>{activity.details.approvalDate}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Funding Date:</span> <span>{activity.details.fundingDate}</span>
+              </div>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
     </div>
   )
 }
