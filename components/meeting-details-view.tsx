@@ -13,7 +13,6 @@ import {
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -276,10 +275,6 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
                 )}
               </div>
             </div>
-
-            <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-              Show all values
-            </Button>
 
             {/* Typable Area */}
             <TypableArea
