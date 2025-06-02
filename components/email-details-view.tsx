@@ -272,7 +272,7 @@ Sarah`,
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Email Header */}
+      {/* Email Header - Exact same placement as task header */}
       <div className="border-b bg-background px-6 py-2">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -286,6 +286,10 @@ Sarah`,
                 onBlur={() => setIsEditingSubject(false)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
+                    setIsEditingSubject(false)
+                  }
+                  if (e.key === "Escape") {
+                    setEmailSubject(email?.subject || "No Subject")
                     setIsEditingSubject(false)
                   }
                 }}
@@ -305,7 +309,7 @@ Sarah`,
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs - Exact same styling as task tabs */}
       <div className="border-b bg-background px-6 py-1">
         <div className="flex gap-6 overflow-x-auto">
           {tabs.map((tab) => {
