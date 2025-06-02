@@ -52,7 +52,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { MasterDrawer } from "./master-drawer"
 import { AddAssetDialog } from "./add-asset-dialog"
@@ -189,6 +189,7 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
     { id: "files", label: "Files", count: 5, icon: FolderIcon },
     { id: "team", label: "Team", count: 6, icon: UsersIcon },
+    { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
   const renderTabContent = (
@@ -201,6 +202,10 @@ function AssetNameCell({ asset }: { asset: Asset }) {
   ) => {
     if (activeTab === "details") {
       return <AssetDetailsPanel asset={asset} isFullScreen={false} />
+    }
+
+    if (activeTab === "company") {
+      return <AssetCompanyContent asset={asset} />
     }
 
     if (activeTab === "performance") {
@@ -792,9 +797,109 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
   )
 }
 
+function AssetCompanyContent({ asset }: { asset: Asset }) {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-start gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary text-primary-foreground text-2xl font-bold">
+              AC
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-xl">Acme Corporation</CardTitle>
+              <CardDescription className="mt-1">Technology • San Francisco, CA</CardDescription>
+              <div className="mt-3 flex items-center gap-4">
+                <Badge variant="outline">Enterprise</Badge>
+                <Badge variant="outline" className="text-green-600">
+                  Active Customer
+                </Badge>
+                <span className="text-sm text-muted-foreground">Founded 2015</span>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium mb-2">Company Overview</h4>
+            <p className="text-sm text-muted-foreground">
+              Acme Corporation is a leading technology company specializing in enterprise software solutions. They
+              provide innovative tools for project management, team collaboration, and business analytics to Fortune 500
+              companies worldwide. With over 500 employees and offices in 12 countries, Acme has established itself as a
+              trusted partner for digital transformation initiatives.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-sm font-medium mb-2">Key Details</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Industry:</span>
+                  <span>Technology</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Employees:</span>
+                  <span>500-1000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Revenue:</span>
+                  <span>$50M - $100M</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Website:</span>
+                  <span className="text-blue-600">acme.com</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-2">Contact Info</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Phone:</span>
+                  <span>+1 (555) 123-4567</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email:</span>
+                  <span className="text-blue-600">info@acme.com</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Address:</span>
+                  <span>123 Tech St, SF, CA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-medium mb-2">Recent Activity</h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span>Contract renewed for $250K</span>
+                <span className="text-muted-foreground">• 2 weeks ago</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                <span>New contact added: Sarah Johnson</span>
+                <span className="text-muted-foreground">• 1 month ago</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 function AssetTabContent({ activeTab, asset }: { activeTab: string; asset: Asset }) {
   if (activeTab === "details") {
     return <AssetDetailsPanel asset={asset} isFullScreen={false} />
+  }
+
+  if (activeTab === "company") {
+    return <AssetCompanyContent asset={asset} />
   }
 
   if (activeTab === "performance") {
