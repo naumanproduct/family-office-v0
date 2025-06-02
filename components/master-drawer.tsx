@@ -222,8 +222,8 @@ export function MasterDrawer({
             )}
 
             {/* Tab Content */}
-            <div className={selectedTask || selectedNote ? "flex-1" : "p-6"}>
-              {!selectedTask && !selectedNote && (
+            <div className={selectedTask || selectedNote || selectedEmail || selectedMeeting ? "flex-1" : "p-6"}>
+              {!selectedTask && !selectedNote && !selectedEmail && !selectedMeeting && (
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
                   <div className="flex items-center gap-2">
@@ -277,7 +277,10 @@ export function MasterDrawer({
                 } else if (selectedEmail) {
                   setSelectedEmail(null)
                 } else {
-                  document.querySelector('[data-state="open"]')?.click()
+                  const openElement = document.querySelector('[data-state="open"]');
+                  if (openElement && 'click' in openElement) {
+                    (openElement as HTMLElement).click();
+                  }
                 }
               }}
             >
@@ -358,8 +361,8 @@ export function MasterDrawer({
           )}
 
           {/* Tab Content */}
-          <div className={selectedTask || selectedNote ? "flex-1" : "p-6"}>
-            {!selectedTask && !selectedNote && (
+          <div className={selectedTask || selectedNote || selectedEmail || selectedMeeting ? "flex-1" : "p-6"}>
+            {!selectedTask && !selectedNote && !selectedEmail && !selectedMeeting && (
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
                 <div className="flex items-center gap-2">
