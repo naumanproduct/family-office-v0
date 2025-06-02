@@ -13,6 +13,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  flexRender,
 } from "@tanstack/react-table"
 import {
   ChevronDownIcon,
@@ -36,7 +37,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
 
 import { createPortal } from "react-dom"
 import {
@@ -60,6 +70,7 @@ import { Label } from "@/components/ui/label"
 import { EmailsTable } from "./emails-table"
 import { TasksTable } from "./tasks-table"
 import { NotesTable } from "./notes-table"
+import { MasterDrawer } from "./master-drawer"
 
 export const contactSchema = z.object({
   id: z.number(),
@@ -286,219 +297,656 @@ const formatNumber = (num: number) => {
 }
 
 function ContactNameCell({ contact }: { contact: Contact }) {
-  const [isFullScreen, setIsFullScreen] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState("details")
-
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "emails", label: "Emails", count: 8, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 5, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 2, icon: FolderIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 5, icon: FolderIcon },
   ]
 
-  const FullScreenContent = () => {
-    const content = (
-      <div className="fixed inset-0 z-[9999] bg-background">
-        {/* Full Screen Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="bg-background">
-              Contacts
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <MailIcon className="h-4 w-4" />
-              Compose email
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(false)}>
-              <XIcon className="h-4 w-4" />
-              Close
-            </Button>
-          </div>
-        </div>
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    if (activeTab === "details") {
+      return <ContactDetailsPanel contact={contact} isFullScreen={false} />
+    }
 
-        {/* Full Screen Content - Two Column Layout */}
-        <div className="flex h-[calc(100vh-73px)]">
-          {/* Left Panel - Details (Persistent) */}
-          <div className="w-96 border-r bg-background">
-            <ContactDetailsPanel contact={contact} isFullScreen={true} />
-          </div>
+    // For other tabs, return generic content similar to the dashboard
+    const data = getContactTabData(activeTab, contact)
 
-          {/* Right Panel - Main Content */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Record Header */}
-            <div className="border-b bg-background px-6 py-2">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={contact.avatar || "/placeholder.svg"}
-                    alt={`${contact.firstName} ${contact.lastName}`}
-                  />
-                  <AvatarFallback>
-                    {contact.firstName.charAt(0)}
-                    {contact.lastName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    {contact.firstName} {contact.lastName}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {contact.jobTitle} at {contact.company}
-                  </p>
-                </div>
-              </div>
-            </div>
+    if (viewMode === "table") {
+      return (
+        <TableView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
 
-            {/* Tabs */}
-            <div className="border-b bg-background px-6">
-              <div className="flex gap-8 overflow-x-auto">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                      activeTab === tab.id
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.icon && <tab.icon className="h-4 w-4" />}
-                    {tab.label}
-                    {tab.count !== null && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                        {tab.count}
-                      </Badge>
-                    )}
-                    {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                  </button>
-                ))}
-              </div>
-            </div>
+    if (viewMode === "card") {
+      return (
+        <CardView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
 
-            {/* Tab Content */}
-            <div className="p-6">
-              <ContactTabContent activeTab={activeTab} contact={contact} />
-            </div>
-          </div>
-        </div>
-      </div>
+    return (
+      <ListView
+        data={data}
+        activeTab={activeTab}
+        onTaskClick={setSelectedTask}
+        onNoteClick={setSelectedNote}
+        onMeetingClick={setSelectedMeeting}
+        onEmailClick={setSelectedEmail}
+      />
     )
-
-    return typeof document !== "undefined" ? createPortal(content, document.body) : null
   }
 
-  if (isFullScreen) {
-    return <FullScreenContent />
+  const renderDetailsPanel = (isFullScreen = false) => {
+    return <ContactDetailsPanel contact={contact} isFullScreen={isFullScreen} />
+  }
+
+  const customActions: React.ReactNode[] = [
+    <Button key="email" variant="outline" size="sm" onClick={() => console.log("Compose email to", contact.email)}>
+      <MailIcon className="h-4 w-4 mr-2" />
+      Email
+    </Button>,
+  ]
+
+  return (
+    <MasterDrawer
+      trigger={
+        <Button variant="link" className="px-0 h-auto font-medium flex items-center gap-2 text-left">
+          <Avatar className="h-8 w-8">
+            {contact.avatar && <AvatarImage src={contact.avatar} alt={`${contact.firstName} ${contact.lastName}`} />}
+            <AvatarFallback>
+              {contact.firstName.charAt(0)}
+              {contact.lastName.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col items-start">
+            <span>
+              {contact.firstName} {contact.lastName}
+            </span>
+            <span className="text-xs text-muted-foreground">{contact.email}</span>
+          </div>
+        </Button>
+      }
+      title={`${contact.firstName} ${contact.lastName}`}
+      recordType="Contact"
+      subtitle={`${contact.jobTitle} at ${contact.company}`}
+      tabs={tabs}
+      detailsPanel={renderDetailsPanel}
+      customActions={customActions}
+      onComposeEmail={() => console.log("Compose email to", contact.email)}
+    >
+      {renderTabContent}
+    </MasterDrawer>
+  )
+}
+
+function getContactTabData(activeTab: string, contact: Contact) {
+  switch (activeTab) {
+    case "emails":
+      return [
+        {
+          id: 1,
+          subject: "Meeting Request",
+          from: contact.email,
+          date: "2 hours ago",
+          status: "Unread",
+          preview: `Hello, I would like to schedule a meeting to discuss...`,
+          type: "received",
+        },
+        {
+          id: 2,
+          subject: "Follow-up",
+          from: "me@company.com",
+          date: "1 day ago",
+          status: "Sent",
+          preview: `Hi ${contact.firstName}, thank you for our meeting yesterday...`,
+          type: "sent",
+        },
+      ]
+    case "tasks":
+      return [
+        {
+          id: 1,
+          title: `Send information to ${contact.firstName}`,
+          priority: "High",
+          status: "pending",
+          assignee: "You",
+          dueDate: "Tomorrow",
+          description: `Prepare and send requested information to ${contact.firstName} ${contact.lastName}`,
+        },
+        {
+          id: 2,
+          title: "Schedule follow-up call",
+          priority: "Medium",
+          status: "pending",
+          assignee: "You",
+          dueDate: "Next week",
+          description: `Schedule a follow-up call with ${contact.firstName} to discuss next steps`,
+        },
+      ]
+    case "notes":
+      return [
+        {
+          id: 1,
+          title: "Initial Contact Notes",
+          date: "2 weeks ago",
+          content: `First meeting with ${contact.firstName}. Discussed potential collaboration opportunities.`,
+        },
+        {
+          id: 2,
+          title: "Background Information",
+          date: "1 month ago",
+          content: `${contact.firstName} previously worked at InnovateTech for 5 years before joining ${contact.company}.`,
+        },
+      ]
+    case "meetings":
+      return [
+        {
+          id: 1,
+          title: "Introductory Call",
+          date: "Tomorrow, 2:00 PM",
+          status: "Scheduled",
+          attendees: ["You", contact.firstName + " " + contact.lastName],
+        },
+        {
+          id: 2,
+          title: "Project Review",
+          date: "Next Monday, 10:00 AM",
+          status: "Scheduled",
+          attendees: ["You", contact.firstName + " " + contact.lastName, "Sarah Johnson"],
+        },
+      ]
+    case "files":
+      return [
+        {
+          id: 1,
+          name: "Contact Profile.pdf",
+          uploadedBy: "You",
+          uploadedDate: "2 weeks ago",
+          size: "1.4 MB",
+          type: "pdf",
+        },
+        {
+          id: 2,
+          name: "Meeting Notes.docx",
+          uploadedBy: "Sarah Johnson",
+          uploadedDate: "1 month ago",
+          size: "0.8 MB",
+          type: "docx",
+        },
+      ]
+    default:
+      return []
+  }
+}
+
+function TableView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">No {activeTab} found</p>
+      </div>
+    )
   }
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage
-                src={contact.avatar || "/placeholder.svg"}
-                alt={`${contact.firstName} ${contact.lastName}`}
-              />
-              <AvatarFallback>
-                {contact.firstName.charAt(0)}
-                {contact.lastName.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="font-medium">
-              {contact.firstName} {contact.lastName}
-            </span>
-          </div>
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => document.querySelector('[data-state="open"]')?.click()}>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="outline" className="bg-background">
-              Contacts
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(true)}>
-              <ExpandIcon className="h-4 w-4" />
-              Full screen
-            </Button>
-            <Button variant="outline" size="sm">
-              <MailIcon className="h-4 w-4" />
-              Compose email
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Record Header */}
-          <div className="border-b bg-background px-6 py-2">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={contact.avatar || "/placeholder.svg"}
-                  alt={`${contact.firstName} ${contact.lastName}`}
-                />
-                <AvatarFallback>
-                  {contact.firstName.charAt(0)}
-                  {contact.lastName.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-lg font-semibold">
-                  {contact.firstName} {contact.lastName}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {contact.jobTitle} at {contact.company}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="border-b bg-background px-6">
-            <div className="flex gap-8 overflow-x-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? "border-b-2 border-primary text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab.icon && <tab.icon className="h-4 w-4" />}
-                  {tab.label}
-                  {tab.count !== null && (
-                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                      {tab.count}
+    <div className="rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {activeTab === "emails" && (
+              <>
+                <TableHead>Subject</TableHead>
+                <TableHead>From</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </>
+            )}
+            {activeTab === "tasks" && (
+              <>
+                <TableHead>Title</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead>Priority</TableHead>
+                <TableHead>Assignee</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </>
+            )}
+            {activeTab === "notes" && (
+              <>
+                <TableHead>Title</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </>
+            )}
+            {activeTab === "meetings" && (
+              <>
+                <TableHead>Title</TableHead>
+                <TableHead>Date & Time</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Attendees</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </>
+            )}
+            {activeTab === "files" && (
+              <>
+                <TableHead>Name</TableHead>
+                <TableHead>Uploaded By</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Size</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </>
+            )}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((item) => (
+            <TableRow
+              key={item.id}
+              className={`${
+                (activeTab === "tasks" && onTaskClick) ||
+                (activeTab === "notes" && onNoteClick) ||
+                (activeTab === "meetings" && onMeetingClick) ||
+                (activeTab === "emails" && onEmailClick)
+                  ? "cursor-pointer hover:bg-muted/50"
+                  : ""
+              }`}
+              onClick={() => {
+                if (activeTab === "tasks" && onTaskClick) {
+                  onTaskClick(item)
+                } else if (activeTab === "notes" && onNoteClick) {
+                  onNoteClick(item)
+                } else if (activeTab === "meetings" && onMeetingClick) {
+                  onMeetingClick(item)
+                } else if (activeTab === "emails" && onEmailClick) {
+                  onEmailClick(item)
+                }
+              }}
+            >
+              {activeTab === "emails" && (
+                <>
+                  <TableCell className="font-medium">{item.subject}</TableCell>
+                  <TableCell>{item.from}</TableCell>
+                  <TableCell>{item.date}</TableCell>
+                  <TableCell>
+                    <Badge variant={item.status === "Unread" ? "default" : "outline"}>{item.status}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <MoreVerticalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>View</DropdownMenuItem>
+                        <DropdownMenuItem>Reply</DropdownMenuItem>
+                        <DropdownMenuItem>Forward</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </>
+              )}
+              {activeTab === "tasks" && (
+                <>
+                  <TableCell className="font-medium">{item.title}</TableCell>
+                  <TableCell>{item.dueDate}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+                      }
+                    >
+                      {item.priority}
                     </Badge>
-                  )}
-                  {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                </button>
-              ))}
-            </div>
-          </div>
+                  </TableCell>
+                  <TableCell>{item.assignee}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{item.status}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <MoreVerticalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>View</DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </>
+              )}
+              {/* Add implementations for other tab types as needed */}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
 
-          {/* Tab Content */}
-          <div className="p-6">
-            <ContactTabContent activeTab={activeTab} contact={contact} />
-          </div>
+function CardView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">No {activeTab} found</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {data.map((item) => (
+        <Card
+          key={item.id}
+          className={`${
+            (activeTab === "tasks" && onTaskClick) ||
+            (activeTab === "notes" && onNoteClick) ||
+            (activeTab === "meetings" && onMeetingClick) ||
+            (activeTab === "emails" && onEmailClick)
+              ? "cursor-pointer hover:bg-muted/50"
+              : ""
+          }`}
+          onClick={() => {
+            if (activeTab === "tasks" && onTaskClick) {
+              onTaskClick(item)
+            } else if (activeTab === "notes" && onNoteClick) {
+              onNoteClick(item)
+            } else if (activeTab === "meetings" && onMeetingClick) {
+              onMeetingClick(item)
+            } else if (activeTab === "emails" && onEmailClick) {
+              onEmailClick(item)
+            }
+          }}
+        >
+          <CardContent className="p-4">
+            {/* Email Card */}
+            {activeTab === "emails" && (
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{item.subject}</h4>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.preview}</p>
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">From:</span>
+                      <span>{item.from}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Date:</span>
+                      <span>{item.date}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={item.status === "Unread" ? "default" : "outline"}>{item.status}</Badge>
+                    </div>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Reply</DropdownMenuItem>
+                    <DropdownMenuItem>Forward</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
+            {/* Task Card */}
+            {activeTab === "tasks" && (
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Due:</span>
+                      <span>{item.dueDate}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Assignee:</span>
+                      <span>{item.assignee}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={
+                          item.priority === "High"
+                            ? "destructive"
+                            : item.priority === "Medium"
+                              ? "default"
+                              : "secondary"
+                        }
+                      >
+                        {item.priority}
+                      </Badge>
+                      <Badge variant="outline">{item.status}</Badge>
+                    </div>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+
+            {/* Add implementations for other card types as needed */}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function ListView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">No {activeTab} found</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {data.map((item) => (
+        <div
+          key={item.id}
+          className={`rounded-lg border p-4 ${
+            (activeTab === "tasks" && onTaskClick) ||
+            (activeTab === "notes" && onNoteClick) ||
+            (activeTab === "meetings" && onMeetingClick) ||
+            (activeTab === "emails" && onEmailClick)
+              ? "cursor-pointer hover:bg-muted/50"
+              : ""
+          }`}
+          onClick={() => {
+            if (activeTab === "tasks" && onTaskClick) {
+              onTaskClick(item)
+            } else if (activeTab === "notes" && onNoteClick) {
+              onNoteClick(item)
+            } else if (activeTab === "meetings" && onMeetingClick) {
+              onMeetingClick(item)
+            } else if (activeTab === "emails" && onEmailClick) {
+              onEmailClick(item)
+            }
+          }}
+        >
+          {/* Email List Item */}
+          {activeTab === "emails" && (
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.subject}</p>
+                    <p className="text-xs text-muted-foreground">From: {item.from}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{item.date}</p>
+                    <div className="mt-1">
+                      <Badge variant={item.status === "Unread" ? "default" : "outline"} className="text-xs">
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.preview}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Reply</DropdownMenuItem>
+                  <DropdownMenuItem>Forward</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
+          {/* Task List Item */}
+          {activeTab === "tasks" && (
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{item.title}</p>
+                    <p className="text-xs text-muted-foreground">Assigned to: {item.assignee}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Due: {item.dueDate}</p>
+                    <div className="mt-1 flex items-center gap-1 justify-end">
+                      <Badge
+                        variant={
+                          item.priority === "High"
+                            ? "destructive"
+                            : item.priority === "Medium"
+                              ? "default"
+                              : "secondary"
+                        }
+                        className="text-xs"
+                      >
+                        {item.priority}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.description}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
+          {/* Add implementations for other list item types as needed */}
         </div>
-      </SheetContent>
-    </Sheet>
+      ))}
+    </div>
   )
 }
 
@@ -590,76 +1038,6 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
         <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
           Show all values
         </Button>
-      </div>
-    </div>
-  )
-}
-
-function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
-  if (activeTab === "details") {
-    return <ContactDetailsPanel contact={contact} isFullScreen={false} />
-  }
-
-  if (activeTab === "emails") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Emails</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Compose Email
-          </Button>
-        </div>
-        <EmailsTable />
-      </div>
-    )
-  }
-
-  if (activeTab === "tasks") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Tasks</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add Task
-          </Button>
-        </div>
-        <TasksTable />
-      </div>
-    )
-  }
-
-  if (activeTab === "notes") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Notes</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add Note
-          </Button>
-        </div>
-        <NotesTable />
-      </div>
-    )
-  }
-
-  // Generic content for other tabs
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
-        <Button variant="outline" size="sm">
-          <PlusIcon className="h-4 w-4" />
-          Add {activeTab.slice(0, -1)}
-        </Button>
-      </div>
-      <div className="text-center py-8 text-muted-foreground">
-        <p>
-          No {activeTab} found for {contact.firstName} {contact.lastName}
-        </p>
-        <p className="text-sm">Add some {activeTab} to get started</p>
       </div>
     </div>
   )
@@ -858,8 +1236,120 @@ export function PeopleTable() {
               <DropdownMenuItem>Strong connections</DropdownMenuItem>
               <DropdownMenuItem>Recent interactions</DropdownMenuItem>
             </DropdownMenuContent>
-            \
           </DropdownMenu>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" className="h-8">
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add contact
+          </Button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="whitespace-nowrap">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        <div className="flex items-center space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-2">
+            <p className="text-sm font-medium">Rows per page</p>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(e) => {
+                table.setPageSize(Number(e.target.value))
+              }}
+              className="h-8 w-[70px] rounded-md border border-input bg-transparent px-2 py-1 text-sm"
+            >
+              {[10, 25, 50, 100].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <span className="sr-only">Go to first page</span>
+              <ChevronLeftIcon className="h-4 w-4" />
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <span className="sr-only">Go to next page</span>
+              <ChevronDownIcon className="h-4 w-4 rotate-[-90deg]" />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <span className="sr-only">Go to last page</span>
+              <ChevronDownIcon className="h-4 w-4 rotate-[-90deg]" />
+              <ChevronDownIcon className="h-4 w-4 rotate-[-90deg]" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

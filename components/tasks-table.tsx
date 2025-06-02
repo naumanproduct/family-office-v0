@@ -13,7 +13,11 @@ import {
   FileTextIcon,
   CalendarIcon,
   UsersIcon,
+  ChevronLeftIcon,
+  XIcon,
+  ExpandIcon,
 } from "lucide-react"
+import { createPortal } from "react-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,6 +33,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 import { TaskDetailsView } from "./task-details-view"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 
 // Task data - extended from investment tab but across all objects
 const tasksData = [
@@ -282,6 +287,40 @@ export function TasksTable() {
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("list")
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
+  const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
+  const [isFullScreen, setIsFullScreen] = React.useState(false)
+
+  // Handle back navigation in the drawer
+  const handleDrawerBackClick = () => {
+    if (selectedSubtask) {
+      // If in a subtask view, return to parent task
+      setSelectedSubtask(null)
+    } else {
+      // If in main task view, close the drawer
+      setSelectedTask(null)
+    }
+  }
+
+  // Handle a subtask selection
+  const handleSubtaskClick = (subtask: any) => {
+    setSelectedSubtask(subtask)
+  }
+
+  // ESC key handler for full screen mode
+  React.useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isFullScreen) {
+        setIsFullScreen(false)
+      }
+    }
+
+    if (isFullScreen) {
+      document.addEventListener('keydown', handleEscKey)
+      return () => {
+        document.removeEventListener('keydown', handleEscKey)
+      }
+    }
+  }, [isFullScreen])
 
   const ViewModeSelector = () => (
     <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -322,53 +361,133 @@ export function TasksTable() {
     return <TaskListView data={tasksData} onTaskClick={setSelectedTask} />
   }
 
-  if (selectedTask) {
-    return <TaskDetailsView task={selectedTask} onBack={() => setSelectedTask(null)} recordName="All Tasks" />
+  const FullScreenContent = () => {
+    if (typeof document === "undefined") return null
+    
+    return createPortal(
+      <div className="fixed inset-0 z-[9999] bg-background">
+        {/* Full Screen Header */}
+        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsFullScreen(false)}
+            >
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+            <Badge variant="outline" className="bg-background">
+              Task
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={() => setIsFullScreen(false)}>
+              <XIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Task Details Content */}
+        <div className="flex-1 overflow-auto">
+          <TaskDetailsView 
+            task={selectedSubtask || selectedTask}
+            onBack={handleDrawerBackClick}
+            recordName="All Tasks"
+            isInDrawer={true}
+            parentTask={selectedSubtask ? selectedTask : undefined}
+            onBackToParent={() => setSelectedSubtask(null)}
+            onSubtaskClick={handleSubtaskClick}
+          />
+        </div>
+      </div>,
+      document.body
+    )
   }
 
   return (
-    <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="relative">
-            <SearchIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search tasks..."
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-8 w-[300px]"
-            />
+    <>
+      <div className="space-y-4">
+        {/* Toolbar */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="relative">
+              <SearchIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search tasks..."
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="pl-8 w-[300px]"
+              />
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <FilterIcon className="mr-2 h-4 w-4" />
+                  Filter
+                  <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[200px]">
+                <DropdownMenuCheckboxItem>High priority</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>In progress</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>Overdue</DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem>Investment related</DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem>Entity related</DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <FilterIcon className="mr-2 h-4 w-4" />
-                Filter
-                <ChevronDownIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[200px]">
-              <DropdownMenuCheckboxItem>High priority</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>In progress</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Overdue</DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem>Investment related</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Entity related</DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center space-x-2">
+            <ViewModeSelector />
+            <Button size="sm">
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Add Task
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <ViewModeSelector />
-          <Button size="sm">
-            <PlusIcon className="mr-2 h-4 w-4" />
-            Add Task
-          </Button>
-        </div>
+
+        {/* Task Content */}
+        {renderTaskContent()}
       </div>
 
-      {/* Task Content */}
-      {renderTaskContent()}
-    </div>
+      {/* Render full screen content if in full screen mode */}
+      {isFullScreen && selectedTask && <FullScreenContent />}
+
+      {/* Task Details Sheet/Drawer */}
+      {selectedTask && !isFullScreen && (
+        <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+          <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <Badge variant="outline" className="bg-background">
+                  Task
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
+                  <ExpandIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            {/* Task Details Content */}
+            <div className="flex-1 overflow-auto">
+              <TaskDetailsView 
+                task={selectedSubtask || selectedTask}
+                onBack={handleDrawerBackClick}
+                recordName="All Tasks"
+                isInDrawer={true}
+                parentTask={selectedSubtask ? selectedTask : undefined}
+                onBackToParent={() => setSelectedSubtask(null)}
+                onSubtaskClick={handleSubtaskClick}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+    </>
   )
 }

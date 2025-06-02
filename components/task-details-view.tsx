@@ -13,6 +13,7 @@ import {
   CircleIcon,
   ClockIcon,
   DotIcon as DotsHorizontalIcon,
+  ChevronLeftIcon,
 } from "lucide-react"
 
 import {
@@ -35,9 +36,12 @@ interface TaskDetailsViewProps {
   recordName: string
   parentTask?: any
   onBackToParent?: () => void
+  isInDrawer?: boolean
+  onNavigateBack?: () => void
+  onSubtaskClick?: (subtask: any) => void
 }
 
-export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackToParent }: TaskDetailsViewProps) {
+export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackToParent, isInDrawer, onNavigateBack, onSubtaskClick }: TaskDetailsViewProps) {
   const [commentText, setCommentText] = React.useState("")
   const [taskTitle, setTaskTitle] = React.useState(task.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
@@ -144,19 +148,42 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
   }
 
   const handleSubtaskStatusChange = (subtaskId: string, newStatus: string) => {
-    setSubtasks(subtasks.map((subtask) => (subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask)))
+    setSubtasks(subtasks.map((subtask: any) => (subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask)))
   }
 
   const handleDeleteSubtask = (subtaskId: string) => {
-    setSubtasks(subtasks.filter((subtask) => subtask.id !== subtaskId))
+    setSubtasks(subtasks.filter((subtask: any) => subtask.id !== subtaskId))
   }
 
   const handleSubtaskClick = (subtask: any) => {
-    setSelectedSubtask(subtask)
+    if (onSubtaskClick) {
+      // If parent provided a subtask click handler, use it
+      onSubtaskClick(subtask)
+    } else {
+      // Otherwise, handle locally
+      setSelectedSubtask(subtask)
+    }
   }
 
   const handleBackFromSubtask = () => {
     setSelectedSubtask(null)
+  }
+
+  // Determine the correct back handler
+  const getBackHandler = () => {
+    if (selectedSubtask) {
+      // If we're viewing a subtask, return to the parent task
+      return handleBackFromSubtask
+    } else if (parentTask && onBackToParent) {
+      // If we're viewing a subtask of another task, return to that parent
+      return onBackToParent
+    } else if (isInDrawer && onNavigateBack) {
+      // If we're in a drawer and have a navigation handler, use it
+      return onNavigateBack
+    } else {
+      // Default back behavior
+      return onBack
+    }
   }
 
   const renderEditableField = (field: string, value: string, icon: React.ReactNode, label: string, isBadge = false) => {
@@ -207,14 +234,17 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
   }
 
   // If a subtask is selected, render the subtask view
-  if (selectedSubtask) {
+  if (selectedSubtask && !onSubtaskClick) {
     return (
       <TaskDetailsView
         task={selectedSubtask}
         onBack={handleBackFromSubtask}
         recordName={recordName}
         parentTask={task}
-        onBackToParent={onBack}
+        onBackToParent={handleBackFromSubtask}
+        isInDrawer={isInDrawer}
+        onNavigateBack={onNavigateBack}
+        onSubtaskClick={onSubtaskClick}
       />
     )
   }
@@ -224,6 +254,12 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
       {/* Task Header - Exact same placement as main drawer record header */}
       <div className="border-b bg-background px-6 py-2">
         <div className="flex items-center gap-3">
+          {/* Back Button - Show only when there's a parent task (for subtask navigation) but not in drawer */}
+          {parentTask && !isInDrawer && (
+            <Button variant="ghost" size="icon" onClick={getBackHandler()}>
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+          )}
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <CheckSquareIcon className="h-4 w-4" />
           </div>
@@ -360,7 +396,7 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
                 </div>
 
                 <div className="space-y-2">
-                  {subtasks.map((subtask) => (
+                  {subtasks.map((subtask: any) => (
                     <div
                       key={subtask.id}
                       className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
