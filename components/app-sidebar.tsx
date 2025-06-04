@@ -72,7 +72,7 @@ const data = {
       icon: CheckCircleIcon,
     },
     {
-      title: "Documents",
+      title: "Files",
       url: "/documents",
       icon: FileTextIcon,
     },

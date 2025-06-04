@@ -298,7 +298,7 @@ export function MasterDrawer({
                     {activeTab !== "activity" && activeTab !== "company" && activeTab !== "details" && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4" />
-                        Add {activeTab === "team" ? "member" : activeTab.slice(0, -1)}
+                        Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
                       </Button>
                     )}
                     {activeTab === "activity" && (
@@ -565,7 +565,7 @@ export function MasterDrawer({
                   {activeTab !== "activity" && activeTab !== "company" && activeTab !== "details" && (
                     <Button variant="outline" size="sm">
                       <PlusIcon className="h-4 w-4" />
-                      Add {activeTab === "team" ? "member" : activeTab.slice(0, -1)}
+                      Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
                     </Button>
                   )}
                   {activeTab === "activity" && (

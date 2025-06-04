@@ -28,6 +28,7 @@ import {
   SearchIcon,
   SortAscIcon,
   SortDescIcon,
+  UsersIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -66,6 +67,109 @@ import { Label } from "@/components/ui/label"
 
 // Import the AddPersonDialog at the top of the file
 import { AddPersonDialog } from "./add-person-dialog"
+import { MasterDrawer } from "./master-drawer"
+import { EmailsTable } from "./emails-table"
+import { TasksTable } from "./tasks-table"
+import { NotesTable } from "./notes-table"
+
+// Add missing component imports
+function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
+        <Button variant="outline" size="sm">
+          <PlusIcon className="h-4 w-4" />
+          Add {activeTab.slice(0, -1)}
+        </Button>
+      </div>
+      <div className="text-center py-8 text-muted-foreground">
+        <p>
+          No {activeTab} found for {contact.firstName} {contact.lastName}
+        </p>
+        <p className="text-sm">Add some {activeTab} to get started</p>
+      </div>
+    </div>
+  )
+}
+
+function TableView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">No {activeTab} found</p>
+      </div>
+    )
+  }
+  // Basic table implementation - would need full implementation
+  return <div className="text-center py-8 text-muted-foreground">Table view</div>
+}
+
+function CardView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">No {activeTab} found</p>
+      </div>
+    )
+  }
+  // Basic card implementation - would need full implementation
+  return <div className="text-center py-8 text-muted-foreground">Card view</div>
+}
+
+function ListView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  if (data.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">No {activeTab} found</p>
+      </div>
+    )
+  }
+  // Basic list implementation - would need full implementation
+  return <div className="text-center py-8 text-muted-foreground">List view</div>
+}
 
 export const contactSchema = z.object({
   id: z.number(),
@@ -292,119 +396,83 @@ const formatNumber = (num: number) => {
 }
 
 function ContactNameCell({ contact }: { contact: Contact }) {
-  const [isFullScreen, setIsFullScreen] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState("details")
-
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "emails", label: "Emails", count: 8, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 5, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 2, icon: FolderIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 5, icon: FolderIcon },
+    { id: "team", label: "People", count: 6, icon: UsersIcon },
+    { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
-  const FullScreenContent = () => {
-    const content = (
-      <div className="fixed inset-0 z-[9999] bg-background">
-        {/* Full Screen Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="bg-background">
-              {contact.firstName} {contact.lastName}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <MailIcon className="h-4 w-4" />
-              Compose email
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(false)}>
-              <XIcon className="h-4 w-4" />
-              Close
-            </Button>
-          </div>
-        </div>
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    if (activeTab === "details") {
+      return <ContactDetailsPanel contact={contact} isFullScreen={false} />
+    }
 
-        {/* Full Screen Content - Two Column Layout */}
-        <div className="flex h-[calc(100vh-73px)]">
-          {/* Left Panel - Details (Persistent) */}
-          <div className="w-96 border-r bg-background">
-            <ContactDetailsPanel contact={contact} isFullScreen={true} />
-          </div>
+    if (activeTab === "company") {
+      return <ContactTabContent activeTab={activeTab} contact={contact} />
+    }
 
-          {/* Right Panel - Main Content */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Record Header */}
-            <div className="border-b bg-background px-6 py-2">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={contact.avatar || "/placeholder.svg"}
-                    alt={`${contact.firstName} ${contact.lastName}`}
-                  />
-                  <AvatarFallback>
-                    {contact.firstName.charAt(0)}
-                    {contact.lastName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    {contact.firstName} {contact.lastName}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {contact.jobTitle} at {contact.company}
-                  </p>
-                </div>
-              </div>
-            </div>
+    // For other tabs, return generic content similar to the dashboard
+    const data = getContactTabData(activeTab, contact)
 
-            {/* Tabs */}
-            <div className="border-b bg-background px-6">
-              <div className="flex gap-8 overflow-x-auto">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                      activeTab === tab.id
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.icon && <tab.icon className="h-4 w-4" />}
-                    {tab.label}
-                    {tab.count !== null && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                        {tab.count}
-                      </Badge>
-                    )}
-                    {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                  </button>
-                ))}
-              </div>
-            </div>
+    if (viewMode === "table") {
+      return (
+        <TableView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
 
-            {/* Tab Content */}
-            <div className="p-6">
-              <ContactTabContent activeTab={activeTab} contact={contact} />
-            </div>
-          </div>
-        </div>
-      </div>
+    if (viewMode === "card") {
+      return (
+        <CardView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
+
+    return (
+      <ListView
+        data={data}
+        activeTab={activeTab}
+        onTaskClick={setSelectedTask}
+        onNoteClick={setSelectedNote}
+        onMeetingClick={setSelectedMeeting}
+        onEmailClick={setSelectedEmail}
+      />
     )
-
-    return typeof document !== "undefined" ? createPortal(content, document.body) : null
   }
 
-  if (isFullScreen) {
-    return <FullScreenContent />
+  const renderDetailsPanel = (isFullScreen = false) => {
+    return <ContactDetailsPanel contact={contact} isFullScreen={isFullScreen} />
   }
+
+  const customActions: React.ReactNode[] = []
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
+    <MasterDrawer
+      trigger={
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
@@ -422,120 +490,25 @@ function ContactNameCell({ contact }: { contact: Contact }) {
             </span>
           </div>
         </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => {
-              const openElement = document.querySelector('[data-state="open"]');
-              if (openElement && 'click' in openElement) {
-                (openElement as HTMLElement).click();
-              }
-            }}>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="outline" className="bg-background">
-              {contact.firstName} {contact.lastName}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(true)}>
-              <ExpandIcon className="h-4 w-4" />
-              Full screen
-            </Button>
-            <Button variant="outline" size="sm">
-              <MailIcon className="h-4 w-4" />
-              Compose email
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Record Header */}
-          <div className="border-b bg-background px-6 py-2">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={contact.avatar || "/placeholder.svg"}
-                  alt={`${contact.firstName} ${contact.lastName}`}
-                />
-                <AvatarFallback>
-                  {contact.firstName.charAt(0)}
-                  {contact.lastName.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-lg font-semibold">
-                  {contact.firstName} {contact.lastName}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {contact.jobTitle} at {contact.company}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="border-b bg-background px-6">
-            <div className="flex gap-8 overflow-x-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? "border-b-2 border-primary text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab.icon && <tab.icon className="h-4 w-4" />}
-                  {tab.label}
-                  {tab.count !== null && (
-                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                      {tab.count}
-                    </Badge>
-                  )}
-                  {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            <ContactTabContent activeTab={activeTab} contact={contact} />
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+      }
+      title={`${contact.firstName} ${contact.lastName}`}
+      recordType="People"
+      subtitle={`${contact.jobTitle} at ${contact.company}`}
+      tabs={tabs}
+      detailsPanel={renderDetailsPanel}
+      customActions={customActions}
+      onComposeEmail={() => console.log('Compose email clicked')}
+    >
+      {renderTabContent}
+    </MasterDrawer>
   )
 }
 
 function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Contact; isFullScreen?: boolean }) {
   return (
-    <div className="p-6">
-      {/* Details Tab */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-6">
-          <button className="relative border-b-2 border-primary pb-3 text-sm font-medium text-primary">
-            Details
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
-          </button>
-          <button className="relative pb-3 text-sm text-muted-foreground hover:text-foreground">
-            Comments
-            <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-              0
-            </Badge>
-          </button>
-        </div>
-      </div>
-
+    <div className="px-6 pt-2 pb-6">
       {/* Contact Details */}
       <div className="space-y-4">
-        <h4 className="text-sm font-medium">Contact Details</h4>
-
         <div className="rounded-lg border border-muted bg-muted/10 p-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -606,29 +579,182 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
   )
 }
 
-function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
-  if (activeTab === "details") {
-    return <ContactDetailsPanel contact={contact} isFullScreen={false} />
+function getContactTabData(activeTab: string, contact: Contact) {
+  switch (activeTab) {
+    case "emails":
+      return [
+        {
+          id: 1,
+          subject: "Investment Performance Update",
+          from: "portfolio@company.com",
+          date: "2 hours ago",
+          status: "Unread",
+          preview: "Quarterly performance report for your investment in " + contact.firstName + " " + contact.lastName,
+          type: "received",
+        },
+        {
+          id: 2,
+          subject: "Valuation Update Required",
+          from: "me@company.com",
+          date: "1 day ago",
+          status: "Sent",
+          preview: "Please provide updated valuation for " + contact.firstName + " " + contact.lastName,
+          type: "sent",
+        },
+      ]
+    case "tasks":
+      return [
+        {
+          id: 1,
+          title: "Review quarterly performance",
+          priority: "High",
+          status: "pending",
+          assignee: "You",
+          dueDate: "Tomorrow",
+          description: "Review Q3 performance metrics and prepare summary report.",
+        },
+        {
+          id: 2,
+          title: "Update valuation model",
+          priority: "Medium",
+          status: "completed",
+          assignee: "You",
+          dueDate: "2 days ago",
+          description: "Updated valuation model with latest market data.",
+        },
+        {
+          id: 3,
+          title: "Capital Call",
+          priority: "High",
+          status: "In Progress",
+          assignee: "You",
+          dueDate: "2024-01-15",
+          description: "Process capital call for TechFlow Ventures Series C investment",
+          subtasks: [
+            {
+              id: "CC-1",
+              title: "Review Capital Call Notice PDF",
+              description: "Open and understand key terms (amount, due date)",
+              status: "Completed",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-10",
+              subtasks: [],
+            },
+            {
+              id: "CC-2",
+              title: "Validate with Principal",
+              description: "Confirm LP or internal commitment matches",
+              status: "Completed",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-11",
+              subtasks: [],
+            },
+            {
+              id: "CC-3",
+              title: "Record in System",
+              description: "Log in accounting system or ledger",
+              status: "In Progress",
+              priority: "Medium",
+              assignee: "You",
+              dueDate: "2024-01-12",
+              subtasks: [],
+            },
+            {
+              id: "CC-4",
+              title: "Notify Accountant",
+              description: "Forward or tag accountant for payment setup",
+              status: "To Do",
+              priority: "Medium",
+              assignee: "Sarah Johnson",
+              dueDate: "2024-01-13",
+              subtasks: [],
+            },
+            {
+              id: "CC-5",
+              title: "Confirm Wire Date",
+              description: "Align on when funds will be sent",
+              status: "To Do",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-14",
+              subtasks: [],
+            },
+            {
+              id: "CC-6",
+              title: "Follow-Up if Not Funded",
+              description: "If deadline passes, notify appropriate party",
+              status: "To Do",
+              priority: "Medium",
+              assignee: "You",
+              dueDate: "2024-01-16",
+              subtasks: [],
+            },
+            {
+              id: "CC-7",
+              title: "Mark as Complete",
+              description: "Close the call internally",
+              status: "To Do",
+              priority: "Low",
+              assignee: "You",
+              dueDate: "2024-01-17",
+              subtasks: [],
+            },
+          ],
+        },
+      ]
+    case "notes":
+      return [
+        {
+          id: 1,
+          title: "Investment thesis review",
+          date: "3 days ago",
+          content: `Strong performance in ${contact.company} sector. Key growth drivers remain intact.`,
+          tags: ["Investment", "Review"],
+        },
+      ]
+    case "meetings":
+      return [
+        {
+          id: 1,
+          title: "Portfolio Review Meeting",
+          date: "Tomorrow",
+          time: "2:00 PM - 3:00 PM",
+          status: "Confirmed",
+          location: "Conference Room A",
+          attendees: 5,
+          description: `Quarterly review of ${contact.firstName} ${contact.lastName} performance.`,
+        },
+      ]
+    case "files":
+      return [
+        {
+          id: 1,
+          name: "Investment_Agreement.pdf",
+          size: "2.4 MB",
+          uploadedBy: "Legal Team",
+          uploadedDate: "2 days ago",
+          type: "pdf",
+          description: "Original investment agreement and terms.",
+        },
+      ]
+    case "team":
+      return [
+        {
+          id: 1,
+          name: "Sarah Johnson",
+          role: "Portfolio Manager",
+          email: "sarah.johnson@company.com",
+          phone: "+1 (555) 123-4567",
+          department: "Investments",
+          joinDate: "2023-01-15",
+          status: "Active",
+        },
+      ]
+    default:
+      return []
   }
-
-  // Generic content for other tabs
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
-        <Button variant="outline" size="sm">
-          <PlusIcon className="h-4 w-4" />
-          Add {activeTab.slice(0, -1)}
-        </Button>
-      </div>
-      <div className="text-center py-8 text-muted-foreground">
-        <p>
-          No {activeTab} found for {contact.firstName} {contact.lastName}
-        </p>
-        <p className="text-sm">Add some {activeTab} to get started</p>
-      </div>
-    </div>
-  )
 }
 
 const columns: ColumnDef<Contact>[] = [

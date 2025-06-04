@@ -1,33 +1,31 @@
 import type { Metadata } from "next"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { TasksTable } from "@/components/tasks-table"
+import { EmailsTable } from "@/components/emails-table"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
 
 export const metadata: Metadata = {
-  title: "Tasks",
-  description: "Manage and track all your tasks in one place.",
+  title: "Emails",
+  description: "Manage and track all your email communications.",
 }
 
-export default function TasksPage() {
+export default function EmailsPage() {
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <header className="flex h-12 shrink-0 items-center border-b">
-          <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Tasks</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbPage>Emails</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col">
@@ -35,11 +33,11 @@ export default function TasksPage() {
               <div className="px-4 lg:px-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h1 className="text-2xl font-semibold">Tasks</h1>
-                    <p className="text-muted-foreground">Manage and track all your tasks and to-dos</p>
+                    <h1 className="text-2xl font-semibold">Emails</h1>
+                    <p className="text-muted-foreground">Manage and track all your email communications</p>
                   </div>
                 </div>
-                <TasksTable />
+                <EmailsTable />
               </div>
             </div>
           </div>

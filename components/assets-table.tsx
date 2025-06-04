@@ -36,6 +36,8 @@ import {
   BarChart3Icon,
   MailIcon,
   UsersIcon,
+  FileIcon,
+  UserIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -188,7 +190,7 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
     { id: "files", label: "Files", count: 5, icon: FolderIcon },
-    { id: "team", label: "Team", count: 6, icon: UsersIcon },
+    { id: "team", label: "People", count: 6, icon: UsersIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
@@ -1085,55 +1087,63 @@ function TableView({
   // Handle notes tab
   if (activeTab === "notes") {
     return (
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Last Modified</TableHead>
-              <TableHead>Tags</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((item) => (
-              <TableRow
-                key={item.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => onNoteClick?.(item)}
-              >
-                <TableCell className="font-medium">{item.title}</TableCell>
-                <TableCell>{item.date}</TableCell>
-                <TableCell>{item.lastModified || item.date}</TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    {item.tags?.map((tag: string, index: number) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {data.map((note) => (
+          <Card
+            key={note.id}
+            className="cursor-pointer hover:bg-muted/50"
+            onClick={() => onNoteClick?.(note)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium">{note.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{note.content}</p>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                      <span>{note.date || new Date(note.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    {note.author && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <UserIcon className="h-4 w-4 text-muted-foreground" />
+                        <span>{note.author}</span>
+                      </div>
+                    )}
                   </div>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                        <MoreVerticalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View</DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  {note.tags && note.tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {note.tags.map((tag: string, index: number) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onNoteClick?.(note);
+                    }}>
+                      View
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Share</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     )
   }
@@ -1256,55 +1266,57 @@ function TableView({
   // Handle files tab
   if (activeTab === "files") {
     return (
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Size</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Uploaded</TableHead>
-              <TableHead>Uploaded By</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                    {item.name}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {data.map((file) => (
+          <Card key={file.id} className="cursor-pointer hover:bg-muted/50">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    {file.fileType?.toUpperCase() === "PDF" ? (
+                      <FileTextIcon className="h-4 w-4 text-red-500" />
+                    ) : file.fileType?.toUpperCase() === "DOCX" ? (
+                      <FileTextIcon className="h-4 w-4 text-blue-500" />
+                    ) : file.fileType?.toUpperCase() === "XLSX" ? (
+                      <FileTextIcon className="h-4 w-4 text-green-500" />
+                    ) : file.fileType?.toUpperCase() === "PPTX" ? (
+                      <FileTextIcon className="h-4 w-4 text-orange-500" />
+                    ) : (
+                      <FileIcon className="h-4 w-4 text-gray-500" />
+                    )}
+                    <h4 className="font-medium text-base">{file.title || file.name}</h4>
                   </div>
-                </TableCell>
-                <TableCell>{item.size}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="text-xs">
-                    {item.type?.toUpperCase() || 'FILE'}
-                  </Badge>
-                </TableCell>
-                <TableCell>{item.uploadedDate}</TableCell>
-                <TableCell>{item.uploadedBy}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVerticalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Download</DropdownMenuItem>
-                      <DropdownMenuItem>View</DropdownMenuItem>
-                      <DropdownMenuItem>Share</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {file.fileName || file.name} • {file.fileSize || file.size}
+                  </p>
+                  <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
+                    <p>Uploaded: {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</p>
+                    <p>By: {file.uploadedBy}</p>
+                    {file.description && <p className="line-clamp-2">{file.description}</p>}
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      Download
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      View
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>Share</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     )
   }
@@ -1480,31 +1492,38 @@ function CardView({
   if (activeTab === "notes") {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data.map((item) => (
+        {data.map((note) => (
           <Card
-            key={item.id}
+            key={note.id}
             className="cursor-pointer hover:bg-muted/50"
-            onClick={() => onNoteClick?.(item)}
+            onClick={() => onNoteClick?.(note)}
           >
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h4 className="font-medium">{item.title}</h4>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.content}</p>
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>Created: {item.date}</span>
+                  <h4 className="font-medium">{note.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{note.content}</p>
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center gap-2 text-sm">
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                      <span>{note.date || new Date(note.createdAt).toLocaleDateString()}</span>
                     </div>
-                    {item.tags && item.tags.length > 0 && (
-                      <div className="flex gap-1 flex-wrap">
-                        {item.tags.map((tag: string, index: number) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
+                    {note.author && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <UserIcon className="h-4 w-4 text-muted-foreground" />
+                        <span>{note.author}</span>
                       </div>
                     )}
                   </div>
+                  {note.tags && note.tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {note.tags.map((tag: string, index: number) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -1513,8 +1532,14 @@ function CardView({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onNoteClick?.(note);
+                    }}>
+                      View
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Share</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
                   </DropdownMenuContent>
@@ -1647,45 +1672,48 @@ function CardView({
   // Handle files tab
   if (activeTab === "files") {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data.map((item) => (
-          <Card key={item.id}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {data.map((file) => (
+          <Card key={file.id} className="cursor-pointer hover:bg-muted/50">
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <FileTextIcon className="h-5 w-5 text-muted-foreground" />
-                    <h4 className="font-medium">{item.name}</h4>
+                  <div className="flex items-center gap-3 mb-2">
+                    {file.fileType?.toUpperCase() === "PDF" ? (
+                      <FileTextIcon className="h-4 w-4 text-red-500" />
+                    ) : file.fileType?.toUpperCase() === "DOCX" ? (
+                      <FileTextIcon className="h-4 w-4 text-blue-500" />
+                    ) : file.fileType?.toUpperCase() === "XLSX" ? (
+                      <FileTextIcon className="h-4 w-4 text-green-500" />
+                    ) : file.fileType?.toUpperCase() === "PPTX" ? (
+                      <FileTextIcon className="h-4 w-4 text-orange-500" />
+                    ) : (
+                      <FileIcon className="h-4 w-4 text-gray-500" />
+                    )}
+                    <h4 className="font-medium text-base">{file.title || file.name}</h4>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
-                  <div className="mt-3 space-y-1">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Size:</span>
-                      <span>{item.size}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Uploaded:</span>
-                      <span>{item.uploadedDate}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>By: {item.uploadedBy}</span>
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <Badge variant="secondary" className="text-xs">
-                      {item.type?.toUpperCase() || 'FILE'}
-                    </Badge>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {file.fileName || file.name} • {file.fileSize || file.size}
+                  </p>
+                  <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
+                    <p>Uploaded: {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</p>
+                    <p>By: {file.uploadedBy}</p>
+                    {file.description && <p className="line-clamp-2">{file.description}</p>}
                   </div>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
                       <MoreVerticalIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Download</DropdownMenuItem>
-                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>
+                      Download
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      View
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Share</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>

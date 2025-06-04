@@ -61,12 +61,14 @@ import {
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 // Import the AddEntityDialog
 import { AddEntityDialog } from "./add-entity-dialog"
 import { EmailsTable } from "./emails-table"
 import { TasksTable } from "./tasks-table"
 import { NotesTable } from "./notes-table"
+import { MasterDrawer } from "./master-drawer"
 
 export const entitySchema = z.object({
   id: z.number(),
@@ -257,112 +259,357 @@ const getEntityTypeColor = (type: string) => {
   }
 }
 
-function EntityNameCell({ entity }: { entity: Entity }) {
-  const [isFullScreen, setIsFullScreen] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState("details")
+function TableView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center py-8 text-muted-foreground">
+        <p>Table view for {activeTab}</p>
+        <p className="text-sm">{data.length} items</p>
+      </div>
+    </div>
+  )
+}
 
+function CardView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center py-8 text-muted-foreground">
+        <p>Card view for {activeTab}</p>
+        <p className="text-sm">{data.length} items</p>
+      </div>
+    </div>
+  )
+}
+
+function ListView({
+  data,
+  activeTab,
+  onTaskClick,
+  onNoteClick,
+  onMeetingClick,
+  onEmailClick,
+}: {
+  data: any[]
+  activeTab: string
+  onTaskClick?: (task: any) => void
+  onNoteClick?: (note: any) => void
+  onMeetingClick?: (meeting: any) => void
+  onEmailClick?: (email: any) => void
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center py-8 text-muted-foreground">
+        <p>List view for {activeTab}</p>
+        <p className="text-sm">{data.length} items</p>
+      </div>
+    </div>
+  )
+}
+
+function getEntityTabData(activeTab: string, entity: Entity) {
+  switch (activeTab) {
+    case "emails":
+      return [
+        {
+          id: 1,
+          subject: "Investment Performance Update",
+          from: "portfolio@company.com",
+          date: "2 hours ago",
+          status: "Unread",
+          preview: "Quarterly performance report for your investment in " + entity.entityName,
+          type: "received",
+        },
+        {
+          id: 2,
+          subject: "Valuation Update Required",
+          from: "me@company.com",
+          date: "1 day ago",
+          status: "Sent",
+          preview: "Please provide updated valuation for " + entity.entityName,
+          type: "sent",
+        },
+        {
+          id: 3,
+          subject: "Due Diligence Documents",
+          from: "legal@company.com",
+          date: "3 days ago",
+          status: "Read",
+          preview: "Attached are the due diligence documents for " + entity.entityName,
+          type: "received",
+        },
+      ]
+    case "tasks":
+      return [
+        {
+          id: 1,
+          title: "Review financial statements",
+          assignee: "John Smith",
+          dueDate: "2024-02-15",
+          status: "In Progress",
+          priority: "High",
+        },
+        {
+          id: 2,
+          title: "Complete due diligence checklist",
+          assignee: "Sarah Johnson",
+          dueDate: "2024-02-20",
+          status: "Pending",
+          priority: "Medium",
+        },
+      ]
+    case "notes":
+      return [
+        {
+          id: 1,
+          title: "Initial call notes",
+          content: "Discussed investment opportunity and next steps for " + entity.entityName,
+          author: "Mike Wilson",
+          date: "2024-01-10",
+          tags: ["call", "initial", "opportunity"],
+        },
+      ]
+    case "meetings":
+      return [
+        {
+          id: 1,
+          title: "Investment Committee Meeting",
+          date: "2024-02-10",
+          time: "10:00 AM",
+          attendees: ["John Smith", "Sarah Johnson", "Mike Wilson"],
+          status: "Scheduled",
+        },
+        {
+          id: 2,
+          title: "Due Diligence Review",
+          date: "2024-02-15",
+          time: "2:00 PM",
+          attendees: ["Legal Team", "Investment Team"],
+          status: "Scheduled",
+        },
+        {
+          id: 3,
+          title: "Management Presentation",
+          date: "2024-02-20",
+          time: "9:00 AM",
+          attendees: ["Management Team", "Investment Committee"],
+          status: "Pending",
+        },
+        {
+          id: 4,
+          title: "Final Investment Decision",
+          date: "2024-02-25",
+          time: "11:00 AM",
+          attendees: ["Investment Committee"],
+          status: "Pending",
+        },
+      ]
+    case "files":
+      return [
+        {
+          id: 1,
+          name: "Investment Memorandum.pdf",
+          size: "2.4 MB",
+          type: "PDF",
+          uploadDate: "2024-01-15",
+          uploadedBy: "John Smith",
+        },
+        {
+          id: 2,
+          name: "Financial Statements Q4.xlsx",
+          size: "1.1 MB",
+          type: "Excel",
+          uploadDate: "2024-01-20",
+          uploadedBy: "Sarah Johnson",
+        },
+        {
+          id: 3,
+          name: "Due Diligence Checklist.docx",
+          size: "850 KB",
+          type: "Word",
+          uploadDate: "2024-01-25",
+          uploadedBy: "Mike Wilson",
+        },
+        {
+          id: 4,
+          name: "Market Analysis Report.pdf",
+          size: "3.2 MB",
+          type: "PDF",
+          uploadDate: "2024-02-01",
+          uploadedBy: "Analysis Team",
+        },
+        {
+          id: 5,
+          name: "Legal Documents.zip",
+          size: "5.8 MB",
+          type: "Archive",
+          uploadDate: "2024-02-05",
+          uploadedBy: "Legal Team",
+        },
+      ]
+    case "team":
+      return [
+        {
+          id: 1,
+          name: "John Smith",
+          role: "Investment Manager",
+          email: "john.smith@company.com",
+          phone: "+1 (555) 123-4567",
+        },
+        {
+          id: 2,
+          name: "Sarah Johnson",
+          role: "Senior Analyst",
+          email: "sarah.johnson@company.com",
+          phone: "+1 (555) 234-5678",
+        },
+        {
+          id: 3,
+          name: "Mike Wilson",
+          role: "Portfolio Manager",
+          email: "mike.wilson@company.com",
+          phone: "+1 (555) 345-6789",
+        },
+        {
+          id: 4,
+          name: "Emily Davis",
+          role: "Research Analyst",
+          email: "emily.davis@company.com",
+          phone: "+1 (555) 456-7890",
+        },
+        {
+          id: 5,
+          name: "David Brown",
+          role: "Investment Associate",
+          email: "david.brown@company.com",
+          phone: "+1 (555) 567-8901",
+        },
+        {
+          id: 6,
+          name: "Lisa Garcia",
+          role: "Operations Manager",
+          email: "lisa.garcia@company.com",
+          phone: "+1 (555) 678-9012",
+        },
+      ]
+    case "company":
+      return [
+        {
+          id: 1,
+          name: entity.entityName,
+          type: entity.entityType,
+          description: "Company information and details",
+          website: "https://company.com",
+          industry: "Various",
+          location: entity.jurisdiction,
+        },
+      ]
+    default:
+      return []
+  }
+}
+
+function EntityNameCell({ entity }: { entity: Entity }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 5, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 12, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 8, icon: FileTextIcon },
-    { id: "meetings", label: "Meetings", count: 6, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 15, icon: FolderIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
+    { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 5, icon: FolderIcon },
+    { id: "team", label: "People", count: 6, icon: UsersIcon },
+    { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
-  const FullScreenContent = () => {
-    const content = (
-      <div className="fixed inset-0 z-[9999] bg-background">
-        {/* Full Screen Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="bg-background">
-              Entities
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <MailIcon className="h-4 w-4" />
-              Send notice
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(false)}>
-              <XIcon className="h-4 w-4" />
-              Close
-            </Button>
-          </div>
-        </div>
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    if (activeTab === "details") {
+      return <EntityDetailsPanel entity={entity} isFullScreen={false} />
+    }
 
-        {/* Full Screen Content - Two Column Layout */}
-        <div className="flex h-[calc(100vh-73px)]">
-          {/* Left Panel - Details (Persistent) */}
-          <div className="w-96 border-r bg-background">
-            <EntityDetailsPanel entity={entity} isFullScreen={true} />
-          </div>
+    // For other tabs, return generic content similar to the dashboard
+    const data = getEntityTabData(activeTab, entity)
 
-          {/* Right Panel - Main Content */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Record Header */}
-            <div className="border-b bg-background px-6 py-2">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {entity.entityName.charAt(0)}
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">{entity.entityName}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {entity.entityType} • {entity.jurisdiction}
-                  </p>
-                </div>
-              </div>
-            </div>
+    if (viewMode === "table") {
+      return (
+        <TableView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
 
-            {/* Tabs */}
-            <div className="border-b bg-background px-6">
-              <div className="flex gap-8 overflow-x-auto">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                      activeTab === tab.id
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.icon && <tab.icon className="h-4 w-4" />}
-                    {tab.label}
-                    {tab.count !== null && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                        {tab.count}
-                      </Badge>
-                    )}
-                    {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                  </button>
-                ))}
-              </div>
-            </div>
+    if (viewMode === "card") {
+      return (
+        <CardView
+          data={data}
+          activeTab={activeTab}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
 
-            {/* Tab Content */}
-            <div className="p-6">
-              <EntityTabContent activeTab={activeTab} entity={entity} />
-            </div>
-          </div>
-        </div>
-      </div>
+    return (
+      <ListView
+        data={data}
+        activeTab={activeTab}
+        onTaskClick={setSelectedTask}
+        onNoteClick={setSelectedNote}
+        onMeetingClick={setSelectedMeeting}
+        onEmailClick={setSelectedEmail}
+      />
     )
-
-    return typeof document !== "undefined" ? createPortal(content, document.body) : null
   }
 
-  if (isFullScreen) {
-    return <FullScreenContent />
+  const renderDetailsPanel = (isFullScreen = false) => {
+    return <EntityDetailsPanel entity={entity} isFullScreen={isFullScreen} />
   }
+
+  const customActions: React.ReactNode[] = []
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
+    <MasterDrawer
+      trigger={
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium">
@@ -371,106 +618,24 @@ function EntityNameCell({ entity }: { entity: Entity }) {
             <span className="font-medium">{entity.entityName}</span>
           </div>
         </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => document.querySelector('[data-state="open"]')?.click()}>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="outline" className="bg-background">
-              Entities
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(true)}>
-              <ExpandIcon className="h-4 w-4" />
-              Full screen
-            </Button>
-            <Button variant="outline" size="sm">
-              <MailIcon className="h-4 w-4" />
-              Send notice
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Record Header */}
-          <div className="border-b bg-background px-6 py-2">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                {entity.entityName.charAt(0)}
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">{entity.entityName}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {entity.entityType} • {entity.jurisdiction}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="border-b bg-background px-6">
-            <div className="flex gap-8 overflow-x-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? "border-b-2 border-primary text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab.icon && <tab.icon className="h-4 w-4" />}
-                  {tab.label}
-                  {tab.count !== null && (
-                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                      {tab.count}
-                    </Badge>
-                  )}
-                  {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            <EntityTabContent activeTab={activeTab} entity={entity} />
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+      }
+      title={entity.entityName}
+      recordType="Entities"
+      subtitle={`${entity.entityType} • ${entity.jurisdiction}`}
+      tabs={tabs}
+      detailsPanel={renderDetailsPanel}
+      customActions={customActions}
+    >
+      {renderTabContent}
+    </MasterDrawer>
   )
 }
 
 function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; isFullScreen?: boolean }) {
   return (
-    <div className="p-6">
-      {/* Details Tab */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-6">
-          <button className="relative border-b-2 border-primary pb-3 text-sm font-medium text-primary">
-            Details
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
-          </button>
-          <button className="relative pb-3 text-sm text-muted-foreground hover:text-foreground">
-            Comments
-            <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-              0
-            </Badge>
-          </button>
-        </div>
-      </div>
-
+    <div className="px-6 pt-2 pb-6">
       {/* Entity Details */}
       <div className="space-y-4">
-        <h4 className="text-sm font-medium">Entity Details</h4>
-
         <div className="rounded-lg border border-muted bg-muted/10 p-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -562,128 +727,6 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
         <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
           Show all values
         </Button>
-
-        {/* Workflows Section */}
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-sm font-medium">Workflows</h4>
-          </div>
-          <div className="space-y-3">
-            <div className="rounded-lg border border-muted">
-              <button onClick={() => {}} className="flex w-full items-center justify-between p-3 text-left">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-blue-100"></div>
-                  <span className="font-medium">Entity Compliance & Legal Tasks</span>
-                  <Badge variant="outline" className="ml-2">
-                    In Progress
-                  </Badge>
-                </div>
-                <ChevronDownIcon className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="rounded-lg border border-muted">
-              <button onClick={() => {}} className="flex w-full items-center justify-between p-3 text-left">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-100"></div>
-                  <span className="font-medium">Tax Document Collection & Filing</span>
-                  <Badge variant="outline" className="ml-2">
-                    Completed
-                  </Badge>
-                </div>
-                <ChevronDownIcon className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function EntityTabContent({ activeTab, entity }: { activeTab: string; entity: Entity }) {
-  if (activeTab === "details") {
-    return <EntityDetailsPanel entity={entity} isFullScreen={false} />
-  }
-
-  if (activeTab === "emails") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Emails</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Compose Email
-          </Button>
-        </div>
-        <EmailsTable />
-      </div>
-    )
-  }
-
-  if (activeTab === "tasks") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Tasks</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add Task
-          </Button>
-        </div>
-        <TasksTable />
-      </div>
-    )
-  }
-
-  if (activeTab === "notes") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Notes</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add Note
-          </Button>
-        </div>
-        <NotesTable />
-      </div>
-    )
-  }
-
-  if (activeTab === "contacts") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Contacts</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add Contact
-          </Button>
-        </div>
-        <div className="text-center py-8 text-muted-foreground">
-          <p>No contacts found for {entity.entityName}</p>
-          <p className="text-sm">Add some contacts to get started</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Generic content for other tabs
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
-        <Button variant="outline" size="sm">
-          <PlusIcon className="h-4 w-4" />
-          Add {activeTab.slice(0, -1)}
-        </Button>
-      </div>
-      <div className="text-center py-8 text-muted-foreground">
-        <p>
-          No {activeTab} found for {entity.entityName}
-        </p>
-        <p className="text-sm">Add some {activeTab} to get started</p>
       </div>
     </div>
   )

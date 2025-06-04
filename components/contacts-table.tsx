@@ -363,12 +363,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
     return <ContactDetailsPanel contact={contact} isFullScreen={isFullScreen} />
   }
 
-  const customActions: React.ReactNode[] = [
-    <Button key="email" variant="outline" size="sm" onClick={() => console.log("Compose email to", contact.email)}>
-      <MailIcon className="h-4 w-4 mr-2" />
-      Email
-    </Button>,
-  ]
+  const customActions: React.ReactNode[] = []
 
   return (
     <MasterDrawer

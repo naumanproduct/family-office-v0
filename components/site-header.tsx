@@ -22,7 +22,7 @@ export function SiteHeader() {
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
-              <BreadcrumbPage>Documents</BreadcrumbPage>
+              <BreadcrumbPage>Files</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

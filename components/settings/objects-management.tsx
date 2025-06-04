@@ -85,9 +85,9 @@ const systemObjects: CustomObject[] = [
   },
   {
     id: "5",
-    name: "Documents",
+    name: "Files",
     apiName: "documents",
-    description: "Document storage and management system",
+    description: "File storage and management system",
     fieldCount: 14,
     recordCount: 892,
     icon: FileText,

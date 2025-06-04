@@ -376,8 +376,8 @@ function CompanyNameCell({ company }: { company: Company }) {
     { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
     { id: "files", label: "Files", count: 5, icon: FolderIcon },
-    { id: "team", label: "Team", count: 6, icon: UsersIcon },
-    { id: "workflows", label: "Workflows", count: company.workflows.length, icon: FolderIcon },
+    { id: "team", label: "People", count: 6, icon: UsersIcon },
+    { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
   const renderTabContent = (
@@ -390,10 +390,6 @@ function CompanyNameCell({ company }: { company: Company }) {
   ) => {
     if (activeTab === "details") {
       return <CompanyDetailsPanel company={company} isFullScreen={false} />
-    }
-
-    if (activeTab === "workflows") {
-      return <CompanyTabContent activeTab={activeTab} company={company} />
     }
 
     // For other tabs, return generic content similar to the dashboard
@@ -494,72 +490,137 @@ function getCompanyTabData(activeTab: string, company: Company) {
       return [
         {
           id: 1,
-          title: "Update company profile",
-          priority: "Medium",
+          title: "Review quarterly performance",
+          priority: "High",
           status: "pending",
           assignee: "You",
           dueDate: "Tomorrow",
-          description: "Update profile details for " + company.name,
+          description: "Review Q3 performance metrics and prepare summary report.",
         },
         {
           id: 2,
-          title: "Schedule quarterly review",
+          title: "Update valuation model",
+          priority: "Medium",
+          status: "completed",
+          assignee: "You",
+          dueDate: "2 days ago",
+          description: "Updated valuation model with latest market data.",
+        },
+        {
+          id: 3,
+          title: "Capital Call",
           priority: "High",
-          status: "pending",
-          assignee: "Sarah Johnson",
-          dueDate: "Next week",
-          description: "Set up quarterly review meeting with " + company.name + " team",
+          status: "In Progress",
+          assignee: "You",
+          dueDate: "2024-01-15",
+          description: "Process capital call for TechFlow Ventures Series C investment",
+          subtasks: [
+            {
+              id: "CC-1",
+              title: "Review Capital Call Notice PDF",
+              description: "Open and understand key terms (amount, due date)",
+              status: "Completed",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-10",
+              subtasks: [],
+            },
+            {
+              id: "CC-2",
+              title: "Validate with Principal",
+              description: "Confirm LP or internal commitment matches",
+              status: "Completed",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-11",
+              subtasks: [],
+            },
+            {
+              id: "CC-3",
+              title: "Record in System",
+              description: "Log in accounting system or ledger",
+              status: "In Progress",
+              priority: "Medium",
+              assignee: "You",
+              dueDate: "2024-01-12",
+              subtasks: [],
+            },
+            {
+              id: "CC-4",
+              title: "Notify Accountant",
+              description: "Forward or tag accountant for payment setup",
+              status: "To Do",
+              priority: "Medium",
+              assignee: "Sarah Johnson",
+              dueDate: "2024-01-13",
+              subtasks: [],
+            },
+            {
+              id: "CC-5",
+              title: "Confirm Wire Date",
+              description: "Align on when funds will be sent",
+              status: "To Do",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-14",
+              subtasks: [],
+            },
+            {
+              id: "CC-6",
+              title: "Follow-Up if Not Funded",
+              description: "If deadline passes, notify appropriate party",
+              status: "To Do",
+              priority: "Medium",
+              assignee: "You",
+              dueDate: "2024-01-16",
+              subtasks: [],
+            },
+            {
+              id: "CC-7",
+              title: "Mark as Complete",
+              description: "Close the call internally",
+              status: "To Do",
+              priority: "Low",
+              assignee: "You",
+              dueDate: "2024-01-17",
+              subtasks: [],
+            },
+          ],
         },
       ]
     case "notes":
       return [
         {
           id: 1,
-          title: "Meeting Notes - Q2 Review",
-          date: "2 weeks ago",
-          content: "Discussed Q2 performance and future collaboration plans...",
-        },
-        {
-          id: 2,
-          title: "Partnership Terms",
-          date: "1 month ago",
-          content: "Notes regarding partnership terms and conditions...",
+          title: "Investment thesis review",
+          date: "3 days ago",
+          content: `Strong performance in ${company.industry} sector. Key growth drivers remain intact.`,
+          tags: ["Investment", "Review"],
         },
       ]
     case "meetings":
       return [
         {
           id: 1,
-          title: "Quarterly Review",
-          date: "Tomorrow, 2:00 PM",
-          status: "Scheduled",
-          attendees: ["You", "Sarah Johnson", "Michael Chen"],
-        },
-        {
-          id: 2,
-          title: "Partnership Discussion",
-          date: "Next Monday, 10:00 AM",
-          status: "Scheduled",
-          attendees: ["You", "Emma Garcia", "David Kim"],
+          title: "Portfolio Review Meeting",
+          date: "Tomorrow",
+          time: "2:00 PM - 3:00 PM",
+          status: "Confirmed",
+          location: "Conference Room A",
+          attendees: 5,
+          description: `Quarterly review of ${company.name} performance.`,
         },
       ]
     case "files":
       return [
         {
           id: 1,
-          name: "Partnership Agreement.pdf",
-          uploadedBy: "You",
-          uploadedDate: "2 weeks ago",
+          name: "Investment_Agreement.pdf",
           size: "2.4 MB",
+          uploadedBy: "Legal Team",
+          uploadedDate: "2 days ago",
           type: "pdf",
-        },
-        {
-          id: 2,
-          name: "Company Profile.docx",
-          uploadedBy: "Sarah Johnson",
-          uploadedDate: "1 month ago",
-          size: "1.8 MB",
-          type: "docx",
+          description: "Original investment agreement and terms.",
         },
       ]
     case "team":
@@ -567,14 +628,12 @@ function getCompanyTabData(activeTab: string, company: Company) {
         {
           id: 1,
           name: "Sarah Johnson",
-          role: "CEO",
-          email: "sarah.johnson@" + company.name.toLowerCase().replace(/\s+/g, "") + ".com",
-        },
-        {
-          id: 2,
-          name: "Michael Chen",
-          role: "CTO",
-          email: "michael.chen@" + company.name.toLowerCase().replace(/\s+/g, "") + ".com",
+          role: "Portfolio Manager",
+          email: "sarah.johnson@company.com",
+          phone: "+1 (555) 123-4567",
+          department: "Investments",
+          joinDate: "2023-01-15",
+          status: "Active",
         },
       ]
     default:
@@ -1039,37 +1098,10 @@ function ListView({
 }
 
 function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Company; isFullScreen?: boolean }) {
-  const [expandedWorkflows, setExpandedWorkflows] = React.useState<Record<string, boolean>>({})
-
-  const toggleWorkflow = (id: string) => {
-    setExpandedWorkflows((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }))
-  }
-
   return (
-    <div className="p-6">
-      {/* Details Tab */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-6">
-          <button className="relative border-b-2 border-primary pb-3 text-sm font-medium text-primary">
-            Details
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
-          </button>
-          <button className="relative pb-3 text-sm text-muted-foreground hover:text-foreground">
-            Comments
-            <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-              0
-            </Badge>
-          </button>
-        </div>
-      </div>
-
+    <div className="px-6 pt-2 pb-6">
       {/* Company Details */}
       <div className="space-y-4">
-        <h4 className="text-sm font-medium">Company Details</h4>
-
         <div className="rounded-lg border border-muted bg-muted/10 p-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -1133,207 +1165,6 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
         <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
           Show all values
         </Button>
-      </div>
-
-      {/* Workflows Section */}
-      {company.workflows && company.workflows.length > 0 && (
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-sm font-medium">Workflows</h4>
-          </div>
-          <div className="space-y-3">
-            {company.workflows.map((workflow) => (
-              <div key={workflow.id} className="rounded-lg border border-muted">
-                <button
-                  onClick={() => toggleWorkflow(workflow.id)}
-                  className="flex w-full items-center justify-between p-3 text-left"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className={`h-2 w-2 rounded-full ${workflow.stageColor}`}></div>
-                    <span className="font-medium">{workflow.name}</span>
-                    <Badge variant="outline" className="ml-2">
-                      {workflow.stage}
-                    </Badge>
-                  </div>
-                  <ChevronDownIcon
-                    className={`h-4 w-4 transition-transform ${expandedWorkflows[workflow.id] ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {expandedWorkflows[workflow.id] && (
-                  <div className="border-t p-3">
-                    <div className="grid gap-2">
-                      {workflow.targetRaise && (
-                        <div className="flex items-center gap-2">
-                          <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <span className="text-xs text-muted-foreground">Target Raise:</span>
-                            <span className="ml-2 text-sm">{workflow.targetRaise}</span>
-                          </div>
-                        </div>
-                      )}
-                      {workflow.fundingRound && (
-                        <div className="flex items-center gap-2">
-                          <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <span className="text-xs text-muted-foreground">Funding Round:</span>
-                            <span className="ml-2 text-sm">{workflow.fundingRound}</span>
-                          </div>
-                        </div>
-                      )}
-                      {workflow.nextMeeting && (
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <span className="text-xs text-muted-foreground">Next Meeting:</span>
-                            <span className="ml-2 text-sm">{workflow.nextMeeting}</span>
-                          </div>
-                        </div>
-                      )}
-                      {workflow.dueDate && (
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <span className="text-xs text-muted-foreground">Due Date:</span>
-                            <span className="ml-2 text-sm">{workflow.dueDate}</span>
-                          </div>
-                        </div>
-                      )}
-                      {workflow.assignee && (
-                        <div className="flex items-center gap-2">
-                          <UsersIcon className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <span className="text-xs text-muted-foreground">Assignee:</span>
-                            <span className="ml-2 text-sm">{workflow.assignee}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function CompanyTabContent({ activeTab, company }: { activeTab: string; company: Company }) {
-  if (activeTab === "details") {
-    return <CompanyDetailsPanel company={company} isFullScreen={false} />
-  }
-
-  if (activeTab === "emails") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Emails</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Compose Email
-          </Button>
-        </div>
-        <EmailsTable />
-      </div>
-    )
-  }
-
-  if (activeTab === "tasks") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Tasks</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add Task
-          </Button>
-        </div>
-        <TasksTable />
-      </div>
-    )
-  }
-
-  if (activeTab === "notes") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Notes</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add Note
-          </Button>
-        </div>
-        <NotesTable />
-      </div>
-    )
-  }
-
-  if (activeTab === "contacts") {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Contacts</h3>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add Contact
-          </Button>
-        </div>
-        <div className="grid gap-4">
-          {[
-            { name: "Sarah Johnson", role: "CEO", email: "sarah@" + company.website, phone: "+1 (555) 123-4567" },
-            { name: "Mike Chen", role: "CTO", email: "mike@" + company.website, phone: "+1 (555) 234-5678" },
-            { name: "Lisa Wang", role: "VP Sales", email: "lisa@" + company.website, phone: "+1 (555) 345-6789" },
-          ].map((contact, index) => (
-            <Card key={index}>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Avatar>
-                    <AvatarFallback>
-                      {contact.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <h4 className="font-medium">{contact.name}</h4>
-                    <p className="text-sm text-muted-foreground">{contact.role}</p>
-                    <div className="mt-2 space-y-1">
-                      <div className="flex items-center gap-2 text-sm">
-                        <MailIcon className="h-3 w-3" />
-                        <span className="text-blue-600">{contact.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <PhoneIcon className="h-3 w-3" />
-                        <span>{contact.phone}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  // Generic content for other tabs
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
-        <Button variant="outline" size="sm">
-          <PlusIcon className="h-4 w-4" />
-          Add {activeTab.slice(0, -1)}
-        </Button>
-      </div>
-      <div className="text-center py-8 text-muted-foreground">
-        <p>
-          No {activeTab} found for {company.name}
-        </p>
-        <p className="text-sm">Add some {activeTab} to get started</p>
       </div>
     </div>
   )

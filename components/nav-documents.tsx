@@ -15,7 +15,7 @@ import {
 
 export function NavDocuments({
   items,
-  title = "Documents",
+  title = "Files",
 }: {
   items: {
     name: string

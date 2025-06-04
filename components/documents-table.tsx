@@ -120,7 +120,7 @@ export function DocumentsTable() {
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full max-w-sm">
           <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="Search documents..." className="w-full bg-background pl-8" />
+          <Input type="search" placeholder="Search files..." className="w-full bg-background pl-8" />
         </div>
         <div className="flex items-center gap-2">
           <DropdownMenu>
@@ -178,7 +178,7 @@ export function DocumentsTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Document</TableHead>
+                <TableHead>File</TableHead>
                 <TableHead>Uploaded</TableHead>
                 <TableHead>Uploaded By</TableHead>
                 <TableHead>Related To</TableHead>

@@ -1,14 +1,14 @@
 import type { Metadata } from "next"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { DocumentsTable } from "@/components/documents-table"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
+import { FileContent } from "@/components/shared/file-content"
 
 export const metadata: Metadata = {
-  title: "Documents",
-  description: "Manage and organize all your documents and files.",
+  title: "Files",
+  description: "Manage and organize all your files.",
 }
 
 export default function DocumentsPage() {
@@ -16,16 +16,18 @@ export default function DocumentsPage() {
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbPage>Documents</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+        <header className="flex h-12 shrink-0 items-center border-b">
+          <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Files</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
         </header>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col">
@@ -33,11 +35,11 @@ export default function DocumentsPage() {
               <div className="px-4 lg:px-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h1 className="text-2xl font-semibold">Documents</h1>
-                    <p className="text-muted-foreground">Manage and organize all your documents and files</p>
+                    <h1 className="text-2xl font-semibold">Files</h1>
+                    <p className="text-muted-foreground">Manage and organize all your files</p>
                   </div>
                 </div>
-                <DocumentsTable />
+                <FileContent />
               </div>
             </div>
           </div>

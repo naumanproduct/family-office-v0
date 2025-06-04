@@ -244,12 +244,7 @@ function LiabilityNameCell({ liability }: { liability: Liability }) {
     return <LiabilityDetailsPanel liability={liability} isFullScreen={isFullScreen} />
   }
 
-  const customActions = [
-    <Button key="payment" variant="outline" size="sm">
-      <DollarSignIcon className="h-4 w-4" />
-      Make Payment
-    </Button>,
-  ]
+  const customActions: React.ReactNode[] = []
 
   return (
     <MasterDrawer
