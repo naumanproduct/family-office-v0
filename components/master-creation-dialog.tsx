@@ -101,12 +101,16 @@ export function MasterCreationDialog({
       category: type.category,
       ...typeData,
     }))
-    setIsDirty(true)
+    // Remove this line: setIsDirty(true)
   }
 
   const handleInputChange = (fieldId: string, value: any) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }))
-    setIsDirty(true)
+
+    // Only set dirty if the value is not empty/default
+    if (value && value !== "") {
+      setIsDirty(true)
+    }
   }
 
   const handleBackToSelection = () => {
