@@ -10,6 +10,16 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ChevronLeftIcon } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface CreationType {
   id: string
@@ -78,6 +88,8 @@ export function MasterCreationDialog({
   const [selectedType, setSelectedType] = useState<CreationType | null>(null)
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [isDirty, setIsDirty] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [pendingAction, setPendingAction] = useState<"close" | "back" | null>(null)
 
   // Initialize form data with default values
   useEffect(() => {
@@ -110,9 +122,15 @@ export function MasterCreationDialog({
   }
 
   const handleBackToSelection = () => {
-    if (isDirty && !confirm("Are you sure you want to discard changes?")) {
-      return
+    if (isDirty) {
+      setPendingAction("back")
+      setShowConfirmDialog(true)
+    } else {
+      executeBackToSelection()
     }
+  }
+
+  const executeBackToSelection = () => {
     setSelectedType(null)
     setFormData({})
     setIsDirty(false)
@@ -121,17 +139,33 @@ export function MasterCreationDialog({
   const handleSave = () => {
     onSave(formData)
     onClose()
-    handleBackToSelection()
+    executeBackToSelection()
     setIsDirty(false)
   }
 
   const handleClose = () => {
-    if (isDirty && !confirm("Are you sure you want to discard changes?")) {
-      return
+    if (isDirty) {
+      setPendingAction("close")
+      setShowConfirmDialog(true)
+    } else {
+      onClose()
     }
-    onClose()
-    handleBackToSelection()
+  }
+
+  const handleConfirmAction = () => {
+    if (pendingAction === "close") {
+      onClose()
+      executeBackToSelection()
+    } else if (pendingAction === "back") {
+      executeBackToSelection()
+    }
     setIsDirty(false)
+    setShowConfirmDialog(false)
+  }
+
+  const handleCancelAction = () => {
+    setPendingAction(null)
+    setShowConfirmDialog(false)
   }
 
   const isFormValid = () => {
@@ -252,89 +286,106 @@ export function MasterCreationDialog({
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={handleClose}>
-      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={selectedType ? handleBackToSelection : handleClose}>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="secondary">{selectedType ? `${recordType} Details` : `${recordType} Type`}</Badge>
-          </div>
-        </div>
-
-        {/* Record Header */}
-        <div className="border-b bg-background px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full ${avatarColor} text-white text-sm font-medium`}
-            >
-              {avatarLetter}
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">{selectedType ? `Add ${selectedType.name}` : title}</h2>
-              <p className="text-sm text-muted-foreground">
-                {selectedType ? description : `Select the type of ${recordType.toLowerCase()} you want to add`}
-              </p>
+    <>
+      <Sheet open={isOpen} onOpenChange={handleClose}>
+        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={selectedType ? handleBackToSelection : handleClose}>
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="secondary">{selectedType ? `${recordType} Details` : `${recordType} Type`}</Badge>
             </div>
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {!selectedType ? (
-            // Type Selection
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground">{typeSelectionTitle}</h3>
-                {types.map((type) => (
-                  <Card
-                    key={type.id}
-                    className="cursor-pointer transition-all duration-200 hover:shadow-md"
-                    onClick={() => handleTypeSelect(type)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base font-medium">{type.name}</CardTitle>
-                          <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    {type.category && (
-                      <CardContent className="pt-0">
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Category: {type.category}</span>
-                        </div>
-                      </CardContent>
-                    )}
-                  </Card>
-                ))}
+          {/* Record Header */}
+          <div className="border-b bg-background px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${avatarColor} text-white text-sm font-medium`}
+              >
+                {avatarLetter}
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">{selectedType ? `Add ${selectedType.name}` : title}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {selectedType ? description : `Select the type of ${recordType.toLowerCase()} you want to add`}
+                </p>
               </div>
             </div>
-          ) : (
-            // Form
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">{formFields.map(renderFormField)}</div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {!selectedType ? (
+              // Type Selection
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <h3 className="text-sm font-medium text-muted-foreground">{typeSelectionTitle}</h3>
+                  {types.map((type) => (
+                    <Card
+                      key={type.id}
+                      className="cursor-pointer transition-all duration-200 hover:shadow-md"
+                      onClick={() => handleTypeSelect(type)}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base font-medium">{type.name}</CardTitle>
+                            <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      {type.category && (
+                        <CardContent className="pt-0">
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>Category: {type.category}</span>
+                          </div>
+                        </CardContent>
+                      )}
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // Form
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">{formFields.map(renderFormField)}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          {selectedType && (
+            <div className="border-t bg-background px-6 py-4">
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={handleBackToSelection} className="flex-1">
+                  Back
+                </Button>
+                <Button onClick={handleSave} className="flex-1" disabled={!isFormValid()}>
+                  Create {recordType}
+                </Button>
+              </div>
             </div>
           )}
-        </div>
+        </SheetContent>
+      </Sheet>
 
-        {/* Footer */}
-        {selectedType && (
-          <div className="border-t bg-background px-6 py-4">
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={handleBackToSelection} className="flex-1">
-                Back
-              </Button>
-              <Button onClick={handleSave} className="flex-1" disabled={!isFormValid()}>
-                Create {recordType}
-              </Button>
-            </div>
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Are you sure you want to discard them?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelAction}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAction}>Discard</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
