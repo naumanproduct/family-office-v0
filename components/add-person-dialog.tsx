@@ -1,12 +1,98 @@
 "use client"
 
-import type * as React from "react"
-import { UserIcon, MailIcon, PhoneIcon, BriefcaseIcon, BuildingIcon, MapPinIcon, FileTextIcon } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { MasterCreationDialog } from "./master-creation-dialog"
+
+// Person types
+const personTypes = [
+  {
+    id: "employee",
+    name: "Employee",
+    description: "A person who works for your organization under an employment contract.",
+    category: "Internal",
+  },
+  {
+    id: "client",
+    name: "Client",
+    description: "A person who uses your organization's products or services.",
+    category: "External",
+  },
+  {
+    id: "investor",
+    name: "Investor",
+    description: "A person who has invested capital in your organization.",
+    category: "External",
+  },
+  {
+    id: "advisor",
+    name: "Advisor",
+    description: "A person who provides expert advice to your organization.",
+    category: "External",
+  },
+  {
+    id: "partner",
+    name: "Partner",
+    description: "A person who has a business relationship with your organization.",
+    category: "External",
+  },
+]
+
+// Form fields configuration
+const personFormFields = [
+  {
+    id: "firstName",
+    label: "First Name",
+    type: "text",
+    placeholder: "Enter first name",
+    required: true,
+    gridCols: 1,
+  },
+  {
+    id: "lastName",
+    label: "Last Name",
+    type: "text",
+    placeholder: "Enter last name",
+    required: true,
+    gridCols: 1,
+  },
+  {
+    id: "email",
+    label: "Email Address",
+    type: "text",
+    placeholder: "email@example.com",
+    required: true,
+  },
+  {
+    id: "phone",
+    label: "Phone Number",
+    type: "text",
+    placeholder: "+1 (555) 123-4567",
+  },
+  {
+    id: "jobTitle",
+    label: "Job Title",
+    type: "text",
+    placeholder: "Enter job title",
+  },
+  {
+    id: "company",
+    label: "Company",
+    type: "text",
+    placeholder: "Enter company name",
+  },
+  {
+    id: "location",
+    label: "Location",
+    type: "text",
+    placeholder: "City, State/Province, Country",
+  },
+  {
+    id: "bio",
+    label: "Bio",
+    type: "textarea",
+    placeholder: "Brief biography or notes",
+    rows: 4,
+  },
+]
 
 interface AddPersonDialogProps {
   open: boolean
@@ -14,93 +100,33 @@ interface AddPersonDialogProps {
 }
 
 export function AddPersonDialog({ open, onOpenChange }: AddPersonDialogProps) {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission
-    onOpenChange(false)
+  const handleSave = (data: any) => {
+    console.log("Person data saved:", data)
+    // Here you would typically save the data to your backend
+  }
+
+  const handleTypeSelect = (type: any) => {
+    // Return any type-specific default values
+    return {
+      personType: type.id,
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Add Person</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />
-                  <Label htmlFor="firstName">First Name</Label>
-                </div>
-                <Input id="firstName" placeholder="First Name" required />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />
-                  <Label htmlFor="lastName">Last Name</Label>
-                </div>
-                <Input id="lastName" placeholder="Last Name" required />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <MailIcon className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="email">Email</Label>
-              </div>
-              <Input id="email" type="email" placeholder="Email" required />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="phone">Phone</Label>
-              </div>
-              <Input id="phone" placeholder="Phone" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <BriefcaseIcon className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="jobTitle">Job Title</Label>
-              </div>
-              <Input id="jobTitle" placeholder="Job Title" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="company">Company</Label>
-              </div>
-              <Input id="company" placeholder="Company" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="location">Location</Label>
-              </div>
-              <Input id="location" placeholder="Location" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="bio">Bio</Label>
-              </div>
-              <Textarea id="bio" placeholder="Bio" className="min-h-[100px]" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">Add Person</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <MasterCreationDialog
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
+      onSave={handleSave}
+      title="Add New Person"
+      description="Create a new person record in the system"
+      recordType="Person"
+      avatarLetter="P"
+      avatarColor="bg-green-600"
+      types={personTypes}
+      typeSelectionTitle="Select Person Type"
+      formFields={personFormFields}
+      requiredFields={["firstName", "lastName", "email"]}
+      onTypeSelect={handleTypeSelect}
+    />
   )
 }

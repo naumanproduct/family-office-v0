@@ -10,14 +10,12 @@ import {
   LayoutGridIcon,
   ListIcon,
   TableIcon,
-  FileTextIcon,
-  CalendarIcon,
-  UsersIcon,
   ChevronLeftIcon,
   XIcon,
   ExpandIcon,
 } from "lucide-react"
 import { createPortal } from "react-dom"
+import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -34,6 +32,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { TaskDetailsView } from "./task-details-view"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { TaskTemplateDialog } from "./task-template-dialog"
 
 // Task data - extended from investment tab but across all objects
 const tasksData = [
@@ -111,16 +110,14 @@ function TaskTableView({
         </TableHeader>
         <TableBody>
           {data.map((item) => (
-            <TableRow
-              key={item.id}
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => onTaskClick?.(item)}
-            >
+            <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onTaskClick?.(item)}>
               <TableCell className="font-medium">{item.title}</TableCell>
               <TableCell>{item.dueDate}</TableCell>
               <TableCell>
-                <Badge 
-                  variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                <Badge
+                  variant={
+                    item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+                  }
                 >
                   {item.priority}
                 </Badge>
@@ -162,11 +159,7 @@ function TaskCardView({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {data.map((item) => (
-        <Card
-          key={item.id}
-          className="cursor-pointer hover:bg-muted/50"
-          onClick={() => onTaskClick?.(item)}
-        >
+        <Card key={item.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onTaskClick?.(item)}>
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -188,8 +181,10 @@ function TaskCardView({
                     </div>
                   )}
                   <div className="flex items-center gap-2">
-                    <Badge 
-                      variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                    <Badge
+                      variant={
+                        item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+                      }
                       className="text-xs"
                     >
                       {item.priority}
@@ -246,8 +241,10 @@ function TaskListView({
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">Due: {item.dueDate}</p>
                   <div className="mt-1 flex items-center gap-1">
-                    <Badge 
-                      variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'secondary'}
+                    <Badge
+                      variant={
+                        item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+                      }
                       className="text-xs"
                     >
                       {item.priority}
@@ -259,9 +256,7 @@ function TaskListView({
                 </div>
               </div>
               <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.description}</p>
-              {item.relatedTo && (
-                <p className="mt-2 text-xs text-blue-600">Related to: {item.relatedTo.name}</p>
-              )}
+              {item.relatedTo && <p className="mt-2 text-xs text-blue-600">Related to: {item.relatedTo.name}</p>}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -289,6 +284,7 @@ export function TasksTable() {
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
   const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
   const [isFullScreen, setIsFullScreen] = React.useState(false)
+  const [isTaskTemplateOpen, setIsTaskTemplateOpen] = useState(false)
 
   // Handle back navigation in the drawer
   const handleDrawerBackClick = () => {
@@ -309,15 +305,15 @@ export function TasksTable() {
   // ESC key handler for full screen mode
   React.useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isFullScreen) {
+      if (event.key === "Escape" && isFullScreen) {
         setIsFullScreen(false)
       }
     }
 
     if (isFullScreen) {
-      document.addEventListener('keydown', handleEscKey)
+      document.addEventListener("keydown", handleEscKey)
       return () => {
-        document.removeEventListener('keydown', handleEscKey)
+        document.removeEventListener("keydown", handleEscKey)
       }
     }
   }, [isFullScreen])
@@ -363,17 +359,13 @@ export function TasksTable() {
 
   const FullScreenContent = () => {
     if (typeof document === "undefined") return null
-    
+
     return createPortal(
       <div className="fixed inset-0 z-[9999] bg-background">
         {/* Full Screen Header */}
         <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsFullScreen(false)}
-            >
+            <Button variant="ghost" size="icon" onClick={() => setIsFullScreen(false)}>
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
             <Badge variant="outline" className="bg-background">
@@ -389,7 +381,7 @@ export function TasksTable() {
 
         {/* Task Details Content */}
         <div className="flex-1 overflow-auto">
-          <TaskDetailsView 
+          <TaskDetailsView
             task={selectedSubtask || selectedTask}
             onBack={handleDrawerBackClick}
             recordName="All Tasks"
@@ -400,7 +392,7 @@ export function TasksTable() {
           />
         </div>
       </div>,
-      document.body
+      document.body,
     )
   }
 
@@ -439,7 +431,7 @@ export function TasksTable() {
           </div>
           <div className="flex items-center space-x-2">
             <ViewModeSelector />
-            <Button size="sm">
+            <Button size="sm" onClick={() => setIsTaskTemplateOpen(true)}>
               <PlusIcon className="mr-2 h-4 w-4" />
               Add Task
             </Button>
@@ -475,7 +467,7 @@ export function TasksTable() {
             </div>
             {/* Task Details Content */}
             <div className="flex-1 overflow-auto">
-              <TaskDetailsView 
+              <TaskDetailsView
                 task={selectedSubtask || selectedTask}
                 onBack={handleDrawerBackClick}
                 recordName="All Tasks"
@@ -488,6 +480,8 @@ export function TasksTable() {
           </SheetContent>
         </Sheet>
       )}
+      {/* Task Template Dialog */}
+      <TaskTemplateDialog isOpen={isTaskTemplateOpen} onClose={() => setIsTaskTemplateOpen(false)} />
     </>
   )
 }
