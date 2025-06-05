@@ -237,7 +237,8 @@ Sarah`,
     attachments: emailThread[0]?.attachments || [],
   })
 
-  const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
+  // Tabs for email details
+  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
@@ -441,7 +442,7 @@ Sarah`,
                         </Label>
                       </div>
                       <div className="pl-6 space-y-2">
-                        {fieldValues.attachments.map((attachment, i) => (
+                        {fieldValues.attachments.map((attachment: any, i: number) => (
                           <EmailAttachment key={i} attachment={attachment} index={i} />
                         ))}
                       </div>

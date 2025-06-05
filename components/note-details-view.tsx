@@ -41,7 +41,7 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
 
   const [noteText, setNoteText] = React.useState("")
 
-  const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
+  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
 
   const getPriorityColor = (priority: string | undefined | null) => {
     if (!priority) return "bg-gray-100 text-gray-800"

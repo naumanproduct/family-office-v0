@@ -42,7 +42,7 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
 
   const [meetingNotes, setMeetingNotes] = React.useState("")
 
-  const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
+  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
 
   const getStatusColor = (status: string | undefined | null) => {
     if (!status) return "bg-gray-100 text-gray-800"

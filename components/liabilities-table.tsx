@@ -37,6 +37,8 @@ import {
   BuildingIcon,
   DollarSignIcon,
   TrendingUpIcon,
+  ClockIcon,
+  MessageSquareIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -53,10 +55,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent } from "@/components/ui/card"
-import { MasterDrawer } from "./master-drawer"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { MasterDrawer } from "@/components/master-drawer"
 import { Label } from "@/components/ui/label"
 import { AddLiabilityDialog } from "./add-liability-dialog"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 
 export const liabilitySchema = z.object({
   id: z.number(),
@@ -178,13 +182,13 @@ const getStatusColor = (status: string) => {
 function LiabilityNameCell({ liability }: { liability: Liability }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 1, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
-    { id: "meetings", label: "Meetings", count: 3, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 4, icon: FolderIcon },
-    { id: "team", label: "Team", count: 3, icon: UsersIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: ClockIcon },
+    { id: "notes", label: "Notes", count: 1, icon: MessageSquareIcon },
+    { id: "meetings", label: "Meetings", count: 1, icon: UsersIcon },
+    { id: "emails", label: "Emails", count: 1, icon: MailIcon },
+    { id: "files", label: "Files", count: 1, icon: FolderIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
+    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
   ]
 
   const renderTabContent = (
@@ -199,43 +203,41 @@ function LiabilityNameCell({ liability }: { liability: Liability }) {
       return <LiabilityDetailsPanel liability={liability} isFullScreen={false} />
     }
 
-    // For other tabs, return generic content similar to assets
-    const data = getLiabilityTabData(activeTab, liability)
-
-    if (viewMode === "table") {
-      return (
-        <TableView
-          data={data}
-          activeTab={activeTab}
-          onTaskClick={setSelectedTask}
-          onNoteClick={setSelectedNote}
-          onMeetingClick={setSelectedMeeting}
-          onEmailClick={setSelectedEmail}
-        />
-      )
+    if (activeTab === "company") {
+      return <LiabilityCompanyContent liability={liability} />
     }
 
-    if (viewMode === "card") {
-      return (
-        <CardView
-          data={data}
-          activeTab={activeTab}
-          onTaskClick={setSelectedTask}
-          onNoteClick={setSelectedNote}
-          onMeetingClick={setSelectedMeeting}
-          onEmailClick={setSelectedEmail}
-        />
-      )
+    if (activeTab === "performance") {
+      return <LiabilityPerformanceContent liability={liability} />
+    }
+    
+    // For other tabs, use TabContentRenderer instead of custom implementations
+    const data = getLiabilityTabData(activeTab, liability)
+    
+    // Create custom tab renderers for special tabs
+    const customTabRenderers = {
+      details: (isFullScreen = false) => <LiabilityDetailsPanel liability={liability} isFullScreen={isFullScreen} />,
+      company: (isFullScreen = false) => <LiabilityCompanyContent liability={liability} />,
+      performance: (isFullScreen = false) => <LiabilityPerformanceContent liability={liability} />,
+    }
+
+    // Create a handler for "add" actions for empty states
+    const handleAdd = () => {
+      console.log(`Add new ${activeTab.slice(0, -1)} for ${liability.name}`);
+      // In a real implementation, this would open the appropriate modal or form
     }
 
     return (
-      <ListView
-        data={data}
+      <TabContentRenderer
         activeTab={activeTab}
+        viewMode={viewMode}
+        data={data}
+        customTabRenderers={customTabRenderers}
         onTaskClick={setSelectedTask}
         onNoteClick={setSelectedNote}
         onMeetingClick={setSelectedMeeting}
         onEmailClick={setSelectedEmail}
+        onAdd={handleAdd}
       />
     )
   }
@@ -353,315 +355,195 @@ function getLiabilityTabData(activeTab: string, liability: Liability) {
           status: "Active",
         },
       ]
+    case "company":
+      return [
+        {
+          id: 1,
+          name: liability.lender,
+          role: "Lender",
+          relationship: "Active",
+          contactPerson: "Jane Smith",
+          email: "j.smith@lender.com",
+          phone: "(555) 123-4567",
+        },
+      ]
     default:
       return []
   }
 }
 
 function LiabilityDetailsPanel({ liability, isFullScreen = false }: { liability: Liability; isFullScreen?: boolean }) {
+  const fieldGroups = [
+    {
+      id: "liability-info",
+      label: "Liability Details",
+      icon: DollarSignIcon,
+      fields: [
+        { label: "Liability Name", value: liability.name },
+        { label: "Type", value: liability.type },
+        { label: "Category", value: liability.category },
+        { label: "Current Balance", value: liability.currentBalance },
+        { label: "Original Amount", value: liability.originalAmount },
+        { label: "Interest Rate", value: liability.interestRate },
+        { label: "Maturity Date", value: liability.maturityDate },
+        { label: "Lender", value: liability.lender },
+        { label: "Entity", value: liability.entity },
+      ],
+    },
+  ];
+
   return (
-    <div className="p-6">
-      {/* Details Tab */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-6">
-          <button className="relative border-b-2 border-primary pb-3 text-sm font-medium text-primary">
-            Details
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
-          </button>
-          <button className="relative pb-3 text-sm text-muted-foreground hover:text-foreground">
-            Comments
-            <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-              0
-            </Badge>
-          </button>
-        </div>
-      </div>
+    <MasterDetailsPanel 
+      fieldGroups={fieldGroups}
+      isFullScreen={isFullScreen}
+    />
+  )
+}
 
-      {/* Liability Details */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-medium">Liability Details</h4>
-
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Liability Name</Label>
-                <p className="text-sm font-medium">{liability.name}</p>
-              </div>
+function LiabilityCompanyContent({ liability }: { liability: Liability }) {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-start gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary text-primary-foreground text-2xl font-bold">
+              {liability.lender.charAt(0)}
             </div>
-
-            <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Type</Label>
-                <p className="text-sm">{liability.type}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Category</Label>
-                <p className="text-sm">{liability.category}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Current Balance</Label>
-                <p className="text-sm font-medium">{liability.currentBalance}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Original Amount</Label>
-                <p className="text-sm">{liability.originalAmount}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Interest Rate</Label>
-                <p className="text-sm">{liability.interestRate}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Maturity Date</Label>
-                <p className="text-sm">{liability.maturityDate}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Lender</Label>
-                <p className="text-sm">{liability.lender}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Entity</Label>
-                <p className="text-sm">{liability.entity}</p>
+            <div className="flex-1">
+              <CardTitle className="text-xl">{liability.lender}</CardTitle>
+              <CardDescription className="mt-1">Financial Institution • {liability.type}</CardDescription>
+              <div className="mt-3 flex items-center gap-4">
+                <Badge variant="outline">Lender</Badge>
+                <Badge variant="outline" className={getStatusColor(liability.status)}>
+                  {liability.status}
+                </Badge>
+                <span className="text-sm text-muted-foreground">Relationship since 2018</span>
               </div>
             </div>
           </div>
-        </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium mb-2">Lender Overview</h4>
+            <p className="text-sm text-muted-foreground">
+              {liability.lender} is a leading financial institution that provides a wide range of banking services,
+              including loans, mortgages, and lines of credit. They specialize in commercial real estate financing
+              and have been a trusted partner for our organization for many years.
+            </p>
+          </div>
 
-        <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-          Show all values
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-function TableView({
-  data,
-  activeTab,
-  onTaskClick,
-  onNoteClick,
-  onMeetingClick,
-  onEmailClick,
-}: {
-  data: any[]
-  activeTab: string
-  onTaskClick?: (task: any) => void
-  onNoteClick?: (note: any) => void
-  onMeetingClick?: (meeting: any) => void
-  onEmailClick?: (email: any) => void
-}) {
-  return (
-    <div className="rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="w-12"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((item) => (
-            <TableRow
-              key={item.id}
-              className={
-                activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails"
-                  ? "cursor-pointer hover:bg-muted/50"
-                  : ""
-              }
-              onClick={() => {
-                if (activeTab === "tasks") {
-                  onTaskClick?.(item)
-                } else if (activeTab === "notes") {
-                  onNoteClick?.(item)
-                } else if (activeTab === "meetings") {
-                  onMeetingClick?.(item)
-                } else if (activeTab === "emails") {
-                  onEmailClick?.(item)
-                }
-              }}
-            >
-              <TableCell>{item.title || item.subject || item.name}</TableCell>
-              <TableCell>{item.date || item.uploadedDate}</TableCell>
-              <TableCell>
-                <Badge variant="outline">{item.status || item.priority}</Badge>
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                      <MoreVerticalIcon className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>View</DropdownMenuItem>
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  )
-}
-
-function CardView({
-  data,
-  activeTab,
-  onTaskClick,
-  onNoteClick,
-  onMeetingClick,
-  onEmailClick,
-}: {
-  data: any[]
-  activeTab: string
-  onTaskClick?: (task: any) => void
-  onNoteClick?: (note: any) => void
-  onMeetingClick?: (meeting: any) => void
-  onEmailClick?: (email: any) => void
-}) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {data.map((item) => (
-        <Card
-          key={item.id}
-          className={
-            activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails"
-              ? "cursor-pointer hover:bg-muted/50"
-              : ""
-          }
-          onClick={() => {
-            if (activeTab === "tasks") {
-              onTaskClick?.(item)
-            } else if (activeTab === "notes") {
-              onNoteClick?.(item)
-            } else if (activeTab === "meetings") {
-              onMeetingClick?.(item)
-            } else if (activeTab === "emails") {
-              onEmailClick?.(item)
-            }
-          }}
-        >
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium">{item.title || item.subject || item.name}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{item.description || item.preview || item.content}</p>
-                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{item.date || item.uploadedDate}</span>
-                  {item.size && <span>• {item.size}</span>}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-sm font-medium mb-2">Key Details</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Loan Type:</span>
+                  <span>{liability.type}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Interest Rate:</span>
+                  <span>{liability.interestRate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Portfolio:</span>
+                  <span>$15M+</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Website:</span>
+                  <span className="text-blue-600">www.lender.com</span>
                 </div>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                    <MoreVerticalIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>View</DropdownMenuItem>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-2">Contact Info</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Relationship Manager:</span>
+                  <span>Jane Smith</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email:</span>
+                  <span className="text-blue-600">j.smith@lender.com</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Phone:</span>
+                  <span>(555) 123-4567</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-medium mb-2">Recent Activity</h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                <span>Payment processed</span>
+                <span className="text-muted-foreground">• 2 weeks ago</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span>Rate adjustment discussion</span>
+                <span className="text-muted-foreground">• 1 month ago</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function LiabilityPerformanceContent({ liability }: { liability: Liability }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Performance</h3>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            1Y
+          </Button>
+          <Button variant="outline" size="sm">
+            3Y
+          </Button>
+          <Button variant="outline" size="sm">
+            5Y
+          </Button>
+          <Button variant="outline" size="sm">
+            All
+          </Button>
+        </div>
+      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+            Payment history chart would appear here
+          </div>
+        </CardContent>
+      </Card>
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm text-muted-foreground">Principal Paid</div>
+            <div className="text-2xl font-semibold">
+              ${Math.round((parseFloat(liability.originalAmount.replace(/[^0-9.]/g, '')) - parseFloat(liability.currentBalance.replace(/[^0-9.]/g, ''))) / 1000)}k
             </div>
           </CardContent>
         </Card>
-      ))}
-    </div>
-  )
-}
-
-function ListView({
-  data,
-  activeTab,
-  onTaskClick,
-  onNoteClick,
-  onMeetingClick,
-  onEmailClick,
-}: {
-  data: any[]
-  activeTab: string
-  onTaskClick?: (task: any) => void
-  onNoteClick?: (note: any) => void
-  onMeetingClick?: (meeting: any) => void
-  onEmailClick?: (email: any) => void
-}) {
-  return (
-    <div className="space-y-4">
-      {data.map((item) => (
-        <div
-          key={item.id}
-          className={`rounded-lg border p-4 ${activeTab === "tasks" || activeTab === "notes" || activeTab === "meetings" || activeTab === "emails" ? "cursor-pointer hover:bg-muted/50" : ""}`}
-          onClick={() => {
-            if (activeTab === "tasks") {
-              onTaskClick?.(item)
-            } else if (activeTab === "notes") {
-              onNoteClick?.(item)
-            } else if (activeTab === "meetings") {
-              onMeetingClick?.(item)
-            } else if (activeTab === "emails") {
-              onEmailClick?.(item)
-            }
-          }}
-        >
-          <div className="flex items-start gap-3">
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{item.title || item.subject || item.name}</p>
-                  {item.assignee && <p className="text-xs text-muted-foreground">Assigned to: {item.assignee}</p>}
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">{item.date || item.uploadedDate}</p>
-                  {item.status && (
-                    <Badge variant="outline" className="text-xs mt-1">
-                      {item.status}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">{item.description || item.preview || item.content}</p>
-            </div>
-          </div>
-        </div>
-      ))}
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm text-muted-foreground">Interest Paid YTD</div>
+            <div className="text-2xl font-semibold">$12.4k</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm text-muted-foreground">Payoff Progress</div>
+            <div className="text-2xl font-semibold">42%</div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

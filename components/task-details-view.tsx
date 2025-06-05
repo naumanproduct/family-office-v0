@@ -90,7 +90,7 @@ export function TaskDetailsView({ task, onBack, recordName, parentTask, onBackTo
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false)
   const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
 
-  const tabs = [{ id: "details", label: "Details", icon: InfoIcon }]
+  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {

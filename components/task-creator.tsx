@@ -481,168 +481,169 @@ export function TaskCreator({
                 className="flex items-center gap-2"
               >
                 Next <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="subtasks" className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto">
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-sm font-medium">Configure Subtasks</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {existingTemplate
-                        ? "Select which subtasks to include and customize them as needed."
-                        : "Break down your task into smaller, manageable subtasks."}
-                    </p>
-                  </div>
-                  {task.subtasks.length > 0 && (
-                    <Button variant="outline" size="sm" onClick={addCustomSubtask}>
-                      <Plus className="h-4 w-4 mr-1" /> Add
-                    </Button>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  {task.subtasks.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
-                      <p className="text-sm mb-4">No subtasks yet</p>
-                      <Button variant="outline" onClick={addCustomSubtask}>
-                        <Plus className="h-4 w-4 mr-2" /> Add First Subtask
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      {task.subtasks.map((subtask: any, index: number) => (
-                        <div key={index} className="group border rounded-lg">
-                          <div className="flex items-center gap-3 p-3">
-                            <Checkbox
-                              checked={subtask.included !== false}
-                              onCheckedChange={() => toggleSubtask(index)}
-                            />
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleSubtaskExpansion(index)}
-                              className="p-0 h-auto"
-                            >
-                              {expandedSubtasks.has(index) ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </Button>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm truncate">{subtask.title || "Untitled subtask"}</div>
-                              {subtask.description && !expandedSubtasks.has(index) && (
-                                <div className="text-xs text-muted-foreground truncate">{subtask.description}</div>
-                              )}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeSubtask(index)}
-                              className="opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive p-1"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-
-                          {expandedSubtasks.has(index) && (
-                            <div className="px-3 pb-3 space-y-2 border-t bg-muted/20">
-                              <div className="pt-3 space-y-2">
-                                <Input
-                                  value={subtask.title}
-                                  onChange={(e) => updateSubtask(index, "title", e.target.value)}
-                                  placeholder="Subtask title..."
-                                  className="text-sm"
-                                />
-                                <Textarea
-                                  value={subtask.description}
-                                  onChange={(e) => updateSubtask(index, "description", e.target.value)}
-                                  placeholder="Subtask description..."
-                                  rows={2}
-                                  className="text-xs"
-                                />
-                                <Select
-                                  value={subtask.priority}
-                                  onValueChange={(value) => updateSubtask(index, "priority", value)}
-                                >
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {priorityOptions.map((priority) => (
-                                      <SelectItem key={priority.value} value={priority.value}>
-                                        {priority.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-between pt-4 border-t flex-shrink-0">
-            <Button variant="outline" onClick={() => setActiveTab("basic")}>
-              Back
-            </Button>
-            <div className="flex gap-2">
-              {isFromScratch && hasSubtasks && !showSaveAsTemplate && (
-                <Button
-                  variant="outline"
-                  onClick={() => setShowSaveAsTemplate(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Bookmark className="h-4 w-4" />
-                  Save as Template
-                </Button>
-              )}
-              <Button onClick={handleSave} disabled={!canSave}>
-                Create Task
               </Button>
             </div>
-          </div>
+          </TabsContent>
 
-          {showSaveAsTemplate && (
-            <div className="border-t pt-4 space-y-3 flex-shrink-0 bg-muted/20">
-              <div className="space-y-2">
-                <Label htmlFor="templateName" className="text-sm font-medium">
-                  Template Name
-                </Label>
-                <Input
-                  id="templateName"
-                  value={templateName}
-                  onChange={(e) => setTemplateName(e.target.value)}
-                  placeholder="e.g., My Custom Workflow"
-                  className="text-sm"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Save this task structure as a reusable template for future tasks.
-                </p>
+          <TabsContent value="subtasks" className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 overflow-y-auto">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-sm font-medium">Configure Subtasks</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {existingTemplate
+                          ? "Select which subtasks to include and customize them as needed."
+                          : "Break down your task into smaller, manageable subtasks."}
+                      </p>
+                    </div>
+                    {task.subtasks.length > 0 && (
+                      <Button variant="outline" size="sm" onClick={addCustomSubtask}>
+                        <Plus className="h-4 w-4 mr-1" /> Add
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    {task.subtasks.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                        <p className="text-sm mb-4">No subtasks yet</p>
+                        <Button variant="outline" onClick={addCustomSubtask}>
+                          <Plus className="h-4 w-4 mr-2" /> Add First Subtask
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        {task.subtasks.map((subtask: any, index: number) => (
+                          <div key={index} className="group border rounded-lg">
+                            <div className="flex items-center gap-3 p-3">
+                              <Checkbox
+                                checked={subtask.included !== false}
+                                onCheckedChange={() => toggleSubtask(index)}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleSubtaskExpansion(index)}
+                                className="p-0 h-auto"
+                              >
+                                {expandedSubtasks.has(index) ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm truncate">{subtask.title || "Untitled subtask"}</div>
+                                {subtask.description && !expandedSubtasks.has(index) && (
+                                  <div className="text-xs text-muted-foreground truncate">{subtask.description}</div>
+                                )}
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeSubtask(index)}
+                                className="opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive p-1"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+
+                            {expandedSubtasks.has(index) && (
+                              <div className="px-3 pb-3 space-y-2 border-t bg-muted/20">
+                                <div className="pt-3 space-y-2">
+                                  <Input
+                                    value={subtask.title}
+                                    onChange={(e) => updateSubtask(index, "title", e.target.value)}
+                                    placeholder="Subtask title..."
+                                    className="text-sm"
+                                  />
+                                  <Textarea
+                                    value={subtask.description}
+                                    onChange={(e) => updateSubtask(index, "description", e.target.value)}
+                                    placeholder="Subtask description..."
+                                    rows={2}
+                                    className="text-xs"
+                                  />
+                                  <Select
+                                    value={subtask.priority}
+                                    onValueChange={(value) => updateSubtask(index, "priority", value)}
+                                  >
+                                    <SelectTrigger className="w-32">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {priorityOptions.map((priority) => (
+                                        <SelectItem key={priority.value} value={priority.value}>
+                                          {priority.label}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <div className="flex justify-between pt-4 border-t flex-shrink-0">
+              <Button variant="outline" onClick={() => setActiveTab("basic")}>
+                Back
+              </Button>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setShowSaveAsTemplate(false)}>
-                  Cancel
-                </Button>
-                <Button size="sm" onClick={handleSaveAsTemplate} disabled={!templateName.trim()}>
-                  Save Template & Create Task
+                {isFromScratch && hasSubtasks && !showSaveAsTemplate && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSaveAsTemplate(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Bookmark className="h-4 w-4" />
+                    Save as Template
+                  </Button>
+                )}
+                <Button onClick={handleSave} disabled={!canSave}>
+                  Create Task
                 </Button>
               </div>
             </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </DialogContent>
-  </Dialog>
-)
+
+            {showSaveAsTemplate && (
+              <div className="border-t pt-4 space-y-3 flex-shrink-0 bg-muted/20">
+                <div className="space-y-2">
+                  <Label htmlFor="templateName" className="text-sm font-medium">
+                    Template Name
+                  </Label>
+                  <Input
+                    id="templateName"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="e.g., My Custom Workflow"
+                    className="text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Save this task structure as a reusable template for future tasks.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowSaveAsTemplate(false)}>
+                    Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSaveAsTemplate} disabled={!templateName.trim()}>
+                    Save Template & Create Task
+                  </Button>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  )
+}

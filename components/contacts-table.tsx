@@ -24,6 +24,12 @@ import {
   SearchIcon,
   SortAscIcon,
   SortDescIcon,
+  FileTextIcon,
+  MailIcon,
+  CalendarIcon,
+  FolderIcon,
+  ClockIcon,
+  MessageSquareIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -52,11 +58,7 @@ import { createPortal } from "react-dom"
 import {
   ExpandIcon,
   XIcon,
-  MailIcon,
   BuildingIcon,
-  FileTextIcon,
-  CalendarIcon,
-  FolderIcon,
   CheckCircleIcon,
   PhoneIcon,
   MapPinIcon,
@@ -70,7 +72,9 @@ import { Label } from "@/components/ui/label"
 import { EmailsTable } from "./emails-table"
 import { TasksTable } from "./tasks-table"
 import { NotesTable } from "./notes-table"
-import { MasterDrawer } from "./master-drawer"
+import { MasterDrawer } from "@/components/master-drawer"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 
 export const contactSchema = z.object({
   id: z.number(),
@@ -299,10 +303,10 @@ const formatNumber = (num: number) => {
 function ContactNameCell({ contact }: { contact: Contact }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: ClockIcon },
+    { id: "notes", label: "Notes", count: 1, icon: MessageSquareIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
+    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
     { id: "files", label: "Files", count: 5, icon: FolderIcon },
   ]
 
@@ -314,47 +318,31 @@ function ContactNameCell({ contact }: { contact: Contact }) {
     setSelectedMeeting?: (meeting: any) => void,
     setSelectedEmail?: (email: any) => void,
   ) => {
-    if (activeTab === "details") {
-      return <ContactDetailsPanel contact={contact} isFullScreen={false} />
-    }
-
-    // For other tabs, return generic content similar to the dashboard
+    // For other tabs, use TabContentRenderer instead of custom implementations
     const data = getContactTabData(activeTab, contact)
-
-    if (viewMode === "table") {
-      return (
-        <TableView
-          data={data}
-          activeTab={activeTab}
-          onTaskClick={setSelectedTask}
-          onNoteClick={setSelectedNote}
-          onMeetingClick={setSelectedMeeting}
-          onEmailClick={setSelectedEmail}
-        />
-      )
+    
+    // Create custom tab renderers for special tabs
+    const customTabRenderers = {
+      details: (isFullScreen = false) => <ContactDetailsPanel contact={contact} isFullScreen={isFullScreen} />,
     }
 
-    if (viewMode === "card") {
-      return (
-        <CardView
-          data={data}
-          activeTab={activeTab}
-          onTaskClick={setSelectedTask}
-          onNoteClick={setSelectedNote}
-          onMeetingClick={setSelectedMeeting}
-          onEmailClick={setSelectedEmail}
-        />
-      )
+    // Create a handler for "add" actions for empty states
+    const handleAdd = () => {
+      console.log(`Add new ${activeTab.slice(0, -1)} for ${contact.firstName} ${contact.lastName}`);
+      // In a real implementation, this would open the appropriate modal or form
     }
 
     return (
-      <ListView
-        data={data}
+      <TabContentRenderer
         activeTab={activeTab}
+        viewMode={viewMode}
+        data={data}
+        customTabRenderers={customTabRenderers}
         onTaskClick={setSelectedTask}
         onNoteClick={setSelectedNote}
         onMeetingClick={setSelectedMeeting}
         onEmailClick={setSelectedEmail}
+        onAdd={handleAdd}
       />
     )
   }
@@ -497,544 +485,29 @@ function getContactTabData(activeTab: string, contact: Contact) {
   }
 }
 
-function TableView({
-  data,
-  activeTab,
-  onTaskClick,
-  onNoteClick,
-  onMeetingClick,
-  onEmailClick,
-}: {
-  data: any[]
-  activeTab: string
-  onTaskClick?: (task: any) => void
-  onNoteClick?: (note: any) => void
-  onMeetingClick?: (meeting: any) => void
-  onEmailClick?: (email: any) => void
-}) {
-  if (data.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No {activeTab} found</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {activeTab === "emails" && (
-              <>
-                <TableHead>Subject</TableHead>
-                <TableHead>From</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </>
-            )}
-            {activeTab === "tasks" && (
-              <>
-                <TableHead>Title</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Assignee</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </>
-            )}
-            {activeTab === "notes" && (
-              <>
-                <TableHead>Title</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </>
-            )}
-            {activeTab === "meetings" && (
-              <>
-                <TableHead>Title</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Attendees</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </>
-            )}
-            {activeTab === "files" && (
-              <>
-                <TableHead>Name</TableHead>
-                <TableHead>Uploaded By</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </>
-            )}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((item) => (
-            <TableRow
-              key={item.id}
-              className={`${
-                (activeTab === "tasks" && onTaskClick) ||
-                (activeTab === "notes" && onNoteClick) ||
-                (activeTab === "meetings" && onMeetingClick) ||
-                (activeTab === "emails" && onEmailClick)
-                  ? "cursor-pointer hover:bg-muted/50"
-                  : ""
-              }`}
-              onClick={() => {
-                if (activeTab === "tasks" && onTaskClick) {
-                  onTaskClick(item)
-                } else if (activeTab === "notes" && onNoteClick) {
-                  onNoteClick(item)
-                } else if (activeTab === "meetings" && onMeetingClick) {
-                  onMeetingClick(item)
-                } else if (activeTab === "emails" && onEmailClick) {
-                  onEmailClick(item)
-                }
-              }}
-            >
-              {activeTab === "emails" && (
-                <>
-                  <TableCell className="font-medium">{item.subject}</TableCell>
-                  <TableCell>{item.from}</TableCell>
-                  <TableCell>{item.date}</TableCell>
-                  <TableCell>
-                    <Badge variant={item.status === "Unread" ? "default" : "outline"}>{item.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                          <MoreVerticalIcon className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View</DropdownMenuItem>
-                        <DropdownMenuItem>Reply</DropdownMenuItem>
-                        <DropdownMenuItem>Forward</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </>
-              )}
-              {activeTab === "tasks" && (
-                <>
-                  <TableCell className="font-medium">{item.title}</TableCell>
-                  <TableCell>{item.dueDate}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
-                      }
-                    >
-                      {item.priority}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{item.assignee}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{item.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                          <MoreVerticalIcon className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </>
-              )}
-              {/* Add implementations for other tab types as needed */}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  )
-}
-
-function CardView({
-  data,
-  activeTab,
-  onTaskClick,
-  onNoteClick,
-  onMeetingClick,
-  onEmailClick,
-}: {
-  data: any[]
-  activeTab: string
-  onTaskClick?: (task: any) => void
-  onNoteClick?: (note: any) => void
-  onMeetingClick?: (meeting: any) => void
-  onEmailClick?: (email: any) => void
-}) {
-  if (data.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No {activeTab} found</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {data.map((item) => (
-        <Card
-          key={item.id}
-          className={`${
-            (activeTab === "tasks" && onTaskClick) ||
-            (activeTab === "notes" && onNoteClick) ||
-            (activeTab === "meetings" && onMeetingClick) ||
-            (activeTab === "emails" && onEmailClick)
-              ? "cursor-pointer hover:bg-muted/50"
-              : ""
-          }`}
-          onClick={() => {
-            if (activeTab === "tasks" && onTaskClick) {
-              onTaskClick(item)
-            } else if (activeTab === "notes" && onNoteClick) {
-              onNoteClick(item)
-            } else if (activeTab === "meetings" && onMeetingClick) {
-              onMeetingClick(item)
-            } else if (activeTab === "emails" && onEmailClick) {
-              onEmailClick(item)
-            }
-          }}
-        >
-          <CardContent className="p-4">
-            {/* Email Card */}
-            {activeTab === "emails" && (
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="font-medium">{item.subject}</h4>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.preview}</p>
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">From:</span>
-                      <span>{item.from}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Date:</span>
-                      <span>{item.date}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={item.status === "Unread" ? "default" : "outline"}>{item.status}</Badge>
-                    </div>
-                  </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                      <MoreVerticalIcon className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>View</DropdownMenuItem>
-                    <DropdownMenuItem>Reply</DropdownMenuItem>
-                    <DropdownMenuItem>Forward</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-
-            {/* Task Card */}
-            {activeTab === "tasks" && (
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="font-medium">{item.title}</h4>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Due:</span>
-                      <span>{item.dueDate}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Assignee:</span>
-                      <span>{item.assignee}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={
-                          item.priority === "High"
-                            ? "destructive"
-                            : item.priority === "Medium"
-                              ? "default"
-                              : "secondary"
-                        }
-                      >
-                        {item.priority}
-                      </Badge>
-                      <Badge variant="outline">{item.status}</Badge>
-                    </div>
-                  </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                      <MoreVerticalIcon className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>View</DropdownMenuItem>
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-
-            {/* Add implementations for other card types as needed */}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-function ListView({
-  data,
-  activeTab,
-  onTaskClick,
-  onNoteClick,
-  onMeetingClick,
-  onEmailClick,
-}: {
-  data: any[]
-  activeTab: string
-  onTaskClick?: (task: any) => void
-  onNoteClick?: (note: any) => void
-  onMeetingClick?: (meeting: any) => void
-  onEmailClick?: (email: any) => void
-}) {
-  if (data.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No {activeTab} found</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      {data.map((item) => (
-        <div
-          key={item.id}
-          className={`rounded-lg border p-4 ${
-            (activeTab === "tasks" && onTaskClick) ||
-            (activeTab === "notes" && onNoteClick) ||
-            (activeTab === "meetings" && onMeetingClick) ||
-            (activeTab === "emails" && onEmailClick)
-              ? "cursor-pointer hover:bg-muted/50"
-              : ""
-          }`}
-          onClick={() => {
-            if (activeTab === "tasks" && onTaskClick) {
-              onTaskClick(item)
-            } else if (activeTab === "notes" && onNoteClick) {
-              onNoteClick(item)
-            } else if (activeTab === "meetings" && onMeetingClick) {
-              onMeetingClick(item)
-            } else if (activeTab === "emails" && onEmailClick) {
-              onEmailClick(item)
-            }
-          }}
-        >
-          {/* Email List Item */}
-          {activeTab === "emails" && (
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.subject}</p>
-                    <p className="text-xs text-muted-foreground">From: {item.from}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">{item.date}</p>
-                    <div className="mt-1">
-                      <Badge variant={item.status === "Unread" ? "default" : "outline"} className="text-xs">
-                        {item.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.preview}</p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                    <MoreVerticalIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>View</DropdownMenuItem>
-                  <DropdownMenuItem>Reply</DropdownMenuItem>
-                  <DropdownMenuItem>Forward</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-
-          {/* Task List Item */}
-          {activeTab === "tasks" && (
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">Assigned to: {item.assignee}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">Due: {item.dueDate}</p>
-                    <div className="mt-1 flex items-center gap-1 justify-end">
-                      <Badge
-                        variant={
-                          item.priority === "High"
-                            ? "destructive"
-                            : item.priority === "Medium"
-                              ? "default"
-                              : "secondary"
-                        }
-                        className="text-xs"
-                      >
-                        {item.priority}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {item.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.description}</p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                    <MoreVerticalIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>View</DropdownMenuItem>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-
-          {/* Add implementations for other list item types as needed */}
-        </div>
-      ))}
-    </div>
-  )
-}
-
 function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Contact; isFullScreen?: boolean }) {
+  const fieldGroups = [
+    {
+      id: "contact-info",
+      label: "Contact Details",
+      icon: UserIcon,
+      fields: [
+        { label: "Name", value: `${contact.firstName} ${contact.lastName}` },
+        { label: "Email", value: contact.email, isLink: true },
+        { label: "Phone", value: contact.phone },
+        { label: "Job Title", value: contact.jobTitle },
+        { label: "Company", value: contact.company, isLink: true },
+        { label: "Location", value: contact.location },
+        { label: "Bio", value: contact.bio },
+      ],
+    },
+  ];
+
   return (
-    <div className="p-6">
-      {/* Details Tab */}
-      <div className="mb-6 border-b">
-        <div className="flex gap-6">
-          <button className="relative border-b-2 border-primary pb-3 text-sm font-medium text-primary">
-            Details
-            <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
-          </button>
-          <button className="relative pb-3 text-sm text-muted-foreground hover:text-foreground">
-            Comments
-            <Badge variant="secondary" className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-              0
-            </Badge>
-          </button>
-        </div>
-      </div>
-
-      {/* Contact Details */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-medium">Contact Details</h4>
-
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <UserIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Name</Label>
-                <p className="text-sm font-medium">
-                  {contact.firstName} {contact.lastName}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <MailIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Email</Label>
-                <p className="text-sm text-blue-600">{contact.email}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Phone</Label>
-                <p className="text-sm">{contact.phone}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <BriefcaseIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Job Title</Label>
-                <p className="text-sm">{contact.jobTitle}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Company</Label>
-                <p className="text-sm text-blue-600">{contact.company}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Location</Label>
-                <p className="text-sm">{contact.location}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2">
-              <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Bio</Label>
-                <p className="text-sm">{contact.bio}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-          Show all values
-        </Button>
-      </div>
-    </div>
+    <MasterDetailsPanel 
+      fieldGroups={fieldGroups}
+      isFullScreen={isFullScreen}
+    />
   )
 }
 

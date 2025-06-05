@@ -30,6 +30,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 
 // Default mock data, can be overridden by passing data prop
 const defaultNotes = [
@@ -86,35 +87,6 @@ export function NoteContent({
     }
   }
 
-  const ViewModeSelector = () => (
-    <div className="flex items-center gap-1 rounded-lg border p-1">
-      <Button
-        variant={viewMode === "card" ? "secondary" : "ghost"}
-        size="sm"
-        onClick={() => setViewMode("card")}
-        className="h-7 px-2"
-      >
-        <LayoutGridIcon className="h-3 w-3" />
-      </Button>
-      <Button
-        variant={viewMode === "list" ? "secondary" : "ghost"}
-        size="sm"
-        onClick={() => setViewMode("list")}
-        className="h-7 px-2"
-      >
-        <ListIcon className="h-3 w-3" />
-      </Button>
-      <Button
-        variant={viewMode === "table" ? "secondary" : "ghost"}
-        size="sm"
-        onClick={() => setViewMode("table")}
-        className="h-7 px-2"
-      >
-        <TableIcon className="h-3 w-3" />
-      </Button>
-    </div>
-  )
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -166,7 +138,7 @@ export function NoteContent({
               <DropdownMenuCheckboxItem>Financial</DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <ViewModeSelector />
+          <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />
           <Button size="sm">
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Note

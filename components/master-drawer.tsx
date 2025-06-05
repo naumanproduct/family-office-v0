@@ -20,6 +20,7 @@ import { TaskDetailsView } from "./task-details-view"
 import { NoteDetailsView } from "./note-details-view"
 import { MeetingDetailsView } from "./meeting-details-view"
 import { EmailDetailsView } from "./email-details-view"
+import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 
 interface Tab {
   id: string
@@ -90,42 +91,9 @@ export function MasterDrawer({
     }
   }, [isFullScreen])
 
-  const ViewModeSelector = () => {
-    if (activeTab === "activity" || activeTab === "details") return null
-
-    return (
-      <div className="flex items-center gap-1 rounded-lg border p-1">
-        <Button
-          variant={viewMode === "card" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setViewMode("card")}
-          className="h-7 px-2"
-        >
-          <LayoutGridIcon className="h-3 w-3" />
-        </Button>
-        <Button
-          variant={viewMode === "list" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setViewMode("list")}
-          className="h-7 px-2"
-        >
-          <ListIcon className="h-3 w-3" />
-        </Button>
-        <Button
-          variant={viewMode === "table" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setViewMode("table")}
-          className="h-7 px-2"
-        >
-          <TableIcon className="h-3 w-3" />
-        </Button>
-      </div>
-    )
-  }
-
-  const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table") => {
+  const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table", isCurrentFullScreen = false) => {
     if (activeTab === "details") {
-      return detailsPanel(false)
+      return detailsPanel(isCurrentFullScreen)
     }
 
     // Handle task details view (only in non-fullscreen mode)
@@ -294,7 +262,7 @@ export function MasterDrawer({
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
                   <div className="flex items-center gap-2">
-                    <ViewModeSelector />
+                    {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
                     {activeTab !== "activity" && activeTab !== "company" && activeTab !== "details" && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4" />
@@ -309,7 +277,7 @@ export function MasterDrawer({
                     )}
                   </div>
                 </div>
-                {renderTabContent(activeTab, viewMode)}
+                {renderTabContent(activeTab, viewMode, true)}
               </div>
             </div>
           </div>
@@ -449,6 +417,9 @@ export function MasterDrawer({
     return typeof document !== "undefined" ? createPortal(content, document.body) : null
   }
 
+  // We will use this conditional check for both instances of ViewModeSelector
+  const shouldShowViewSelector = !(activeTab === "activity" || activeTab === "details")
+
   if (isFullScreen) {
     return <FullScreenContent />
   }
@@ -561,7 +532,7 @@ export function MasterDrawer({
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
                 <div className="flex items-center gap-2">
-                  <ViewModeSelector />
+                  {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
                   {activeTab !== "activity" && activeTab !== "company" && activeTab !== "details" && (
                     <Button variant="outline" size="sm">
                       <PlusIcon className="h-4 w-4" />
@@ -577,7 +548,7 @@ export function MasterDrawer({
                 </div>
               </div>
             )}
-            {renderTabContent(activeTab, viewMode)}
+            {renderTabContent(activeTab, viewMode, false)}
           </div>
         </div>
       </SheetContent>
