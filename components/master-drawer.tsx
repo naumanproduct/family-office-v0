@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
-import { ChevronLeftIcon, ExpandIcon, PlusIcon, XIcon, MailIcon } from "lucide-react"
+import { ChevronLeftIcon, ExpandIcon, PlusIcon, XIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -200,12 +200,6 @@ export function MasterDrawer({
               {customActions.map((action, index) => (
                 <React.Fragment key={index}>{action}</React.Fragment>
               ))}
-              {onComposeEmail && (
-                <Button variant="outline" size="sm" onClick={onComposeEmail}>
-                  <MailIcon className="h-4 w-4" />
-                  Compose email
-                </Button>
-              )}
               <Button
                 variant="outline"
                 size="icon"
@@ -485,12 +479,6 @@ export function MasterDrawer({
             {customActions.map((action, index) => (
               <React.Fragment key={index}>{action}</React.Fragment>
             ))}
-            {onComposeEmail && (
-              <Button variant="outline" size="sm" onClick={onComposeEmail}>
-                <MailIcon className="h-4 w-4" />
-                Compose email
-              </Button>
-            )}
           </div>
         </div>
 

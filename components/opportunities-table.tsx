@@ -44,11 +44,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-import { createPortal } from "react-dom"
 import {
-  ExpandIcon,
-  XIcon,
   MailIcon,
   BuildingIcon,
   FileTextIcon,
@@ -56,18 +52,12 @@ import {
   FolderIcon,
   UsersIcon,
   CheckCircleIcon,
-  PhoneIcon,
   DollarSignIcon,
   TrendingUpIcon,
 } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { MasterDrawer } from "./master-drawer"
-import { EmailsTable } from "./emails-table"
-import { TasksTable } from "./tasks-table"
-import { NotesTable } from "./notes-table"
+import { AddOpportunityDialog } from "./add-opportunity-dialog"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -818,6 +808,7 @@ export function OpportunitiesTable() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = React.useState("")
+  const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false)
 
   const table = useReactTable({
     data: opportunitiesData,
@@ -904,7 +895,7 @@ export function OpportunitiesTable() {
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Opportunity
           </Button>
@@ -1018,6 +1009,7 @@ export function OpportunitiesTable() {
           </div>
         </div>
       </div>
+      <AddOpportunityDialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
     </div>
   )
 }

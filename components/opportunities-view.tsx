@@ -1,42 +1,27 @@
 "use client"
-
-import * as React from "react"
-import { Button } from "@/components/ui/button"
-import { LayoutGridIcon, ListIcon } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { OpportunitiesTable } from "./opportunities-table"
 import { OpportunitiesKanban } from "./opportunities-kanban"
 
 export function OpportunitiesView() {
-  const [view, setView] = React.useState<"list" | "kanban">("list")
-
   return (
     <div className="space-y-4">
-      {/* View Toggle */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-1 rounded-lg bg-muted p-1">
-          <Button
-            variant={view === "list" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setView("list")}
-            className="h-8 px-3"
-          >
-            <ListIcon className="h-4 w-4 mr-2" />
-            List
-          </Button>
-          <Button
-            variant={view === "kanban" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setView("kanban")}
-            className="h-8 px-3"
-          >
-            <LayoutGridIcon className="h-4 w-4 mr-2" />
-            Kanban
-          </Button>
-        </div>
+        <Tabs defaultValue="table" className="w-full">
+          <div className="flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="table">Table</TabsTrigger>
+              <TabsTrigger value="kanban">Kanban</TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="table" className="mt-6">
+            <OpportunitiesTable />
+          </TabsContent>
+          <TabsContent value="kanban" className="mt-6">
+            <OpportunitiesKanban />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Content */}
-      {view === "list" ? <OpportunitiesTable /> : <OpportunitiesKanban />}
     </div>
   )
 }

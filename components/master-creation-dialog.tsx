@@ -317,19 +317,23 @@ export function MasterCreationDialog({
             // Form
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">{formFields.map(renderFormField)}</div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t">
-                <Button variant="outline" onClick={handleBackToSelection} className="flex-1">
-                  Back
-                </Button>
-                <Button onClick={handleSave} className="flex-1" disabled={!isFormValid()}>
-                  Create {recordType}
-                </Button>
-              </div>
             </div>
           )}
         </div>
+
+        {/* Footer */}
+        {selectedType && (
+          <div className="border-t bg-background px-6 py-4">
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={handleBackToSelection} className="flex-1">
+                Back
+              </Button>
+              <Button onClick={handleSave} className="flex-1" disabled={!isFormValid()}>
+                Create {recordType}
+              </Button>
+            </div>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   )

@@ -6,18 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
-import { ArrowRight, Check, Plus, X } from "lucide-react"
+import { ArrowRight, Check, Plus, X, ChevronLeftIcon } from "lucide-react"
 
 // Define the object types that can be tracked in workflows
 const objectTypes = [
@@ -209,217 +202,233 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
   const canSave = canProceedToStages && workflow.stages.length > 0
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px]">
-        <DialogHeader>
-          <DialogTitle>{existingWorkflow ? "Edit Workflow" : "Create New Workflow"}</DialogTitle>
-          <DialogDescription>
-            {existingWorkflow
-              ? "Update your workflow settings and configuration."
-              : "Create a new workflow to track and manage your business processes."}
-          </DialogDescription>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+            <Badge variant="outline" className="bg-background">
+              Workflow
+            </Badge>
+          </div>
+        </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="basic">Basic Info</TabsTrigger>
-            <TabsTrigger value="attributes" disabled={!canProceedToAttributes}>
-              Card Attributes
-            </TabsTrigger>
-            <TabsTrigger value="stages" disabled={!canProceedToStages}>
-              Workflow Stages
-            </TabsTrigger>
-          </TabsList>
+        {/* Record Header */}
+        <div className="border-b bg-background px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-500 text-white text-sm font-medium">
+              W
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold">{existingWorkflow ? "Edit Workflow" : "Create New Workflow"}</h2>
+              <p className="text-sm text-muted-foreground">
+                {existingWorkflow
+                  ? "Update your workflow settings and configuration."
+                  : "Create a new workflow to track and manage your business processes."}
+              </p>
+            </div>
+          </div>
+        </div>
 
-          <TabsContent value="basic" className="space-y-4">
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Workflow Name</Label>
-                <Input
-                  id="name"
-                  value={workflow.name}
-                  onChange={(e) => setWorkflow({ ...workflow, name: e.target.value })}
-                  placeholder="e.g., Deal Pipeline, Task Management"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={workflow.description}
-                  onChange={(e) => setWorkflow({ ...workflow, description: e.target.value })}
-                  placeholder="Describe what this workflow is used for..."
-                  rows={3}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="objectType">Object Type</Label>
-                <Select
-                  value={workflow.objectType}
-                  onValueChange={handleObjectTypeChange}
-                  disabled={!!existingWorkflow}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select object type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {objectTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-sm text-muted-foreground">
-                  {workflow.objectType
-                    ? objectTypes.find((t) => t.id === workflow.objectType)?.description
-                    : "Select the type of object this workflow will track."}
-                </p>
-              </div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
+            <div className="border-b bg-background px-6">
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="attributes" disabled={!canProceedToAttributes}>
+                  Card Attributes
+                </TabsTrigger>
+                <TabsTrigger value="stages" disabled={!canProceedToStages}>
+                  Workflow Stages
+                </TabsTrigger>
+              </TabsList>
             </div>
 
-            <div className="flex justify-end">
+            <TabsContent value="basic" className="flex-1 p-6 space-y-4 m-0">
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Workflow Name</Label>
+                  <Input
+                    id="name"
+                    value={workflow.name}
+                    onChange={(e) => setWorkflow({ ...workflow, name: e.target.value })}
+                    placeholder="e.g., Deal Pipeline, Task Management"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={workflow.description}
+                    onChange={(e) => setWorkflow({ ...workflow, description: e.target.value })}
+                    placeholder="Describe what this workflow is used for..."
+                    rows={3}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="objectType">Object Type</Label>
+                  <Select
+                    value={workflow.objectType}
+                    onValueChange={handleObjectTypeChange}
+                    disabled={!!existingWorkflow}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select object type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {objectTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    {workflow.objectType
+                      ? objectTypes.find((t) => t.id === workflow.objectType)?.description
+                      : "Select the type of object this workflow will track."}
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="attributes" className="flex-1 p-6 m-0">
+              <div className="grid gap-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Select Card Attributes</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Choose which attributes will appear on cards in your workflow. These attributes will be visible at a
+                    glance on the kanban board.
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {workflow.objectType &&
+                      availableAttributes[workflow.objectType].map((attribute) => (
+                        <div
+                          key={attribute.id}
+                          className={`flex items-center space-x-2 rounded-md border p-3 cursor-pointer ${
+                            isAttributeSelected(attribute.id) ? "border-primary bg-primary/5" : ""
+                          }`}
+                          onClick={() => toggleAttribute(attribute.id)}
+                        >
+                          <Checkbox
+                            id={`attribute-${attribute.id}`}
+                            checked={isAttributeSelected(attribute.id)}
+                            onCheckedChange={() => toggleAttribute(attribute.id)}
+                          />
+                          <div className="flex-1">
+                            <Label htmlFor={`attribute-${attribute.id}`} className="text-sm font-medium cursor-pointer">
+                              {attribute.name}
+                            </Label>
+                            <p className="text-xs text-muted-foreground">{attribute.type}</p>
+                          </div>
+                          {isAttributeSelected(attribute.id) && <Check className="h-4 w-4 text-primary" />}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="stages" className="flex-1 p-6 m-0">
+              <div className="grid gap-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Configure Workflow Stages</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Define the stages that items will move through in your workflow. These will appear as columns on
+                    your kanban board.
+                  </p>
+
+                  <div className="space-y-2">
+                    {workflow.stages.map((stage: any, index: number) => (
+                      <div key={stage.id} className="flex items-center gap-2 p-2 border rounded-md">
+                        <div className={`w-4 h-4 rounded-full ${stage.color}`}></div>
+                        <div className="flex-1">
+                          <Input
+                            value={stage.name}
+                            onChange={(e) => {
+                              const updatedStages = [...workflow.stages]
+                              updatedStages[index] = { ...stage, name: e.target.value }
+                              setWorkflow({ ...workflow, stages: updatedStages })
+                            }}
+                            className="h-8"
+                          />
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const updatedStages = workflow.stages.filter((_: any, i: number) => i !== index)
+                            setWorkflow({ ...workflow, stages: updatedStages })
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+
+                    <Button
+                      variant="outline"
+                      className="w-full mt-2"
+                      onClick={() => {
+                        const newStage = {
+                          id: `stage-${Date.now()}`,
+                          name: `New Stage`,
+                          color: "bg-gray-100",
+                        }
+                        setWorkflow({ ...workflow, stages: [...workflow.stages, newStage] })
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> Add Stage
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t bg-background px-6 py-4">
+          <div className="flex justify-between">
+            {activeTab === "basic" ? (
               <Button
                 onClick={() => setActiveTab("attributes")}
                 disabled={!canProceedToAttributes}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 ml-auto"
               >
                 Next <ArrowRight className="h-4 w-4" />
               </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="attributes" className="space-y-4">
-            <div className="grid gap-4">
-              <div>
-                <h3 className="text-sm font-medium mb-2">Select Card Attributes</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Choose which attributes will appear on cards in your workflow. These attributes will be visible at a
-                  glance on the kanban board.
-                </p>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {workflow.objectType &&
-                    availableAttributes[workflow.objectType].map((attribute) => (
-                      <div
-                        key={attribute.id}
-                        className={`flex items-center space-x-2 rounded-md border p-3 cursor-pointer ${
-                          isAttributeSelected(attribute.id) ? "border-primary bg-primary/5" : ""
-                        }`}
-                        onClick={() => toggleAttribute(attribute.id)}
-                      >
-                        <Checkbox
-                          id={`attribute-${attribute.id}`}
-                          checked={isAttributeSelected(attribute.id)}
-                          onCheckedChange={() => toggleAttribute(attribute.id)}
-                        />
-                        <div className="flex-1">
-                          <Label htmlFor={`attribute-${attribute.id}`} className="text-sm font-medium cursor-pointer">
-                            {attribute.name}
-                          </Label>
-                          <p className="text-xs text-muted-foreground">{attribute.type}</p>
-                        </div>
-                        {isAttributeSelected(attribute.id) && <Check className="h-4 w-4 text-primary" />}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setActiveTab("basic")}>
-                Back
-              </Button>
-              <Button
-                onClick={() => setActiveTab("stages")}
-                disabled={!canProceedToStages}
-                className="flex items-center gap-2"
-              >
-                Next <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="stages" className="space-y-4">
-            <div className="grid gap-4">
-              <div>
-                <h3 className="text-sm font-medium mb-2">Configure Workflow Stages</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Define the stages that items will move through in your workflow. These will appear as columns on your
-                  kanban board.
-                </p>
-
-                <div className="space-y-2">
-                  {workflow.stages.map((stage: any, index: number) => (
-                    <div key={stage.id} className="flex items-center gap-2 p-2 border rounded-md">
-                      <div className={`w-4 h-4 rounded-full ${stage.color}`}></div>
-                      <div className="flex-1">
-                        <Input
-                          value={stage.name}
-                          onChange={(e) => {
-                            const updatedStages = [...workflow.stages]
-                            updatedStages[index] = { ...stage, name: e.target.value }
-                            setWorkflow({ ...workflow, stages: updatedStages })
-                          }}
-                          className="h-8"
-                        />
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          const updatedStages = workflow.stages.filter((_: any, i: number) => i !== index)
-                          setWorkflow({ ...workflow, stages: updatedStages })
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-
-                  <Button
-                    variant="outline"
-                    className="w-full mt-2"
-                    onClick={() => {
-                      const newStage = {
-                        id: `stage-${Date.now()}`,
-                        name: `New Stage`,
-                        color: "bg-gray-100",
-                      }
-                      setWorkflow({ ...workflow, stages: [...workflow.stages, newStage] })
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-2" /> Add Stage
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setActiveTab("attributes")}>
-                Back
-              </Button>
-              <Button onClick={handleSave} disabled={!canSave}>
-                {existingWorkflow ? "Save Changes" : "Create Workflow"}
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        <DialogFooter className="flex items-center justify-between">
-          <div>
-            {activeTab === "attributes" && workflow.attributes.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {workflow.attributes.map((attr: any) => (
-                  <Badge key={attr.id} variant="outline">
-                    {attr.name}
-                  </Badge>
-                ))}
-              </div>
+            ) : activeTab === "attributes" ? (
+              <>
+                <Button variant="outline" onClick={() => setActiveTab("basic")}>
+                  Back
+                </Button>
+                <Button
+                  onClick={() => setActiveTab("stages")}
+                  disabled={!canProceedToStages}
+                  className="flex items-center gap-2"
+                >
+                  Next <ArrowRight className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setActiveTab("attributes")}>
+                  Back
+                </Button>
+                <Button onClick={handleSave} disabled={!canSave}>
+                  {existingWorkflow ? "Save Changes" : "Create Workflow"}
+                </Button>
+              </>
             )}
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }
