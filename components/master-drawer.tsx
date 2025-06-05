@@ -2,16 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
-import {
-  ChevronLeftIcon,
-  ExpandIcon,
-  LayoutGridIcon,
-  ListIcon,
-  TableIcon,
-  PlusIcon,
-  XIcon,
-  MailIcon,
-} from "lucide-react"
+import { ChevronLeftIcon, ExpandIcon, PlusIcon, XIcon, MailIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -66,10 +57,6 @@ export function MasterDrawer({
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
   const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
-  const [selectedTaskFullScreen, setSelectedTaskFullScreen] = React.useState(false)
-  const [selectedNoteFullScreen, setSelectedNoteFullScreen] = React.useState(false)
-  const [selectedMeetingFullScreen, setSelectedMeetingFullScreen] = React.useState(false)
-  const [selectedEmailFullScreen, setSelectedEmailFullScreen] = React.useState(false)
 
   // ESC key handler for full screen mode
   React.useEffect(() => {
@@ -191,7 +178,18 @@ export function MasterDrawer({
           {/* Full Screen Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => setIsFullScreen(false)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setIsFullScreen(false)
+                  // Clear any selected items when exiting fullscreen
+                  setSelectedTask(null)
+                  setSelectedNote(null)
+                  setSelectedMeeting(null)
+                  setSelectedEmail(null)
+                }}
+              >
                 <ChevronLeftIcon className="h-4 w-4" />
               </Button>
               <Badge variant="outline" className="bg-background">
@@ -208,7 +206,18 @@ export function MasterDrawer({
                   Compose email
                 </Button>
               )}
-              <Button variant="outline" size="icon" onClick={() => setIsFullScreen(false)}>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  setIsFullScreen(false)
+                  // Clear any selected items when exiting fullscreen
+                  setSelectedTask(null)
+                  setSelectedNote(null)
+                  setSelectedMeeting(null)
+                  setSelectedEmail(null)
+                }}
+              >
                 <XIcon className="h-4 w-4" />
               </Button>
             </div>
@@ -305,14 +314,7 @@ export function MasterDrawer({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={() => {
-                      // Create a separate state for task fullscreen mode
-                      setSelectedTaskFullScreen(prev => !prev);
-                    }}
-                  >
+                  <Button variant="outline" size="icon">
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -324,7 +326,6 @@ export function MasterDrawer({
                   onBack={handleDrawerBackClick}
                   recordName={title}
                   isInDrawer={true}
-                  isFullScreen={selectedTaskFullScreen}
                 />
               </div>
             </SheetContent>
@@ -349,24 +350,14 @@ export function MasterDrawer({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => {
-                      setSelectedNoteFullScreen(prev => !prev);
-                    }}
-                  >
+                  <Button variant="outline" size="icon">
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               {/* Note Details Content */}
               <div className="flex-1 overflow-auto">
-                <NoteDetailsView 
-                  note={selectedNote} 
-                  onBack={handleDrawerBackClick} 
-                  isFullScreen={selectedNoteFullScreen}
-                />
+                <NoteDetailsView note={selectedNote} onBack={handleDrawerBackClick} />
               </div>
             </SheetContent>
           </Sheet>
@@ -390,24 +381,14 @@ export function MasterDrawer({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => {
-                      setSelectedMeetingFullScreen(prev => !prev);
-                    }}
-                  >
+                  <Button variant="outline" size="icon">
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               {/* Meeting Details Content */}
               <div className="flex-1 overflow-auto">
-                <MeetingDetailsView 
-                  meeting={selectedMeeting} 
-                  onBack={handleDrawerBackClick}
-                  isFullScreen={selectedMeetingFullScreen} 
-                />
+                <MeetingDetailsView meeting={selectedMeeting} onBack={handleDrawerBackClick} />
               </div>
             </SheetContent>
           </Sheet>
@@ -431,24 +412,14 @@ export function MasterDrawer({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => {
-                      setSelectedEmailFullScreen(prev => !prev);
-                    }}
-                  >
+                  <Button variant="outline" size="icon">
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               {/* Email Details Content */}
               <div className="flex-1 overflow-auto">
-                <EmailDetailsView 
-                  email={selectedEmail} 
-                  onBack={handleDrawerBackClick}
-                  isFullScreen={selectedEmailFullScreen}
-                />
+                <EmailDetailsView email={selectedEmail} onBack={handleDrawerBackClick} />
               </div>
             </SheetContent>
           </Sheet>

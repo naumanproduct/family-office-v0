@@ -60,4 +60,4 @@ export function MasterDetailsPanel({
       </div>
     </div>
   )
-} 
+}

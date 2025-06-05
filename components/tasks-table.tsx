@@ -365,7 +365,16 @@ export function TasksTable() {
         {/* Full Screen Header */}
         <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setIsFullScreen(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setIsFullScreen(false)
+                // Clear selected tasks when exiting fullscreen
+                setSelectedTask(null)
+                setSelectedSubtask(null)
+              }}
+            >
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
             <Badge variant="outline" className="bg-background">
@@ -373,7 +382,16 @@ export function TasksTable() {
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => setIsFullScreen(false)}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                setIsFullScreen(false)
+                // Clear selected tasks when exiting fullscreen
+                setSelectedTask(null)
+                setSelectedSubtask(null)
+              }}
+            >
               <XIcon className="h-4 w-4" />
             </Button>
           </div>
