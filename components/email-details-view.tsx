@@ -124,12 +124,13 @@ function EmailContent({ emailItem }: { emailItem: any }) {
 interface EmailDetailsViewProps {
   email: any
   onBack: () => void
+  isFullScreen?: boolean
 }
 
-export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
+export function EmailDetailsView({ email, onBack, isFullScreen = false }: EmailDetailsViewProps) {
   const [emailSubject, setEmailSubject] = React.useState(email?.subject || "No Subject")
   const [isEditingSubject, setIsEditingSubject] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState("details")
+  const [activeTab, setActiveTab] = React.useState(isFullScreen ? "email" : "details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [replyText, setReplyText] = React.useState("")
   const [isReplying, setIsReplying] = React.useState(false)
@@ -237,8 +238,16 @@ Sarah`,
     attachments: emailThread[0]?.attachments || [],
   })
 
-  // Tabs for email details
-  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
+  // Tabs depend on whether we're in fullscreen mode
+  const tabs = isFullScreen 
+    ? [
+        { id: "email", label: "Email", icon: MailIcon },
+        { id: "attachments", label: "Attachments", icon: PaperclipIcon },
+        { id: "thread", label: "Thread", icon: InboxIcon },
+      ]
+    : [
+        { id: "details", label: "Details", icon: FileTextIcon }
+      ]
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {

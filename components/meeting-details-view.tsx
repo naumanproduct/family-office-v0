@@ -10,6 +10,8 @@ import {
   VideoIcon,
   InfoIcon,
   UsersIcon,
+  ClipboardIcon,
+  StickyNoteIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -22,12 +24,13 @@ import { TypableArea } from "@/components/typable-area"
 interface MeetingDetailsViewProps {
   meeting: any
   onBack: () => void
+  isFullScreen?: boolean
 }
 
-export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps) {
+export function MeetingDetailsView({ meeting, onBack, isFullScreen = false }: MeetingDetailsViewProps) {
   const [meetingTitle, setMeetingTitle] = React.useState(meeting.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState("details")
+  const [activeTab, setActiveTab] = React.useState(isFullScreen ? "attendees" : "details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
     agenda: meeting?.agenda || "",
@@ -42,7 +45,16 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
 
   const [meetingNotes, setMeetingNotes] = React.useState("")
 
-  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
+  // Tabs depend on whether we're in fullscreen mode
+  const tabs = isFullScreen 
+    ? [
+        { id: "attendees", label: "Attendees", icon: UsersIcon },
+        { id: "agenda", label: "Agenda", icon: ClipboardIcon },
+        { id: "notes", label: "Notes", icon: StickyNoteIcon },
+      ]
+    : [
+        { id: "details", label: "Details", icon: FileTextIcon }
+      ]
 
   const getStatusColor = (status: string | undefined | null) => {
     if (!status) return "bg-gray-100 text-gray-800"

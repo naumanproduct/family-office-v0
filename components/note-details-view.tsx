@@ -10,6 +10,9 @@ import {
   InfoIcon,
   TagIcon,
   BuildingIcon,
+  ClockIcon,
+  EditIcon,
+  PlusIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -22,12 +25,13 @@ import { TypableArea } from "@/components/typable-area"
 interface NoteDetailsViewProps {
   note: any
   onBack: () => void
+  isFullScreen?: boolean
 }
 
-export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
+export function NoteDetailsView({ note, onBack, isFullScreen = false }: NoteDetailsViewProps) {
   const [noteTitle, setNoteTitle] = React.useState(note.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState("details")
+  const [activeTab, setActiveTab] = React.useState(isFullScreen ? "content" : "details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
     content: note?.content || "",
@@ -41,7 +45,15 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
 
   const [noteText, setNoteText] = React.useState("")
 
-  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
+  // Tabs depend on whether we're in fullscreen mode
+  const tabs = isFullScreen 
+    ? [
+        { id: "content", label: "Content", icon: StickyNoteIcon },
+        { id: "activity", label: "Activity", icon: ClockIcon },
+      ]
+    : [
+        { id: "details", label: "Details", icon: FileTextIcon }
+      ]
 
   const getPriorityColor = (priority: string | undefined | null) => {
     if (!priority) return "bg-gray-100 text-gray-800"
@@ -144,6 +156,110 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
     )
   }
 
+  // For fullscreen mode, implement a two-panel layout
+  if (isFullScreen) {
+    return (
+      <div className="flex h-full">
+        {/* Left Panel - Details (fixed) */}
+        <div className="w-96 border-r overflow-auto p-6 bg-background">
+          <div className="space-y-6">
+            {/* Content Section */}
+            <div>
+              <h3 className="text-sm font-medium mb-2">Content</h3>
+              <div className="p-3 border rounded-md bg-muted/20">
+                <p className="text-sm text-muted-foreground">{fieldValues.content}</p>
+              </div>
+            </div>
+
+            {/* Properties Section */}
+            <div className="space-y-3">
+              {renderEditableField("author", fieldValues.author, <UserIcon className="h-4 w-4 text-purple-500" />, "Author")}
+              {renderEditableField("priority", fieldValues.priority || "Normal", <AlertTriangleIcon className="h-4 w-4 text-amber-500" />, "Priority", true)}
+              {renderEditableField("createdAt", fieldValues.createdAt, <CalendarIcon className="h-4 w-4 text-blue-500" />, "Created")}
+              {renderEditableField("updatedAt", fieldValues.updatedAt, <CalendarIcon className="h-4 w-4 text-green-500" />, "Updated")}
+              {renderEditableField("tags", fieldValues.tags || [], <TagIcon className="h-4 w-4 text-red-500" />, "Tags", false)}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Tab Content */}
+        <div className="flex-1 overflow-auto">
+          {/* Tabs */}
+          <div className="border-b bg-background px-6">
+            <div className="flex gap-6 overflow-x-auto">
+              {tabs.map((tab) => {
+                const Icon = tab.icon
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative flex items-center gap-2 whitespace-nowrap py-3 text-sm font-medium transition-colors ${
+                      activeTab === tab.id ? "text-foreground border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {tab.label}
+                    {activeTab === tab.id && (
+                      <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === "content" && (
+              <div className="space-y-4">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold">{noteTitle}</h3>
+                  <p className="text-sm text-muted-foreground">{new Date(fieldValues.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div className="prose prose-sm max-w-none">
+                  <p>{fieldValues.content}</p>
+                </div>
+              </div>
+            )}
+            {activeTab === "activity" && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Recent Activity</h3>
+                <div className="space-y-4">
+                  <div className="flex gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+                      <EditIcon className="h-4 w-4 text-blue-700" />
+                    </div>
+                    <div>
+                      <div className="flex gap-2 text-sm">
+                        <span className="font-medium">You</span>
+                        <span className="text-muted-foreground">edited this note</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Yesterday at 3:45 PM</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
+                      <PlusIcon className="h-4 w-4 text-purple-700" />
+                    </div>
+                    <div>
+                      <div className="flex gap-2 text-sm">
+                        <span className="font-medium">Sarah Johnson</span>
+                        <span className="text-muted-foreground">created this note</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">3 days ago at 2:15 PM</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Standard drawer view
   return (
     <div className="flex flex-col flex-1">
       {/* Note Header - Same placement as task header */}
