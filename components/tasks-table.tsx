@@ -1,74 +1,51 @@
 "use client"
 
 import * as React from "react"
-import { useState } from "react"
-import { createPortal } from "react-dom"
 import {
-  CheckCircleIcon,
-  CheckSquareIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   ChevronDownIcon,
-  CircleIcon,
-  ClockIcon,
-  MoreHorizontalIcon,
   FilterIcon,
+  MoreVerticalIcon,
   PlusIcon,
   SearchIcon,
-  XIcon,
-  CalendarIcon,
-  AlertTriangleIcon,
-  FileTextIcon,
-  UserIcon,
-  ExpandIcon,
-  MailIcon,
-  MessageSquareIcon,
-  PhoneIcon,
   LayoutGridIcon,
   ListIcon,
   TableIcon,
+  ChevronLeftIcon,
+  XIcon,
+  ExpandIcon,
+  CheckSquareIcon,
+  FileTextIcon,
+  AlertTriangleIcon,
+  CheckCircleIcon,
+  UserIcon,
+  CalendarIcon,
+  CircleIcon,
+  ClockIcon,
+  DotIcon as DotsHorizontalIcon,
 } from "lucide-react"
+import { createPortal } from "react-dom"
+import { useState } from "react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { TaskTemplateDialog } from "./task-template-dialog"
+import { Label } from "@/components/ui/label"
 import { NoteContent } from "@/components/shared/note-content"
 import { FileContent } from "@/components/shared/file-content"
-import { MasterDrawer } from "./master-drawer"
-import { MasterDetailsPanel } from "./shared/master-details-panel"
-import { ActivitySection } from "./shared/activity-section"
-import { type ActivityItem } from "./shared/activity-content"
-import { TypableArea } from "./typable-area"
-import { TaskTemplateDialog } from "./task-template-dialog"
-
-// Define Task type
-interface Task {
-  id: number | string;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  assignee: string;
-  dueDate: string;
-  relatedTo?: {
-    name: string;
-    type: string;
-  };
-  subtasks?: any[];
-}
 
 // Task data - extended from investment tab but across all objects
 const tasksData = [
@@ -180,46 +157,60 @@ function TaskTableView({
   data,
   onTaskClick,
 }: {
-  data: Task[]
-  onTaskClick?: (task: Task) => void
+  data: any[]
+  onTaskClick?: (task: any) => void
 }) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Priority</TableHead>
-          <TableHead>Assignee</TableHead>
-          <TableHead>Due Date</TableHead>
-          <TableHead>Related To</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((task) => (
-          <TableRow key={task.id}>
-            <TableCell>
-              <TaskNameCell task={task} />
-            </TableCell>
-            <TableCell>
-              <Badge className={`text-xs ${getStatusColor(task.status)}`}>{task.status}</Badge>
-            </TableCell>
-            <TableCell>
-              <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>{task.priority}</Badge>
-            </TableCell>
-            <TableCell>{task.assignee}</TableCell>
-            <TableCell>{task.dueDate}</TableCell>
-            <TableCell>
-              {task.relatedTo ? (
-                <span className="text-blue-600">{task.relatedTo.name}</span>
-              ) : (
-                "All Tasks"
-              )}
-            </TableCell>
+    <div className="rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Due Date</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead>Assignee</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="w-12"></TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {data.map((item) => (
+            <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onTaskClick?.(item)}>
+              <TableCell className="font-medium">{item.title}</TableCell>
+              <TableCell>{item.dueDate}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+                  }
+                >
+                  {item.priority}
+                </Badge>
+              </TableCell>
+              <TableCell>{item.assignee}</TableCell>
+              <TableCell>
+                <Badge variant="outline">{item.status}</Badge>
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                      <MoreVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>View</DropdownMenuItem>
+                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
 
@@ -272,7 +263,7 @@ function TaskCardView({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                    <MoreHorizontalIcon className="h-4 w-4" />
+                    <MoreVerticalIcon className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -335,7 +326,7 @@ function TaskListView({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                  <MoreHorizontalIcon className="h-4 w-4" />
+                  <MoreVerticalIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -755,7 +746,7 @@ export function TasksTable() {
                                 className="h-6 w-6 p-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <MoreHorizontalIcon className="h-3 w-3" />
+                                <DotsHorizontalIcon className="h-3 w-3" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -1307,318 +1298,4 @@ function TaskActivityContent({ task }: { task: any }) {
       ))}
     </div>
   );
-}
-
-// Update the TaskNameCell component 
-function TaskNameCell({ task }: { task: Task }) {
-  // Define the tabs for the drawer
-  const tabs = [
-    { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "subtasks", label: "Subtasks", count: task.subtasks?.length || 0, icon: CheckSquareIcon },
-    { id: "notes", label: "Notes", count: null, icon: FileTextIcon },
-    { id: "files", label: "Files", count: null, icon: FileTextIcon },
-    { id: "activity", label: "Activity", count: null, icon: ClockIcon },
-  ]
-
-  // Define the renderer for tab content
-  const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table") => {
-    switch (activeTab) {
-      case "details":
-        return <TaskDetailsPanel task={task} />
-      case "subtasks":
-        return <TaskSubtasksContent task={task} />
-      case "notes":
-        return <NoteContent title={`Notes for Task: ${task.title}`} />
-      case "files":
-        return <FileContent title={`Files for Task: ${task.title}`} />
-      case "activity":
-        return <TaskActivityContent task={task} />
-      default:
-        return null
-    }
-  }
-
-  // Define the renderer for the details panel
-  const renderDetailsPanel = (isFullScreen = false) => {
-    return <TaskDetailsPanel task={task} isFullScreen={isFullScreen} />
-  }
-
-  return (
-    <MasterDrawer
-      trigger={
-        <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium">
-              <CheckSquareIcon className="h-3 w-3" />
-            </div>
-            <span className="font-medium">{task.title}</span>
-          </div>
-        </Button>
-      }
-      title={task.title}
-      recordType="Task"
-      subtitle={`${task.status} • ${task.priority}`}
-      tabs={tabs}
-      detailsPanel={renderDetailsPanel}
-    >
-      {renderTabContent}
-    </MasterDrawer>
-  )
-}
-
-// Create a consistent TaskDetailsPanel component that uses MasterDetailsPanel
-function TaskDetailsPanel({ task, isFullScreen = false }: { task: Task; isFullScreen?: boolean }) {
-  // Define field groups for the MasterDetailsPanel
-  const fieldGroups = [
-    {
-      id: "task-info",
-      label: "Task Information",
-      icon: CheckSquareIcon,
-      fields: [
-        { label: "Description", value: task.description || "No description provided" },
-        { label: "Priority", value: <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>{task.priority}</Badge> },
-        { label: "Status", value: <Badge className={`text-xs ${getStatusColor(task.status)}`}>{task.status}</Badge> },
-        { label: "Assignee", value: task.assignee },
-        { label: "Due Date", value: task.dueDate },
-        { label: "Related to", value: task.relatedTo?.name || "All Tasks", isLink: !!task.relatedTo },
-      ],
-    },
-  ]
-
-  // Define activities for this task
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "change",
-      actor: "John Smith",
-      action: "changed status of",
-      target: task.title,
-      timestamp: "2 days ago",
-      date: "2023-05-18",
-      details: {
-        previousStatus: "To Do",
-        newStatus: task.status,
-        reason: "Task is now being worked on",
-        comments: "Starting work on this task today",
-      },
-    },
-    {
-      id: 2,
-      type: "assignment",
-      actor: "Sarah Johnson",
-      action: "assigned",
-      target: task.title,
-      timestamp: "1 week ago",
-      date: "2023-05-13",
-      details: {
-        previousAssignee: "Unassigned",
-        newAssignee: task.assignee,
-        priority: task.priority,
-        notes: "Please complete this by the end of the week",
-      },
-    },
-    {
-      id: 3,
-      type: "comment",
-      actor: "David Kim",
-      action: "commented on",
-      target: task.title,
-      timestamp: "2 weeks ago",
-      date: "2023-05-06",
-      details: {
-        commentText: "I've gathered all the necessary information to begin this task. Will start working on it soon.",
-        attachments: [],
-        mentions: ["Sarah Johnson"],
-      },
-    },
-  ]
-
-  // Define additional content with Activity section
-  const additionalContent = (
-    <>
-      {/* Show all values button */}
-      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-        Show all values
-      </Button>
-
-      {/* Activity Section */}
-      <ActivitySection activities={activities} />
-    </>
-  )
-
-  return (
-    <MasterDetailsPanel 
-      fieldGroups={fieldGroups} 
-      isFullScreen={isFullScreen} 
-      additionalContent={additionalContent} 
-    />
-  )
-}
-
-// Create a TaskSubtasksContent component for the subtasks tab
-function TaskSubtasksContent({ task }: { task: Task }) {
-  const [subtasks, setSubtasks] = React.useState(task.subtasks || [])
-  const [isAddingSubtask, setIsAddingSubtask] = React.useState(false)
-  const [newSubtaskTitle, setNewSubtaskTitle] = React.useState("")
-
-  const handleAddSubtask = () => {
-    if (newSubtaskTitle.trim()) {
-      const newSubtask = {
-        id: `SUBTASK-${Date.now()}`,
-        title: newSubtaskTitle.trim(),
-        description: "",
-        status: "To Do",
-        priority: "Medium",
-        assignee: "Unassigned",
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-      }
-      setSubtasks([...subtasks, newSubtask])
-      setNewSubtaskTitle("")
-      setIsAddingSubtask(false)
-    }
-  }
-
-  const handleSubtaskStatusChange = (subtaskId: string, newStatus: string) => {
-    setSubtasks(
-      subtasks.map((subtask: any) => (subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask)),
-    )
-  }
-
-  const handleDeleteSubtask = (subtaskId: string) => {
-    setSubtasks(subtasks.filter((subtask: any) => subtask.id !== subtaskId))
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium">Subtasks ({subtasks.length})</h4>
-        <Button variant="outline" size="sm" onClick={() => setIsAddingSubtask(true)}>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Add Subtask
-        </Button>
-      </div>
-      
-      <div className="space-y-2">
-        {subtasks.map((subtask: any) => (
-          <div
-            key={subtask.id}
-            className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={() => {
-                    const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
-                    handleSubtaskStatusChange(subtask.id, newStatus)
-                  }}
-                >
-                  {subtask.status === "Completed" ? (
-                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                  ) : subtask.status === "In Progress" ? (
-                    <ClockIcon className="h-4 w-4 text-blue-500" />
-                  ) : (
-                    <CircleIcon className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-                <div className="flex-1">
-                  <div
-                    className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
-                  >
-                    {subtask.title}
-                  </div>
-                  <div className="flex items-center gap-4 mt-1">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <UserIcon className="h-3 w-3" />
-                      {subtask.assignee}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <CalendarIcon className="h-3 w-3" />
-                      {new Date(subtask.dueDate).toLocaleDateString()}
-                    </div>
-                    <Badge
-                      variant={
-                        subtask.status === "Completed"
-                          ? "default"
-                          : subtask.status === "In Progress"
-                            ? "secondary"
-                            : "outline"
-                      }
-                      className="text-xs"
-                    >
-                      {subtask.status}
-                    </Badge>
-                    <Badge className={`text-xs ${getPriorityColor(subtask.priority)}`}>
-                      {subtask.priority}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0"
-                  >
-                    <MoreHorizontalIcon className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Open Details</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
-                    Mark as To Do
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "In Progress")}>
-                    Mark as In Progress
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "Completed")}>
-                    Mark as Completed
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => handleDeleteSubtask(subtask.id)}
-                    className="text-destructive"
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        ))}
-
-        {isAddingSubtask && (
-          <div className="rounded-lg border border-muted bg-muted/10 p-3">
-            <div className="flex gap-2">
-              <Input
-                value={newSubtaskTitle}
-                onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                placeholder="Enter subtask title..."
-                className="flex-1"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAddSubtask()
-                  if (e.key === "Escape") setIsAddingSubtask(false)
-                }}
-              />
-              <Button size="sm" onClick={handleAddSubtask}>Add</Button>
-              <Button size="sm" variant="ghost" onClick={() => setIsAddingSubtask(false)}>Cancel</Button>
-            </div>
-          </div>
-        )}
-
-        {subtasks.length === 0 && !isAddingSubtask && (
-          <div className="text-center py-8 text-muted-foreground">
-            <CheckSquareIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No subtasks yet</p>
-            <p className="text-xs">Break down this task into smaller steps</p>
-          </div>
-        )}
-      </div>
-    </div>
-  )
 }
