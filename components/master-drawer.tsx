@@ -3,7 +3,6 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import { ChevronLeftIcon, ExpandIcon, PlusIcon, XIcon } from "lucide-react"
-import { MessageSquareIcon, FolderIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,8 +12,6 @@ import { NoteDetailsView } from "./note-details-view"
 import { MeetingDetailsView } from "./meeting-details-view"
 import { EmailDetailsView } from "./email-details-view"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
-import { NoteContent } from "@/components/shared/note-content"
-import { FileContent } from "@/components/shared/file-content"
 
 interface Tab {
   id: string
@@ -60,28 +57,22 @@ export function MasterDrawer({
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
   const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
-  const [isRecordFullScreen, setIsRecordFullScreen] = React.useState(false)
-  const [previousActiveTab, setPreviousActiveTab] = React.useState<string>("details")
 
   // ESC key handler for full screen mode
   React.useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (isRecordFullScreen) {
-          setIsRecordFullScreen(false)
-        } else if (isFullScreen) {
-          setIsFullScreen(false)
-        }
+      if (event.key === "Escape" && isFullScreen) {
+        setIsFullScreen(false)
       }
     }
 
-    if (isFullScreen || isRecordFullScreen) {
+    if (isFullScreen) {
       document.addEventListener("keydown", handleEscKey)
       return () => {
         document.removeEventListener("keydown", handleEscKey)
       }
     }
-  }, [isFullScreen, isRecordFullScreen])
+  }, [isFullScreen])
 
   React.useEffect(() => {
     // When switching to full screen mode, ensure we're not showing the "details" tab
@@ -185,247 +176,79 @@ export function MasterDrawer({
     }
   }
 
-  // Handle entering full screen mode for a record
-  const handleRecordFullScreen = (recordType: string) => {
-    setPreviousActiveTab(activeTab);
-    setIsRecordFullScreen(true);
-  };
+  const FullScreenContent = () => {
+    const headerInfo = getHeaderInfo()
 
-  // Record FullScreen Component
-  const RecordFullScreenContent = () => {
-    const headerInfo = getHeaderInfo();
-    
     const content = (
-      <div className="fixed inset-0 z-[99999] bg-background">
-        {/* Full Screen Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                if (isRecordFullScreen) {
-                  setIsRecordFullScreen(false);
-                  setActiveTab(previousActiveTab);
-                } else {
-                  setIsFullScreen(false);
+      <>
+        <div className="fixed inset-0 z-[9999] bg-background">
+          {/* Full Screen Header */}
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setIsFullScreen(false)
                   // Clear any selected items when exiting fullscreen
-                  setSelectedTask(null);
-                  setSelectedNote(null);
-                  setSelectedMeeting(null);
-                  setSelectedEmail(null);
-                }
-              }}
-            >
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="outline" className="bg-background">
-              {isRecordFullScreen
-                ? (selectedTask
-                   ? "Task"
-                   : selectedNote
-                   ? "Note"
-                   : selectedMeeting
-                   ? "Meeting"
-                   : selectedEmail
-                   ? "Email"
-                   : "Record")
-                : recordType}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            {!isRecordFullScreen && customActions.map((action, index) => (
-              <React.Fragment key={index}>{action}</React.Fragment>
-            ))}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                if (isRecordFullScreen) {
-                  setIsRecordFullScreen(false);
-                  setActiveTab(previousActiveTab);
-                } else {
-                  setIsFullScreen(false);
-                  // Clear any selected items when exiting fullscreen
-                  setSelectedTask(null);
-                  setSelectedNote(null);
-                  setSelectedMeeting(null);
-                  setSelectedEmail(null);
-                }
-              }}
-            >
-              <XIcon className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Full Screen Content - Two Column Layout */}
-        <div className="flex h-[calc(100vh-73px)]">
-          {/* Left Panel - Details (Persistent) */}
-          <div className="w-96 border-r bg-background">
-            {/* Record Header */}
-            <div className="border-b bg-background px-6 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {isRecordFullScreen
-                    ? (selectedTask
-                      ? "T"
-                      : selectedNote
-                      ? "N"
-                      : selectedMeeting
-                      ? "M"
-                      : selectedEmail
-                      ? "E"
-                      : "R")
-                    : headerInfo.firstLetter}
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    {isRecordFullScreen
-                      ? (selectedTask?.title || 
-                         selectedNote?.title || 
-                         selectedMeeting?.title || 
-                         selectedEmail?.subject || 
-                         "Record Details")
-                      : headerInfo.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {isRecordFullScreen
-                      ? (selectedTask
-                         ? `Task in ${title}`
-                         : selectedNote
-                         ? `Note in ${title}`
-                         : selectedMeeting
-                         ? `Meeting in ${title}`
-                         : selectedEmail
-                         ? `Email in ${title}`
-                         : "Record Details")
-                      : headerInfo.subtitle}
-                  </p>
-                </div>
-              </div>
+                  setSelectedTask(null)
+                  setSelectedNote(null)
+                  setSelectedMeeting(null)
+                  setSelectedEmail(null)
+                }}
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="outline" className="bg-background">
+                {recordType}
+              </Badge>
             </div>
-            
-            {/* Details Panel Content */}
-            {isRecordFullScreen ? (
-              <div className="px-6 pt-4 pb-6">
-                {selectedTask && (
-                  <TaskDetailsView 
-                    task={selectedTask} 
-                    onBack={() => {}} 
-                    recordName={title}
-                    isInDrawer={false}
-                  />
-                )}
-                {selectedNote && (
-                  <NoteDetailsView 
-                    note={selectedNote} 
-                    onBack={() => {}}
-                  />
-                )}
-                {selectedMeeting && (
-                  <MeetingDetailsView 
-                    meeting={selectedMeeting} 
-                    onBack={() => {}}
-                  />
-                )}
-                {selectedEmail && (
-                  <EmailDetailsView 
-                    email={selectedEmail} 
-                    onBack={() => {}}
-                  />
-                )}
-              </div>
-            ) : (
-              detailsPanel(true)
-            )}
+            <div className="flex items-center gap-2">
+              {customActions.map((action, index) => (
+                <React.Fragment key={index}>{action}</React.Fragment>
+              ))}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  setIsFullScreen(false)
+                  // Clear any selected items when exiting fullscreen
+                  setSelectedTask(null)
+                  setSelectedNote(null)
+                  setSelectedMeeting(null)
+                  setSelectedEmail(null)
+                }}
+              >
+                <XIcon className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          {/* Right Panel - Tab Content */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Tabs */}
-            <div className="border-b bg-background px-6">
-              <div className="flex gap-8 overflow-x-auto">
-                {isRecordFullScreen ? (
-                  /* Record Full Screen Tabs */
-                  <>
-                    {selectedTask && [
-                      { id: "notes", label: "Notes", icon: MessageSquareIcon },
-                      { id: "files", label: "Files", icon: FolderIcon }
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                          activeTab === tab.id
-                            ? "border-b-2 border-primary text-primary"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {tab.icon && <tab.icon className="h-4 w-4" />}
-                        {tab.label}
-                        {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                      </button>
-                    ))}
-                    
-                    {selectedNote && [
-                      { id: "files", label: "Files", icon: FolderIcon }
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                          activeTab === tab.id
-                            ? "border-b-2 border-primary text-primary"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {tab.icon && <tab.icon className="h-4 w-4" />}
-                        {tab.label}
-                        {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                      </button>
-                    ))}
-                    
-                    {selectedMeeting && [
-                      { id: "notes", label: "Notes", icon: MessageSquareIcon },
-                      { id: "files", label: "Files", icon: FolderIcon }
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                          activeTab === tab.id
-                            ? "border-b-2 border-primary text-primary"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {tab.icon && <tab.icon className="h-4 w-4" />}
-                        {tab.label}
-                        {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                      </button>
-                    ))}
-                    
-                    {selectedEmail && [
-                      { id: "files", label: "Files", icon: FolderIcon }
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                          activeTab === tab.id
-                            ? "border-b-2 border-primary text-primary"
-                            : "text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {tab.icon && <tab.icon className="h-4 w-4" />}
-                        {tab.label}
-                        {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                      </button>
-                    ))}
-                  </>
-                ) : (
-                  /* Regular Full Screen Tabs */
-                  tabs
+          {/* Full Screen Content - Two Column Layout */}
+          <div className="flex h-[calc(100vh-73px)]">
+            {/* Left Panel - Details (Persistent) */}
+            <div className="w-96 border-r bg-background">
+              {/* Record Header - Always show original record info in left panel */}
+              <div className="border-b bg-background px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                    {headerInfo.firstLetter}
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold">{headerInfo.title}</h2>
+                    {headerInfo.subtitle && <p className="text-sm text-muted-foreground">{headerInfo.subtitle}</p>}
+                  </div>
+                </div>
+              </div>
+              {detailsPanel(true)}
+            </div>
+
+            {/* Right Panel - Main Content */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Tabs */}
+              <div className="border-b bg-background px-6">
+                <div className="flex gap-8 overflow-x-auto">
+                  {tabs
                     .filter(tab => tab.id !== "details") // Filter out the Details tab in full screen mode
                     .map((tab) => (
                     <button
@@ -446,64 +269,175 @@ export function MasterDrawer({
                       )}
                       {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
                     </button>
-                  ))
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Tab Content */}
-            <div className="p-6">
-              {isRecordFullScreen ? (
-                /* Record Full Screen Tab Content */
-                <>
-                  {selectedTask && activeTab === "notes" && <NoteContent title={`Notes for Task: ${selectedTask.title}`} />}
-                  {selectedTask && activeTab === "files" && <FileContent title={`Files for Task: ${selectedTask.title}`} />}
-                  
-                  {selectedNote && activeTab === "files" && <FileContent title={`Files for Note: ${selectedNote.title}`} />}
-                  
-                  {selectedMeeting && activeTab === "notes" && <NoteContent title={`Notes for Meeting: ${selectedMeeting.title}`} />}
-                  {selectedMeeting && activeTab === "files" && <FileContent title={`Files for Meeting: ${selectedMeeting.title}`} />}
-                  
-                  {selectedEmail && activeTab === "files" && <FileContent title={`Files for Email: ${selectedEmail.subject}`} />}
-                </>
-              ) : (
-                /* Regular Full Screen Tab Content */
-                <>
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
-                    <div className="flex items-center gap-2">
-                      {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
-                      {activeTab !== "activity" && activeTab !== "company" && activeTab !== "details" && (
-                        <Button variant="outline" size="sm">
-                          <PlusIcon className="h-4 w-4" />
-                          Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
-                        </Button>
-                      )}
-                      {activeTab === "activity" && (
-                        <Button variant="outline" size="sm">
-                          <PlusIcon className="h-4 w-4" />
-                          Add meeting
-                        </Button>
-                      )}
-                    </div>
+              {/* Tab Content */}
+              <div className="p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
+                  <div className="flex items-center gap-2">
+                    {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
+                    {activeTab !== "activity" && activeTab !== "company" && activeTab !== "details" && (
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
+                      </Button>
+                    )}
+                    {activeTab === "activity" && (
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add meeting
+                      </Button>
+                    )}
                   </div>
-                  {renderTabContent(activeTab, viewMode, true)}
-                </>
-              )}
+                </div>
+                {renderTabContent(activeTab, viewMode, true)}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    );
 
-    return typeof document !== "undefined" ? createPortal(content, document.body) : null;
-  };
+        {/* Task Details Sheet/Drawer in Full Screen Mode */}
+        {selectedTask && (
+          <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+            <SheetContent
+              side="right"
+              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  </Button>
+                  <Badge variant="outline" className="bg-background">
+                    Task
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <ExpandIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {/* Task Details Content */}
+              <div className="flex-1 overflow-auto">
+                <TaskDetailsView
+                  task={selectedTask}
+                  onBack={handleDrawerBackClick}
+                  recordName={title}
+                  isInDrawer={true}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
+
+        {/* Note Details Sheet/Drawer in Full Screen Mode */}
+        {selectedNote && (
+          <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
+            <SheetContent
+              side="right"
+              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  </Button>
+                  <Badge variant="outline" className="bg-background">
+                    Note
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <ExpandIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {/* Note Details Content */}
+              <div className="flex-1 overflow-auto">
+                <NoteDetailsView note={selectedNote} onBack={handleDrawerBackClick} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
+
+        {/* Meeting Details Sheet/Drawer in Full Screen Mode */}
+        {selectedMeeting && (
+          <Sheet open={!!selectedMeeting} onOpenChange={(open) => !open && setSelectedMeeting(null)}>
+            <SheetContent
+              side="right"
+              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  </Button>
+                  <Badge variant="outline" className="bg-background">
+                    Meeting
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <ExpandIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {/* Meeting Details Content */}
+              <div className="flex-1 overflow-auto">
+                <MeetingDetailsView meeting={selectedMeeting} onBack={handleDrawerBackClick} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
+
+        {/* Email Details Sheet/Drawer in Full Screen Mode */}
+        {selectedEmail && (
+          <Sheet open={!!selectedEmail} onOpenChange={(open) => !open && setSelectedEmail(null)}>
+            <SheetContent
+              side="right"
+              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  </Button>
+                  <Badge variant="outline" className="bg-background">
+                    Email
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <ExpandIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {/* Email Details Content */}
+              <div className="flex-1 overflow-auto">
+                <EmailDetailsView email={selectedEmail} onBack={handleDrawerBackClick} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
+      </>
+    )
+
+    return typeof document !== "undefined" ? createPortal(content, document.body) : null
+  }
 
   // We will use this conditional check for both instances of ViewModeSelector
   const shouldShowViewSelector = !(activeTab === "activity" || activeTab === "details")
 
-  if (isFullScreen || isRecordFullScreen) {
-    return <RecordFullScreenContent />
+  if (isFullScreen) {
+    return <FullScreenContent />
   }
 
   return (
@@ -627,135 +561,6 @@ export function MasterDrawer({
             {renderTabContent(activeTab, viewMode, false)}
           </div>
         </div>
-
-        {/* Task Details Sheet/Drawer in Full Screen Mode */}
-        {selectedTask && isFullScreen && !isRecordFullScreen && (
-          <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-            <SheetContent
-              side="right"
-              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
-                    <ChevronLeftIcon className="h-4 w-4" />
-                  </Button>
-                  <Badge variant="outline" className="bg-background">
-                    Task
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => handleRecordFullScreen("Task")}>
-                    <ExpandIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {/* Task Details Content */}
-              <div className="flex-1 overflow-auto">
-                <TaskDetailsView
-                  task={selectedTask}
-                  onBack={handleDrawerBackClick}
-                  recordName={title}
-                  isInDrawer={true}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
-        )}
-
-        {/* Note Details Sheet/Drawer in Full Screen Mode */}
-        {selectedNote && isFullScreen && !isRecordFullScreen && (
-          <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
-            <SheetContent
-              side="right"
-              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
-                    <ChevronLeftIcon className="h-4 w-4" />
-                  </Button>
-                  <Badge variant="outline" className="bg-background">
-                    Note
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => handleRecordFullScreen("Note")}>
-                    <ExpandIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {/* Note Details Content */}
-              <div className="flex-1 overflow-auto">
-                <NoteDetailsView note={selectedNote} onBack={handleDrawerBackClick} />
-              </div>
-            </SheetContent>
-          </Sheet>
-        )}
-
-        {/* Meeting Details Sheet/Drawer in Full Screen Mode */}
-        {selectedMeeting && isFullScreen && !isRecordFullScreen && (
-          <Sheet open={!!selectedMeeting} onOpenChange={(open) => !open && setSelectedMeeting(null)}>
-            <SheetContent
-              side="right"
-              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
-                    <ChevronLeftIcon className="h-4 w-4" />
-                  </Button>
-                  <Badge variant="outline" className="bg-background">
-                    Meeting
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => handleRecordFullScreen("Meeting")}>
-                    <ExpandIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {/* Meeting Details Content */}
-              <div className="flex-1 overflow-auto">
-                <MeetingDetailsView meeting={selectedMeeting} onBack={handleDrawerBackClick} />
-              </div>
-            </SheetContent>
-          </Sheet>
-        )}
-
-        {/* Email Details Sheet/Drawer in Full Screen Mode */}
-        {selectedEmail && isFullScreen && !isRecordFullScreen && (
-          <Sheet open={!!selectedEmail} onOpenChange={(open) => !open && setSelectedEmail(null)}>
-            <SheetContent
-              side="right"
-              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
-                    <ChevronLeftIcon className="h-4 w-4" />
-                  </Button>
-                  <Badge variant="outline" className="bg-background">
-                    Email
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => handleRecordFullScreen("Email")}>
-                    <ExpandIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {/* Email Details Content */}
-              <div className="flex-1 overflow-auto">
-                <EmailDetailsView email={selectedEmail} onBack={handleDrawerBackClick} />
-              </div>
-            </SheetContent>
-          </Sheet>
-        )}
       </SheetContent>
     </Sheet>
   )

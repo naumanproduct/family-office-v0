@@ -823,16 +823,16 @@ export function TasksTable() {
               </div>
               
               {/* Subtask Details Content */}
-              <div className="flex-1 overflow-auto">
-                <TaskDetailsView
+        <div className="flex-1 overflow-auto">
+          <TaskDetailsView
                   task={selectedSubtask}
                   onBack={() => setSelectedSubtask(null)}
-                  recordName="All Tasks"
-                  isInDrawer={true}
+            recordName="All Tasks"
+            isInDrawer={true}
                   parentTask={selectedTask}
-                  onBackToParent={() => setSelectedSubtask(null)}
-                />
-              </div>
+            onBackToParent={() => setSelectedSubtask(null)}
+          />
+        </div>
             </SheetContent>
           </Sheet>
         )}
@@ -885,23 +885,23 @@ export function TasksTable() {
 
         {/* Task Content */}
         <div className="relative">
-          {renderTaskContent()}
+        {renderTaskContent()}
         </div>
       </div>
 
       {/* Task drawer */}
       <Sheet open={!!selectedTask && !isFullScreen} onOpenChange={(open) => !open && setSelectedTask(null)}>
         <SheetContent className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
-                <ChevronLeftIcon className="h-4 w-4" />
-              </Button>
-              <Badge variant="outline" className="bg-background">
-                Task
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <Badge variant="outline" className="bg-background">
+                  Task
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -928,17 +928,17 @@ export function TasksTable() {
                   <path d="M21 16.5V19a2 2 0 0 1-2 2h-2.5" />
                   <path d="M7.5 21H5a2 2 0 0 1-2-2v-2.5" />
                 </svg>
-              </Button>
+                </Button>
+              </div>
             </div>
-          </div>
-          <TaskDetailsView 
+              <TaskDetailsView
             task={selectedTask} 
-            onBack={handleDrawerBackClick}
-            recordName="All Tasks"
-            isInDrawer={true}
-          />
-        </SheetContent>
-      </Sheet>
+                onBack={handleDrawerBackClick}
+                recordName="All Tasks"
+                isInDrawer={true}
+              />
+          </SheetContent>
+        </Sheet>
 
       {isFullScreen && <FullScreenContent />}
       
