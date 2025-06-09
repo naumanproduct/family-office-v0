@@ -130,8 +130,24 @@ function TableView({
   activeTab: string
 } & TabContentRendererHandlers) {
   if (data.length === 0) {
-    return <EmptyState activeTab={activeTab} />
+    return <EmptyState activeTab={activeTab} onAdd={onAdd} />
   }
+
+  // Debug logging
+  const handleItemClick = (item: any) => {
+    console.log(`Clicked on ${activeTab} item:`, item);
+    
+    if (activeTab === "tasks" && onTaskClick) {
+      console.log("Calling onTaskClick handler");
+      onTaskClick(item);
+    } else if (activeTab === "notes" && onNoteClick) {
+      onNoteClick(item);
+    } else if (activeTab === "meetings" && onMeetingClick) {
+      onMeetingClick(item);
+    } else if (activeTab === "emails" && onEmailClick) {
+      onEmailClick(item);
+    }
+  };
 
   return (
     <div className="rounded-lg border">
@@ -204,17 +220,7 @@ function TableView({
                   ? "cursor-pointer hover:bg-muted/50"
                   : ""
               }`}
-              onClick={() => {
-                if (activeTab === "tasks" && onTaskClick) {
-                  onTaskClick(item)
-                } else if (activeTab === "notes" && onNoteClick) {
-                  onNoteClick(item)
-                } else if (activeTab === "meetings" && onMeetingClick) {
-                  onMeetingClick(item)
-                } else if (activeTab === "emails" && onEmailClick) {
-                  onEmailClick(item)
-                }
-              }}
+              onClick={() => handleItemClick(item)}
             >
               {activeTab === "emails" && (
                 <>
@@ -285,7 +291,7 @@ function TableView({
   )
 }
 
-// Standard CardView component
+// CardView component 
 function CardView({
   data,
   activeTab,
@@ -302,6 +308,22 @@ function CardView({
     return <EmptyState activeTab={activeTab} onAdd={onAdd} />
   }
 
+  // Use the same handler for consistency
+  const handleItemClick = (item: any) => {
+    console.log(`CardView: Clicked on ${activeTab} item:`, item);
+    
+    if (activeTab === "tasks" && onTaskClick) {
+      console.log("CardView: Calling onTaskClick handler");
+      onTaskClick(item);
+    } else if (activeTab === "notes" && onNoteClick) {
+      onNoteClick(item);
+    } else if (activeTab === "meetings" && onMeetingClick) {
+      onMeetingClick(item);
+    } else if (activeTab === "emails" && onEmailClick) {
+      onEmailClick(item);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {data.map((item) => (
@@ -312,20 +334,10 @@ function CardView({
             (activeTab === "notes" && onNoteClick) ||
             (activeTab === "meetings" && onMeetingClick) ||
             (activeTab === "emails" && onEmailClick)
-              ? "cursor-pointer hover:bg-muted/50"
+              ? "cursor-pointer hover:bg-muted/50 transition-colors"
               : ""
           }`}
-          onClick={() => {
-            if (activeTab === "tasks" && onTaskClick) {
-              onTaskClick(item)
-            } else if (activeTab === "notes" && onNoteClick) {
-              onNoteClick(item)
-            } else if (activeTab === "meetings" && onMeetingClick) {
-              onMeetingClick(item)
-            } else if (activeTab === "emails" && onEmailClick) {
-              onEmailClick(item)
-            }
-          }}
+          onClick={() => handleItemClick(item)}
         >
           {/* Implement card views for different tab types */}
           <div className="flex flex-col h-full">
@@ -382,6 +394,22 @@ function ListView({
     return <EmptyState activeTab={activeTab} onAdd={onAdd} />
   }
 
+  // Use the same handler for consistency
+  const handleItemClick = (item: any) => {
+    console.log(`ListView: Clicked on ${activeTab} item:`, item);
+    
+    if (activeTab === "tasks" && onTaskClick) {
+      console.log("ListView: Calling onTaskClick handler");
+      onTaskClick(item);
+    } else if (activeTab === "notes" && onNoteClick) {
+      onNoteClick(item);
+    } else if (activeTab === "meetings" && onMeetingClick) {
+      onMeetingClick(item);
+    } else if (activeTab === "emails" && onEmailClick) {
+      onEmailClick(item);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {data.map((item) => (
@@ -395,17 +423,7 @@ function ListView({
               ? "cursor-pointer hover:bg-muted/50"
               : ""
           }`}
-          onClick={() => {
-            if (activeTab === "tasks" && onTaskClick) {
-              onTaskClick(item)
-            } else if (activeTab === "notes" && onNoteClick) {
-              onNoteClick(item)
-            } else if (activeTab === "meetings" && onMeetingClick) {
-              onMeetingClick(item)
-            } else if (activeTab === "emails" && onEmailClick) {
-              onEmailClick(item)
-            }
-          }}
+          onClick={() => handleItemClick(item)}
         >
           {/* Email List Item */}
           {activeTab === "emails" && (
