@@ -964,26 +964,61 @@ function TaskDetailsView({
   parentTask?: any;
   onBackToParent?: (() => void) | null;
 }) {
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = React.useState("details")
+  const isSubtask = !!parentTask
 
-  if (!task) return null;
+  // Date formatting utility function
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  }
 
-  const isSubtask = !!parentTask;
+  // Format priority for display
+  const getPriorityBadge = (priority: string) => {
+    const className = {
+      high: "bg-red-100 text-red-600",
+      medium: "bg-yellow-100 text-yellow-600",
+      low: "bg-green-100 text-green-600",
+    }[priority.toLowerCase()] || "bg-slate-100 text-slate-600"
+
+    return <Badge className={`${className} text-xs`}>{priority}</Badge>
+  }
+
+  // Get status badge with color
+  const getStatusBadge = (status: string) => {
+    const className = {
+      "not started": "bg-slate-100 text-slate-600",
+      "in progress": "bg-blue-100 text-blue-600",
+      completed: "bg-green-100 text-green-600",
+      blocked: "bg-red-100 text-red-600",
+      deferred: "bg-purple-100 text-purple-600",
+    }[status.toLowerCase()] || "bg-slate-100 text-slate-600"
+
+    return <Badge className={`${className} text-xs`}>{status}</Badge>
+  }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Record Header */}
-      <div className="border-b bg-background px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <CheckSquareIcon className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold">{task.title}</h2>
-            <p className="text-sm text-muted-foreground">
-              {isSubtask ? `Subtask in ${parentTask.title}` : `Task in ${recordName}`}
-            </p>
-          </div>
+    <div className={`flex h-full flex-col overflow-hidden ${isInDrawer ? "" : "bg-background"}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between border-b bg-background p-4">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8">
+            <ChevronLeftIcon className="h-4 w-4" />
+          </Button>
+          <h2 className="text-sm font-medium">{recordName}</h2>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <ExpandIcon className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8">
+            <XIcon className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -1016,38 +1051,30 @@ function TaskDetailsView({
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="space-y-6">
           {activeTab === "details" && (
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Task Details</h4>
+            <div className="space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold">{task.title}</h3>
+                <p className="text-sm text-muted-foreground">{task.description}</p>
+              </div>
+
               <div className="rounded-lg border border-muted bg-muted/10 p-4">
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Description</Label>
-                      <p className="text-sm">{task.description}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1">
-                      <Label className="text-xs text-muted-foreground">Priority</Label>
-                      <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
-                      </Badge>
-                    </div>
-                  </div>
-
                   <div className="flex items-center gap-2">
                     <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
                     <div className="flex-1">
                       <Label className="text-xs text-muted-foreground">Status</Label>
-                      <Badge className={`text-xs ${getStatusColor(task.status)}`}>
-                        {task.status}
-                      </Badge>
+                      <p className="text-sm">{getStatusBadge(task.status)}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <ClockIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Priority</Label>
+                      <p className="text-sm">{getPriorityBadge(task.priority)}</p>
                     </div>
                   </div>
 
@@ -1077,6 +1104,18 @@ function TaskDetailsView({
                   </Button>
                 </div>
               )}
+              
+              {/* Activity Section */}
+              <div className="mt-8">
+                <div className="mb-4 flex items-center justify-between">
+                  <h4 className="text-sm font-medium">Activity</h4>
+                  <Button variant="outline" size="sm">
+                    <PlusIcon className="h-4 w-4" />
+                    Add activity
+                  </Button>
+                </div>
+                <TaskActivityContent task={task} />
+              </div>
             </div>
           )}
           
@@ -1084,6 +1123,179 @@ function TaskDetailsView({
           {activeTab === "files" && <FileContent title={`Files for Task: ${task.title}`} />}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Task Activity Component
+function TaskActivityContent({ task }: { task: any }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
+
+  const activities = [
+    {
+      id: 1,
+      type: "status-change",
+      actor: "Alex Johnson",
+      action: "changed status from 'Not Started' to",
+      target: "'In Progress'",
+      timestamp: "2 days ago",
+      date: "2023-01-15",
+      details: {
+        previousStatus: "Not Started",
+        newStatus: "In Progress",
+        reason: "Starting implementation phase",
+        timeSpent: "N/A",
+      },
+    },
+    {
+      id: 2,
+      type: "assignment",
+      actor: "Maria Garcia",
+      action: "assigned",
+      target: task.title,
+      timestamp: "1 week ago",
+      date: "2023-01-10",
+      details: {
+        previousAssignee: "Unassigned",
+        newAssignee: task.assignee,
+        reason: "Taking over from previous team member",
+      },
+    },
+    {
+      id: 3,
+      type: "comment",
+      actor: "David Lee",
+      action: "commented on",
+      target: task.title,
+      timestamp: "2 weeks ago",
+      date: "2023-01-03",
+      details: {
+        comment: "I've started working on this task and identified some potential challenges with the integration. Let's discuss this in our next team meeting.",
+        mentions: ["@Alex", "@Maria"],
+      },
+    },
+  ];
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "status-change":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
+      case "assignment":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
+      case "comment":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>;
+      case "deadline-change":
+        return <div className="h-2 w-2 rounded-full bg-amber-500"></div>;
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
+    }
+  };
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span> {activity.action}{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    );
+  };
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "status-change":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Status Change Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Status:</span>{" "}
+                  <span>{activity.details.previousStatus}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Status:</span>{" "}
+                  <span>{activity.details.newStatus}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+          </div>
+        );
+      case "assignment":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Assignment Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Assignee:</span>{" "}
+                  <span>{activity.details.previousAssignee}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Assignee:</span>{" "}
+                  <span>{activity.details.newAssignee}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+          </div>
+        );
+      case "comment":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-1">Comment</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.comment}</p>
+            </div>
+            {activity.details.mentions.length > 0 && (
+              <div>
+                <h5 className="text-sm font-medium mb-1">Mentions</h5>
+                <div className="flex flex-wrap gap-1">
+                  {activity.details.mentions.map((mention: string, index: number) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {mention}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

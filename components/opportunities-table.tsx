@@ -691,9 +691,208 @@ function OpportunityDetailsPanel({
         <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
           Show all values
         </Button>
+
+        {/* Activity Section - Always shown, regardless of mode */}
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <OpportunityActivityContent opportunity={opportunity} />
+        </div>
       </div>
     </div>
   )
+}
+
+// Add the OpportunityActivityContent component
+function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
+
+  const activities = [
+    {
+      id: 1,
+      type: "stage",
+      actor: "Investment Team",
+      action: "moved opportunity to",
+      target: opportunity.stage,
+      timestamp: "3 days ago",
+      date: "2025-01-27",
+      details: {
+        previousStage: "Initial Screening",
+        newStage: opportunity.stage,
+        reason: "Completed due diligence review and investment committee approval",
+        nextSteps: "Prepare term sheet for review",
+      },
+    },
+    {
+      id: 2,
+      type: "meeting",
+      actor: "Deal Team",
+      action: "had a meeting about",
+      target: opportunity.name,
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        meetingType: "Due Diligence Review",
+        attendees: "Investment Committee, Legal Counsel, Deal Team",
+        topics: "Financial performance, market opportunity, competitive landscape",
+        outcomes: "Approved to proceed to next stage with contingencies",
+      },
+    },
+    {
+      id: 3,
+      type: "document",
+      actor: "Legal Team",
+      action: "uploaded document for",
+      target: opportunity.name,
+      timestamp: "2 weeks ago",
+      date: "2025-01-16",
+      details: {
+        documentType: "Term Sheet",
+        fileName: "Opportunity_TermSheet_v1.pdf",
+        status: "Under Review",
+        reviewers: "Investment Committee, Senior Partners",
+        nextSteps: "Schedule review meeting",
+      },
+    },
+  ];
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "stage":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
+      case "meeting":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
+      case "document":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>;
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
+    }
+  };
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span> {activity.action}{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    );
+  };
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "stage":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Stage Change</h5>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Stage:</span>{" "}
+                  <span>{activity.details.previousStage}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Stage:</span>{" "}
+                  <span className="font-medium">{activity.details.newStage}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
+            </div>
+          </div>
+        );
+      case "meeting":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.meetingType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Attendees:</span> <span>{activity.details.attendees}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.topics}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Outcomes</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.outcomes}</p>
+            </div>
+          </div>
+        );
+      case "document":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Document Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.documentType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span> <span>{activity.details.status}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">File:</span>{" "}
+                  <span className="text-blue-600">{activity.details.fileName}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Reviewers:</span> <span>{activity.details.reviewers}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 const columns: ColumnDef<Opportunity>[] = [

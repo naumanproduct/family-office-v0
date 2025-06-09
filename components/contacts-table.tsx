@@ -373,7 +373,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
         </Button>
       }
       title={`${contact.firstName} ${contact.lastName}`}
-      recordType="Contact"
+      recordType="People"
       subtitle={`${contact.jobTitle} at ${contact.company}`}
       tabs={tabs}
       detailsPanel={renderDetailsPanel}
@@ -503,12 +503,225 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
     },
   ];
 
+  // Define additional content with Activity section
+  const additionalContent = (
+    <>
+      {/* Show all values button */}
+      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+        Show all values
+      </Button>
+
+      {/* Activity Section - Always shown, regardless of mode */}
+      <div className="mt-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h4 className="text-sm font-medium">Activity</h4>
+          <Button variant="outline" size="sm">
+            <PlusIcon className="h-4 w-4" />
+            Add meeting
+          </Button>
+        </div>
+        <ContactActivityContent contact={contact} />
+      </div>
+    </>
+  );
+
   return (
     <MasterDetailsPanel 
       fieldGroups={fieldGroups}
       isFullScreen={isFullScreen}
+      additionalContent={additionalContent}
     />
   )
+}
+
+// Add the ContactActivityContent component
+function ContactActivityContent({ contact }: { contact: Contact }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
+
+  const activities = [
+    {
+      id: 1,
+      type: "email",
+      actor: "Sarah Johnson",
+      action: "sent an email to",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "3 days ago",
+      date: "2025-01-27",
+      details: {
+        subject: "Follow-up on our recent discussion",
+        content: "Thank you for taking the time to meet with us last week...",
+        attachments: "Proposal.pdf, Presentation.pptx",
+        status: "Opened",
+        openRate: "2 times",
+      },
+    },
+    {
+      id: 2,
+      type: "meeting",
+      actor: "Investment Team",
+      action: "had a meeting with",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        meetingType: "Introduction Call",
+        attendees: "Sarah Johnson, Michael Chen, David Rodriguez",
+        topics: "Investment opportunities, portfolio review, next steps",
+        outcomes: "Follow-up meeting scheduled for next month",
+      },
+    },
+    {
+      id: 3,
+      type: "note",
+      actor: "Michael Chen",
+      action: "added a note about",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "2 weeks ago",
+      date: "2025-01-16",
+      details: {
+        noteType: "Meeting Summary",
+        content: "Contact expressed interest in our healthcare portfolio companies. Follow up with additional information.",
+        tags: "Meeting, Follow-up, Healthcare",
+        priority: "Medium",
+      },
+    },
+  ];
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "email":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
+      case "meeting":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
+      case "note":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>;
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
+    }
+  };
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span> {activity.action}{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    );
+  };
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "email":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Email Details</h5>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Subject:</span>{" "}
+                  <span className="font-medium">{activity.details.subject}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span>{" "}
+                  <span>{activity.details.status} ({activity.details.openRate})</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Content</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.content}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Attachments</h5>
+              <p className="text-sm text-blue-600">{activity.details.attachments}</p>
+            </div>
+          </div>
+        );
+      case "meeting":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.meetingType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Attendees:</span> <span>{activity.details.attendees}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.topics}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Outcomes</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.outcomes}</p>
+            </div>
+          </div>
+        );
+      case "note":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Note Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.noteType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Priority:</span> <span>{activity.details.priority}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Content</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.content}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Tags</h5>
+              <div className="flex flex-wrap gap-1">
+                {activity.details.tags.split(", ").map((tag: string) => (
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 const columns: ColumnDef<Contact>[] = [

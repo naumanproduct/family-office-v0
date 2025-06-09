@@ -28,6 +28,8 @@ import {
   SearchIcon,
   SortAscIcon,
   SortDescIcon,
+  BriefcaseIcon,
+  UserIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -86,6 +88,9 @@ export const entitySchema = z.object({
   linkedDocs: z.number(),
   upcomingDeadlines: z.array(z.string()),
   notes: z.string(),
+  taxId: z.string(),
+  formationDate: z.string(),
+  registeredAgent: z.string(),
 })
 
 type Entity = z.infer<typeof entitySchema>
@@ -107,6 +112,9 @@ export const entitiesData: Entity[] = [
     linkedDocs: 12,
     upcomingDeadlines: ["Tax Filing - March 15", "Annual Report - April 30"],
     notes: "Primary holding company for all venture investments",
+    taxId: "123456789",
+    formationDate: "2020-01-15",
+    registeredAgent: "John Smith",
   },
   {
     id: 2,
@@ -124,6 +132,9 @@ export const entitiesData: Entity[] = [
     linkedDocs: 8,
     upcomingDeadlines: ["Audit - June 30"],
     notes: "Limited partnership for technology sector investments",
+    taxId: "987654321",
+    formationDate: "2021-03-10",
+    registeredAgent: "Sarah Johnson",
   },
   {
     id: 3,
@@ -141,6 +152,9 @@ export const entitiesData: Entity[] = [
     linkedDocs: 15,
     upcomingDeadlines: [],
     notes: "Charitable foundation for philanthropic activities",
+    taxId: "555555555",
+    formationDate: "2019-11-20",
+    registeredAgent: "Michael Chen",
   },
   {
     id: 4,
@@ -158,6 +172,9 @@ export const entitiesData: Entity[] = [
     linkedDocs: 6,
     upcomingDeadlines: ["Board Meeting - February 15", "Tax Filing - March 15"],
     notes: "Operating company for direct business activities",
+    taxId: "111111111",
+    formationDate: "2022-05-01",
+    registeredAgent: "Lisa Wang",
   },
   {
     id: 5,
@@ -175,6 +192,9 @@ export const entitiesData: Entity[] = [
     linkedDocs: 3,
     upcomingDeadlines: [],
     notes: "Legacy trust structure, currently inactive",
+    taxId: "222222222",
+    formationDate: "2018-08-12",
+    registeredAgent: "Robert Davis",
   },
   {
     id: 6,
@@ -192,6 +212,9 @@ export const entitiesData: Entity[] = [
     linkedDocs: 9,
     upcomingDeadlines: ["K-1 Distribution - March 31"],
     notes: "General partner entity for fund management",
+    taxId: "333333333",
+    formationDate: "2023-01-30",
+    registeredAgent: "Amanda Wilson",
   },
   {
     id: 7,
@@ -209,6 +232,9 @@ export const entitiesData: Entity[] = [
     linkedDocs: 11,
     upcomingDeadlines: ["Annual Filing - May 31"],
     notes: "International holding structure for global investments",
+    taxId: "444444444",
+    formationDate: "2020-12-01",
+    registeredAgent: "David Brown",
   },
   {
     id: 8,
@@ -226,6 +252,9 @@ export const entitiesData: Entity[] = [
     linkedDocs: 18,
     upcomingDeadlines: ["Trust Review - April 15"],
     notes: "Dynasty trust for multi-generational wealth planning",
+    taxId: "666666666",
+    formationDate: "2021-09-15",
+    registeredAgent: "Jennifer Taylor",
   },
 ]
 
@@ -647,7 +676,7 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
             </div>
 
             <div className="flex items-center gap-2">
-              <ScaleIcon className="h-4 w-4 text-muted-foreground" />
+              <BriefcaseIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
                 <Label className="text-xs text-muted-foreground">Entity Type</Label>
                 <p className="text-sm">{entity.entityType}</p>
@@ -655,10 +684,10 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
             </div>
 
             <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+              <MailIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Role / Purpose</Label>
-                <p className="text-sm">{entity.rolePurpose}</p>
+                <Label className="text-xs text-muted-foreground">Tax ID / EIN</Label>
+                <p className="text-sm">{entity.taxId}</p>
               </div>
             </div>
 
@@ -671,46 +700,18 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
             </div>
 
             <div className="flex items-center gap-2">
-              <ScaleIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Status</Label>
-                <Badge className={`text-xs ${getStatusColor(entity.status)}`}>{entity.status}</Badge>
-              </div>
-            </div>
-
-            {entity.ownershipPercent && (
-              <div className="flex items-center gap-2">
-                <UsersIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Ownership %</Label>
-                  <p className="text-sm">{entity.ownershipPercent}%</p>
-                </div>
-              </div>
-            )}
-
-            {entity.parentEntity && (
-              <div className="flex items-center gap-2">
-                <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Parent Entity</Label>
-                  <p className="text-sm text-blue-600">{entity.parentEntity}</p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2">
-              <UsersIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Manager / Controller</Label>
-                <p className="text-sm">{entity.managerController}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Date Formed</Label>
-                <p className="text-sm">{new Date(entity.dateFormed).toLocaleDateString()}</p>
+                <Label className="text-xs text-muted-foreground">Formation Date</Label>
+                <p className="text-sm">{entity.formationDate}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <UserIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Registered Agent</Label>
+                <p className="text-sm">{entity.registeredAgent}</p>
               </div>
             </div>
 
@@ -727,9 +728,233 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
         <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
           Show all values
         </Button>
+
+        {/* Activity Section - Always shown, regardless of mode */}
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add activity
+            </Button>
+          </div>
+          <EntityActivityContent entity={entity} />
+        </div>
       </div>
     </div>
   )
+}
+
+// Add the EntityActivityContent component
+function EntityActivityContent({ entity }: { entity: Entity }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
+
+  const activities = [
+    {
+      id: 1,
+      type: "filing",
+      actor: "Compliance Team",
+      action: "submitted annual filing for",
+      target: entity.entityName,
+      timestamp: "2 weeks ago",
+      date: "2025-01-15",
+      details: {
+        filingType: "Annual Report",
+        jurisdiction: entity.jurisdiction,
+        period: "2024",
+        status: "Completed",
+        confirmation: "AR-23456789",
+        filingFee: "$350.00",
+      },
+    },
+    {
+      id: 2,
+      type: "document",
+      actor: "Legal Team",
+      action: "updated operating agreement for",
+      target: entity.entityName,
+      timestamp: "1 month ago",
+      date: "2024-12-20",
+      details: {
+        documentType: "Operating Agreement",
+        version: "3.2",
+        changes: "Updated member capital contributions and ownership percentages",
+        approvedBy: "Board of Managers",
+        effectiveDate: "2025-01-01",
+      },
+    },
+    {
+      id: 3,
+      type: "tax",
+      actor: "Tax Team",
+      action: "prepared tax return for",
+      target: entity.entityName,
+      timestamp: "3 months ago",
+      date: "2024-10-15",
+      details: {
+        taxYear: "2023",
+        returnType: "Federal Income Tax",
+        status: "Filed",
+        filingDate: "2024-10-15",
+        taxDue: "$42,850.00",
+        preparedBy: "Smith & Associates LLP",
+      },
+    },
+  ];
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "filing":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
+      case "document":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
+      case "tax":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>;
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
+    }
+  };
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span> {activity.action}{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    );
+  };
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "filing":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Filing Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Filing Type:</span>{" "}
+                  <span className="font-medium">{activity.details.filingType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Jurisdiction:</span>{" "}
+                  <span>{activity.details.jurisdiction}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Period:</span>{" "}
+                  <span>{activity.details.period}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span>{" "}
+                  <span>{activity.details.status}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Filing Fee</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.filingFee}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Confirmation Number</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.confirmation}</p>
+            </div>
+          </div>
+        );
+      case "document":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Document Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Document Type:</span>{" "}
+                  <span>{activity.details.documentType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Version:</span>{" "}
+                  <span>{activity.details.version}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Effective Date:</span>{" "}
+                  <span>{activity.details.effectiveDate}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Approved By:</span>{" "}
+                  <span>{activity.details.approvedBy}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Changes Made</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.changes}</p>
+            </div>
+          </div>
+        );
+      case "tax":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Tax Filing Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Tax Year:</span>{" "}
+                  <span>{activity.details.taxYear}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Return Type:</span>{" "}
+                  <span>{activity.details.returnType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span>{" "}
+                  <span>{activity.details.status}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Filing Date:</span>{" "}
+                  <span>{activity.details.filingDate}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Tax Due</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.taxDue}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Prepared By</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.preparedBy}</p>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 const columns: ColumnDef<Entity>[] = [

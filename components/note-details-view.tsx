@@ -10,6 +10,8 @@ import {
   InfoIcon,
   TagIcon,
   BuildingIcon,
+  PlusIcon,
+  ChevronDownIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -115,33 +117,34 @@ export function NoteDetailsView({ note, onBack, isFullScreen = false }: NoteDeta
                 />
               )
             ) : (
-              <div
-                className="cursor-pointer hover:bg-muted/50 px-2 py-1 rounded text-sm"
-                onClick={() => setEditingField(field)}
-              >
+              <div className="flex-1">
                 {isBadge ? (
-                  <Badge className={`text-xs ${getPriorityColor(value)}`}>{value}</Badge>
-                ) : field === "tags" ? (
+                  <Badge className={`text-xs ${getPriorityColor(value as string)}`}>{value}</Badge>
+                ) : Array.isArray(value) ? (
                   <div className="flex flex-wrap gap-1">
-                    {Array.isArray(value) ? (
-                      value.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                    {value.length === 0 ? (
+                      <span className="text-sm text-muted-foreground">No tags</span>
+                    ) : (
+                      value.map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
                           {tag}
                         </Badge>
                       ))
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">
-                        {value}
-                      </Badge>
                     )}
                   </div>
-                ) : field === "createdAt" || field === "updatedAt" ? (
-                  new Date(value).toLocaleDateString()
                 ) : (
-                  value
+                  <p className="text-sm">{value}</p>
                 )}
               </div>
             )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+              onClick={() => setEditingField(field)}
+            >
+              <InfoIcon className="h-3 w-3" />
+            </Button>
           </div>
         </div>
       </div>
@@ -283,6 +286,18 @@ export function NoteDetailsView({ note, onBack, isFullScreen = false }: NoteDeta
               Show all values
             </Button>
 
+            {/* Activity Section */}
+            <div className="mt-8">
+              <div className="mb-4 flex items-center justify-between">
+                <h4 className="text-sm font-medium">Activity</h4>
+                <Button variant="outline" size="sm">
+                  <PlusIcon className="h-4 w-4" />
+                  Add activity
+                </Button>
+              </div>
+              <NoteActivityContent note={note} />
+            </div>
+
             {/* Typable Area */}
             <TypableArea value={noteText} onChange={setNoteText} placeholder="Add notes..." showButtons={false} />
           </div>
@@ -290,4 +305,220 @@ export function NoteDetailsView({ note, onBack, isFullScreen = false }: NoteDeta
       </div>
     </div>
   )
+}
+
+// Note Activity Component
+function NoteActivityContent({ note }: { note: any }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
+
+  const activities = [
+    {
+      id: 1,
+      type: "create",
+      actor: note.author || "John Doe",
+      action: "created",
+      target: "this note",
+      timestamp: "3 days ago",
+      date: "2023-01-15",
+      details: {
+        noteTitle: note.title || "Untitled",
+        initialTags: note.tags || [],
+        classification: "Meeting Notes",
+        relatedItems: ["Deal #1234", "Contact: Jane Smith"],
+      },
+    },
+    {
+      id: 2,
+      type: "edit",
+      actor: "Maria Garcia",
+      action: "edited",
+      target: "content",
+      timestamp: "2 days ago",
+      date: "2023-01-16",
+      details: {
+        changedSections: ["Introduction", "Key Points"],
+        addedContent: "Added next steps and action items",
+        removedContent: "Removed outdated timeline information",
+        length: "+232 chars",
+      },
+    },
+    {
+      id: 3,
+      type: "tag",
+      actor: "David Wilson",
+      action: "added tags to",
+      target: "this note",
+      timestamp: "1 day ago",
+      date: "2023-01-17",
+      details: {
+        previousTags: ["Meeting"],
+        addedTags: ["Important", "Follow-up"],
+        currentTags: ["Meeting", "Important", "Follow-up"],
+      },
+    },
+  ];
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "create":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
+      case "edit":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
+      case "tag":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>;
+      case "share":
+        return <div className="h-2 w-2 rounded-full bg-amber-500"></div>;
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
+    }
+  };
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span> {activity.action}{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    );
+  };
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "create":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Creation Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Title:</span>{" "}
+                  <span>{activity.details.noteTitle}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Classification:</span>{" "}
+                  <span>{activity.details.classification}</span>
+                </div>
+              </div>
+            </div>
+            {activity.details.initialTags.length > 0 && (
+              <div>
+                <h5 className="text-sm font-medium mb-1">Initial Tags</h5>
+                <div className="flex flex-wrap gap-1">
+                  {activity.details.initialTags.map((tag: string, index: number) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {activity.details.relatedItems.length > 0 && (
+              <div>
+                <h5 className="text-sm font-medium mb-1">Related Items</h5>
+                <div className="space-y-1">
+                  {activity.details.relatedItems.map((item: string, index: number) => (
+                    <p key={index} className="text-sm text-blue-600">
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      case "edit":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Edit Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Changed Sections:</span>{" "}
+                  <span>{activity.details.changedSections.join(", ")}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Length Change:</span>{" "}
+                  <span>{activity.details.length}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Added Content</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.addedContent}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Removed Content</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.removedContent}</p>
+            </div>
+          </div>
+        );
+      case "tag":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Tag Changes</h5>
+              <div>
+                <h6 className="text-xs text-muted-foreground mb-1">Previous Tags</h6>
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {activity.details.previousTags.length === 0 ? (
+                    <span className="text-sm text-muted-foreground">No tags</span>
+                  ) : (
+                    activity.details.previousTags.map((tag: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))
+                  )}
+                </div>
+                <h6 className="text-xs text-muted-foreground mb-1">Added Tags</h6>
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {activity.details.addedTags.map((tag: string, index: number) => (
+                    <Badge key={index} variant="secondary" className="text-xs bg-green-100">
+                      +{tag}
+                    </Badge>
+                  ))}
+                </div>
+                <h6 className="text-xs text-muted-foreground mb-1">Current Tags</h6>
+                <div className="flex flex-wrap gap-1">
+                  {activity.details.currentTags.map((tag: string, index: number) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }

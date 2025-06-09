@@ -93,7 +93,7 @@ const data = {
         },
         {
           title: "People",
-          url: "/contacts",
+          url: "/people",
           icon: UsersIcon,
         },
       ],
