@@ -57,22 +57,24 @@ export function MasterDrawer({
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
   const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
+  const [subtaskFullScreen, setSubtaskFullScreen] = React.useState(false)
 
   // ESC key handler for full screen mode
   React.useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isFullScreen) {
+      if (event.key === "Escape" && (isFullScreen || subtaskFullScreen)) {
         setIsFullScreen(false)
+        setSubtaskFullScreen(false)
       }
     }
 
-    if (isFullScreen) {
+    if (isFullScreen || subtaskFullScreen) {
       document.addEventListener("keydown", handleEscKey)
       return () => {
         document.removeEventListener("keydown", handleEscKey)
       }
     }
-  }, [isFullScreen])
+  }, [isFullScreen, subtaskFullScreen])
 
   React.useEffect(() => {
     // When switching to full screen mode, ensure we're not showing the "details" tab
@@ -173,6 +175,17 @@ export function MasterDrawer({
       setSelectedMeeting(null)
     } else if (selectedEmail) {
       setSelectedEmail(null)
+    }
+  }
+
+  // Handle full screen mode for tasks/subtasks
+  const handleFullScreenClick = () => {
+    // If we're in a subtask view, set subtaskFullScreen to true
+    if (selectedTask) {
+      setSubtaskFullScreen(true)
+    } else {
+      // Otherwise go to regular full screen mode
+      setIsFullScreen(true)
     }
   }
 
@@ -317,7 +330,7 @@ export function MasterDrawer({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => setSubtaskFullScreen(true)}>
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -353,7 +366,7 @@ export function MasterDrawer({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => setSubtaskFullScreen(true)}>
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -384,7 +397,7 @@ export function MasterDrawer({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => setSubtaskFullScreen(true)}>
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -415,7 +428,7 @@ export function MasterDrawer({
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => setSubtaskFullScreen(true)}>
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -433,8 +446,92 @@ export function MasterDrawer({
     return typeof document !== "undefined" ? createPortal(content, document.body) : null
   }
 
+  // Subtask Full Screen Content (now more generic for all secondary drawer types)
+  const SubitemFullScreenContent = () => {
+    if (typeof document === "undefined") return null
+    
+    // Determine which type of item is selected
+    const selectedItem = selectedTask || selectedNote || selectedMeeting || selectedEmail
+    if (!selectedItem) return null
+    
+    // Determine the type of item for display
+    const itemType = selectedTask ? "Task" :
+                     selectedNote ? "Note" :
+                     selectedMeeting ? "Meeting" :
+                     selectedEmail ? "Email" : "Item"
+    
+    // Handle back navigation from full screen
+    const handleBackFromFullScreen = () => {
+      setSubtaskFullScreen(false)
+      // Don't clear the selected item when going back, just exit full screen
+    }
+    
+    return createPortal(
+      <div className="fixed inset-0 z-[99999] bg-background">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="bg-background">
+              {itemType}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleBackFromFullScreen}
+            >
+              <XIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Full Content */}
+        <div className="h-[calc(100vh-73px)] overflow-y-auto">
+          {selectedTask && (
+            <TaskDetailsView
+              task={selectedTask}
+              onBack={() => {
+                // If we're going back from a full screen subtask view,
+                // just exit full screen mode but keep the task selected
+                // so user returns to the drawer
+                setSubtaskFullScreen(false)
+              }}
+              recordName={title}
+              isInDrawer={false}
+              onNavigateBack={handleBackFromFullScreen}
+            />
+          )}
+          {selectedNote && (
+            <NoteDetailsView 
+              note={selectedNote} 
+              onBack={handleBackFromFullScreen}
+            />
+          )}
+          {selectedMeeting && (
+            <MeetingDetailsView 
+              meeting={selectedMeeting} 
+              onBack={handleBackFromFullScreen}
+            />
+          )}
+          {selectedEmail && (
+            <EmailDetailsView 
+              email={selectedEmail} 
+              onBack={handleBackFromFullScreen}
+            />
+          )}
+        </div>
+      </div>,
+      document.body
+    )
+  }
+
   // We will use this conditional check for both instances of ViewModeSelector
   const shouldShowViewSelector = !(activeTab === "activity" || activeTab === "details")
+
+  if (subtaskFullScreen) {
+    return <SubitemFullScreenContent />
+  }
 
   if (isFullScreen) {
     return <FullScreenContent />
@@ -482,7 +579,7 @@ export function MasterDrawer({
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
+            <Button variant="outline" size="icon" onClick={handleFullScreenClick}>
               <ExpandIcon className="h-4 w-4" />
             </Button>
             {customActions.map((action, index) => (

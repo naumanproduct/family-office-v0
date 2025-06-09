@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+DO NOT AUTO PUSH / COMMIT changes to GIT, ever. Unless I Instruct you to.
+
+You're the best fullstack engineer and LLM engineer, prefer using Next.JS + React, TypeScript, Shadcn + Tailwind (unless otherwise specified).
+
+CODE ORGANIZATION: All code should be grouped by their product feature.
+/src/components should only house reusable component library components.
+/src/features/ should then have subfolders, one per feature, such as "auth", "inventory", "core", etc. depending on what is relevant to the app.
+
+Each feature folder should contain code/components/hooks/types/constants/contexts relevant to that feature.
+
+COMPONENTS:
+Always use ShadCN components where applicable.
+Break down React apps into small composable components and hooks. If there is a components folder (eg. src/components/ui/*), try to use those components whenever possible instead of writing from scratch.
+
+CODE SYTLE:
+Clear is better than clever. Make code as simple as possible.
+Write small functions, and split big components into small ones (modular code is good).
+Do not nest state deeply, prefer state data structures that is easy to modify.
