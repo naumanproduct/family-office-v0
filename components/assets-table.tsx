@@ -29,6 +29,7 @@ import {
   MailIcon,
   ClockIcon,
   MessageSquareIcon,
+  UserIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -181,6 +182,7 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     { id: "meetings", label: "Meetings", count: 3, icon: CalendarIcon },
     { id: "emails", label: "Emails", count: 2, icon: MailIcon },
     { id: "files", label: "Files", count: 4, icon: FolderIcon },
+    { id: "people", label: "People", count: 3, icon: UserIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
     { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
   ]
@@ -426,7 +428,7 @@ function getAssetTabData(activeTab: string, asset: Asset) {
           description: "Original investment agreement and terms.",
         },
       ]
-    case "team":
+    case "people":
       return [
         {
           id: 1,
@@ -436,6 +438,26 @@ function getAssetTabData(activeTab: string, asset: Asset) {
           phone: "+1 (555) 123-4567",
           department: "Investments",
           joinDate: "2023-01-15",
+          status: "Active",
+        },
+        {
+          id: 2,
+          name: "Michael Chen",
+          role: "Senior Analyst",
+          email: "michael.chen@company.com",
+          phone: "+1 (555) 987-6543",
+          department: "Investments",
+          joinDate: "2023-03-22",
+          status: "Active",
+        },
+        {
+          id: 3,
+          name: "Emily Rodriguez",
+          role: "Legal Counsel",
+          email: "emily.rodriguez@company.com",
+          phone: "+1 (555) 456-7890",
+          department: "Legal",
+          joinDate: "2022-08-10",
           status: "Active",
         },
       ]
@@ -516,19 +538,17 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
         <p className="text-sm text-muted-foreground">This asset has not been added to any portfolios</p>
       </div>
 
-      {/* Activity Section - Only in Drawer View */}
-      {!isFullScreen && (
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-sm font-medium">Activity</h4>
-            <Button variant="outline" size="sm">
-              <PlusIcon className="h-4 w-4" />
-              Add meeting
-            </Button>
-          </div>
-          <AssetActivityContent asset={asset} />
+      {/* Activity Section - Always shown, regardless of mode */}
+      <div className="mt-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h4 className="text-sm font-medium">Activity</h4>
+          <Button variant="outline" size="sm">
+            <PlusIcon className="h-4 w-4" />
+            Add meeting
+          </Button>
         </div>
-      )}
+        <AssetActivityContent asset={asset} />
+      </div>
     </>
   )
 

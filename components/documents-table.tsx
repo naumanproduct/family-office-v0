@@ -28,7 +28,6 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
-import { DocumentViewerDrawer } from "./document-viewer-drawer"
 
 const documents = [
   {
@@ -114,7 +113,6 @@ const getFileIcon = (fileType: string) => {
 }
 
 export function DocumentsTable() {
-  const [selectedDocument, setSelectedDocument] = useState<any>(null)
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -263,7 +261,7 @@ export function DocumentsTable() {
                           <DownloadIcon className="mr-2 h-4 w-4" />
                           Download
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setSelectedDocument(document)}>View</DropdownMenuItem>
+                        <DropdownMenuItem>View</DropdownMenuItem>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
                         <DropdownMenuItem>Share</DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -277,11 +275,6 @@ export function DocumentsTable() {
           </Table>
         </CardContent>
       </Card>
-      <DocumentViewerDrawer
-        document={selectedDocument}
-        isOpen={!!selectedDocument}
-        onClose={() => setSelectedDocument(null)}
-      />
     </div>
   )
 }

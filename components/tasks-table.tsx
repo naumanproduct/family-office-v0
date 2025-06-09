@@ -13,9 +13,19 @@ import {
   ChevronLeftIcon,
   XIcon,
   ExpandIcon,
+  CheckSquareIcon,
+  FileTextIcon,
+  AlertTriangleIcon,
+  CheckCircleIcon,
+  UserIcon,
+  CalendarIcon,
+  CircleIcon,
+  ClockIcon,
+  DotIcon as DotsHorizontalIcon,
 } from "lucide-react"
 import { createPortal } from "react-dom"
 import { useState } from "react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,15 +34,18 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { TaskDetailsView } from "./task-details-view"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { TaskTemplateDialog } from "./task-template-dialog"
+import { Label } from "@/components/ui/label"
+import { NoteContent } from "@/components/shared/note-content"
+import { FileContent } from "@/components/shared/file-content"
 
 // Task data - extended from investment tab but across all objects
 const tasksData = [
@@ -45,6 +58,35 @@ const tasksData = [
     dueDate: "Tomorrow",
     description: "Review Q3 performance metrics and prepare summary report.",
     relatedTo: { type: "Investment", name: "TechFlow Ventures Series C" },
+    subtasks: [
+      {
+        id: "1.1",
+        title: "Analyze revenue growth",
+        description: "Compare revenue growth against previous quarters and projections",
+        status: "Completed",
+        priority: "High",
+        assignee: "You",
+        dueDate: "Yesterday",
+      },
+      {
+        id: "1.2",
+        title: "Review expense trends",
+        description: "Analyze expense patterns and identify areas for optimization",
+        status: "In Progress",
+        priority: "Medium",
+        assignee: "You",
+        dueDate: "Today",
+      },
+      {
+        id: "1.3",
+        title: "Prepare executive summary",
+        description: "Create a concise summary for executive review",
+        status: "To Do",
+        priority: "High",
+        assignee: "You",
+        dueDate: "Tomorrow",
+      },
+    ],
   },
   {
     id: 2,
@@ -55,6 +97,7 @@ const tasksData = [
     dueDate: "2 days ago",
     description: "Updated valuation model with latest market data.",
     relatedTo: { type: "Investment", name: "MedInnovate Seed Round" },
+    subtasks: [],
   },
   {
     id: 3,
@@ -65,6 +108,26 @@ const tasksData = [
     dueDate: "2024-01-15",
     description: "Process capital call for TechFlow Ventures Series C investment",
     relatedTo: { type: "Investment", name: "TechFlow Ventures Series C" },
+    subtasks: [
+      {
+        id: "3.1",
+        title: "Verify capital call notice",
+        description: "Ensure all documentation is accurate and complete",
+        status: "Completed",
+        priority: "High",
+        assignee: "Sarah Johnson",
+        dueDate: "2024-01-10",
+      },
+      {
+        id: "3.2",
+        title: "Prepare wire transfer",
+        description: "Set up the transfer in the banking system",
+        status: "In Progress",
+        priority: "High",
+        assignee: "Finance Team",
+        dueDate: "2024-01-14",
+      },
+    ],
   },
   {
     id: 4,
@@ -75,6 +138,7 @@ const tasksData = [
     dueDate: "Next week",
     description: "Review partnership agreement for Global Ventures",
     relatedTo: { type: "Entity", name: "Global Ventures LLC" },
+    subtasks: [],
   },
   {
     id: 5,
@@ -85,6 +149,7 @@ const tasksData = [
     dueDate: "End of month",
     description: "Annual compliance review for Meridian Capital Fund III",
     relatedTo: { type: "Entity", name: "Meridian Capital Fund III" },
+    subtasks: [],
   },
 ]
 
@@ -278,28 +343,106 @@ function TaskListView({
   )
 }
 
+// Helper functions for styling
+const getPriorityColor = (priority: string = "Medium") => {
+  switch (priority.toLowerCase()) {
+    case "high":
+      return "bg-red-100 text-red-800"
+    case "medium":
+      return "bg-yellow-100 text-yellow-800"
+    case "low":
+      return "bg-green-100 text-green-800"
+    default:
+      return "bg-gray-100 text-gray-800"
+  }
+}
+
+const getStatusColor = (status: string = "pending") => {
+  switch (status.toLowerCase()) {
+    case "completed":
+      return "bg-green-100 text-green-800"
+    case "pending":
+      return "bg-yellow-100 text-yellow-800"
+    case "in progress":
+      return "bg-blue-100 text-blue-800"
+    case "to do":
+      return "bg-gray-100 text-gray-800"
+    default:
+      return "bg-gray-100 text-gray-800"
+  }
+}
+
 export function TasksTable() {
-  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("list")
+  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
   const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
   const [isFullScreen, setIsFullScreen] = React.useState(false)
   const [isTaskTemplateOpen, setIsTaskTemplateOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("subtasks")
+  const [isAddingSubtask, setIsAddingSubtask] = useState(false)
+  const [isSubtaskDrawerOpen, setIsSubtaskDrawerOpen] = useState(false)
+
+  // React hook to handle task selection
+  React.useEffect(() => {
+    // Reset subtask state when selected task changes
+    setSelectedSubtask(null);
+    setIsSubtaskDrawerOpen(false);
+    
+    // If we're in full screen mode and a task is selected, set the active tab to subtasks
+    if (isFullScreen && selectedTask) {
+      setActiveTab("subtasks");
+    }
+  }, [selectedTask, isFullScreen]);
 
   // Handle back navigation in the drawer
   const handleDrawerBackClick = () => {
     if (selectedSubtask) {
       // If in a subtask view, return to parent task
       setSelectedSubtask(null)
+      setIsSubtaskDrawerOpen(false)
     } else {
       // If in main task view, close the drawer
       setSelectedTask(null)
     }
   }
 
-  // Handle a subtask selection
+  // Handle a subtask selection in full screen mode
   const handleSubtaskClick = (subtask: any) => {
-    setSelectedSubtask(subtask)
+    console.log("Subtask clicked:", subtask);
+    setSelectedSubtask(subtask);
+    
+    if (isFullScreen) {
+      // In full screen mode, open the subtask drawer
+      setIsSubtaskDrawerOpen(true);
+      console.log("Setting subtask drawer to open, isFullScreen:", isFullScreen);
+    }
+  }
+
+  // Handle subtask status change
+  const handleSubtaskStatusChange = (subtaskId: string, newStatus: string) => {
+    if (selectedTask && selectedTask.subtasks) {
+      const updatedSubtasks = selectedTask.subtasks.map((subtask: any) => 
+        subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask
+      );
+      setSelectedTask({
+        ...selectedTask,
+        subtasks: updatedSubtasks
+      });
+    }
+  }
+
+  // Handle subtask deletion
+  const handleDeleteSubtask = (subtaskId: string) => {
+    if (selectedTask && selectedTask.subtasks) {
+      const updatedSubtasks = selectedTask.subtasks.filter((subtask: any) => 
+        subtask.id !== subtaskId
+      );
+      setSelectedTask({
+        ...selectedTask,
+        subtasks: updatedSubtasks
+      });
+    }
   }
 
   // ESC key handler for full screen mode
@@ -311,6 +454,8 @@ export function TasksTable() {
     }
 
     if (isFullScreen) {
+      // When entering full screen mode, set the active tab to something other than "details"
+      setActiveTab("subtasks")
       document.addEventListener("keydown", handleEscKey)
       return () => {
         document.removeEventListener("keydown", handleEscKey)
@@ -373,6 +518,7 @@ export function TasksTable() {
                 // Clear selected tasks when exiting fullscreen
                 setSelectedTask(null)
                 setSelectedSubtask(null)
+                setIsSubtaskDrawerOpen(false)
               }}
             >
               <ChevronLeftIcon className="h-4 w-4" />
@@ -390,6 +536,7 @@ export function TasksTable() {
                 // Clear selected tasks when exiting fullscreen
                 setSelectedTask(null)
                 setSelectedSubtask(null)
+                setIsSubtaskDrawerOpen(false)
               }}
             >
               <XIcon className="h-4 w-4" />
@@ -397,18 +544,298 @@ export function TasksTable() {
           </div>
         </div>
 
-        {/* Task Details Content */}
-        <div className="flex-1 overflow-auto">
-          <TaskDetailsView
-            task={selectedSubtask || selectedTask}
-            onBack={handleDrawerBackClick}
-            recordName="All Tasks"
-            isInDrawer={true}
-            parentTask={selectedSubtask ? selectedTask : undefined}
-            onBackToParent={() => setSelectedSubtask(null)}
-            onSubtaskClick={handleSubtaskClick}
-          />
+        {/* Full Screen Content - Two Column Layout */}
+        <div className="flex h-[calc(100vh-73px)]">
+          {/* Left Panel - Details (Persistent) - Always shows the main task */}
+          <div className="w-96 border-r bg-background overflow-y-auto">
+            {/* Record Header */}
+            <div className="border-b bg-background px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <CheckSquareIcon className="h-4 w-4" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold">{selectedTask?.title}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Task in All Tasks
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Details Panel Content - Always shows the main task details */}
+            <div className="px-6 pt-4 pb-6">
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium">Task Details</h4>
+                <div className="rounded-lg border border-muted bg-muted/10 p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Description</Label>
+                        <p className="text-sm">{selectedTask?.description}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Priority</Label>
+                        <Badge className={`text-xs ${getPriorityColor(selectedTask?.priority)}`}>
+                          {selectedTask?.priority}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Status</Label>
+                        <Badge className={`text-xs ${getStatusColor(selectedTask?.status)}`}>
+                          {selectedTask?.status}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Assignee</Label>
+                        <p className="text-sm">{selectedTask?.assignee}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Due Date</Label>
+                        <p className="text-sm">{selectedTask?.dueDate}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <Label className="text-xs text-muted-foreground">Related to</Label>
+                        <p className="text-sm">{selectedTask?.relatedTo?.name || "All Tasks"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Panel - Main Content with Tabs */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Tabs */}
+            <div className="border-b bg-background px-6">
+              <div className="flex gap-8 overflow-x-auto">
+                {/* Tabs order: Subtasks, Notes, Files */}
+                {[
+                  { id: "subtasks", label: "Subtasks", icon: CheckSquareIcon },
+                  { id: "notes", label: "Notes", icon: FileTextIcon },
+                  { id: "files", label: "Files", icon: FileTextIcon }
+                ].map((tab) => {
+                  const TabIcon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
+                        activeTab === tab.id
+                          ? "border-b-2 border-primary text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <TabIcon className="h-4 w-4" />
+                      {tab.label}
+                      {tab.id === "subtasks" && selectedTask?.subtasks?.length > 0 && (
+                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                          {selectedTask.subtasks.length}
+                        </Badge>
+                      )}
+                      {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6">
+              {activeTab === "notes" && <NoteContent title={`Notes for Task: ${selectedTask?.title}`} />}
+              {activeTab === "files" && <FileContent title={`Files for Task: ${selectedTask?.title}`} />}
+              {activeTab === "subtasks" && selectedTask && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold">Subtasks ({selectedTask.subtasks?.length || 0})</h4>
+                    <Button variant="outline" size="sm" onClick={() => setIsAddingSubtask(true)}>
+                      <PlusIcon className="h-4 w-4 mr-2" />
+                      Add Subtask
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {(selectedTask.subtasks || []).map((subtask: any) => (
+                      <div
+                        key={subtask.id}
+                        className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div
+                            className="flex items-center gap-3 flex-1 cursor-pointer"
+                            onClick={() => handleSubtaskClick(subtask)}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
+                                handleSubtaskStatusChange(subtask.id, newStatus)
+                              }}
+                            >
+                              {subtask.status === "Completed" ? (
+                                <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                              ) : subtask.status === "In Progress" ? (
+                                <ClockIcon className="h-4 w-4 text-blue-500" />
+                              ) : (
+                                <CircleIcon className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </Button>
+                            <div className="flex-1">
+                              <div
+                                className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
+                              >
+                                {subtask.title}
+                              </div>
+                              <div className="flex items-center gap-4 mt-1">
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <UserIcon className="h-3 w-3" />
+                                  {subtask.assignee}
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <CalendarIcon className="h-3 w-3" />
+                                  {new Date(subtask.dueDate).toLocaleDateString()}
+                                </div>
+                                <Badge
+                                  variant={
+                                    subtask.status === "Completed"
+                                      ? "default"
+                                      : subtask.status === "In Progress"
+                                        ? "secondary"
+                                        : "outline"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {subtask.status}
+                                </Badge>
+                                <Badge className={`text-xs ${getPriorityColor(subtask.priority)}`}>
+                                  {subtask.priority}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <DotsHorizontalIcon className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>
+                                Open Details
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
+                                Mark as To Do
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "In Progress")}>
+                                Mark as In Progress
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "Completed")}>
+                                Mark as Completed
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteSubtask(subtask.id)}
+                                className="text-destructive"
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                    ))}
+
+                    {(selectedTask.subtasks || []).length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <CheckSquareIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No subtasks yet</p>
+                        <p className="text-xs">Break down this task into smaller steps</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
+
+        {/* Subtask Drawer */}
+        {selectedSubtask && isFullScreen && (
+          <Sheet 
+            open={isSubtaskDrawerOpen} 
+            onOpenChange={(open) => {
+              console.log("Drawer open state changed to:", open);
+              setIsSubtaskDrawerOpen(open);
+              if (!open) {
+                setSelectedSubtask(null);
+              }
+            }}
+          >
+            <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[99999]">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => {
+                      setIsSubtaskDrawerOpen(false);
+                      setSelectedSubtask(null);
+                    }}
+                  >
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  </Button>
+                  <Badge variant="outline" className="bg-background">
+                    Subtask
+                  </Badge>
+                </div>
+              </div>
+              
+              {/* Subtask Details Content */}
+              <div className="flex-1 overflow-auto">
+                <TaskDetailsView
+                  task={selectedSubtask}
+                  onBack={() => setSelectedSubtask(null)}
+                  recordName="All Tasks"
+                  isInDrawer={true}
+                  parentTask={selectedTask}
+                  onBackToParent={() => setSelectedSubtask(null)}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </div>,
       document.body,
     )
@@ -457,49 +884,206 @@ export function TasksTable() {
         </div>
 
         {/* Task Content */}
-        {renderTaskContent()}
+        <div className="relative">
+          {renderTaskContent()}
+        </div>
       </div>
 
-      {/* Render full screen content if in full screen mode */}
-      {isFullScreen && selectedTask && <FullScreenContent />}
+      {/* Task drawer */}
+      <Sheet open={!!selectedTask && !isFullScreen} onOpenChange={(open) => !open && setSelectedTask(null)}>
+        <SheetContent className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="outline" className="bg-background">
+                Task
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setIsFullScreen(true)
+                  document.body.style.overflow = "hidden"
+                }}
+              >
+                Enter Full Screen
+                <svg
+                  className="ml-2 h-4 w-4"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M3 7.5V5a2 2 0 0 1 2-2h2.5" />
+                  <path d="M16.5 3H19a2 2 0 0 1 2 2v2.5" />
+                  <path d="M21 16.5V19a2 2 0 0 1-2 2h-2.5" />
+                  <path d="M7.5 21H5a2 2 0 0 1-2-2v-2.5" />
+                </svg>
+              </Button>
+            </div>
+          </div>
+          <TaskDetailsView 
+            task={selectedTask} 
+            onBack={handleDrawerBackClick}
+            recordName="All Tasks"
+            isInDrawer={true}
+          />
+        </SheetContent>
+      </Sheet>
 
-      {/* Task Details Sheet/Drawer */}
-      {selectedTask && !isFullScreen && (
-        <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-          <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
-                  <ChevronLeftIcon className="h-4 w-4" />
-                </Button>
-                <Badge variant="outline" className="bg-background">
-                  Task
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
-                  <ExpandIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {/* Task Details Content */}
-            <div className="flex-1 overflow-auto">
-              <TaskDetailsView
-                task={selectedSubtask || selectedTask}
-                onBack={handleDrawerBackClick}
-                recordName="All Tasks"
-                isInDrawer={true}
-                parentTask={selectedSubtask ? selectedTask : undefined}
-                onBackToParent={() => setSelectedSubtask(null)}
-                onSubtaskClick={handleSubtaskClick}
-              />
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
-      {/* Task Template Dialog */}
+      {isFullScreen && <FullScreenContent />}
+      
+      {/* Task template dialog */}
       <TaskTemplateDialog isOpen={isTaskTemplateOpen} onClose={() => setIsTaskTemplateOpen(false)} />
     </>
   )
+}
+
+// This component displays task details with tabs
+function TaskDetailsView({
+  task,
+  onBack,
+  recordName,
+  isInDrawer = false,
+  parentTask = null,
+  onBackToParent = null,
+}: {
+  task: any;
+  onBack: () => void;
+  recordName: string;
+  isInDrawer?: boolean;
+  parentTask?: any;
+  onBackToParent?: (() => void) | null;
+}) {
+  const [activeTab, setActiveTab] = useState("details");
+
+  if (!task) return null;
+
+  const isSubtask = !!parentTask;
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Record Header */}
+      <div className="border-b bg-background px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <CheckSquareIcon className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">{task.title}</h2>
+            <p className="text-sm text-muted-foreground">
+              {isSubtask ? `Subtask in ${parentTask.title}` : `Task in ${recordName}`}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b bg-background">
+        <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab}>
+          <div className="px-6">
+            <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
+              <TabsTrigger
+                value="details"
+                className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              >
+                Details
+              </TabsTrigger>
+              <TabsTrigger
+                value="notes"
+                className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              >
+                Notes
+              </TabsTrigger>
+              <TabsTrigger
+                value="files"
+                className="rounded-none border-b-2 border-transparent px-4 py-3 data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              >
+                Files
+              </TabsTrigger>
+            </TabsList>
+          </div>
+        </Tabs>
+      </div>
+
+      {/* Tab Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          {activeTab === "details" && (
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Task Details</h4>
+              <div className="rounded-lg border border-muted bg-muted/10 p-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Description</Label>
+                      <p className="text-sm">{task.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Priority</Label>
+                      <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
+                        {task.priority}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Status</Label>
+                      <Badge className={`text-xs ${getStatusColor(task.status)}`}>
+                        {task.status}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Assignee</Label>
+                      <p className="text-sm">{task.assignee}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1">
+                      <Label className="text-xs text-muted-foreground">Due Date</Label>
+                      <p className="text-sm">{task.dueDate}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {isSubtask && onBackToParent && (
+                <div className="mt-6">
+                  <Button variant="outline" onClick={onBackToParent}>
+                    <ChevronLeftIcon className="h-4 w-4 mr-2" />
+                    Back to Parent Task
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {activeTab === "notes" && <NoteContent title={`Notes for Task: ${task.title}`} />}
+          {activeTab === "files" && <FileContent title={`Files for Task: ${task.title}`} />}
+        </div>
+      </div>
+    </div>
+  );
 }

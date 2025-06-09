@@ -75,12 +75,19 @@ export function MasterDrawer({
   }, [isFullScreen])
 
   React.useEffect(() => {
-    // Don't automatically change tabs when switching to full screen
-    // This preserves the current tab when toggling full screen mode
-    if (!isFullScreen && activeTab === "activity") {
-      setActiveTab("details")
+    // When switching to full screen mode, ensure we're not showing the "details" tab
+    // which is redundant with the left panel
+    if (isFullScreen && activeTab === "details") {
+      // Find the first non-details tab to display instead
+      const firstNonDetailsTab = tabs.find(tab => tab.id !== "details")
+      if (firstNonDetailsTab) {
+        setActiveTab(firstNonDetailsTab.id)
+      } else {
+        // Fallback if there's somehow no other tab
+        setActiveTab("activity")
+      }
     }
-  }, [isFullScreen])
+  }, [isFullScreen, activeTab, tabs])
 
   const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table", isCurrentFullScreen = false) => {
     if (activeTab === "details") {
@@ -241,7 +248,9 @@ export function MasterDrawer({
               {/* Tabs */}
               <div className="border-b bg-background px-6">
                 <div className="flex gap-8 overflow-x-auto">
-                  {tabs.map((tab) => (
+                  {tabs
+                    .filter(tab => tab.id !== "details") // Filter out the Details tab in full screen mode
+                    .map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}

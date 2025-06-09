@@ -22,9 +22,10 @@ import { TypableArea } from "@/components/typable-area"
 interface NoteDetailsViewProps {
   note: any
   onBack: () => void
+  isFullScreen?: boolean
 }
 
-export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
+export function NoteDetailsView({ note, onBack, isFullScreen = false }: NoteDetailsViewProps) {
   const [noteTitle, setNoteTitle] = React.useState(note.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
@@ -41,7 +42,10 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
 
   const [noteText, setNoteText] = React.useState("")
 
-  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
+  // Use a different tabs list when in full screen mode (exclude details tab)
+  const tabs = isFullScreen 
+    ? [] // No tabs needed in full screen mode as details are shown on the left
+    : [{ id: "details", label: "Details", icon: FileTextIcon }]
 
   const getPriorityColor = (priority: string | undefined | null) => {
     if (!priority) return "bg-gray-100 text-gray-800"

@@ -32,7 +32,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { DocumentViewerDrawer } from "../document-viewer-drawer"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 
 // Default mock data, can be overridden by passing data prop
@@ -104,14 +103,11 @@ export function FileContent({
   onFileSelect,
   title = "Files" 
 }: FileContentProps) {
-  const [selectedDocument, setSelectedDocument] = useState<any>(null)
   const [viewMode, setViewMode] = useState(initialViewMode)
 
   const handleFileSelect = (file: any) => {
     if (onFileSelect) {
       onFileSelect(file)
-    } else {
-      setSelectedDocument(file)
     }
   }
 
@@ -356,14 +352,6 @@ export function FileContent({
             </Card>
           ))}
         </div>
-      )}
-
-      {!onFileSelect && (
-        <DocumentViewerDrawer
-          document={selectedDocument}
-          isOpen={!!selectedDocument}
-          onClose={() => setSelectedDocument(null)}
-        />
       )}
     </div>
   )
