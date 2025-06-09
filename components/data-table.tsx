@@ -78,7 +78,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -722,96 +722,202 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   }
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="link" className="w-fit px-0 text-left text-foreground">
-          {item.header}
+        <Button variant="link" className="h-auto p-0 hover:bg-transparent">
+          <span className="sr-only">View details</span>
+          <span className="text-left font-medium">
+            {item.header}
+            <span className="block text-xs text-muted-foreground font-normal">
+              {item.tags ? item.tags[0] : "No tags"}
+            </span>
+          </span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => document.querySelector('[data-state="open"]')?.click()}>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="outline" className="bg-background">
-              {item.header}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(true)}>
-              <ExpandIcon className="h-4 w-4" />
-              Full screen
-            </Button>
-            <Button variant="outline" size="sm">
-              <MailIcon className="h-4 w-4" />
-              Compose email
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Record Header - moved here */}
-          <div className="border-b bg-background px-6 py-2">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                {item.header.charAt(0)}
+      <SheetContent className="w-[calc(min(100vw,700px))] sm:max-w-[min(100vw,700px)] p-0">
+        <div className="flex h-full flex-col">
+          <div className="flex items-center gap-4 border-b px-6 py-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold">{item.header}</span>
+                {/* Only show status badges for items that have them */}
+                {item.status && (
+                  <Badge
+                    className={`${
+                      item.status === "Active"
+                        ? "bg-green-500"
+                        : item.status === "Complete" || item.status === "Won"
+                        ? "bg-green-500"
+                        : item.status === "In Progress"
+                        ? "bg-blue-500"
+                        : item.status === "Lost" || item.status === "Canceled"
+                        ? "bg-destructive"
+                        : "bg-muted"
+                    }`}
+                  >
+                    {item.status}
+                  </Badge>
+                )}
               </div>
-              <div>
-                <h2 className="text-lg font-semibold">{item.header}</h2>
+              <div className="text-sm text-muted-foreground">
+                {/* Display custom subtitles based on item type */}
+                {item.type === "contact" && (
+                  <span>
+                    {item.email} • {item.company}
+                  </span>
+                )}
+                {item.type === "company" && (
+                  <span>
+                    {item.industry} • {item.location}
+                  </span>
+                )}
+                {item.type === "deal" && (
+                  <span>
+                    {item.company} • {item.value}
+                  </span>
+                )}
+                {!item.type && <span>{item.subheader || "No description"}</span>}
               </div>
             </div>
+            <SheetClose asChild>
+              <Button variant="ghost" size="icon">
+                <XIcon className="h-4 w-4" />
+              </Button>
+            </SheetClose>
           </div>
-
-          {/* Tabs */}
-          <div className="border-b bg-background px-6">
-            <div className="flex gap-8 overflow-x-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? "border-b-2 border-primary text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab.icon && <tab.icon className="h-4 w-4" />}
-                  {tab.label}
-                  {tab.count !== null && (
-                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                      {tab.count}
-                    </Badge>
-                  )}
-                  {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                </button>
-              ))}
-            </div>
-
-            {/* Tab Content */}
-            <div className="p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
-                <div className="flex items-center gap-2">
-                  <ViewModeSelector />
-                  {activeTab !== "activity" && activeTab !== "company" && (
-                    <Button variant="outline" size="sm">
-                      <PlusIcon className="h-4 w-4" />
-                      Add {activeTab === "team" ? "member" : activeTab.slice(0, -1)}
-                    </Button>
-                  )}
-                  {activeTab === "activity" && (
-                    <Button variant="outline" size="sm">
-                      <PlusIcon className="h-4 w-4" />
-                      Add meeting
-                    </Button>
-                  )}
+          <div className="flex h-full flex-col overflow-hidden">
+            <Tabs defaultValue="details" className="flex-1">
+              <div className="border-b">
+                <div className="px-6">
+                  <TabsList className="-mb-px flex">
+                    <TabsTrigger value="details" className="relative rounded-none border-b-2 border-transparent">
+                      Details
+                    </TabsTrigger>
+                    <TabsTrigger value="activity" className="relative rounded-none border-b-2 border-transparent">
+                      Activity
+                    </TabsTrigger>
+                    <TabsTrigger value="emails" className="relative rounded-none border-b-2 border-transparent">
+                      Emails
+                    </TabsTrigger>
+                    <TabsTrigger value="files" className="relative rounded-none border-b-2 border-transparent">
+                      Files
+                    </TabsTrigger>
+                    <TabsTrigger value="tasks" className="relative rounded-none border-b-2 border-transparent">
+                      Tasks
+                    </TabsTrigger>
+                    <TabsTrigger value="notes" className="relative rounded-none border-b-2 border-transparent">
+                      Notes
+                    </TabsTrigger>
+                    <TabsTrigger value="team" className="relative rounded-none border-b-2 border-transparent">
+                      Team
+                    </TabsTrigger>
+                    <TabsTrigger value="company" className="relative rounded-none border-b-2 border-transparent">
+                      Company
+                    </TabsTrigger>
+                  </TabsList>
                 </div>
               </div>
-              <TabContent activeTab={activeTab} viewMode={viewMode} item={item} />
-            </div>
+              <TabsContent value="details" className="overflow-auto p-6">
+                <ItemDetails item={item} />
+              </TabsContent>
+              <TabsContent value="activity" className="overflow-auto">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Activity</h3>
+                    <div className="flex items-center gap-2">
+                      <ViewModeSelector />
+                    </div>
+                  </div>
+                  <ActivityContent item={item} />
+                </div>
+              </TabsContent>
+              <TabsContent value="emails" className="overflow-auto">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Emails</h3>
+                    <div className="flex items-center gap-2">
+                      <ViewModeSelector />
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Compose
+                      </Button>
+                    </div>
+                  </div>
+                  <EmailContent item={item} />
+                </div>
+              </TabsContent>
+              <TabsContent value="files" className="overflow-auto">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Files</h3>
+                    <div className="flex items-center gap-2">
+                      <ViewModeSelector />
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Upload
+                      </Button>
+                    </div>
+                  </div>
+                  <FileContent item={item} />
+                </div>
+              </TabsContent>
+              <TabsContent value="tasks" className="overflow-auto">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Tasks</h3>
+                    <div className="flex items-center gap-2">
+                      <ViewModeSelector />
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add task
+                      </Button>
+                    </div>
+                  </div>
+                  <TaskContent item={item} />
+                </div>
+              </TabsContent>
+              <TabsContent value="notes" className="overflow-auto">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Notes</h3>
+                    <div className="flex items-center gap-2">
+                      <ViewModeSelector />
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add note
+                      </Button>
+                    </div>
+                  </div>
+                  <NoteContent item={item} />
+                </div>
+              </TabsContent>
+              <TabsContent value="team" className="overflow-auto">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Team</h3>
+                    <div className="flex items-center gap-2">
+                      <ViewModeSelector />
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add member
+                      </Button>
+                    </div>
+                  </div>
+                  <TeamContent item={item} />
+                </div>
+              </TabsContent>
+              <TabsContent value="company" className="overflow-auto">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Company</h3>
+                    <div className="flex items-center gap-2">
+                      <ViewModeSelector />
+                    </div>
+                  </div>
+                  <CompanyContent item={item} />
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </SheetContent>

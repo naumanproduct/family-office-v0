@@ -78,6 +78,8 @@ import { NotesTable } from "./notes-table"
 import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { ActivitySection } from "@/components/shared/activity-section"
+import { type ActivityItem } from "@/components/shared/activity-content"
 
 export const companySchema = z.object({
   id: z.number(),
@@ -744,6 +746,57 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
     },
   ];
 
+  // Define activities for this company
+  const activities: ActivityItem[] = [
+    {
+      id: 1,
+      type: "meeting",
+      actor: "Investment Team",
+      action: "had a meeting with",
+      target: company.name,
+      timestamp: "3 days ago",
+      date: "2023-05-17",
+      details: {
+        meetingType: "Due Diligence",
+        duration: "1 hour",
+        participants: ["Sarah Johnson", "Michael Chen", "David Kim", `${company.name} CEO`],
+        summary: "Discussed growth projections and potential investment opportunities with the management team.",
+        nextSteps: "Follow up with financial projections request",
+      },
+    },
+    {
+      id: 2,
+      type: "note",
+      actor: "Sarah Johnson",
+      action: "added a note about",
+      target: company.name,
+      timestamp: "1 week ago",
+      date: "2023-05-13",
+      details: {
+        noteType: "Market Analysis",
+        visibility: "Team",
+        content: `${company.name} is positioning well in the ${company.industry} market with significant growth potential. Their recent product launch has been well-received by customers.`,
+        tags: ["Market Leader", "Growth", "Opportunity"],
+      },
+    },
+    {
+      id: 3,
+      type: "document",
+      actor: "Legal Team",
+      action: "uploaded a document related to",
+      target: company.name,
+      timestamp: "2 weeks ago",
+      date: "2023-05-06",
+      details: {
+        documentType: "Term Sheet",
+        size: "1.2 MB",
+        version: "2.0",
+        status: "Under Review",
+        uploadedBy: "Jessica Williams",
+      },
+    },
+  ];
+
   // Define additional content with Activity section
   const additionalContent = (
     <>
@@ -753,16 +806,7 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       </Button>
 
       {/* Activity Section - Always shown, regardless of mode */}
-      <div className="mt-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h4 className="text-sm font-medium">Activity</h4>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add meeting
-          </Button>
-        </div>
-        <CompanyActivityContent company={company} />
-      </div>
+      <ActivitySection activities={activities} />
     </>
   );
 
@@ -773,189 +817,6 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       additionalContent={additionalContent}
     />
   )
-}
-
-// Add the CompanyActivityContent component
-function CompanyActivityContent({ company }: { company: Company }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
-
-  const activities = [
-    {
-      id: 1,
-      type: "update",
-      actor: "Portfolio Team",
-      action: "updated company info for",
-      target: company.name,
-      timestamp: "2 days ago",
-      date: "2025-01-28",
-      details: {
-        previousStage: "Series B",
-        newStage: company.stage,
-        reason: "Company completed recent funding round",
-        additionalInfo: "Valuation increased to $250M post-money",
-      },
-    },
-    {
-      id: 2,
-      type: "meeting",
-      actor: "Investment Team",
-      action: "had a meeting with",
-      target: company.name,
-      timestamp: "1 week ago",
-      date: "2025-01-23",
-      details: {
-        meetingType: "Quarterly Review",
-        attendees: "Sarah Johnson, Michael Chen, David Rodriguez",
-        topics: "Growth strategy, market expansion, competitive landscape",
-        outcomes: "Follow-up meeting scheduled for next month",
-      },
-    },
-    {
-      id: 3,
-      type: "research",
-      actor: "Research Team",
-      action: "completed industry analysis for",
-      target: company.name,
-      timestamp: "3 weeks ago",
-      date: "2025-01-05",
-      details: {
-        industry: company.industry,
-        keyFindings: "Market growing at 15% CAGR, competitive position strong",
-        recommendations: "Increase allocation by 5% in next investment round",
-        researchScope: "Competitor analysis, market sizing, growth projections",
-      },
-    },
-  ];
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "update":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
-      case "meeting":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
-      case "research":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>;
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
-    }
-  };
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span> {activity.action}{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    );
-  };
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "update":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Update Details</h5>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Previous Stage:</span>{" "}
-                  <span>{activity.details.previousStage}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">New Stage:</span>{" "}
-                  <span className="font-medium">{activity.details.newStage}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Reason</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Additional Information</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.additionalInfo}</p>
-            </div>
-          </div>
-        );
-      case "meeting":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.meetingType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Attendees:</span> <span>{activity.details.attendees}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.topics}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Outcomes</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.outcomes}</p>
-            </div>
-          </div>
-        );
-      case "research":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Research Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Industry:</span> <span>{activity.details.industry}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Scope:</span> <span>{activity.details.researchScope}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Key Findings</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.keyFindings}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Recommendations</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.recommendations}</p>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
 }
 
 const columns: ColumnDef<Company>[] = [

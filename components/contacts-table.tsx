@@ -75,6 +75,8 @@ import { NotesTable } from "./notes-table"
 import { MasterDrawer } from "@/components/master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { ActivitySection } from "@/components/shared/activity-section"
+import { type ActivityItem } from "@/components/shared/activity-content"
 
 export const contactSchema = z.object({
   id: z.number(),
@@ -503,6 +505,56 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
     },
   ];
 
+  // Define activities for this contact
+  const activities: ActivityItem[] = [
+    {
+      id: 1,
+      type: "meeting",
+      actor: "You",
+      action: "had a meeting with",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "2 days ago",
+      date: "2023-05-15",
+      details: {
+        meetingType: "Zoom Call",
+        duration: "45 minutes",
+        participants: ["You", `${contact.firstName} ${contact.lastName}`, "Alex Johnson"],
+        summary: "Discussed potential investment opportunities in the fintech sector. Sarah expressed interest in our fund's thesis and will follow up with more detailed information about her company's growth plans.",
+        nextSteps: "Schedule follow-up meeting in 2 weeks",
+      },
+    },
+    {
+      id: 2,
+      type: "email",
+      actor: "You",
+      action: "sent an email to",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "1 week ago",
+      date: "2023-05-10",
+      details: {
+        subject: "Investment Opportunity Follow-up",
+        recipients: [contact.email, "team@yourcompany.com"],
+        attachments: ["Investment_Deck_2023.pdf", "Term_Sheet_Draft.docx"],
+        snippets: "Thank you for your time yesterday. As promised, I'm sending over our latest investment thesis and some information about our fund's performance...",
+      },
+    },
+    {
+      id: 3,
+      type: "note",
+      actor: "Maria Garcia",
+      action: "added a note about",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "2 weeks ago",
+      date: "2023-05-03",
+      details: {
+        noteType: "Contact Information",
+        visibility: "Team",
+        content: `${contact.firstName} mentioned they're planning to raise a Series B in Q3. They're targeting $30-40M at a $200M valuation. We should prepare an investment memo before their formal process begins.`,
+        tags: ["Series B", "Follow-up", "High Priority"],
+      },
+    },
+  ];
+
   // Define additional content with Activity section
   const additionalContent = (
     <>
@@ -512,16 +564,7 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
       </Button>
 
       {/* Activity Section - Always shown, regardless of mode */}
-      <div className="mt-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h4 className="text-sm font-medium">Activity</h4>
-          <Button variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-            Add meeting
-          </Button>
-        </div>
-        <ContactActivityContent contact={contact} />
-      </div>
+      <ActivitySection activities={activities} />
     </>
   );
 
@@ -532,196 +575,6 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
       additionalContent={additionalContent}
     />
   )
-}
-
-// Add the ContactActivityContent component
-function ContactActivityContent({ contact }: { contact: Contact }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
-
-  const activities = [
-    {
-      id: 1,
-      type: "email",
-      actor: "Sarah Johnson",
-      action: "sent an email to",
-      target: `${contact.firstName} ${contact.lastName}`,
-      timestamp: "3 days ago",
-      date: "2025-01-27",
-      details: {
-        subject: "Follow-up on our recent discussion",
-        content: "Thank you for taking the time to meet with us last week...",
-        attachments: "Proposal.pdf, Presentation.pptx",
-        status: "Opened",
-        openRate: "2 times",
-      },
-    },
-    {
-      id: 2,
-      type: "meeting",
-      actor: "Investment Team",
-      action: "had a meeting with",
-      target: `${contact.firstName} ${contact.lastName}`,
-      timestamp: "1 week ago",
-      date: "2025-01-23",
-      details: {
-        meetingType: "Introduction Call",
-        attendees: "Sarah Johnson, Michael Chen, David Rodriguez",
-        topics: "Investment opportunities, portfolio review, next steps",
-        outcomes: "Follow-up meeting scheduled for next month",
-      },
-    },
-    {
-      id: 3,
-      type: "note",
-      actor: "Michael Chen",
-      action: "added a note about",
-      target: `${contact.firstName} ${contact.lastName}`,
-      timestamp: "2 weeks ago",
-      date: "2025-01-16",
-      details: {
-        noteType: "Meeting Summary",
-        content: "Contact expressed interest in our healthcare portfolio companies. Follow up with additional information.",
-        tags: "Meeting, Follow-up, Healthcare",
-        priority: "Medium",
-      },
-    },
-  ];
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "email":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
-      case "meeting":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
-      case "note":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>;
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
-    }
-  };
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span> {activity.action}{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    );
-  };
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "email":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Email Details</h5>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Subject:</span>{" "}
-                  <span className="font-medium">{activity.details.subject}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Status:</span>{" "}
-                  <span>{activity.details.status} ({activity.details.openRate})</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Content</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.content}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Attachments</h5>
-              <p className="text-sm text-blue-600">{activity.details.attachments}</p>
-            </div>
-          </div>
-        );
-      case "meeting":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.meetingType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Attendees:</span> <span>{activity.details.attendees}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.topics}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Outcomes</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.outcomes}</p>
-            </div>
-          </div>
-        );
-      case "note":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Note Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.noteType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Priority:</span> <span>{activity.details.priority}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Content</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.content}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Tags</h5>
-              <div className="flex flex-wrap gap-1">
-                {activity.details.tags.split(", ").map((tag: string) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
 }
 
 const columns: ColumnDef<Contact>[] = [

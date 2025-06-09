@@ -71,6 +71,8 @@ import { MasterDrawer } from "./master-drawer"
 import { EmailsTable } from "./emails-table"
 import { TasksTable } from "./tasks-table"
 import { NotesTable } from "./notes-table"
+import { ActivitySection } from "@/components/shared/activity-section"
+import { type ActivityItem } from "@/components/shared/activity-content"
 
 // Add missing component imports
 function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
@@ -505,6 +507,56 @@ function ContactNameCell({ contact }: { contact: Contact }) {
 }
 
 function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Contact; isFullScreen?: boolean }) {
+  // Define activities for this contact
+  const activities: ActivityItem[] = [
+    {
+      id: 1,
+      type: "meeting",
+      actor: "You",
+      action: "had a meeting with",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "2 days ago",
+      date: "2023-05-15",
+      details: {
+        meetingType: "Zoom Call",
+        duration: "45 minutes",
+        participants: ["You", `${contact.firstName} ${contact.lastName}`, "Alex Johnson"],
+        summary: "Discussed potential investment opportunities in the fintech sector. Sarah expressed interest in our fund's thesis and will follow up with more detailed information about her company's growth plans.",
+        nextSteps: "Schedule follow-up meeting in 2 weeks",
+      },
+    },
+    {
+      id: 2,
+      type: "email",
+      actor: "You",
+      action: "sent an email to",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "1 week ago",
+      date: "2023-05-10",
+      details: {
+        subject: "Investment Opportunity Follow-up",
+        recipients: [contact.email, "team@yourcompany.com"],
+        attachments: ["Investment_Deck_2023.pdf", "Term_Sheet_Draft.docx"],
+        snippets: "Thank you for your time yesterday. As promised, I'm sending over our latest investment thesis and some information about our fund's performance...",
+      },
+    },
+    {
+      id: 3,
+      type: "note",
+      actor: "Maria Garcia",
+      action: "added a note about",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "2 weeks ago",
+      date: "2023-05-03",
+      details: {
+        noteType: "Contact Information",
+        visibility: "Team",
+        content: `${contact.firstName} mentioned they're planning to raise a Series B in Q3. They're targeting $30-40M at a $200M valuation. We should prepare an investment memo before their formal process begins.`,
+        tags: ["Series B", "Follow-up", "High Priority"],
+      },
+    },
+  ];
+
   return (
     <div className="px-6 pt-2 pb-6">
       {/* Contact Details */}
@@ -576,245 +628,10 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
         </Button>
         
         {/* Activity Section */}
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-sm font-medium">Activity</h4>
-            <Button variant="outline" size="sm">
-              <PlusIcon className="h-4 w-4" />
-              Add meeting
-            </Button>
-          </div>
-          <ContactActivityContent contact={contact} />
-        </div>
+        <ActivitySection activities={activities} />
       </div>
     </div>
   )
-}
-
-// Activity component for contacts
-function ContactActivityContent({ contact }: { contact: Contact }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
-
-  const activities = [
-    {
-      id: 1,
-      type: "meeting",
-      actor: "You",
-      action: "had a meeting with",
-      target: `${contact.firstName} ${contact.lastName}`,
-      timestamp: "2 days ago",
-      date: "2023-05-15",
-      details: {
-        meetingType: "Zoom Call",
-        duration: "45 minutes",
-        participants: ["You", `${contact.firstName} ${contact.lastName}`, "Alex Johnson"],
-        summary: "Discussed potential investment opportunities in the fintech sector. Sarah expressed interest in our fund's thesis and will follow up with more detailed information about her company's growth plans.",
-        nextSteps: "Schedule follow-up meeting in 2 weeks",
-      },
-    },
-    {
-      id: 2,
-      type: "email",
-      actor: "You",
-      action: "sent an email to",
-      target: `${contact.firstName} ${contact.lastName}`,
-      timestamp: "1 week ago",
-      date: "2023-05-10",
-      details: {
-        subject: "Investment Opportunity Follow-up",
-        recipients: [contact.email, "team@yourcompany.com"],
-        attachments: ["Investment_Deck_2023.pdf", "Term_Sheet_Draft.docx"],
-        snippets: "Thank you for your time yesterday. As promised, I'm sending over our latest investment thesis and some information about our fund's performance...",
-      },
-    },
-    {
-      id: 3,
-      type: "note",
-      actor: "Maria Garcia",
-      action: "added a note about",
-      target: `${contact.firstName} ${contact.lastName}`,
-      timestamp: "2 weeks ago",
-      date: "2023-05-03",
-      details: {
-        noteType: "Contact Information",
-        visibility: "Team",
-        content: `${contact.firstName} mentioned they're planning to raise a Series B in Q3. They're targeting $30-40M at a $200M valuation. We should prepare an investment memo before their formal process begins.`,
-        tags: ["Series B", "Follow-up", "High Priority"],
-      },
-    },
-  ];
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "meeting":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
-      case "email":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
-      case "note":
-        return <div className="h-2 w-2 rounded-full bg-amber-500"></div>;
-      case "call":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>;
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
-    }
-  };
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span> {activity.action}{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    );
-  };
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "meeting":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span>{" "}
-                  <span>{activity.details.meetingType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Duration:</span>{" "}
-                  <span>{activity.details.duration}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Date:</span>{" "}
-                  <span>{activity.date}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Participants</h5>
-              <div className="space-y-1">
-                {activity.details.participants.map((participant: string, index: number) => (
-                  <div key={index} className="text-sm text-muted-foreground">
-                    {participant}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Summary</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.summary}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
-            </div>
-          </div>
-        );
-      case "email":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Email Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Subject:</span>{" "}
-                  <span>{activity.details.subject}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Date:</span>{" "}
-                  <span>{activity.date}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Recipients</h5>
-              <div className="space-y-1">
-                {activity.details.recipients.map((recipient: string, index: number) => (
-                  <div key={index} className="text-sm text-blue-600">
-                    {recipient}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Attachments</h5>
-              <div className="space-y-1">
-                {activity.details.attachments.map((attachment: string, index: number) => (
-                  <div key={index} className="text-sm text-blue-600">
-                    {attachment}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Content Preview</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.snippets}</p>
-            </div>
-          </div>
-        );
-      case "note":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Note Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span>{" "}
-                  <span>{activity.details.noteType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Visibility:</span>{" "}
-                  <span>{activity.details.visibility}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Content</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.content}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Tags</h5>
-              <div className="flex flex-wrap gap-1">
-                {activity.details.tags.map((tag: string, index: number) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
 }
 
 function getContactTabData(activeTab: string, contact: Contact) {
