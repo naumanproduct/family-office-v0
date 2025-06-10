@@ -53,53 +53,43 @@ export function TaskDetailsView({
   onNavigateBack,
   onSubtaskClick,
 }: TaskDetailsViewProps) {
+  // Safety check - if task is null or undefined, use empty object
+  const safeTask = task || {};
+  
   const [commentText, setCommentText] = React.useState("")
-  const [taskTitle, setTaskTitle] = React.useState(task.title || "")
+  // Make sure we initialize with the task's title
+  const [taskTitle, setTaskTitle] = React.useState(safeTask.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
-    description: task.description || "Complete due diligence review for the investment opportunity",
-    priority: task.priority || "High",
-    status: task.status || "In Progress",
-    assignee: task.assignee || "John Smith",
-    dueDate: task.dueDate || "2023-05-25",
+    description: safeTask.description || "",
+    priority: safeTask.priority || "Medium",
+    status: safeTask.status || "Pending",
+    assignee: safeTask.assignee || "Unassigned",
+    dueDate: safeTask.dueDate || new Date().toISOString().split("T")[0],
   })
 
-  const [subtasks, setSubtasks] = React.useState(
-    task.subtasks || [
-      {
-        id: "SUBTASK-1",
-        title: "Review financial statements",
-        description: "Analyze the company's financial performance over the last 3 years",
-        status: "Completed",
-        priority: "High",
-        assignee: "John Smith",
-        dueDate: "2023-05-18",
-      },
-      {
-        id: "SUBTASK-2",
-        title: "Analyze market conditions",
-        description: "Research industry trends and competitive landscape",
-        status: "In Progress",
-        priority: "Medium",
-        assignee: "Sarah Johnson",
-        dueDate: "2023-05-20",
-      },
-      {
-        id: "SUBTASK-3",
-        title: "Prepare investment memo",
-        description: "Draft comprehensive investment recommendation",
-        status: "To Do",
-        priority: "High",
-        assignee: "Michael Brown",
-        dueDate: "2023-05-22",
-      },
-    ],
-  )
+  // Initialize subtasks from the task data, or use an empty array if not present
+  const [subtasks, setSubtasks] = React.useState(safeTask.subtasks || [])
   const [newSubtaskTitle, setNewSubtaskTitle] = React.useState("")
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false)
   const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
+
+  // Update state when task changes
+  React.useEffect(() => {
+    if (task) {
+      setTaskTitle(task.title || "");
+      setFieldValues({
+        description: task.description || "",
+        priority: task.priority || "Medium",
+        status: task.status || "Pending",
+        assignee: task.assignee || "Unassigned",
+        dueDate: task.dueDate || new Date().toISOString().split("T")[0],
+      });
+      setSubtasks(task.subtasks || []);
+    }
+  }, [task]);
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
@@ -257,7 +247,7 @@ export function TaskDetailsView({
         task={selectedSubtask}
         onBack={handleBackFromSubtask}
         recordName={recordName}
-        parentTask={task}
+        parentTask={safeTask}
         onBackToParent={handleBackFromSubtask}
         isInDrawer={isInDrawer}
         onNavigateBack={onNavigateBack}
@@ -271,12 +261,7 @@ export function TaskDetailsView({
       {/* Task Header - Exact same placement as main drawer record header */}
       <div className="border-b bg-background px-6 py-2">
         <div className="flex items-center gap-3">
-          {/* Back Button - Show only when there's a parent task (for subtask navigation) but not in drawer */}
-          {parentTask && !isInDrawer && (
-            <Button variant="ghost" size="icon" onClick={getBackHandler()}>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-          )}
+          {/* We've removed the back button here since it's redundant with the drawer header back button */}
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <CheckSquareIcon className="h-4 w-4" />
           </div>
@@ -291,7 +276,7 @@ export function TaskDetailsView({
                     setIsEditingTitle(false)
                   }
                   if (e.key === "Escape") {
-                    setTaskTitle(task.title || "")
+                    setTaskTitle(safeTask.title || "")
                     setIsEditingTitle(false)
                   }
                 }}
