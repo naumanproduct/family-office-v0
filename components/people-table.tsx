@@ -51,7 +51,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 // Import the AddPersonDialog at the top of the file
 import { AddPersonDialog } from "./add-person-dialog"
 import { MasterDrawer } from "./master-drawer"
-import { MasterDetailsPanel } from "./master-details-panel"
+import { MasterDetailsPanel } from "./shared/master-details-panel" // Fixed import path
 
 // Add missing component imports
 function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
