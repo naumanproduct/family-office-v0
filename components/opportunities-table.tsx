@@ -56,7 +56,7 @@ import {
 } from "lucide-react"
 import { MasterDrawer } from "./master-drawer"
 import { AddOpportunityDialog } from "./add-opportunity-dialog"
-import { MasterDetailsPanel } from "./master-details-panel"
+import { MasterDetailsPanel } from "./shared/master-details-panel"
 
 export const opportunitySchema = z.object({
   id: z.number(),
