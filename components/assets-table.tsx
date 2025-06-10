@@ -29,7 +29,6 @@ import {
   MailIcon,
   ClockIcon,
   MessageSquareIcon,
-  UserIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -50,8 +49,6 @@ import { MasterDrawer } from "./master-drawer"
 import { AddAssetDialog } from "./add-asset-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
-import { ActivitySection } from "@/components/shared/activity-section"
-import { type ActivityItem } from "@/components/shared/activity-content"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -184,7 +181,6 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     { id: "meetings", label: "Meetings", count: 3, icon: CalendarIcon },
     { id: "emails", label: "Emails", count: 2, icon: MailIcon },
     { id: "files", label: "Files", count: 4, icon: FolderIcon },
-    { id: "people", label: "People", count: 3, icon: UserIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
     { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
   ]
@@ -430,7 +426,7 @@ function getAssetTabData(activeTab: string, asset: Asset) {
           description: "Original investment agreement and terms.",
         },
       ]
-    case "people":
+    case "team":
       return [
         {
           id: 1,
@@ -442,26 +438,6 @@ function getAssetTabData(activeTab: string, asset: Asset) {
           joinDate: "2023-01-15",
           status: "Active",
         },
-        {
-          id: 2,
-          name: "Michael Chen",
-          role: "Senior Analyst",
-          email: "michael.chen@company.com",
-          phone: "+1 (555) 987-6543",
-          department: "Investments",
-          joinDate: "2023-03-22",
-          status: "Active",
-        },
-        {
-          id: 3,
-          name: "Emily Rodriguez",
-          role: "Legal Counsel",
-          email: "emily.rodriguez@company.com",
-          phone: "+1 (555) 456-7890",
-          department: "Legal",
-          joinDate: "2022-08-10",
-          status: "Active",
-        },
       ]
     default:
       return []
@@ -469,74 +445,59 @@ function getAssetTabData(activeTab: string, asset: Asset) {
 }
 
 function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
+  // Define field groups for the MasterDetailsPanel
   const fieldGroups = [
     {
-      id: "asset-info",
-      label: "Asset Information",
-      icon: TrendingUpIcon,
+      id: "basic-info",
+      label: "Basic Information",
+      icon: DollarSignIcon,
       fields: [
-        { label: "Asset Name", value: asset.name },
-        { label: "Type", value: asset.type },
-        { label: "Category", value: asset.category },
-        { label: "Sector", value: asset.sector },
-        { label: "Original Cost", value: asset.originalCost },
-        { label: "Current Value", value: asset.currentValue },
-        { label: "Unrealized Gain", value: asset.unrealizedGain },
+        {
+          label: "Asset Name",
+          value: asset.name,
+        },
+        {
+          label: "Asset Type",
+          value: asset.type,
+        },
+        {
+          label: "Investment Thesis",
+          value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
+        },
+        {
+          label: "Owning Entity",
+          value: asset.entity,
+          isLink: true,
+        },
       ],
     },
-  ];
+    {
+      id: "financial-info",
+      label: "Financial Information",
+      icon: DollarSignIcon,
+      fields: [
+        {
+          label: "Acquisition Date",
+          value: asset.acquisitionDate,
+        },
+        {
+          label: "Current Value",
+          value: asset.currentValue,
+        },
+        {
+          label: "Performance",
+          value: (
+            <span className={getGainColor(asset.percentageGain)}>
+              {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
+              {asset.percentageGain}%)
+            </span>
+          ),
+        },
+      ],
+    },
+  ]
 
-  // Define activities for this asset
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "change",
-      actor: "Portfolio Manager",
-      action: "updated valuation for",
-      target: asset.name,
-      timestamp: "2 days ago",
-      date: "2023-05-18",
-      details: {
-        previousValue: "$245,000.00",
-        newValue: asset.currentValue,
-        reason: "Quarterly valuation update",
-        changePercent: "+4.2%",
-      },
-    },
-    {
-      id: 2,
-      type: "document",
-      actor: "Finance Team",
-      action: "generated statement for",
-      target: asset.name,
-      timestamp: "1 week ago",
-      date: "2023-05-13",
-      details: {
-        documentType: "Quarterly Statement",
-        period: "Q1 2023",
-        includedAssets: "All holdings in Portfolio A",
-        author: "Financial Reporting System",
-      },
-    },
-    {
-      id: 3,
-      type: "meeting",
-      actor: "Investment Committee",
-      action: "reviewed performance of",
-      target: asset.name,
-      timestamp: "2 weeks ago",
-      date: "2023-05-06",
-      details: {
-        meetingType: "Quarterly Review",
-        duration: "45 minutes",
-        participants: ["Sarah Johnson", "Michael Chen", "David Kim", "Emma Rodriguez"],
-        summary: "Discussed performance metrics and decided to maintain current allocation.",
-        recommendations: "Hold position, monitor market conditions",
-      },
-    },
-  ];
-
-  // Define additional content with Activity section
+  // Define additional content (portfolios section and activity section)
   const additionalContent = (
     <>
       {/* Show all values button */}
@@ -544,13 +505,260 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
         Show all values
       </Button>
 
-      {/* Activity Section - Always shown, regardless of mode */}
-      <ActivitySection activities={activities} />
+      {/* Portfolios Section */}
+      <div className="mt-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h4 className="text-sm font-medium">Portfolios</h4>
+          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+            Add to portfolio
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">This asset has not been added to any portfolios</p>
+      </div>
+
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <AssetActivityContent asset={asset} />
+        </div>
+      )}
     </>
-  );
+  )
 
   return (
     <MasterDetailsPanel fieldGroups={fieldGroups} isFullScreen={isFullScreen} additionalContent={additionalContent} />
+  )
+}
+
+function AssetActivityContent({ asset }: { asset: Asset }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+
+  const activities = [
+    {
+      id: 1,
+      type: "valuation",
+      actor: "Portfolio Team",
+      action: "updated valuation for",
+      target: asset.name,
+      timestamp: "2 days ago",
+      date: "2025-01-28",
+      details: {
+        previousValue: "$17.2M",
+        newValue: asset.currentValue,
+        reason: "Q4 2024 performance review and market comparables analysis",
+        methodology: "DCF and comparable company analysis",
+      },
+    },
+    {
+      id: 2,
+      type: "distribution",
+      actor: asset.name,
+      action: "distributed",
+      target: "$500K",
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        amount: "$500,000",
+        type: "Quarterly Distribution",
+        perShare: "$2.50",
+        totalShares: "200,000",
+        paymentDate: "2025-01-25",
+      },
+    },
+    {
+      id: 3,
+      type: "investment",
+      actor: "Investment Committee",
+      action: "approved investment in",
+      target: asset.name,
+      timestamp: "6 months ago",
+      date: "2024-08-15",
+      details: {
+        amount: asset.originalCost,
+        investmentType: asset.type,
+        sector: asset.sector,
+        geography: asset.geography,
+        approvalDate: "2024-08-10",
+        fundingDate: "2024-08-15",
+      },
+    },
+  ]
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "valuation":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      case "distribution":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      case "investment":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
+
+  const formatActivityText = (activity: any) => {
+    switch (activity.type) {
+      case "valuation":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <Badge variant="outline" className="text-xs mx-1">
+              {activity.target}
+            </Badge>
+          </span>
+        )
+      case "distribution":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium text-green-600">{activity.target}</span>
+          </span>
+        )
+      case "investment":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium">{activity.target}</span>
+          </span>
+        )
+      default:
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium">{activity.target}</span>
+          </span>
+        )
+    }
+  }
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "valuation":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Valuation Update</h5>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Value:</span>{" "}
+                  <span>{activity.details.previousValue}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Value:</span>{" "}
+                  <span className="font-medium">{activity.details.newValue}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Methodology</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.methodology}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+          </div>
+        )
+      case "distribution":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Distribution Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Per Share:</span> <span>{activity.details.perShare}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Total Shares:</span>{" "}
+                  <span>{activity.details.totalShares}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Payment Date</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.paymentDate}</p>
+            </div>
+          </div>
+        )
+      case "investment":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Investment Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.investmentType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Sector:</span> <span>{activity.details.sector}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Geography:</span> <span>{activity.details.geography}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Approval Date:</span>{" "}
+                <span>{activity.details.approvalDate}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Funding Date:</span> <span>{activity.details.fundingDate}</span>
+              </div>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
   )
 }
 

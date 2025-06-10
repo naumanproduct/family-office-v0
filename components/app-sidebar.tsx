@@ -73,7 +73,7 @@ const data = {
     },
     {
       title: "Files",
-      url: "/files",
+      url: "/documents",
       icon: FileTextIcon,
     },
     {
@@ -93,7 +93,7 @@ const data = {
         },
         {
           title: "People",
-          url: "/people",
+          url: "/contacts",
           icon: UsersIcon,
         },
       ],

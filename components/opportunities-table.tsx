@@ -28,13 +28,6 @@ import {
   SearchIcon,
   SortAscIcon,
   SortDescIcon,
-  BuildingIcon,
-  TagIcon,
-  ActivityIcon,
-  UserIcon,
-  FileTextIcon,
-  CalendarIcon,
-  DollarSignIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -53,14 +46,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   MailIcon,
+  BuildingIcon,
+  FileTextIcon,
+  CalendarIcon,
+  FolderIcon,
+  UsersIcon,
   CheckCircleIcon,
+  DollarSignIcon,
   TrendingUpIcon,
 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { MasterDrawer } from "./master-drawer"
 import { AddOpportunityDialog } from "./add-opportunity-dialog"
-import { ActivitySection } from "@/components/shared/activity-section"
-import { type ActivityItem } from "@/components/shared/activity-content"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -525,8 +522,8 @@ function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
     { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 5, icon: FileTextIcon },
-    { id: "team", label: "People", count: 6, icon: UserIcon },
+    { id: "files", label: "Files", count: 5, icon: FolderIcon },
+    { id: "team", label: "People", count: 6, icon: UsersIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
@@ -617,101 +614,50 @@ function OpportunityDetailsPanel({
   opportunity,
   isFullScreen = false,
 }: { opportunity: Opportunity; isFullScreen?: boolean }) {
-  // Define activities for this opportunity
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "change",
-      actor: "John Smith",
-      action: "changed status of",
-      target: opportunity.name,
-      timestamp: "2 days ago",
-      date: "2023-05-18",
-      details: {
-        previousStatus: "Due Diligence",
-        newStatus: opportunity.stage,
-        reason: "Completed technical evaluation",
-        comments: "All assessment criteria have been met. Moving forward with investment committee review.",
-      },
-    },
-    {
-      id: 2,
-      type: "meeting",
-      actor: "Investment Team",
-      action: "held a review meeting for",
-      target: opportunity.name,
-      timestamp: "1 week ago",
-      date: "2023-05-13",
-      details: {
-        meetingType: "Investment Committee",
-        duration: "90 minutes",
-        participants: ["Sarah Johnson", "Michael Chen", "David Kim", "Emma Rodriguez"],
-        summary: "Discussed valuation models and potential terms for the investment. Team is generally positive about the opportunity.",
-        nextSteps: "Prepare term sheet draft for review",
-      },
-    },
-    {
-      id: 3,
-      type: "document",
-      actor: "Financial Team",
-      action: "completed financial analysis for",
-      target: opportunity.name,
-      timestamp: "2 weeks ago",
-      date: "2023-05-06",
-      details: {
-        documentType: "Financial Model",
-        metrics: "IRR: 32%, ROI: 4.5x, Payback: 3.2 years",
-        author: "David Kim",
-        recommendations: "Proceed with investment, suggested allocation of $5M",
-      },
-    },
-  ];
-
   return (
     <div className="px-6 pt-2 pb-6">
+      {/* Opportunity Details */}
       <div className="space-y-4">
         <div className="rounded-lg border border-muted bg-muted/10 p-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
+              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
+              <div className="flex-1">
+                <Label className="text-xs text-muted-foreground">Opportunity Name</Label>
+                <p className="text-sm font-medium">{opportunity.name}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
               <BuildingIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Company</Label>
-                <p className="text-sm text-blue-600">{opportunity.company.name}</p>
+                <Label className="text-xs text-muted-foreground">Company ({opportunity.company.type})</Label>
+                <p className="text-sm">{opportunity.company.name}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <TagIcon className="h-4 w-4 text-muted-foreground" />
+              <UsersIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Type</Label>
-                <p className="text-sm">{opportunity.company.type}</p>
+                <Label className="text-xs text-muted-foreground">Contact (Deal Sponsor)</Label>
+                <p className="text-sm">{opportunity.contact.name}</p>
+                <p className="text-xs text-muted-foreground">{opportunity.contact.role}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <ActivityIcon className="h-4 w-4 text-muted-foreground" />
+              <FileTextIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Stage</Label>
-                <p className="text-sm">
-                  <Badge
-                    className={`text-xs ${
-                      opportunity.stage === "Won"
-                        ? "bg-green-100 text-green-800"
-                        : opportunity.stage === "Lost"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-blue-100 text-blue-800"
-                    }`}
-                  >
-                    {opportunity.stage}
-                  </Badge>
-                </p>
+                <Label className="text-xs text-muted-foreground">Legal Entity (Investing Party)</Label>
+                <p className="text-sm">{opportunity.legalEntity.name}</p>
+                <p className="text-xs text-muted-foreground">{opportunity.legalEntity.type}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Value</Label>
+                <Label className="text-xs text-muted-foreground">Investment Amount</Label>
                 <p className="text-sm">{opportunity.amount}</p>
               </div>
             </div>
@@ -719,16 +665,16 @@ function OpportunityDetailsPanel({
             <div className="flex items-center gap-2">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Close Date</Label>
+                <Label className="text-xs text-muted-foreground">Expected Close</Label>
                 <p className="text-sm">{opportunity.expectedClose}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <UserIcon className="h-4 w-4 text-muted-foreground" />
+              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Owner</Label>
-                <p className="text-sm">{opportunity.contact.name}</p>
+                <Label className="text-xs text-muted-foreground">Probability</Label>
+                <p className="text-sm">{opportunity.probability}%</p>
               </div>
             </div>
 
@@ -745,9 +691,6 @@ function OpportunityDetailsPanel({
         <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
           Show all values
         </Button>
-
-        {/* Activity Section */}
-        <ActivitySection activities={activities} />
       </div>
     </div>
   )

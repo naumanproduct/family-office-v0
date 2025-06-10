@@ -78,8 +78,6 @@ import { NotesTable } from "./notes-table"
 import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
-import { ActivitySection } from "@/components/shared/activity-section"
-import { type ActivityItem } from "@/components/shared/activity-content"
 
 export const companySchema = z.object({
   id: z.number(),
@@ -746,75 +744,10 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
     },
   ];
 
-  // Define activities for this company
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "meeting",
-      actor: "Investment Team",
-      action: "had a meeting with",
-      target: company.name,
-      timestamp: "3 days ago",
-      date: "2023-05-17",
-      details: {
-        meetingType: "Due Diligence",
-        duration: "1 hour",
-        participants: ["Sarah Johnson", "Michael Chen", "David Kim", `${company.name} CEO`],
-        summary: "Discussed growth projections and potential investment opportunities with the management team.",
-        nextSteps: "Follow up with financial projections request",
-      },
-    },
-    {
-      id: 2,
-      type: "note",
-      actor: "Sarah Johnson",
-      action: "added a note about",
-      target: company.name,
-      timestamp: "1 week ago",
-      date: "2023-05-13",
-      details: {
-        noteType: "Market Analysis",
-        visibility: "Team",
-        content: `${company.name} is positioning well in the ${company.industry} market with significant growth potential. Their recent product launch has been well-received by customers.`,
-        tags: ["Market Leader", "Growth", "Opportunity"],
-      },
-    },
-    {
-      id: 3,
-      type: "document",
-      actor: "Legal Team",
-      action: "uploaded a document related to",
-      target: company.name,
-      timestamp: "2 weeks ago",
-      date: "2023-05-06",
-      details: {
-        documentType: "Term Sheet",
-        size: "1.2 MB",
-        version: "2.0",
-        status: "Under Review",
-        uploadedBy: "Jessica Williams",
-      },
-    },
-  ];
-
-  // Define additional content with Activity section
-  const additionalContent = (
-    <>
-      {/* Show all values button */}
-      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-        Show all values
-      </Button>
-
-      {/* Activity Section - Always shown, regardless of mode */}
-      <ActivitySection activities={activities} />
-    </>
-  );
-
   return (
     <MasterDetailsPanel 
       fieldGroups={fieldGroups}
       isFullScreen={isFullScreen}
-      additionalContent={additionalContent}
     />
   )
 }
