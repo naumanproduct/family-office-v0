@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ChevronLeftIcon, ChevronDownIcon } from "lucide-react"
+import { ChevronLeftIcon } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,58 +68,6 @@ interface MasterCreationDialogProps {
 
   // Custom handlers
   onTypeSelect?: (type: CreationType) => Partial<Record<string, any>>
-}
-
-interface TypeSelectionItemProps {
-  type: CreationType
-  onSelect: () => void
-}
-
-function TypeSelectionItem({ type, onSelect }: TypeSelectionItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
-
-  return (
-    <div className="border rounded-lg overflow-hidden hover:shadow-sm transition-all duration-200">
-      {/* Compact Header - Always Visible */}
-      <div className="flex items-center justify-between p-3 hover:bg-muted/50 cursor-pointer">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-sm">{type.name}</span>
-              {type.category && (
-                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                  {type.category}
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsExpanded(!isExpanded)
-            }}
-            className="h-6 w-6 p-0"
-          >
-            <ChevronDownIcon className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
-          </Button>
-          <Button size="sm" onClick={onSelect} className="h-6 px-2 text-xs">
-            Select
-          </Button>
-        </div>
-      </div>
-
-      {/* Expanded Details */}
-      {isExpanded && (
-        <div className="px-3 pb-3 pt-0 border-t bg-muted/20">
-          <p className="text-xs text-muted-foreground leading-relaxed">{type.description}</p>
-        </div>
-      )}
-    </div>
-  )
 }
 
 export function MasterCreationDialog({
@@ -370,19 +319,37 @@ export function MasterCreationDialog({
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
             {!selectedType ? (
-              // Type Selection - Compact & Scannable
+              // Type Selection
               <div className="space-y-4">
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <h3 className="text-sm font-medium text-muted-foreground">{typeSelectionTitle}</h3>
-                  <div className="space-y-1">
-                    {types.map((type) => (
-                      <TypeSelectionItem key={type.id} type={type} onSelect={() => handleTypeSelect(type)} />
-                    ))}
-                  </div>
+                  {types.map((type) => (
+                    <Card
+                      key={type.id}
+                      className="cursor-pointer transition-all duration-200 hover:shadow-md"
+                      onClick={() => handleTypeSelect(type)}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base font-medium">{type.name}</CardTitle>
+                            <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      {type.category && (
+                        <CardContent className="pt-0">
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>Category: {type.category}</span>
+                          </div>
+                        </CardContent>
+                      )}
+                    </Card>
+                  ))}
                 </div>
               </div>
             ) : (
-              // Form (unchanged)
+              // Form
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">{formFields.map(renderFormField)}</div>
               </div>

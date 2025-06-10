@@ -445,11 +445,11 @@ function getAssetTabData(activeTab: string, asset: Asset) {
 }
 
 function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
-  // Define field groups for the MasterDetailsPanel
+  // Define field groups for the MasterDetailsPanel - consolidate into single group
   const fieldGroups = [
     {
-      id: "basic-info",
-      label: "Basic Information",
+      id: "asset-info",
+      label: "Asset Information",
       icon: DollarSignIcon,
       fields: [
         {
@@ -469,13 +469,6 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
           value: asset.entity,
           isLink: true,
         },
-      ],
-    },
-    {
-      id: "financial-info",
-      label: "Financial Information",
-      icon: DollarSignIcon,
-      fields: [
         {
           label: "Acquisition Date",
           value: asset.acquisitionDate,

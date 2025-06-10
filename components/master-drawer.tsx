@@ -78,13 +78,14 @@ export function MasterDrawer({
       setHiddenTabs([])
     }
 
-    // For full screen, show first 10 tabs as visible, rest as hidden
+    // For full screen, show first 10 tabs as visible, rest as hidden, but exclude details tab
+    const tabsWithoutDetails = tabs.filter((tab) => tab.id !== "details")
     const maxFullScreenVisibleTabs = 10
-    if (tabs.length > maxFullScreenVisibleTabs) {
-      setFullScreenVisibleTabs(tabs.slice(0, maxFullScreenVisibleTabs))
-      setFullScreenHiddenTabs(tabs.slice(maxFullScreenVisibleTabs))
+    if (tabsWithoutDetails.length > maxFullScreenVisibleTabs) {
+      setFullScreenVisibleTabs(tabsWithoutDetails.slice(0, maxFullScreenVisibleTabs))
+      setFullScreenHiddenTabs(tabsWithoutDetails.slice(maxFullScreenVisibleTabs))
     } else {
-      setFullScreenVisibleTabs(tabs)
+      setFullScreenVisibleTabs(tabsWithoutDetails)
       setFullScreenHiddenTabs([])
     }
   }, [tabs])
@@ -134,12 +135,18 @@ export function MasterDrawer({
   }, [isFullScreen])
 
   React.useEffect(() => {
-    // Don't automatically change tabs when switching to full screen
-    // This preserves the current tab when toggling full screen mode
-    if (!isFullScreen && activeTab === "activity") {
+    // When switching to full screen mode, if we're on details tab, switch to first available tab
+    if (isFullScreen && activeTab === "details") {
+      const availableTabs = [...fullScreenVisibleTabs, ...fullScreenHiddenTabs]
+      if (availableTabs.length > 0) {
+        setActiveTab(availableTabs[0].id)
+      }
+    }
+    // When switching back from full screen, if current tab doesn't exist in regular tabs, switch to details
+    if (!isFullScreen && !tabs.find((tab) => tab.id === activeTab)) {
       setActiveTab("details")
     }
-  }, [isFullScreen])
+  }, [isFullScreen, activeTab, fullScreenVisibleTabs, fullScreenHiddenTabs, tabs])
 
   const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table", isCurrentFullScreen = false) => {
     if (activeTab === "details") {
