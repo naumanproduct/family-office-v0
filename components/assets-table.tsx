@@ -498,17 +498,6 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
         Show all values
       </Button>
 
-      {/* Portfolios Section */}
-      <div className="mt-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h4 className="text-sm font-medium">Portfolios</h4>
-          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-            Add to portfolio
-          </Button>
-        </div>
-        <p className="text-sm text-muted-foreground">This asset has not been added to any portfolios</p>
-      </div>
-
       {/* Activity Section - Only in Drawer View */}
       {!isFullScreen && (
         <div className="mt-8">

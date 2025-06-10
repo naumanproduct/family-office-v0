@@ -44,11 +44,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-import { createPortal } from "react-dom"
 import {
-  ExpandIcon,
-  XIcon,
   MailIcon,
   BuildingIcon,
   FileTextIcon,
@@ -56,19 +52,12 @@ import {
   FolderIcon,
   UsersIcon,
   CheckCircleIcon,
-  MapPinIcon,
-  ScaleIcon,
 } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 // Import the AddEntityDialog
 import { AddEntityDialog } from "./add-entity-dialog"
-import { EmailsTable } from "./emails-table"
-import { TasksTable } from "./tasks-table"
-import { NotesTable } from "./notes-table"
 import { MasterDrawer } from "./master-drawer"
+import { MasterDetailsPanel } from "./master-details-panel"
 
 export const entitySchema = z.object({
   id: z.number(),
@@ -489,6 +478,7 @@ function getEntityTabData(activeTab: string, entity: Entity) {
           role: "Senior Analyst",
           email: "sarah.johnson@company.com",
           phone: "+1 (555) 234-5678",
+          phone: "+1 (555) 234-5678",
         },
         {
           id: 3,
@@ -631,104 +621,255 @@ function EntityNameCell({ entity }: { entity: Entity }) {
   )
 }
 
-function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; isFullScreen?: boolean }) {
-  return (
-    <div className="px-6 pt-2 pb-6">
-      {/* Entity Details */}
-      <div className="space-y-4">
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Entity Name</Label>
-                <p className="text-sm font-medium">{entity.entityName}</p>
-              </div>
-            </div>
+function EntityActivityContent({ entity }: { entity: Entity }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
 
-            <div className="flex items-center gap-2">
-              <ScaleIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Entity Type</Label>
-                <p className="text-sm">{entity.entityType}</p>
-              </div>
-            </div>
+  const activities = [
+    {
+      id: 1,
+      type: "compliance",
+      actor: "Legal Team",
+      action: "filed annual report for",
+      target: entity.entityName,
+      timestamp: "2 weeks ago",
+      date: "2025-01-16",
+      details: {
+        filingType: "Annual Report",
+        jurisdiction: entity.jurisdiction,
+        status: "Filed",
+        dueDate: "2025-01-31",
+        filedDate: "2025-01-16",
+        nextFiling: "2026-01-31",
+      },
+    },
+    {
+      id: 2,
+      type: "structure_change",
+      actor: "Corporate Secretary",
+      action: "updated ownership structure for",
+      target: entity.entityName,
+      timestamp: "1 month ago",
+      date: "2024-12-28",
+      details: {
+        changeType: "Ownership Transfer",
+        previousOwnership: "75%",
+        newOwnership: entity.ownershipPercent ? `${entity.ownershipPercent}%` : "100%",
+        effectiveDate: "2024-12-28",
+        reason: "Corporate restructuring",
+      },
+    },
+    {
+      id: 3,
+      type: "document",
+      actor: "Legal Team",
+      action: "updated governing documents for",
+      target: entity.entityName,
+      timestamp: "3 months ago",
+      date: "2024-10-28",
+      details: {
+        documentType: "Operating Agreement",
+        version: "v2.1",
+        changes: ["Updated management structure", "Revised distribution terms", "Added compliance provisions"],
+        approvedBy: "Board of Directors",
+        effectiveDate: "2024-11-01",
+      },
+    },
+  ]
 
-            <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Role / Purpose</Label>
-                <p className="text-sm">{entity.rolePurpose}</p>
-              </div>
-            </div>
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "compliance":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      case "structure_change":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+      case "document":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
 
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Jurisdiction</Label>
-                <p className="text-sm">{entity.jurisdiction}</p>
-              </div>
-            </div>
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span>{" "}
+        <span className="text-muted-foreground">{activity.action}</span>{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    )
+  }
 
-            <div className="flex items-center gap-2">
-              <ScaleIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Status</Label>
-                <Badge className={`text-xs ${getStatusColor(entity.status)}`}>{entity.status}</Badge>
-              </div>
-            </div>
-
-            {entity.ownershipPercent && (
-              <div className="flex items-center gap-2">
-                <UsersIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Ownership %</Label>
-                  <p className="text-sm">{entity.ownershipPercent}%</p>
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "compliance":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Filing Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Filing Type:</span> <span>{activity.details.filingType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Jurisdiction:</span>{" "}
+                  <span>{activity.details.jurisdiction}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span> <span>{activity.details.status}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Filed Date:</span> <span>{activity.details.filedDate}</span>
                 </div>
               </div>
-            )}
-
-            {entity.parentEntity && (
-              <div className="flex items-center gap-2">
-                <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Parent Entity</Label>
-                  <p className="text-sm text-blue-600">{entity.parentEntity}</p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2">
-              <UsersIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Manager / Controller</Label>
-                <p className="text-sm">{entity.managerController}</p>
-              </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Date Formed</Label>
-                <p className="text-sm">{new Date(entity.dateFormed).toLocaleDateString()}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2">
-              <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Notes</Label>
-                <p className="text-sm">{entity.notes}</p>
-              </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Next Filing Due</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.nextFiling}</p>
             </div>
           </div>
-        </div>
+        )
+      case "structure_change":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Structure Change Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Change Type:</span> <span>{activity.details.changeType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Previous:</span>{" "}
+                  <span>{activity.details.previousOwnership}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New:</span> <span>{activity.details.newOwnership}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Effective Date:</span>{" "}
+                  <span>{activity.details.effectiveDate}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+          </div>
+        )
+      case "document":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Document Update Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Document Type:</span>{" "}
+                  <span>{activity.details.documentType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Version:</span> <span>{activity.details.version}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Approved By:</span> <span>{activity.details.approvedBy}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Effective Date:</span>{" "}
+                  <span>{activity.details.effectiveDate}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Changes Made</h5>
+              <ul className="text-sm text-muted-foreground list-disc list-inside">
+                {activity.details.changes.map((change: string, index: number) => (
+                  <li key={index}>{change}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
 
-        <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-          Show all values
-        </Button>
-      </div>
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
     </div>
+  )
+}
+
+function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; isFullScreen?: boolean }) {
+  // Define additional content with Activity section
+  const additionalContent = (
+    <>
+      {/* Show all values button */}
+      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+        Show all values
+      </Button>
+
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <EntityActivityContent entity={entity} />
+        </div>
+      )}
+    </>
+  )
+
+  return (
+    <MasterDetailsPanel
+      fieldGroups={[
+        {
+          id: "entity-info",
+          label: "Entity Information",
+          icon: BuildingIcon,
+          fields: [
+            { label: "Entity Name", value: entity.entityName },
+            { label: "Entity Type", value: entity.entityType },
+            { label: "Role / Purpose", value: entity.rolePurpose },
+            { label: "Jurisdiction", value: entity.jurisdiction },
+            { label: "Status", value: entity.status },
+            { label: "Ownership %", value: entity.ownershipPercent ? `${entity.ownershipPercent}%` : "—" },
+            { label: "Parent Entity", value: entity.parentEntity || "—", isLink: !!entity.parentEntity },
+            { label: "Manager / Controller", value: entity.managerController },
+            { label: "Date Formed", value: new Date(entity.dateFormed).toLocaleDateString() },
+            { label: "Notes", value: entity.notes },
+          ],
+        },
+      ]}
+      isFullScreen={isFullScreen}
+      additionalContent={additionalContent}
+    />
   )
 }
 

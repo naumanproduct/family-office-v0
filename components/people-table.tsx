@@ -45,32 +45,13 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-import { createPortal } from "react-dom"
-import {
-  ExpandIcon,
-  XIcon,
-  MailIcon,
-  BuildingIcon,
-  FileTextIcon,
-  CalendarIcon,
-  FolderIcon,
-  CheckCircleIcon,
-  PhoneIcon,
-  MapPinIcon,
-  UserIcon,
-  BriefcaseIcon,
-} from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { MailIcon, BuildingIcon, FileTextIcon, CalendarIcon, FolderIcon, CheckCircleIcon, UserIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Label } from "@/components/ui/label"
 
 // Import the AddPersonDialog at the top of the file
 import { AddPersonDialog } from "./add-person-dialog"
 import { MasterDrawer } from "./master-drawer"
-import { EmailsTable } from "./emails-table"
-import { TasksTable } from "./tasks-table"
-import { NotesTable } from "./notes-table"
+import { MasterDetailsPanel } from "./master-details-panel"
 
 // Add missing component imports
 function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
@@ -212,7 +193,7 @@ const contactsData: Contact[] = [
     twitter: "@sarahjohnson",
     twitterFollowers: 15600,
     bio: "Sarah is the CEO of Craft Ventures with over 15 years of experience in venture capital...",
-    avatar: "/placeholder.svg?height=40&width=40&query=SJ",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -232,7 +213,7 @@ const contactsData: Contact[] = [
     twitter: "@mchen",
     twitterFollowers: 8700,
     bio: "Michael leads the technical team at FalconX, focusing on blockchain infrastructure...",
-    avatar: "/placeholder.svg?height=40&width=40&query=MC",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -252,7 +233,7 @@ const contactsData: Contact[] = [
     twitter: "@lwang",
     twitterFollowers: 12400,
     bio: "Lisa oversees product strategy and development at Google's cloud division...",
-    avatar: "/placeholder.svg?height=40&width=40&query=LW",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -270,7 +251,7 @@ const contactsData: Contact[] = [
     connectionStrength: "Medium",
     linkedin: "davidkim",
     bio: "David leads the enterprise sales team at Amplitude, focusing on Fortune 500 clients...",
-    avatar: "/placeholder.svg?height=40&width=40&query=DK",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Prospect",
   },
   {
@@ -290,7 +271,7 @@ const contactsData: Contact[] = [
     twitter: "@egarcia",
     twitterFollowers: 5600,
     bio: "Emma oversees all financial operations at Stripe, with a background in investment banking...",
-    avatar: "/placeholder.svg?height=40&width=40&query=EG",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -310,7 +291,7 @@ const contactsData: Contact[] = [
     twitter: "@jwilson",
     twitterFollowers: 9800,
     bio: "James leads Notion's global marketing strategy, focusing on community-driven growth...",
-    avatar: "/placeholder.svg?height=40&width=40&query=JW",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -330,7 +311,7 @@ const contactsData: Contact[] = [
     twitter: "@smartinez",
     twitterFollowers: 14300,
     bio: "Sophia oversees the design team at Figma, with expertise in product and interface design...",
-    avatar: "/placeholder.svg?height=40&width=40&query=SM",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Inactive",
   },
   {
@@ -350,7 +331,7 @@ const contactsData: Contact[] = [
     twitter: "@athompson",
     twitterFollowers: 7200,
     bio: "Alex leads product development for Airtable's enterprise solutions...",
-    avatar: "/placeholder.svg?height=40&width=40&query=AT",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
 ]
@@ -497,85 +478,251 @@ function ContactNameCell({ contact }: { contact: Contact }) {
       tabs={tabs}
       detailsPanel={renderDetailsPanel}
       customActions={customActions}
-      onComposeEmail={() => console.log('Compose email clicked')}
+      onComposeEmail={() => console.log("Compose email clicked")}
     >
       {renderTabContent}
     </MasterDrawer>
   )
 }
 
-function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Contact; isFullScreen?: boolean }) {
-  return (
-    <div className="px-6 pt-2 pb-6">
-      {/* Contact Details */}
-      <div className="space-y-4">
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <UserIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Name</Label>
-                <p className="text-sm font-medium">
-                  {contact.firstName} {contact.lastName}
-                </p>
+function PersonActivityContent({ contact }: { contact: Contact }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+
+  const activities = [
+    {
+      id: 1,
+      type: "meeting",
+      actor: "You",
+      action: "had a meeting with",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "3 days ago",
+      date: "2025-01-27",
+      details: {
+        type: "Video Call",
+        duration: "45 minutes",
+        topics: ["Partnership opportunities", "Q1 planning", "Budget discussion"],
+        outcome: "Positive discussion, follow-up scheduled",
+        nextSteps: "Send proposal by Friday, schedule technical review",
+      },
+    },
+    {
+      id: 2,
+      type: "email",
+      actor: contact.firstName,
+      action: "sent email about",
+      target: "Project collaboration",
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        subject: "Re: Partnership Proposal",
+        type: "Response",
+        sentiment: "Positive",
+        keyPoints: ["Interested in collaboration", "Budget approved", "Timeline discussion needed"],
+        followUp: "Schedule technical review meeting",
+      },
+    },
+    {
+      id: 3,
+      type: "role_change",
+      actor: contact.firstName,
+      action: "was promoted to",
+      target: contact.jobTitle,
+      timestamp: "2 months ago",
+      date: "2024-11-28",
+      details: {
+        previousRole: "Senior Manager",
+        newRole: contact.jobTitle,
+        company: contact.company,
+        effectiveDate: "2024-12-01",
+        impact: "Increased decision-making authority, larger budget responsibility",
+      },
+    },
+  ]
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "meeting":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      case "email":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      case "role_change":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span>{" "}
+        <span className="text-muted-foreground">{activity.action}</span>{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    )
+  }
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "meeting":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Duration:</span> <span>{activity.details.duration}</span>
+                </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <MailIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Email</Label>
-                <p className="text-sm text-blue-600">{contact.email}</p>
-              </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.topics.join(", ")}</p>
             </div>
-
-            <div className="flex items-center gap-2">
-              <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Phone</Label>
-                <p className="text-sm">{contact.phone}</p>
-              </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Outcome</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.outcome}</p>
             </div>
-
-            <div className="flex items-center gap-2">
-              <BriefcaseIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Job Title</Label>
-                <p className="text-sm">{contact.jobTitle}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Company</Label>
-                <p className="text-sm text-blue-600">{contact.company}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Location</Label>
-                <p className="text-sm">{contact.location}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2">
-              <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Bio</Label>
-                <p className="text-sm">{contact.bio}</p>
-              </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
             </div>
           </div>
-        </div>
+        )
+      case "email":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Email Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Subject:</span> <span>{activity.details.subject}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Sentiment:</span> <span>{activity.details.sentiment}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Key Points</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.keyPoints.join(", ")}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Follow Up</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.followUp}</p>
+            </div>
+          </div>
+        )
+      case "role_change":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Role Change Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Role:</span>{" "}
+                  <span>{activity.details.previousRole}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Role:</span> <span>{activity.details.newRole}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Company:</span> <span>{activity.details.company}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Effective Date:</span>{" "}
+                  <span>{activity.details.effectiveDate}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Impact</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.impact}</p>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
 
-        <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-          Show all values (including social profiles)
-        </Button>
-      </div>
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
     </div>
+  )
+}
+
+function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Contact; isFullScreen?: boolean }) {
+  return (
+    <MasterDetailsPanel
+      fieldGroups={[
+        {
+          id: "contact-info",
+          label: "Contact Details",
+          icon: UserIcon,
+          fields: [
+            { label: "Name", value: `${contact.firstName} ${contact.lastName}` },
+            { label: "Email", value: contact.email, isLink: true },
+            { label: "Phone", value: contact.phone },
+            { label: "Job Title", value: contact.jobTitle },
+            { label: "Company", value: contact.company, isLink: true },
+            { label: "Location", value: contact.location },
+            { label: "Bio", value: contact.bio },
+          ],
+        },
+      ]}
+      isFullScreen={isFullScreen}
+      additionalContent={
+        <>
+          {/* Show all values button */}
+          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+            Show all values (including social profiles)
+          </Button>
+
+          {/* Activity Section - Only in Drawer View */}
+          {!isFullScreen && (
+            <div className="mt-8">
+              <div className="mb-4 flex items-center justify-between">
+                <h4 className="text-sm font-medium">Activity</h4>
+                <Button variant="outline" size="sm">
+                  <PlusIcon className="h-4 w-4" />
+                  Add meeting
+                </Button>
+              </div>
+              <PersonActivityContent contact={contact} />
+            </div>
+          )}
+        </>
+      }
+    />
   )
 }
 

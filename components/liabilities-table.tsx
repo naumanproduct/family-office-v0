@@ -30,8 +30,6 @@ import {
   SortDescIcon,
   FileTextIcon,
   MailIcon,
-  CheckCircleIcon,
-  CalendarIcon,
   FolderIcon,
   UsersIcon,
   BuildingIcon,
@@ -57,7 +55,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { MasterDrawer } from "@/components/master-drawer"
-import { Label } from "@/components/ui/label"
 import { AddLiabilityDialog } from "./add-liability-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
@@ -210,10 +207,10 @@ function LiabilityNameCell({ liability }: { liability: Liability }) {
     if (activeTab === "performance") {
       return <LiabilityPerformanceContent liability={liability} />
     }
-    
+
     // For other tabs, use TabContentRenderer instead of custom implementations
     const data = getLiabilityTabData(activeTab, liability)
-    
+
     // Create custom tab renderers for special tabs
     const customTabRenderers = {
       details: (isFullScreen = false) => <LiabilityDetailsPanel liability={liability} isFullScreen={isFullScreen} />,
@@ -223,7 +220,7 @@ function LiabilityNameCell({ liability }: { liability: Liability }) {
 
     // Create a handler for "add" actions for empty states
     const handleAdd = () => {
-      console.log(`Add new ${activeTab.slice(0, -1)} for ${liability.name}`);
+      console.log(`Add new ${activeTab.slice(0, -1)} for ${liability.name}`)
       // In a real implementation, this would open the appropriate modal or form
     }
 
@@ -372,6 +369,209 @@ function getLiabilityTabData(activeTab: string, liability: Liability) {
   }
 }
 
+function LiabilityActivityContent({ liability }: { liability: Liability }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+
+  const activities = [
+    {
+      id: 1,
+      type: "payment",
+      actor: "Finance Team",
+      action: "processed payment for",
+      target: liability.name,
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        amount: liability.paymentAmount,
+        paymentDate: "2025-01-23",
+        method: "Wire Transfer",
+        principal: "$35,000",
+        interest: "$9,270",
+        remainingBalance: liability.currentBalance,
+      },
+    },
+    {
+      id: 2,
+      type: "rate_change",
+      actor: liability.lender,
+      action: "adjusted interest rate for",
+      target: liability.name,
+      timestamp: "2 months ago",
+      date: "2024-11-28",
+      details: {
+        previousRate: "4.75%",
+        newRate: liability.interestRate,
+        effectiveDate: "2024-12-01",
+        reason: "Federal Reserve rate adjustment",
+        impact: "Monthly payment increased by $150",
+      },
+    },
+    {
+      id: 3,
+      type: "review",
+      actor: "Investment Team",
+      action: "conducted annual review of",
+      target: liability.name,
+      timestamp: "3 months ago",
+      date: "2024-10-28",
+      details: {
+        reviewType: "Annual Credit Review",
+        outcome: "Approved for renewal",
+        recommendations: ["Consider refinancing at lower rate", "Maintain current payment schedule"],
+        nextReview: "2025-10-28",
+        creditRating: "A-",
+      },
+    },
+  ]
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "payment":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      case "rate_change":
+        return <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+      case "review":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span>{" "}
+        <span className="text-muted-foreground">{activity.action}</span>{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    )
+  }
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "payment":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Payment Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Total Amount:</span> <span>{activity.details.amount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Payment Date:</span>{" "}
+                  <span>{activity.details.paymentDate}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Principal:</span> <span>{activity.details.principal}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Interest:</span> <span>{activity.details.interest}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Method:</span> <span>{activity.details.method}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Remaining Balance</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.remainingBalance}</p>
+            </div>
+          </div>
+        )
+      case "rate_change":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Rate Change Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Rate:</span>{" "}
+                  <span>{activity.details.previousRate}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Rate:</span> <span>{activity.details.newRate}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Effective Date:</span>{" "}
+                  <span>{activity.details.effectiveDate}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Impact</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.impact}</p>
+            </div>
+          </div>
+        )
+      case "review":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Review Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Review Type:</span> <span>{activity.details.reviewType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Outcome:</span> <span>{activity.details.outcome}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Credit Rating:</span>{" "}
+                  <span>{activity.details.creditRating}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Next Review:</span> <span>{activity.details.nextReview}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Recommendations</h5>
+              <ul className="text-sm text-muted-foreground list-disc list-inside">
+                {activity.details.recommendations.map((rec: string, index: number) => (
+                  <li key={index}>{rec}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function LiabilityDetailsPanel({ liability, isFullScreen = false }: { liability: Liability; isFullScreen?: boolean }) {
   const fieldGroups = [
     {
@@ -390,13 +590,34 @@ function LiabilityDetailsPanel({ liability, isFullScreen = false }: { liability:
         { label: "Entity", value: liability.entity },
       ],
     },
-  ];
+  ]
+
+  // Define additional content with Activity section
+  const additionalContent = (
+    <>
+      {/* Show all values button */}
+      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+        Show all values
+      </Button>
+
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <LiabilityActivityContent liability={liability} />
+        </div>
+      )}
+    </>
+  )
 
   return (
-    <MasterDetailsPanel 
-      fieldGroups={fieldGroups}
-      isFullScreen={isFullScreen}
-    />
+    <MasterDetailsPanel fieldGroups={fieldGroups} isFullScreen={isFullScreen} additionalContent={additionalContent} />
   )
 }
 
@@ -427,8 +648,8 @@ function LiabilityCompanyContent({ liability }: { liability: Liability }) {
             <h4 className="text-sm font-medium mb-2">Lender Overview</h4>
             <p className="text-sm text-muted-foreground">
               {liability.lender} is a leading financial institution that provides a wide range of banking services,
-              including loans, mortgages, and lines of credit. They specialize in commercial real estate financing
-              and have been a trusted partner for our organization for many years.
+              including loans, mortgages, and lines of credit. They specialize in commercial real estate financing and
+              have been a trusted partner for our organization for many years.
             </p>
           </div>
 
@@ -527,7 +748,13 @@ function LiabilityPerformanceContent({ liability }: { liability: Liability }) {
           <CardContent className="p-4">
             <div className="text-sm text-muted-foreground">Principal Paid</div>
             <div className="text-2xl font-semibold">
-              ${Math.round((parseFloat(liability.originalAmount.replace(/[^0-9.]/g, '')) - parseFloat(liability.currentBalance.replace(/[^0-9.]/g, ''))) / 1000)}k
+              $
+              {Math.round(
+                (Number.parseFloat(liability.originalAmount.replace(/[^0-9.]/g, "")) -
+                  Number.parseFloat(liability.currentBalance.replace(/[^0-9.]/g, ""))) /
+                  1000,
+              )}
+              k
             </div>
           </CardContent>
         </Card>
@@ -662,6 +889,13 @@ export function LiabilitiesTable() {
     initialState: {
       pagination: {
         pageSize: 25,
+      },
+    },
+  })
+
+  return (
+    <div className="space-y-4">
+      {/* Toolbar        pageSize: 25,
       },
     },
   })

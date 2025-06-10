@@ -45,36 +45,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-import { createPortal } from "react-dom"
-import {
-  ExpandIcon,
-  XIcon,
-  MailIcon,
-  BuildingIcon,
-  FileTextIcon,
-  CalendarIcon,
-  FolderIcon,
-  UsersIcon,
-  CheckCircleIcon,
-  PhoneIcon,
-  GlobeIcon,
-  MapPinIcon,
-  DollarSignIcon,
-  TrendingUpIcon,
-  ClockIcon,
-  MessageSquareIcon,
-} from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { MailIcon, BuildingIcon, FileTextIcon, UsersIcon, ClockIcon, MessageSquareIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 
 // Import the AddCompanyDialog at the top of the file
 import { AddCompanyDialog } from "./add-company-dialog"
-import { EmailsTable } from "./emails-table"
-import { TasksTable } from "./tasks-table"
-import { NotesTable } from "./notes-table"
 import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
@@ -394,7 +369,7 @@ function CompanyNameCell({ company }: { company: Company }) {
   ) => {
     // For other tabs, use TabContentRenderer instead of custom implementations
     const data = getCompanyTabData(activeTab, company)
-    
+
     // Create custom tab renderers for special tabs
     const customTabRenderers = {
       details: (isFullScreen = false) => <CompanyDetailsPanel company={company} isFullScreen={isFullScreen} />,
@@ -403,7 +378,7 @@ function CompanyNameCell({ company }: { company: Company }) {
 
     // Create a handler for "add" actions for empty states
     const handleAdd = () => {
-      console.log(`Add new ${activeTab.slice(0, -1)} for ${company.name}`);
+      console.log(`Add new ${activeTab.slice(0, -1)} for ${company.name}`)
       // In a real implementation, this would open the appropriate modal or form
     }
 
@@ -641,7 +616,9 @@ function CompanyTabContent({ company }: { company: Company }) {
             </div>
             <div className="flex-1">
               <CardTitle className="text-xl">{company.name}</CardTitle>
-              <CardDescription className="mt-1">{company.industry} • {company.location}</CardDescription>
+              <CardDescription className="mt-1">
+                {company.industry} • {company.location}
+              </CardDescription>
               <div className="mt-3 flex items-center gap-4">
                 <Badge variant="outline">{company.stage}</Badge>
                 {company.status && (
@@ -657,9 +634,7 @@ function CompanyTabContent({ company }: { company: Company }) {
         <CardContent className="space-y-4">
           <div>
             <h4 className="text-sm font-medium mb-2">Company Overview</h4>
-            <p className="text-sm text-muted-foreground">
-              {company.description}
-            </p>
+            <p className="text-sm text-muted-foreground">{company.description}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -694,7 +669,7 @@ function CompanyTabContent({ company }: { company: Company }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Twitter:</span>
-                  <span className="text-blue-600">{company.twitter || 'N/A'}</span>
+                  <span className="text-blue-600">{company.twitter || "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Connection:</span>
@@ -726,6 +701,192 @@ function CompanyTabContent({ company }: { company: Company }) {
   )
 }
 
+function CompanyActivityContent({ company }: { company: Company }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+
+  const activities = [
+    {
+      id: 1,
+      type: "funding",
+      actor: company.name,
+      action: "completed",
+      target: "Series C funding round",
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        amount: "$25M",
+        round: "Series C",
+        leadInvestor: "Venture Capital Partners",
+        valuation: "$150M",
+        useOfFunds: "Product development and market expansion",
+      },
+    },
+    {
+      id: 2,
+      type: "partnership",
+      actor: company.name,
+      action: "announced partnership with",
+      target: "Microsoft",
+      timestamp: "2 weeks ago",
+      date: "2025-01-16",
+      details: {
+        type: "Strategic Partnership",
+        duration: "3 years",
+        value: "$5M",
+        scope: "Cloud infrastructure and AI integration",
+      },
+    },
+    {
+      id: 3,
+      type: "meeting",
+      actor: "Investment Team",
+      action: "conducted quarterly review with",
+      target: company.name,
+      timestamp: "1 month ago",
+      date: "2024-12-28",
+      details: {
+        attendees: ["CEO", "CFO", "Investment Team"],
+        topics: ["Q4 Performance", "2025 Strategy", "Market Expansion"],
+        outcome: "Positive outlook, continued support",
+        nextSteps: "Monthly check-ins, board seat discussion",
+      },
+    },
+  ]
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "funding":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      case "partnership":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      case "meeting":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span>{" "}
+        <span className="text-muted-foreground">{activity.action}</span>{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    )
+  }
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "funding":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Funding Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Round:</span> <span>{activity.details.round}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Lead Investor:</span>{" "}
+                  <span>{activity.details.leadInvestor}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Valuation:</span> <span>{activity.details.valuation}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Use of Funds</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.useOfFunds}</p>
+            </div>
+          </div>
+        )
+      case "partnership":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Partnership Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Duration:</span> <span>{activity.details.duration}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Value:</span> <span>{activity.details.value}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Scope</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.scope}</p>
+            </div>
+          </div>
+        )
+      case "meeting":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Attendees:</span>{" "}
+                  <span>{activity.details.attendees.join(", ")}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Topics:</span>{" "}
+                  <span>{activity.details.topics.join(", ")}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Outcome</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.outcome}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Company; isFullScreen?: boolean }) {
   const fieldGroups = [
     {
@@ -742,13 +903,34 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
         { label: "Description", value: company.description },
       ],
     },
-  ];
+  ]
+
+  // Define additional content with Activity section
+  const additionalContent = (
+    <>
+      {/* Show all values button */}
+      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+        Show all values
+      </Button>
+
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <CompanyActivityContent company={company} />
+        </div>
+      )}
+    </>
+  )
 
   return (
-    <MasterDetailsPanel 
-      fieldGroups={fieldGroups}
-      isFullScreen={isFullScreen}
-    />
+    <MasterDetailsPanel fieldGroups={fieldGroups} isFullScreen={isFullScreen} additionalContent={additionalContent} />
   )
 }
 

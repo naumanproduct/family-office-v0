@@ -43,35 +43,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-
-import { createPortal } from "react-dom"
-import {
-  ExpandIcon,
-  XIcon,
-  BuildingIcon,
-  CheckCircleIcon,
-  PhoneIcon,
-  MapPinIcon,
-  UserIcon,
-  BriefcaseIcon,
-} from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { UserIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Label } from "@/components/ui/label"
-
-import { EmailsTable } from "./emails-table"
-import { TasksTable } from "./tasks-table"
-import { NotesTable } from "./notes-table"
 import { MasterDrawer } from "@/components/master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
@@ -117,7 +92,7 @@ const contactsData: Contact[] = [
     twitter: "@sarahjohnson",
     twitterFollowers: 15600,
     bio: "Sarah is the CEO of Craft Ventures with over 15 years of experience in venture capital...",
-    avatar: "/placeholder.svg?height=40&width=40&query=SJ",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -137,7 +112,7 @@ const contactsData: Contact[] = [
     twitter: "@mchen",
     twitterFollowers: 8700,
     bio: "Michael leads the technical team at FalconX, focusing on blockchain infrastructure...",
-    avatar: "/placeholder.svg?height=40&width=40&query=MC",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -157,7 +132,7 @@ const contactsData: Contact[] = [
     twitter: "@lwang",
     twitterFollowers: 12400,
     bio: "Lisa oversees product strategy and development at Google's cloud division...",
-    avatar: "/placeholder.svg?height=40&width=40&query=LW",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -175,7 +150,7 @@ const contactsData: Contact[] = [
     connectionStrength: "Medium",
     linkedin: "davidkim",
     bio: "David leads the enterprise sales team at Amplitude, focusing on Fortune 500 clients...",
-    avatar: "/placeholder.svg?height=40&width=40&query=DK",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Prospect",
   },
   {
@@ -195,7 +170,7 @@ const contactsData: Contact[] = [
     twitter: "@egarcia",
     twitterFollowers: 5600,
     bio: "Emma oversees all financial operations at Stripe, with a background in investment banking...",
-    avatar: "/placeholder.svg?height=40&width=40&query=EG",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -215,7 +190,7 @@ const contactsData: Contact[] = [
     twitter: "@jwilson",
     twitterFollowers: 9800,
     bio: "James leads Notion's global marketing strategy, focusing on community-driven growth...",
-    avatar: "/placeholder.svg?height=40&width=40&query=JW",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
   {
@@ -235,7 +210,7 @@ const contactsData: Contact[] = [
     twitter: "@smartinez",
     twitterFollowers: 14300,
     bio: "Sophia oversees the design team at Figma, with expertise in product and interface design...",
-    avatar: "/placeholder.svg?height=40&width=40&query=SM",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Inactive",
   },
   {
@@ -255,7 +230,7 @@ const contactsData: Contact[] = [
     twitter: "@athompson",
     twitterFollowers: 7200,
     bio: "Alex leads product development for Airtable's enterprise solutions...",
-    avatar: "/placeholder.svg?height=40&width=40&query=AT",
+    avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
   },
 ]
@@ -320,7 +295,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
   ) => {
     // For other tabs, use TabContentRenderer instead of custom implementations
     const data = getContactTabData(activeTab, contact)
-    
+
     // Create custom tab renderers for special tabs
     const customTabRenderers = {
       details: (isFullScreen = false) => <ContactDetailsPanel contact={contact} isFullScreen={isFullScreen} />,
@@ -328,7 +303,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
 
     // Create a handler for "add" actions for empty states
     const handleAdd = () => {
-      console.log(`Add new ${activeTab.slice(0, -1)} for ${contact.firstName} ${contact.lastName}`);
+      console.log(`Add new ${activeTab.slice(0, -1)} for ${contact.firstName} ${contact.lastName}`)
       // In a real implementation, this would open the appropriate modal or form
     }
 
@@ -358,7 +333,12 @@ function ContactNameCell({ contact }: { contact: Contact }) {
       trigger={
         <Button variant="link" className="px-0 h-auto font-medium flex items-center gap-2 text-left">
           <Avatar className="h-8 w-8">
-            {contact.avatar && <AvatarImage src={contact.avatar} alt={`${contact.firstName} ${contact.lastName}`} />}
+            {contact.avatar && (
+              <AvatarImage
+                src={contact.avatar || "/placeholder.svg"}
+                alt={`${contact.firstName} ${contact.lastName}`}
+              />
+            )}
             <AvatarFallback>
               {contact.firstName.charAt(0)}
               {contact.lastName.charAt(0)}
@@ -485,6 +465,201 @@ function getContactTabData(activeTab: string, contact: Contact) {
   }
 }
 
+function ContactActivityContent({ contact }: { contact: Contact }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+
+  const activities = [
+    {
+      id: 1,
+      type: "meeting",
+      actor: "You",
+      action: "had a meeting with",
+      target: `${contact.firstName} ${contact.lastName}`,
+      timestamp: "3 days ago",
+      date: "2025-01-27",
+      details: {
+        type: "Video Call",
+        duration: "45 minutes",
+        topics: ["Partnership opportunities", "Q1 planning", "Budget discussion"],
+        outcome: "Positive discussion, follow-up scheduled",
+        nextSteps: "Send proposal by Friday, schedule technical review",
+      },
+    },
+    {
+      id: 2,
+      type: "email",
+      actor: contact.firstName,
+      action: "sent email about",
+      target: "Project collaboration",
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        subject: "Re: Partnership Proposal",
+        type: "Response",
+        sentiment: "Positive",
+        keyPoints: ["Interested in collaboration", "Budget approved", "Timeline discussion needed"],
+        followUp: "Schedule technical review meeting",
+      },
+    },
+    {
+      id: 3,
+      type: "role_change",
+      actor: contact.firstName,
+      action: "was promoted to",
+      target: contact.jobTitle,
+      timestamp: "2 months ago",
+      date: "2024-11-28",
+      details: {
+        previousRole: "Senior Manager",
+        newRole: contact.jobTitle,
+        company: contact.company,
+        effectiveDate: "2024-12-01",
+        impact: "Increased decision-making authority, larger budget responsibility",
+      },
+    },
+  ]
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "meeting":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      case "email":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      case "role_change":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span>{" "}
+        <span className="text-muted-foreground">{activity.action}</span>{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    )
+  }
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "meeting":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Duration:</span> <span>{activity.details.duration}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.topics.join(", ")}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Outcome</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.outcome}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
+            </div>
+          </div>
+        )
+      case "email":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Email Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Subject:</span> <span>{activity.details.subject}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Sentiment:</span> <span>{activity.details.sentiment}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Key Points</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.keyPoints.join(", ")}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Follow Up</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.followUp}</p>
+            </div>
+          </div>
+        )
+      case "role_change":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Role Change Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Role:</span>{" "}
+                  <span>{activity.details.previousRole}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Role:</span> <span>{activity.details.newRole}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Company:</span> <span>{activity.details.company}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Effective Date:</span>{" "}
+                  <span>{activity.details.effectiveDate}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Impact</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.impact}</p>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Contact; isFullScreen?: boolean }) {
   const fieldGroups = [
     {
@@ -501,13 +676,34 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
         { label: "Bio", value: contact.bio },
       ],
     },
-  ];
+  ]
+
+  // Define additional content with Activity section
+  const additionalContent = (
+    <>
+      {/* Show all values button */}
+      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+        Show all values (including social profiles)
+      </Button>
+
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <ContactActivityContent contact={contact} />
+        </div>
+      )}
+    </>
+  )
 
   return (
-    <MasterDetailsPanel 
-      fieldGroups={fieldGroups}
-      isFullScreen={isFullScreen}
-    />
+    <MasterDetailsPanel fieldGroups={fieldGroups} isFullScreen={isFullScreen} additionalContent={additionalContent} />
   )
 }
 
@@ -722,9 +918,7 @@ export function PeopleTable() {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id} className="whitespace-nowrap">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -735,9 +929,7 @@ export function PeopleTable() {
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
                 </TableRow>
               ))
@@ -755,8 +947,8 @@ export function PeopleTable() {
       {/* Pagination */}
       <div className="flex items-center justify-between">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
+          selected.
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">

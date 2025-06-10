@@ -52,12 +52,11 @@ import {
   FolderIcon,
   UsersIcon,
   CheckCircleIcon,
-  DollarSignIcon,
   TrendingUpIcon,
 } from "lucide-react"
-import { Label } from "@/components/ui/label"
 import { MasterDrawer } from "./master-drawer"
 import { AddOpportunityDialog } from "./add-opportunity-dialog"
+import { MasterDetailsPanel } from "./master-details-panel"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -610,89 +609,260 @@ function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
   )
 }
 
+function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+
+  const activities = [
+    {
+      id: 1,
+      type: "stage_change",
+      actor: "Deal Team",
+      action: "moved opportunity to",
+      target: opportunity.stage,
+      timestamp: "3 days ago",
+      date: "2025-01-27",
+      details: {
+        previousStage: "Initial Contact",
+        newStage: opportunity.stage,
+        reason: "Completed preliminary due diligence",
+        nextSteps: ["Management presentation", "Financial model review", "Reference calls"],
+        timeline: "2-3 weeks",
+      },
+    },
+    {
+      id: 2,
+      type: "meeting",
+      actor: "Investment Team",
+      action: "conducted management meeting for",
+      target: opportunity.name,
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        meetingType: "Management Presentation",
+        duration: "2 hours",
+        attendees: ["CEO", "CFO", "CTO", "Investment Team"],
+        topics: ["Business model", "Market opportunity", "Financial projections", "Use of funds"],
+        outcome: "Positive feedback, proceeding to next stage",
+      },
+    },
+    {
+      id: 3,
+      type: "due_diligence",
+      actor: "Legal Team",
+      action: "completed legal review for",
+      target: opportunity.name,
+      timestamp: "2 weeks ago",
+      date: "2025-01-16",
+      details: {
+        reviewType: "Legal Due Diligence",
+        scope: ["Corporate structure", "Contracts review", "IP analysis", "Compliance check"],
+        findings: "No material issues identified",
+        recommendations: ["Standard legal documentation", "IP protection enhancement"],
+        status: "Completed",
+      },
+    },
+  ]
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "stage_change":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      case "meeting":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+      case "due_diligence":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
+
+  const formatActivityText = (activity: any) => {
+    return (
+      <span>
+        <span className="font-medium">{activity.actor}</span>{" "}
+        <span className="text-muted-foreground">{activity.action}</span>{" "}
+        <span className="font-medium">{activity.target}</span>
+      </span>
+    )
+  }
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "stage_change":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Stage Change Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Stage:</span>{" "}
+                  <span>{activity.details.previousStage}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Stage:</span> <span>{activity.details.newStage}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Timeline:</span> <span>{activity.details.timeline}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
+              <ul className="text-sm text-muted-foreground list-disc list-inside">
+                {activity.details.nextSteps.map((step: string, index: number) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )
+      case "meeting":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.meetingType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Duration:</span> <span>{activity.details.duration}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Attendees</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.attendees.join(", ")}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.topics.join(", ")}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Outcome</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.outcome}</p>
+            </div>
+          </div>
+        )
+      case "due_diligence":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Due Diligence Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Review Type:</span> <span>{activity.details.reviewType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span> <span>{activity.details.status}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Scope</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.scope.join(", ")}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Findings</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.findings}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Recommendations</h5>
+              <ul className="text-sm text-muted-foreground list-disc list-inside">
+                {activity.details.recommendations.map((rec: string, index: number) => (
+                  <li key={index}>{rec}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function OpportunityDetailsPanel({
   opportunity,
   isFullScreen = false,
 }: { opportunity: Opportunity; isFullScreen?: boolean }) {
-  return (
-    <div className="px-6 pt-2 pb-6">
-      {/* Opportunity Details */}
-      <div className="space-y-4">
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Opportunity Name</Label>
-                <p className="text-sm font-medium">{opportunity.name}</p>
-              </div>
-            </div>
+  // Define additional content with Activity section
+  const additionalContent = (
+    <>
+      {/* Show all values button */}
+      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+        Show all values
+      </Button>
 
-            <div className="flex items-center gap-2">
-              <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Company ({opportunity.company.type})</Label>
-                <p className="text-sm">{opportunity.company.name}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <UsersIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Contact (Deal Sponsor)</Label>
-                <p className="text-sm">{opportunity.contact.name}</p>
-                <p className="text-xs text-muted-foreground">{opportunity.contact.role}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Legal Entity (Investing Party)</Label>
-                <p className="text-sm">{opportunity.legalEntity.name}</p>
-                <p className="text-xs text-muted-foreground">{opportunity.legalEntity.type}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Investment Amount</Label>
-                <p className="text-sm">{opportunity.amount}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Expected Close</Label>
-                <p className="text-sm">{opportunity.expectedClose}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Probability</Label>
-                <p className="text-sm">{opportunity.probability}%</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2">
-              <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Description</Label>
-                <p className="text-sm">{opportunity.description}</p>
-              </div>
-            </div>
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
           </div>
+          <OpportunityActivityContent opportunity={opportunity} />
         </div>
+      )}
+    </>
+  )
 
-        <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-          Show all values
-        </Button>
-      </div>
-    </div>
+  return (
+    <MasterDetailsPanel
+      fieldGroups={[
+        {
+          id: "opportunity-info",
+          label: "Opportunity Information",
+          icon: TrendingUpIcon,
+          fields: [
+            { label: "Opportunity Name", value: opportunity.name },
+            { label: "Company", value: `${opportunity.company.name} (${opportunity.company.type})` },
+            { label: "Contact", value: `${opportunity.contact.name} - ${opportunity.contact.role}` },
+            { label: "Legal Entity", value: `${opportunity.legalEntity.name} (${opportunity.legalEntity.type})` },
+            { label: "Investment Amount", value: opportunity.amount },
+            { label: "Expected Close", value: opportunity.expectedClose },
+            { label: "Probability", value: `${opportunity.probability}%` },
+            { label: "Description", value: opportunity.description },
+          ],
+        },
+      ]}
+      isFullScreen={isFullScreen}
+      additionalContent={additionalContent}
+    />
   )
 }
 
