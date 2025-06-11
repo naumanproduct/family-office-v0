@@ -1,244 +1,1101 @@
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+"use client"
 
+import * as React from "react"
+import {
+  type ColumnDef,
+  type ColumnFiltersState,
+  type SortingState,
+  type VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+import {
+  ChevronDownIcon,
+  ColumnsIcon,
+  FilterIcon,
+  PlusIcon,
+  SearchIcon,
+  BuildingIcon,
+  FileTextIcon,
+  CalendarIcon,
+  FolderIcon,
+  DollarSignIcon,
+  TrendingUpIcon,
+  MailIcon,
+  ClockIcon,
+  MessageSquareIcon,
+} from "lucide-react"
+import { z } from "zod"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { MoreHorizontal } from "lucide-react"
-import { Building2Icon, UsersIcon, TrendingUpIcon, TargetIcon, ChevronDownIcon } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { MasterDrawer } from "./master-drawer"
+import { AddAssetDialog } from "./add-asset-dialog"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 
-export type Asset = {
-  id: string
-  name: string
-  description: string
-  imageUrl: string
-  status: "active" | "inactive"
-  createdAt: Date
-  updatedAt: Date
-  owner: {
-    id: string
-    name: string
-    email: string
-    imageUrl: string
+export const assetSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  type: z.string(),
+  category: z.string(),
+  currentValue: z.string(),
+  originalCost: z.string(),
+  unrealizedGain: z.string(),
+  percentageGain: z.number(),
+  acquisitionDate: z.string(),
+  lastValuation: z.string(),
+  entity: z.string(),
+  status: z.string(),
+  sector: z.string(),
+  geography: z.string(),
+})
+
+export type Asset = z.infer<typeof assetSchema>
+
+export const assetsData: Asset[] = [
+  {
+    id: 1,
+    name: "TechFlow Ventures Series C",
+    type: "Equity Investment",
+    category: "Private Equity",
+    currentValue: "$18.5M",
+    originalCost: "$15.0M",
+    unrealizedGain: "$3.5M",
+    percentageGain: 23.3,
+    acquisitionDate: "2023-08-15",
+    lastValuation: "2024-06-30",
+    entity: "Meridian Capital Fund III",
+    status: "Active",
+    sector: "Enterprise Software",
+    geography: "North America",
+  },
+  {
+    id: 2,
+    name: "MedInnovate Seed Round",
+    type: "Equity Investment",
+    category: "Venture Capital",
+    currentValue: "$4.2M",
+    originalCost: "$3.0M",
+    unrealizedGain: "$1.2M",
+    percentageGain: 40.0,
+    acquisitionDate: "2024-01-30",
+    lastValuation: "2024-06-30",
+    entity: "Innovation Ventures LLC",
+    status: "Active",
+    sector: "Healthcare Technology",
+    geography: "North America",
+  },
+  {
+    id: 3,
+    name: "PayFlow Solutions Growth",
+    type: "Equity Investment",
+    category: "Growth Capital",
+    currentValue: "$22.8M",
+    originalCost: "$25.0M",
+    unrealizedGain: "-$2.2M",
+    percentageGain: -8.8,
+    acquisitionDate: "2023-10-15",
+    lastValuation: "2024-06-30",
+    entity: "Global Growth Partners",
+    status: "Under Review",
+    sector: "Financial Technology",
+    geography: "Global",
+  },
+  {
+    id: 4,
+    name: "Urban Development Fund II",
+    type: "Fund Investment",
+    category: "Real Estate",
+    currentValue: "$85.6M",
+    originalCost: "$80.0M",
+    unrealizedGain: "$5.6M",
+    percentageGain: 7.0,
+    acquisitionDate: "2022-09-30",
+    lastValuation: "2024-03-31",
+    entity: "Real Estate Investment Trust",
+    status: "Active",
+    sector: "Real Estate",
+    geography: "North America",
+  },
+  {
+    id: 5,
+    name: "Green Energy Infrastructure",
+    type: "Direct Investment",
+    category: "Infrastructure",
+    currentValue: "$45.2M",
+    originalCost: "$40.0M",
+    unrealizedGain: "$5.2M",
+    percentageGain: 13.0,
+    acquisitionDate: "2023-03-15",
+    lastValuation: "2024-06-30",
+    entity: "Sustainable Infrastructure Fund",
+    status: "Active",
+    sector: "Clean Energy",
+    geography: "Europe",
+  },
+]
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Active":
+      return "bg-green-100 text-green-800"
+    case "Under Review":
+      return "bg-yellow-100 text-yellow-800"
+    case "Exited":
+      return "bg-blue-100 text-blue-800"
+    case "Written Off":
+      return "bg-red-100 text-red-800"
+    default:
+      return "bg-gray-100 text-gray-800"
   }
 }
 
-export const columns: ColumnDef<Asset>[] = [
+const getGainColor = (percentage: number) => {
+  if (percentage > 0) return "text-green-600"
+  if (percentage < 0) return "text-red-600"
+  return "text-gray-600"
+}
+
+function AssetNameCell({ asset }: { asset: Asset }) {
+  const tabs = [
+    { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: ClockIcon },
+    { id: "notes", label: "Notes", count: 1, icon: MessageSquareIcon },
+    { id: "meetings", label: "Meetings", count: 3, icon: CalendarIcon },
+    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "files", label: "Files", count: 4, icon: FolderIcon },
+    { id: "company", label: "Company", count: null, icon: BuildingIcon },
+    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
+  ]
+
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    if (activeTab === "details") {
+      return <AssetDetailsPanel asset={asset} isFullScreen={false} />
+    }
+
+    if (activeTab === "company") {
+      return <AssetCompanyContent asset={asset} />
+    }
+
+    if (activeTab === "performance") {
+      return <AssetPerformanceContent asset={asset} />
+    }
+
+    // For other tabs, use TabContentRenderer instead of custom implementations
+    const data = getAssetTabData(activeTab, asset)
+
+    // Create custom tab renderers for special tabs
+    const customTabRenderers = {
+      details: (isFullScreen = false) => <AssetDetailsPanel asset={asset} isFullScreen={isFullScreen} />,
+      company: (isFullScreen = false) => <AssetCompanyContent asset={asset} />,
+      performance: (isFullScreen = false) => <AssetPerformanceContent asset={asset} />,
+    }
+
+    // Create a handler for "add" actions for empty states
+    const handleAdd = () => {
+      console.log(`Add new ${activeTab.slice(0, -1)} for ${asset.name}`)
+      // In a real implementation, this would open the appropriate modal or form
+    }
+
+    return (
+      <TabContentRenderer
+        activeTab={activeTab}
+        viewMode={viewMode}
+        data={data}
+        customTabRenderers={customTabRenderers}
+        onTaskClick={setSelectedTask}
+        onNoteClick={setSelectedNote}
+        onMeetingClick={setSelectedMeeting}
+        onEmailClick={setSelectedEmail}
+        onAdd={handleAdd}
+      />
+    )
+  }
+
+  const renderDetailsPanel = (isFullScreen = false) => {
+    return <AssetDetailsPanel asset={asset} isFullScreen={isFullScreen} />
+  }
+
+  const customActions: React.ReactNode[] = []
+
+  return (
+    <MasterDrawer
+      trigger={
+        <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium">
+              {asset.name.charAt(0)}
+            </div>
+            <span className="font-medium">{asset.name}</span>
+          </div>
+        </Button>
+      }
+      title={asset.name}
+      recordType="Assets"
+      subtitle={`${asset.type} • ${asset.category}`}
+      tabs={tabs}
+      detailsPanel={renderDetailsPanel}
+      customActions={customActions}
+    >
+      {renderTabContent}
+    </MasterDrawer>
+  )
+}
+
+function getAssetTabData(activeTab: string, asset: Asset) {
+  switch (activeTab) {
+    case "emails":
+      return [
+        {
+          id: 1,
+          subject: "Investment Performance Update",
+          from: "portfolio@company.com",
+          date: "2 hours ago",
+          status: "Unread",
+          preview: "Quarterly performance report for your investment in " + asset.name,
+          type: "received",
+        },
+        {
+          id: 2,
+          subject: "Valuation Update Required",
+          from: "me@company.com",
+          date: "1 day ago",
+          status: "Sent",
+          preview: "Please provide updated valuation for " + asset.name,
+          type: "sent",
+        },
+      ]
+    case "tasks":
+      return [
+        {
+          id: 1,
+          title: "Review quarterly performance",
+          priority: "High",
+          status: "pending",
+          assignee: "You",
+          dueDate: "Tomorrow",
+          description: "Review Q3 performance metrics and prepare summary report.",
+        },
+        {
+          id: 2,
+          title: "Update valuation model",
+          priority: "Medium",
+          status: "completed",
+          assignee: "You",
+          dueDate: "2 days ago",
+          description: "Updated valuation model with latest market data.",
+        },
+        {
+          id: 3,
+          title: "Capital Call",
+          priority: "High",
+          status: "In Progress",
+          assignee: "You",
+          dueDate: "2024-01-15",
+          description: "Process capital call for TechFlow Ventures Series C investment",
+          subtasks: [
+            {
+              id: "CC-1",
+              title: "Review Capital Call Notice PDF",
+              description: "Open and understand key terms (amount, due date)",
+              status: "Completed",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-10",
+              subtasks: [],
+            },
+            {
+              id: "CC-2",
+              title: "Validate with Principal",
+              description: "Confirm LP or internal commitment matches",
+              status: "Completed",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-11",
+              subtasks: [],
+            },
+            {
+              id: "CC-3",
+              title: "Record in System",
+              description: "Log in accounting system or ledger",
+              status: "In Progress",
+              priority: "Medium",
+              assignee: "You",
+              dueDate: "2024-01-12",
+              subtasks: [],
+            },
+            {
+              id: "CC-4",
+              title: "Notify Accountant",
+              description: "Forward or tag accountant for payment setup",
+              status: "To Do",
+              priority: "Medium",
+              assignee: "Sarah Johnson",
+              dueDate: "2024-01-13",
+              subtasks: [],
+            },
+            {
+              id: "CC-5",
+              title: "Confirm Wire Date",
+              description: "Align on when funds will be sent",
+              status: "To Do",
+              priority: "High",
+              assignee: "You",
+              dueDate: "2024-01-14",
+              subtasks: [],
+            },
+            {
+              id: "CC-6",
+              title: "Follow-Up if Not Funded",
+              description: "If deadline passes, notify appropriate party",
+              status: "To Do",
+              priority: "Medium",
+              assignee: "You",
+              dueDate: "2024-01-16",
+              subtasks: [],
+            },
+            {
+              id: "CC-7",
+              title: "Mark as Complete",
+              description: "Close the call internally",
+              status: "To Do",
+              priority: "Low",
+              assignee: "You",
+              dueDate: "2024-01-17",
+              subtasks: [],
+            },
+          ],
+        },
+      ]
+    case "notes":
+      return [
+        {
+          id: 1,
+          title: "Investment thesis review",
+          date: "3 days ago",
+          content: `Strong performance in ${asset.sector} sector. Key growth drivers remain intact.`,
+          tags: ["Investment", "Review"],
+        },
+      ]
+    case "meetings":
+      return [
+        {
+          id: 1,
+          title: "Portfolio Review Meeting",
+          date: "Tomorrow",
+          time: "2:00 PM - 3:00 PM",
+          status: "Confirmed",
+          location: "Conference Room A",
+          attendees: 5,
+          description: `Quarterly review of ${asset.name} performance.`,
+        },
+      ]
+    case "files":
+      return [
+        {
+          id: 1,
+          name: "Investment_Agreement.pdf",
+          size: "2.4 MB",
+          uploadedBy: "Legal Team",
+          uploadedDate: "2 days ago",
+          type: "pdf",
+          description: "Original investment agreement and terms.",
+        },
+      ]
+    case "team":
+      return [
+        {
+          id: 1,
+          name: "Sarah Johnson",
+          role: "Portfolio Manager",
+          email: "sarah.johnson@company.com",
+          phone: "+1 (555) 123-4567",
+          department: "Investments",
+          joinDate: "2023-01-15",
+          status: "Active",
+        },
+      ]
+    default:
+      return []
+  }
+}
+
+function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
+  // Define field groups for the MasterDetailsPanel - consolidate into single group
+  const fieldGroups = [
+    {
+      id: "asset-info",
+      label: "Asset Information",
+      icon: DollarSignIcon,
+      fields: [
+        {
+          label: "Asset Name",
+          value: asset.name,
+        },
+        {
+          label: "Asset Type",
+          value: asset.type,
+        },
+        {
+          label: "Investment Thesis",
+          value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
+        },
+        {
+          label: "Owning Entity",
+          value: asset.entity,
+          isLink: true,
+        },
+        {
+          label: "Acquisition Date",
+          value: asset.acquisitionDate,
+        },
+        {
+          label: "Current Value",
+          value: asset.currentValue,
+        },
+        {
+          label: "Performance",
+          value: (
+            <span className={getGainColor(asset.percentageGain)}>
+              {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
+              {asset.percentageGain}%)
+            </span>
+          ),
+        },
+      ],
+    },
+  ]
+
+  // Define additional content (portfolios section and activity section)
+  const additionalContent = (
+    <>
+      {/* Show all values button */}
+      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+        Show all values
+      </Button>
+
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <AssetActivityContent asset={asset} />
+        </div>
+      )}
+    </>
+  )
+
+  return (
+    <MasterDetailsPanel fieldGroups={fieldGroups} isFullScreen={isFullScreen} additionalContent={additionalContent} />
+  )
+}
+
+function AssetActivityContent({ asset }: { asset: Asset }) {
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+
+  const activities = [
+    {
+      id: 1,
+      type: "valuation",
+      actor: "Portfolio Team",
+      action: "updated valuation for",
+      target: asset.name,
+      timestamp: "2 days ago",
+      date: "2025-01-28",
+      details: {
+        previousValue: "$17.2M",
+        newValue: asset.currentValue,
+        reason: "Q4 2024 performance review and market comparables analysis",
+        methodology: "DCF and comparable company analysis",
+      },
+    },
+    {
+      id: 2,
+      type: "distribution",
+      actor: asset.name,
+      action: "distributed",
+      target: "$500K",
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        amount: "$500,000",
+        type: "Quarterly Distribution",
+        perShare: "$2.50",
+        totalShares: "200,000",
+        paymentDate: "2025-01-25",
+      },
+    },
+    {
+      id: 3,
+      type: "investment",
+      actor: "Investment Committee",
+      action: "approved investment in",
+      target: asset.name,
+      timestamp: "6 months ago",
+      date: "2024-08-15",
+      details: {
+        amount: asset.originalCost,
+        investmentType: asset.type,
+        sector: asset.sector,
+        geography: asset.geography,
+        approvalDate: "2024-08-10",
+        fundingDate: "2024-08-15",
+      },
+    },
+  ]
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "valuation":
+        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+      case "distribution":
+        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
+      case "investment":
+        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+      default:
+        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
+    }
+  }
+
+  const formatActivityText = (activity: any) => {
+    switch (activity.type) {
+      case "valuation":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <Badge variant="outline" className="text-xs mx-1">
+              {activity.target}
+            </Badge>
+          </span>
+        )
+      case "distribution":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium text-green-600">{activity.target}</span>
+          </span>
+        )
+      case "investment":
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium">{activity.target}</span>
+          </span>
+        )
+      default:
+        return (
+          <span>
+            <span className="font-medium">{activity.actor}</span>{" "}
+            <span className="text-muted-foreground">{activity.action}</span>{" "}
+            <span className="font-medium">{activity.target}</span>
+          </span>
+        )
+    }
+  }
+
+  const renderExpandedDetails = (activity: any) => {
+    switch (activity.type) {
+      case "valuation":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Valuation Update</h5>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Previous Value:</span>{" "}
+                  <span>{activity.details.previousValue}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">New Value:</span>{" "}
+                  <span className="font-medium">{activity.details.newValue}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Methodology</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.methodology}</p>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Reason</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
+            </div>
+          </div>
+        )
+      case "distribution":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Distribution Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Per Share:</span> <span>{activity.details.perShare}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Total Shares:</span>{" "}
+                  <span>{activity.details.totalShares}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium mb-1">Payment Date</h5>
+              <p className="text-sm text-muted-foreground">{activity.details.paymentDate}</p>
+            </div>
+          </div>
+        )
+      case "investment":
+        return (
+          <div className="mt-4 space-y-3">
+            <div>
+              <h5 className="text-sm font-medium mb-2">Investment Details</h5>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.investmentType}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Sector:</span> <span>{activity.details.sector}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Geography:</span> <span>{activity.details.geography}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Approval Date:</span>{" "}
+                <span>{activity.details.approvalDate}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Funding Date:</span> <span>{activity.details.fundingDate}</span>
+              </div>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {activities.map((activity) => (
+        <div key={activity.id}>
+          <button
+            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
+            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+          >
+            <div className="mt-1">{getActivityIcon(activity.type)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm">{formatActivityText(activity)}</div>
+              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            </div>
+            <ChevronDownIcon
+              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                expandedActivity === activity.id ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {expandedActivity === activity.id && (
+            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function AssetCompanyContent({ asset }: { asset: Asset }) {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-start gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary text-primary-foreground text-2xl font-bold">
+              AC
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-xl">Acme Corporation</CardTitle>
+              <CardDescription className="mt-1">Technology • San Francisco, CA</CardDescription>
+              <div className="mt-3 flex items-center gap-4">
+                <Badge variant="outline">Enterprise</Badge>
+                <Badge variant="outline" className="text-green-600">
+                  Active Customer
+                </Badge>
+                <span className="text-sm text-muted-foreground">Founded 2015</span>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium mb-2">Company Overview</h4>
+            <p className="text-sm text-muted-foreground">
+              Acme Corporation is a leading technology company specializing in enterprise software solutions. They
+              provide innovative tools for project management, team collaboration, and business analytics to Fortune 500
+              companies worldwide. With over 500 employees and offices in 12 countries, Acme has established itself as a
+              trusted partner for digital transformation initiatives.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-sm font-medium mb-2">Key Details</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Industry:</span>
+                  <span>Technology</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Employees:</span>
+                  <span>500-1000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Revenue:</span>
+                  <span>$50M - $100M</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Website:</span>
+                  <span className="text-blue-600">acme.com</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-2">Contact Info</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Phone:</span>
+                  <span>+1 (555) 123-4567</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email:</span>
+                  <span className="text-blue-600">info@acme.com</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Address:</span>
+                  <span>123 Tech St, SF, CA</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-medium mb-2">Recent Activity</h4>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span>Contract renewed for $250K</span>
+                <span className="text-muted-foreground">• 2 weeks ago</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                <span>New contact added: Sarah Johnson</span>
+                <span className="text-muted-foreground">• 1 month ago</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+function AssetPerformanceContent({ asset }: { asset: Asset }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Performance</h3>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            1Y
+          </Button>
+          <Button variant="outline" size="sm">
+            3Y
+          </Button>
+          <Button variant="outline" size="sm">
+            5Y
+          </Button>
+          <Button variant="outline" size="sm">
+            All
+          </Button>
+        </div>
+      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+            Performance chart would appear here
+          </div>
+        </CardContent>
+      </Card>
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm text-muted-foreground">Total Return</div>
+            <div className={`text-2xl font-semibold ${getGainColor(asset.percentageGain)}`}>
+              {asset.percentageGain > 0 ? "+" : ""}
+              {asset.percentageGain}%
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm text-muted-foreground">IRR</div>
+            <div className="text-2xl font-semibold">12.4%</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm text-muted-foreground">MOIC</div>
+            <div className="text-2xl font-semibold">1.8x</div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
+const columns: ColumnDef<Asset>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => (
-      <div className="flex items-center space-x-2">
-        <Avatar>
-          <AvatarImage src={row.original.imageUrl || "/placeholder.svg"} alt={row.original.name} />
-          <AvatarFallback>{row.original.name.substring(0, 2)}</AvatarFallback>
-        </Avatar>
-        <span className="font-medium">{row.original.name}</span>
-      </div>
-    ),
+    cell: ({ row }) => <AssetNameCell asset={row.original} />,
   },
   {
-    accessorKey: "description",
-    header: "Description",
+    accessorKey: "type",
+    header: "Type",
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+  },
+  {
+    accessorKey: "currentValue",
+    header: "Current Value",
+  },
+  {
+    accessorKey: "originalCost",
+    header: "Original Cost",
+  },
+  {
+    accessorKey: "unrealizedGain",
+    header: "Unrealized Gain",
+  },
+  {
+    accessorKey: "percentageGain",
+    header: "Percentage Gain",
+    cell: ({ row }) => {
+      const percentage = row.original.percentageGain
+      const gainColor = getGainColor(percentage)
+      return (
+        <span className={gainColor}>
+          {percentage > 0 ? "+" : ""}
+          {percentage}%
+        </span>
+      )
+    },
+  },
+  {
+    accessorKey: "acquisitionDate",
+    header: "Acquisition Date",
+  },
+  {
+    accessorKey: "lastValuation",
+    header: "Last Valuation",
+  },
+  {
+    accessorKey: "entity",
+    header: "Entity",
   },
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
-      <Badge variant={row.original.status === "active" ? "default" : "destructive"}>{row.original.status}</Badge>
-    ),
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => row.original.createdAt.toLocaleDateString(),
-  },
-  {
-    id: "actions",
     cell: ({ row }) => {
-      const asset = row.original
-      return (
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="sm:max-w-lg">
-            <SheetHeader>
-              <SheetTitle>Asset Details</SheetTitle>
-              <SheetDescription>
-                View all the details of this asset. Click below to navigate to the asset page.
-              </SheetDescription>
-            </SheetHeader>
-            <MasterDetailsPanel asset={asset} />
-          </SheetContent>
-        </Sheet>
-      )
+      const status = row.original.status
+      const statusColor = getStatusColor(status)
+      return <Badge className={statusColor}>{status}</Badge>
     },
+  },
+  {
+    accessorKey: "sector",
+    header: "Sector",
+  },
+  {
+    accessorKey: "geography",
+    header: "Geography",
   },
 ]
 
-interface MasterDetailsPanelProps {
-  asset: Asset
-}
+export function AssetsTable() {
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [globalFilter, setGlobalFilter] = React.useState("")
+  const [isAddAssetDialogOpen, setIsAddAssetDialogOpen] = React.useState(false)
 
-function MasterDetailsPanel({ asset }: MasterDetailsPanelProps) {
-  return (
-    <ScrollArea>
-      <div className="p-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>{asset.name}</CardTitle>
-            <CardDescription>{asset.description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-4">
-              <Avatar>
-                <AvatarImage src={asset.imageUrl || "/placeholder.svg"} alt={asset.name} />
-                <AvatarFallback>{asset.name.substring(0, 2)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium leading-none">{asset.owner.name}</p>
-                <p className="text-sm text-muted-foreground">{asset.owner.email}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Collapsible Sections */}
-        <div className="space-y-4">
-          {/* Company Section */}
-          <Collapsible defaultOpen={false}>
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 hover:bg-muted/50">
-              <div className="flex items-center gap-2">
-                <Building2Icon className="h-4 w-4" />
-                <span className="font-medium">Company</span>
-              </div>
-              <ChevronDownIcon className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Badge variant="secondary">Acme Corp</Badge>
-                <Badge variant="secondary">TechStart Inc</Badge>
-                <Badge variant="secondary">Global Ventures</Badge>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* People Section */}
-          <Collapsible defaultOpen={false}>
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 hover:bg-muted/50">
-              <div className="flex items-center gap-2">
-                <UsersIcon className="h-4 w-4" />
-                <span className="font-medium">People</span>
-              </div>
-              <ChevronDownIcon className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Badge variant="secondary">John Smith</Badge>
-                <Badge variant="secondary">Sarah Johnson</Badge>
-                <Badge variant="secondary">Michael Chen</Badge>
-                <Badge variant="secondary">Emily Davis</Badge>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Investments Section */}
-          <Collapsible defaultOpen={false}>
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 hover:bg-muted/50">
-              <div className="flex items-center gap-2">
-                <TrendingUpIcon className="h-4 w-4" />
-                <span className="font-medium">Investments</span>
-              </div>
-              <ChevronDownIcon className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Badge variant="secondary">Series A - $2M</Badge>
-                <Badge variant="secondary">Seed Round - $500K</Badge>
-                <Badge variant="secondary">Bridge - $1M</Badge>
-                <Badge variant="secondary">Series B - $5M</Badge>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          {/* Opportunities Section */}
-          <Collapsible defaultOpen={false}>
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 hover:bg-muted/50">
-              <div className="flex items-center gap-2">
-                <TargetIcon className="h-4 w-4" />
-                <span className="font-medium">Opportunities</span>
-              </div>
-              <ChevronDownIcon className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 pb-4">
-              <div className="flex flex-wrap gap-2 pt-2">
-                <Badge variant="secondary">Exit Strategy</Badge>
-                <Badge variant="secondary">IPO Preparation</Badge>
-                <Badge variant="secondary">Strategic Partnership</Badge>
-                <Badge variant="secondary">Market Expansion</Badge>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-      </div>
-    </ScrollArea>
-  )
-}
-
-interface DataTableProps {
-  columns: ColumnDef<Asset>[]
-  data: Asset[]
-}
-
-export function AssetsTable({ columns, data }: DataTableProps) {
   const table = useReactTable({
-    data,
+    data: assetsData,
     columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onGlobalFilterChange: setGlobalFilter,
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      globalFilter,
+    },
   })
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                ))}
+    <div className="space-y-4">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <div className="relative">
+            <SearchIcon className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search assets..."
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="pl-8 w-[300px]"
+            />
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FilterIcon className="mr-2 h-4 w-4" />
+                Filter
+                <ChevronDownIcon className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-[200px]">
+              <DropdownMenuItem>Active assets</DropdownMenuItem>
+              <DropdownMenuItem>High performers</DropdownMenuItem>
+              <DropdownMenuItem>Under review</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Private equity</DropdownMenuItem>
+              <DropdownMenuItem>Venture capital</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex items-center space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <ColumnsIcon className="mr-2 h-4 w-4" />
+                Columns
+                <ChevronDownIcon className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              {table
+                .getAllColumns()
+                .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  )
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button size="sm" onClick={() => setIsAddAssetDialogOpen(true)}>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Add Asset
+          </Button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id} className="h-10">
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="h-12">
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="py-2">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <AddAssetDialog isOpen={isAddAssetDialogOpen} onClose={() => setIsAddAssetDialogOpen(false)} />
     </div>
   )
 }

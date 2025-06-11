@@ -306,19 +306,19 @@ export function MasterDrawer({
             <div className="flex-1 overflow-y-auto">
               {/* Tabs */}
               <div className="border-b bg-background px-6">
-                <div className="flex gap-8 relative">
+                <div className="flex relative overflow-x-auto">
                   {fullScreenVisibleTabs.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
+                      className={`relative whitespace-nowrap py-3 px-4 text-sm font-medium flex items-center gap-2 min-w-0 ${
                         activeTab === tab.id
                           ? "border-b-2 border-primary text-primary"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {tab.icon && <tab.icon className="h-4 w-4" />}
-                      {tab.label}
+                      <span className="truncate max-w-[120px]">{tab.label}</span>
                       {tab.count !== null && (
                         <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
                           {tab.count}
@@ -599,19 +599,19 @@ export function MasterDrawer({
           {/* Tabs */}
           {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && (
             <div className="border-b bg-background px-6">
-              <div className="flex gap-8 relative">
+              <div className="flex relative overflow-x-auto">
                 {visibleTabs.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
+                    className={`relative whitespace-nowrap py-3 px-4 text-sm font-medium flex items-center gap-2 min-w-0 ${
                       activeTab === tab.id
                         ? "border-b-2 border-primary text-primary"
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {tab.icon && <tab.icon className="h-4 w-4" />}
-                    {tab.label}
+                    <span className="truncate max-w-[120px]">{tab.label}</span>
                     {tab.count !== null && (
                       <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
                         {tab.count}
