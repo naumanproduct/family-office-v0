@@ -174,7 +174,7 @@ export function ObjectsManagement() {
   }
 
   return (
-    <Card>
+    <Card className="shadow-none border-0 bg-transparent">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -232,7 +232,7 @@ export function ObjectsManagement() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border">
+        <div>
           <Table>
             <TableHeader>
               <TableRow>

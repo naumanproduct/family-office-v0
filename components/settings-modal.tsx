@@ -229,42 +229,42 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                   {activeCategory === "objects" && <ObjectsManagement />}
                   {activeCategory === "workflows" && <WorkflowsManagement />}
                   {activeCategory === "general" && (
-                    <Card className="shadow-none border-0">
+                    <Card className="shadow-none border-0 bg-transparent">
                       <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">General settings coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "security" && (
-                    <Card className="shadow-none border-0">
+                    <Card className="shadow-none border-0 bg-transparent">
                       <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">Security settings coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "integrations" && (
-                    <Card className="shadow-none border-0">
+                    <Card className="shadow-none border-0 bg-transparent">
                       <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">Integrations coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "notifications" && (
-                    <Card className="shadow-none border-0">
+                    <Card className="shadow-none border-0 bg-transparent">
                       <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">Notification settings coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "users" && (
-                    <Card className="shadow-none border-0">
+                    <Card className="shadow-none border-0 bg-transparent">
                       <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">User management coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "appearance" && (
-                    <Card className="shadow-none border-0">
+                    <Card className="shadow-none border-0 bg-transparent">
                       <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">Appearance settings coming soon...</p>
                       </CardContent>
