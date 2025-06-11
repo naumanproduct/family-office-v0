@@ -29,6 +29,13 @@ import {
   MailIcon,
   ClockIcon,
   MessageSquareIcon,
+  Users,
+  ChevronLeftIcon,
+  XIcon,
+  LayoutIcon,
+  MoreHorizontalIcon,
+  ExternalLinkIcon,
+  UnlinkIcon,
 } from "lucide-react"
 import { z } from "zod"
 
@@ -49,6 +56,7 @@ import { MasterDrawer } from "./master-drawer"
 import { AddAssetDialog } from "./add-asset-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { Label } from "@/components/ui/label"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -445,78 +453,386 @@ function getAssetTabData(activeTab: string, asset: Asset) {
 }
 
 function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
-  // Define field groups for the MasterDetailsPanel - consolidate into single group
-  const fieldGroups = [
-    {
-      id: "asset-info",
-      label: "Asset Information",
-      icon: DollarSignIcon,
-      fields: [
-        {
-          label: "Asset Name",
-          value: asset.name,
-        },
-        {
-          label: "Asset Type",
-          value: asset.type,
-        },
-        {
-          label: "Investment Thesis",
-          value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
-        },
-        {
-          label: "Owning Entity",
-          value: asset.entity,
-          isLink: true,
-        },
-        {
-          label: "Acquisition Date",
-          value: asset.acquisitionDate,
-        },
-        {
-          label: "Current Value",
-          value: asset.currentValue,
-        },
-        {
-          label: "Performance",
-          value: (
-            <span className={getGainColor(asset.percentageGain)}>
-              {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
-              {asset.percentageGain}%)
-            </span>
-          ),
-        },
-      ],
-    },
-  ]
+  // Add state for collapsible sections
+  const [openSections, setOpenSections] = React.useState<{
+    details: boolean;
+    company: boolean;
+    people: boolean;
+    entities: boolean;
+    investments: boolean;
+    opportunities: boolean;
+  }>({
+    details: true, // Details expanded by default
+    company: false,
+    people: false,
+    entities: false,
+    investments: false,
+    opportunities: false,
+  });
 
-  // Define additional content (portfolios section and activity section)
-  const additionalContent = (
-    <>
-      {/* Show all values button */}
-      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-        Show all values
-      </Button>
+  // Add state for showing all values
+  const [showingAllValues, setShowingAllValues] = React.useState(false);
+
+  // Toggle function for collapsible sections
+  const toggleSection = (section: 'details' | 'company' | 'people' | 'entities' | 'investments' | 'opportunities') => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  // Mock data for related entities
+  const relatedData = {
+    companies: [
+      { id: 1, name: "TechFlow Inc.", type: "Portfolio Company" },
+      { id: 2, name: "Meridian Capital", type: "Investment Fund" },
+    ],
+    people: [
+      { id: 1, name: "Sarah Johnson", role: "CEO" },
+      { id: 2, name: "Michael Chen", role: "Investment Manager" },
+      { id: 3, name: "David Williams", role: "Board Member" },
+    ],
+    entities: [
+      { id: 1, name: "Trust #1231", type: "Family Trust" },
+      { id: 2, name: "Offshore Holdings LLC", type: "Holding Company" },
+    ],
+    investments: [
+      { id: 1, name: "Series B Round", amount: "$5M" },
+      { id: 2, name: "Series C Round", amount: "$10M" },
+    ],
+    opportunities: [
+      { id: 1, name: "Expansion Funding", status: "In Discussion" },
+      { id: 2, name: "Strategic Partnership", status: "Initial Review" },
+    ],
+  };
+
+  // Basic fields for collapsed view
+  const basicFields = [
+    {
+      label: "Asset Name",
+      value: asset.name,
+    },
+    {
+      label: "Asset Type",
+      value: asset.type,
+    },
+    {
+      label: "Investment Thesis",
+      value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
+    },
+    {
+      label: "Owning Entity",
+      value: asset.entity,
+      isLink: true,
+    },
+    {
+      label: "Acquisition Date",
+      value: asset.acquisitionDate,
+    },
+    {
+      label: "Current Value",
+      value: asset.currentValue,
+    },
+    {
+      label: "Performance",
+      value: (
+        <span className={getGainColor(asset.percentageGain)}>
+          {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
+          {asset.percentageGain}%)
+        </span>
+      ),
+    },
+  ];
+
+  // Extended fields for "Show all" view
+  const extendedFields = [
+    {
+      label: "Asset Name",
+      value: asset.name,
+    },
+    {
+      label: "Asset Type",
+      value: asset.type,
+    },
+    {
+      label: "Category",
+      value: asset.category,
+    },
+    {
+      label: "Investment Thesis",
+      value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
+    },
+    {
+      label: "Owning Entity",
+      value: asset.entity,
+      isLink: true,
+    },
+    {
+      label: "Status",
+      value: asset.status,
+    },
+    {
+      label: "Acquisition Date",
+      value: asset.acquisitionDate,
+    },
+    {
+      label: "Last Valuation",
+      value: asset.lastValuation,
+    },
+    {
+      label: "Current Value",
+      value: asset.currentValue,
+    },
+    {
+      label: "Original Cost",
+      value: asset.originalCost,
+    },
+    {
+      label: "Unrealized Gain",
+      value: asset.unrealizedGain,
+    },
+    {
+      label: "Performance",
+      value: (
+        <span className={getGainColor(asset.percentageGain)}>
+          {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
+          {asset.percentageGain}%)
+        </span>
+      ),
+    },
+    {
+      label: "Sector",
+      value: asset.sector,
+    },
+    {
+      label: "Geography",
+      value: asset.geography,
+    },
+  ];
+
+  // Navigation function for when a chip is clicked
+  const navigateToRecord = (recordType: string, id: number) => {
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    // This would be implemented to navigate to the record within the same panel
+    // For example, this could update state to show the record details
+  };
+
+  // Render the detail fields
+  const renderFields = (fields: typeof basicFields, showAllButton: boolean = false) => (
+    <div className="space-y-3">
+      {fields.map((field, index) => (
+        <div key={index} className="flex items-center">
+          {/* Field name aligned directly with section icons (matching the ml-2 of icons) */}
+          <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
+
+          {/* Field value */}
+          {field.isLink ? (
+            <p className="text-sm text-blue-600 flex-1">{field.value}</p>
+          ) : (
+            <p className="text-sm flex-1">{field.value}</p>
+          )}
+        </div>
+      ))}
+      {showAllButton && (
+        <div className="flex items-center mt-2">
+          <Button 
+            variant="link" 
+            className="h-auto p-0 text-xs text-blue-600 ml-2"
+            onClick={() => setShowingAllValues(true)}
+          >
+            Show all
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
+  // Items section for related data
+  const ItemsSection = ({ 
+    items 
+  }: { 
+    items: any[] 
+  }) => {
+    // Mock function for adding a linked record
+    const handleAddRecord = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      console.log("Add linked record");
+      // In a real implementation, this would open a dialog to select records to link
+    };
+    
+    // Mock function for removing a linked record
+    const handleUnlinkRecord = (e: React.MouseEvent, id: number) => {
+      e.stopPropagation();
+      console.log(`Unlink record with ID: ${id}`);
+      // In a real implementation, this would remove the link between records
+    };
+
+    // Mock function for viewing a linked record
+    const handleViewRecord = (e: React.MouseEvent, id: number) => {
+      e.stopPropagation();
+      console.log(`View record with ID: ${id}`);
+      // In a real implementation, this would navigate to the record's details
+    };
+    
+    return (
+      <div className="ml-2 group/section">
+        <div className="flex flex-col space-y-2">
+          {items.map((item) => (
+            <div key={item.id} className="flex items-center justify-between group">
+              <Badge 
+                variant="outline" 
+                className="cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-1 py-1 w-fit font-normal"
+                onClick={() => navigateToRecord(item.type || item.role || '', item.id)}
+              >
+                {item.name}
+              </Badge>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <MoreHorizontalIcon className="h-3 w-3 text-muted-foreground" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[160px]">
+                  <DropdownMenuItem onClick={(e) => handleViewRecord(e, item.id)}>
+                    <ExternalLinkIcon className="mr-2 h-3.5 w-3.5" />
+                    <span>View</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={(e) => handleUnlinkRecord(e, item.id)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <UnlinkIcon className="mr-2 h-3.5 w-3.5" />
+                    <span>Unlink</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ))}
+        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="mt-2 text-xs text-muted-foreground opacity-0 group-hover/section:opacity-100 transition-opacity"
+          onClick={handleAddRecord}
+        >
+          <PlusIcon className="h-3 w-3 mr-1" />
+          Add
+        </Button>
+      </div>
+    );
+  };
+
+  // Apple-style section headers and content
+  const sections = [
+    {
+      id: 'details',
+      title: 'Record Details',
+      icon: FileTextIcon,
+      content: renderFields(showingAllValues ? extendedFields : basicFields, !showingAllValues),
+      count: null
+    },
+    {
+      id: 'company',
+      title: 'Company',
+      icon: BuildingIcon,
+      content: <ItemsSection items={relatedData.companies} />,
+      count: relatedData.companies.length
+    },
+    {
+      id: 'people',
+      title: 'People',
+      icon: Users,
+      content: <ItemsSection items={relatedData.people} />,
+      count: relatedData.people.length
+    },
+    {
+      id: 'entities',
+      title: 'Entities',
+      icon: LayoutIcon,
+      content: <ItemsSection items={relatedData.entities} />,
+      count: relatedData.entities.length
+    },
+    {
+      id: 'investments',
+      title: 'Investments',
+      icon: DollarSignIcon,
+      content: <ItemsSection items={relatedData.investments} />,
+      count: relatedData.investments.length
+    },
+    {
+      id: 'opportunities',
+      title: 'Opportunities',
+      icon: TrendingUpIcon,
+      content: <ItemsSection items={relatedData.opportunities} />,
+      count: relatedData.opportunities.length
+    }
+  ];
+
+  return (
+    <div className="px-6 pt-2 pb-6">
+      {/* Unified container with Apple-style cohesive design */}
+      <div className="rounded-lg border border-muted overflow-hidden">
+        {sections.map((section, index) => {
+          const isOpen = openSections[section.id as keyof typeof openSections];
+          const Icon = section.icon;
+          
+          return (
+            <React.Fragment key={section.id}>
+              {/* Divider between sections (except for the first one) */}
+              {index > 0 && (
+                <div className="h-px bg-muted mx-3" />
+              )}
+              
+              {/* Section Header */}
+              <button 
+                onClick={() => toggleSection(section.id as 'details' | 'company' | 'people' | 'entities' | 'investments' | 'opportunities')}
+                className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+              >
+                <div className="flex items-center">
+                  <Icon className="h-4 w-4 text-muted-foreground ml-2" />
+                  <h4 className="text-sm font-medium ml-2">{section.title}</h4>
+                  
+                  {/* Show count badge for sections that have counts */}
+                  {section.count !== null && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 rounded-full text-xs">
+                      {section.count}
+                    </Badge>
+                  )}
+                </div>
+                <ChevronDownIcon 
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+                />
+              </button>
+              
+              {/* Section Content with smooth height transition */}
+              {isOpen && (
+                <div className="px-3 pb-3 pt-2 group/section">
+                  {section.content}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
 
       {/* Activity Section - Only in Drawer View */}
       {!isFullScreen && (
         <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4">
             <h4 className="text-sm font-medium">Activity</h4>
-            <Button variant="outline" size="sm">
-              <PlusIcon className="h-4 w-4" />
-              Add meeting
-            </Button>
           </div>
           <AssetActivityContent asset={asset} />
         </div>
       )}
-    </>
-  )
-
-  return (
-    <MasterDetailsPanel fieldGroups={fieldGroups} isFullScreen={isFullScreen} additionalContent={additionalContent} />
-  )
+    </div>
+  );
 }
 
 function AssetActivityContent({ asset }: { asset: Asset }) {
@@ -590,7 +906,7 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
     switch (activity.type) {
       case "valuation":
         return (
-          <span>
+          <span className="text-sm">
             <span className="font-medium">{activity.actor}</span>{" "}
             <span className="text-muted-foreground">{activity.action}</span>{" "}
             <Badge variant="outline" className="text-xs mx-1">
@@ -600,7 +916,7 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
         )
       case "distribution":
         return (
-          <span>
+          <span className="text-sm">
             <span className="font-medium">{activity.actor}</span>{" "}
             <span className="text-muted-foreground">{activity.action}</span>{" "}
             <span className="font-medium text-green-600">{activity.target}</span>
@@ -608,7 +924,7 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
         )
       case "investment":
         return (
-          <span>
+          <span className="text-sm">
             <span className="font-medium">{activity.actor}</span>{" "}
             <span className="text-muted-foreground">{activity.action}</span>{" "}
             <span className="font-medium">{activity.target}</span>
@@ -616,7 +932,7 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
         )
       default:
         return (
-          <span>
+          <span className="text-sm">
             <span className="font-medium">{activity.actor}</span>{" "}
             <span className="text-muted-foreground">{activity.action}</span>{" "}
             <span className="font-medium">{activity.target}</span>
@@ -717,29 +1033,42 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
   }
 
   return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+    <div className="space-y-2">
+      {activities.map((activity) => {
+        const isExpanded = expandedActivity === activity.id;
+        
+        return (
+          <div 
+            key={activity.id} 
+            className={`${
+              isExpanded ? 'border rounded-lg overflow-hidden' : ''
+            }`}
           >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+            <div 
+              className={`flex items-center ${isExpanded ? 'p-3 border-b bg-muted/20' : 'py-2 px-3'} cursor-pointer`}
+              onClick={() => setExpandedActivity(isExpanded ? null : activity.id)}
+            >
+              <div className="flex items-center flex-1">
+                {getActivityIcon(activity.type)}
+                <div className="ml-3 flex-1">
+                  <div className="flex items-center justify-between">
+                    <div>{formatActivityText(activity)}</div>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                      {activity.timestamp}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
+            
+            {isExpanded && (
+              <div className="p-3">
+                {renderExpandedDetails(activity)}
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
