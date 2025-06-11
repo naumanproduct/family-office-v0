@@ -43,6 +43,7 @@ import {
 import { ChevronsUpDownIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { WorkflowTemplateDialog } from "./workflows/workflow-template-dialog"
+import { SettingsModal } from "./settings-modal"
 
 const data = {
   user: {
@@ -123,7 +124,7 @@ const data = {
   navSecondary: [
     {
       title: "Settings",
-      url: "/settings",
+      action: "settings",
       icon: SettingsIcon,
     },
     {
@@ -145,6 +146,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+
+  const handleNavAction = (item: any) => {
+    if (item.url) {
+      handleNavigation(item.url)
+    } else if (item.action === "settings") {
+      setIsSettingsModalOpen(true)
+    }
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -261,7 +271,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    onClick={() => handleNavigation(item.url)}
+                    onClick={() => handleNavAction(item)}
                     className="cursor-pointer"
                   >
                     {item.icon && <item.icon />}
@@ -277,6 +287,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={data.user} />
       </SidebarFooter>
       <WorkflowTemplateDialog isOpen={isTemplateDialogOpen} onClose={() => setIsTemplateDialogOpen(false)} />
+      <SettingsModal open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen} />
     </Sidebar>
   )
 }
