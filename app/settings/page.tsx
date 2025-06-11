@@ -91,7 +91,9 @@ export default function SettingsPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="space-y-4">
+      <div className="space-y-4 pb-8">
+        {" "}
+        {/* Added pb-8 here for more spacing */}
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
