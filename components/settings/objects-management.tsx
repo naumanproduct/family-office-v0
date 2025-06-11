@@ -135,15 +135,31 @@ const systemObjects: CustomObject[] = [
   },
 ]
 
-export function ObjectsManagement() {
+interface ObjectsManagementProps {
+  hideTitle?: boolean;
+  hideButton?: boolean;
+  isDialogOpen?: boolean;
+  onDialogOpenChange?: (open: boolean) => void;
+}
+
+export function ObjectsManagement({ 
+  hideTitle = false, 
+  hideButton = false,
+  isDialogOpen,
+  onDialogOpenChange
+}: ObjectsManagementProps = {}) {
   const [objects, setObjects] = useState<CustomObject[]>(systemObjects)
   const [selectedObject, setSelectedObject] = useState<CustomObject | null>(null)
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [localIsCreateDialogOpen, setLocalIsCreateDialogOpen] = useState(false)
   const [newObject, setNewObject] = useState({
     name: "",
     apiName: "",
     description: "",
   })
+  
+  // Use either external or local dialog state
+  const isCreateDialogOpen = isDialogOpen !== undefined ? isDialogOpen : localIsCreateDialogOpen;
+  const setIsCreateDialogOpen = onDialogOpenChange || setLocalIsCreateDialogOpen;
 
   const handleCreateObject = () => {
     const object: CustomObject = {
@@ -174,68 +190,72 @@ export function ObjectsManagement() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl">Objects</CardTitle>
-            <CardDescription>
-              Manage your data objects and their field structures. Objects define the data models for your business
-              entities.
-            </CardDescription>
+    <Card className={!hideTitle ? undefined : "border-0 shadow-none"}>
+      {!hideTitle && (
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl">Objects</CardTitle>
+              <CardDescription>
+                Manage your data objects and their field structures. Objects define the data models for your business
+                entities.
+              </CardDescription>
+            </div>
+            {!hideButton && (
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Object
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Create Custom Object</DialogTitle>
+                    <DialogDescription>Add a new custom object to store your business data.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Object Name</Label>
+                      <Input
+                        id="name"
+                        value={newObject.name}
+                        onChange={(e) => setNewObject({ ...newObject, name: e.target.value })}
+                        placeholder="e.g., Investment Deal"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="apiName">API Name</Label>
+                      <Input
+                        id="apiName"
+                        value={newObject.apiName}
+                        onChange={(e) => setNewObject({ ...newObject, apiName: e.target.value })}
+                        placeholder="e.g., investment_deal"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={newObject.description}
+                        onChange={(e) => setNewObject({ ...newObject, description: e.target.value })}
+                        placeholder="Describe what this object is used for..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" onClick={handleCreateObject}>
+                      Create Object
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Object
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Create Custom Object</DialogTitle>
-                <DialogDescription>Add a new custom object to store your business data.</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Object Name</Label>
-                  <Input
-                    id="name"
-                    value={newObject.name}
-                    onChange={(e) => setNewObject({ ...newObject, name: e.target.value })}
-                    placeholder="e.g., Investment Deal"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="apiName">API Name</Label>
-                  <Input
-                    id="apiName"
-                    value={newObject.apiName}
-                    onChange={(e) => setNewObject({ ...newObject, apiName: e.target.value })}
-                    placeholder="e.g., investment_deal"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newObject.description}
-                    onChange={(e) => setNewObject({ ...newObject, description: e.target.value })}
-                    placeholder="Describe what this object is used for..."
-                    rows={3}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit" onClick={handleCreateObject}>
-                  Create Object
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent>
+        </CardHeader>
+      )}
+      <CardContent className={hideTitle ? "p-0" : undefined}>
         <div className="rounded-md border">
           <Table>
             <TableHeader>

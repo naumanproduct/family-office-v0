@@ -27,6 +27,7 @@ import {
   UserCircle,
   Globe,
   FileText,
+  Plus,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -117,6 +118,10 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [breadcrumbs, setBreadcrumbs] = useState<{id: string, label: string}[]>([])
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false)
   
+  // State for managing dialogs
+  const [isObjectsDialogOpen, setIsObjectsDialogOpen] = useState(false)
+  const [isWorkflowsDialogOpen, setIsWorkflowsDialogOpen] = useState(false)
+  
   // Update breadcrumbs when navigation changes
   useEffect(() => {
     const currentMainCategory = settingsCategories.find(cat => cat.id === mainCategory)
@@ -173,6 +178,15 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
     // In a real app, this would filter visible settings or show search results
+  }
+  
+  // Helper function for Add button click
+  const handleAddButtonClick = () => {
+    if (subCategory === "objects") {
+      setIsObjectsDialogOpen(true)
+    } else if (subCategory === "workflows") {
+      setIsWorkflowsDialogOpen(true)
+    }
   }
   
   const currentCategory = getCurrentCategory()
@@ -316,17 +330,39 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 <div>
                   <h1 className="text-2xl font-semibold">{currentCategory?.label}</h1>
                   <p className="text-muted-foreground mt-1">
-                    {currentCategory?.description || `Manage your ${currentCategory?.label.toLowerCase()} settings`}
+                    {currentCategory?.description || `Manage your ${currentCategory?.label?.toLowerCase()} settings`}
                   </p>
                 </div>
+                
+                {/* Add buttons for Data Management sections */}
+                {(subCategory === "objects" || subCategory === "workflows") && (
+                  <Button onClick={handleAddButtonClick}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add {subCategory === "objects" ? "Object" : "Workflow"}
+                  </Button>
+                )}
               </div>
               <Separator />
             </div>
             
             {/* Content Body */}
             <div className="flex-1 p-6 pt-4 overflow-y-auto">
-              {subCategory === "objects" && <ObjectsManagement />}
-              {subCategory === "workflows" && <WorkflowsManagement />}
+              {subCategory === "objects" && (
+                <ObjectsManagement 
+                  hideTitle 
+                  hideButton 
+                  isDialogOpen={isObjectsDialogOpen}
+                  onDialogOpenChange={setIsObjectsDialogOpen}
+                />
+              )}
+              {subCategory === "workflows" && (
+                <WorkflowsManagement 
+                  hideTitle 
+                  hideButton 
+                  isDialogOpen={isWorkflowsDialogOpen}
+                  onDialogOpenChange={setIsWorkflowsDialogOpen}
+                />
+              )}
               
               {/* General Settings */}
               {subCategory === "general" && (

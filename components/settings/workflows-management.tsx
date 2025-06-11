@@ -79,15 +79,31 @@ const sampleWorkflows: WorkflowItem[] = [
   },
 ]
 
-export function WorkflowsManagement() {
+interface WorkflowsManagementProps {
+  hideTitle?: boolean;
+  hideButton?: boolean;
+  isDialogOpen?: boolean;
+  onDialogOpenChange?: (open: boolean) => void;
+}
+
+export function WorkflowsManagement({ 
+  hideTitle = false, 
+  hideButton = false,
+  isDialogOpen,
+  onDialogOpenChange
+}: WorkflowsManagementProps = {}) {
   const [workflows, setWorkflows] = useState<WorkflowItem[]>(sampleWorkflows)
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowItem | null>(null)
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [localIsCreateDialogOpen, setLocalIsCreateDialogOpen] = useState(false)
   const [newWorkflow, setNewWorkflow] = useState({
     name: "",
     description: "",
     triggerType: "Record Create",
   })
+  
+  // Use either external or local dialog state
+  const isCreateDialogOpen = isDialogOpen !== undefined ? isDialogOpen : localIsCreateDialogOpen;
+  const setIsCreateDialogOpen = onDialogOpenChange || setLocalIsCreateDialogOpen;
 
   const handleCreateWorkflow = () => {
     const workflow: WorkflowItem = {
@@ -132,59 +148,63 @@ export function WorkflowsManagement() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl">Workflows</CardTitle>
-            <CardDescription>
-              Create and manage automated workflows for your business processes. Workflows help streamline operations
-              and ensure consistency.
-            </CardDescription>
+    <Card className={!hideTitle ? undefined : "border-0 shadow-none"}>
+      {!hideTitle && (
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl">Workflows</CardTitle>
+              <CardDescription>
+                Create and manage automated workflows for your business processes. Workflows help streamline operations
+                and ensure consistency.
+              </CardDescription>
+            </div>
+            {!hideButton && (
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Workflow
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Create Workflow</DialogTitle>
+                    <DialogDescription>Add a new workflow to automate your business processes.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Workflow Name</Label>
+                      <Input
+                        id="name"
+                        value={newWorkflow.name}
+                        onChange={(e) => setNewWorkflow({ ...newWorkflow, name: e.target.value })}
+                        placeholder="e.g., Deal Pipeline Automation"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        value={newWorkflow.description}
+                        onChange={(e) => setNewWorkflow({ ...newWorkflow, description: e.target.value })}
+                        placeholder="Describe what this workflow does..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" onClick={handleCreateWorkflow}>
+                      Create Workflow
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Workflow
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Create Workflow</DialogTitle>
-                <DialogDescription>Add a new workflow to automate your business processes.</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Workflow Name</Label>
-                  <Input
-                    id="name"
-                    value={newWorkflow.name}
-                    onChange={(e) => setNewWorkflow({ ...newWorkflow, name: e.target.value })}
-                    placeholder="e.g., Deal Pipeline Automation"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newWorkflow.description}
-                    onChange={(e) => setNewWorkflow({ ...newWorkflow, description: e.target.value })}
-                    placeholder="Describe what this workflow does..."
-                    rows={3}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit" onClick={handleCreateWorkflow}>
-                  Create Workflow
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent>
+        </CardHeader>
+      )}
+      <CardContent className={hideTitle ? "p-0" : undefined}>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
