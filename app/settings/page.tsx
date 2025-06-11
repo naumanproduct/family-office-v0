@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ChevronDown,
   ArrowLeft,
+  X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -90,16 +91,19 @@ export default function SettingsPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div className="flex items-center gap-4">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-            <p className="text-muted-foreground">Manage your application settings and configuration.</p>
-          </div>
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+          <p className="text-muted-foreground">Manage your application settings and configuration.</p>
         </div>
       </div>
 
