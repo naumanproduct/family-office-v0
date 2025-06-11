@@ -135,11 +135,7 @@ const systemObjects: CustomObject[] = [
   },
 ]
 
-interface ObjectsManagementProps {
-  onSelectObject?: (name: string) => void;
-}
-
-export function ObjectsManagement({ onSelectObject }: ObjectsManagementProps) {
+export function ObjectsManagement() {
   const [objects, setObjects] = useState<CustomObject[]>(systemObjects)
   const [selectedObject, setSelectedObject] = useState<CustomObject | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -166,9 +162,6 @@ export function ObjectsManagement({ onSelectObject }: ObjectsManagementProps) {
   }
 
   const handleObjectClick = (object: CustomObject) => {
-    if (onSelectObject) {
-      onSelectObject(object.name);
-    }
     setSelectedObject(object)
   }
 
@@ -181,11 +174,15 @@ export function ObjectsManagement({ onSelectObject }: ObjectsManagementProps) {
   }
 
   return (
-    <Card className="shadow-none border-0 bg-transparent">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            {/* Title and description removed to avoid redundancy with settings header */}
+            <CardTitle className="text-xl">Objects</CardTitle>
+            <CardDescription>
+              Manage your data objects and their field structures. Objects define the data models for your business
+              entities.
+            </CardDescription>
           </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
@@ -239,7 +236,7 @@ export function ObjectsManagement({ onSelectObject }: ObjectsManagementProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div>
+        <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>

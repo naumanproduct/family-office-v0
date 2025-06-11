@@ -18,7 +18,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
+import { ArrowLeft, Plus, Edit, Trash2, GripVertical } from "lucide-react"
 
 interface Field {
   id: string
@@ -130,7 +130,18 @@ export function FieldManagement({ objectType, objectName, onBack }: FieldManagem
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to {objectType === "object" ? "Objects" : "Workflows"}
+        </Button>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-medium">{objectName} Fields</h3>
+          <p className="text-sm text-muted-foreground">Manage fields for this {objectType}.</p>
+        </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
