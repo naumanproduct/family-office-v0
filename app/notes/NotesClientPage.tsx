@@ -10,39 +10,143 @@ import { NoteDetailsView } from "@/components/note-details-view"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useMediaQuery } from "../../hooks/use-media-query"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ChevronLeftIcon, ExpandIcon, XIcon } from "lucide-react"
+import { createPortal } from "react-dom"
 
 export default function NotesClientPage() {
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
+  const [isFullScreen, setIsFullScreen] = React.useState(false)
   const isDesktop = useMediaQuery("(min-width: 768px)")
   
   // Use a drawer/sheet for the note details
   const NoteDetailDrawer = () => {
     if (!selectedNote) return null
     
+    // For fullscreen mode
+    if (isFullScreen) {
+      const content = (
+        <div className="fixed inset-0 z-[9999] bg-background">
+          {/* Full Screen Header */}
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setIsFullScreen(false);
+                }}
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="outline" className="bg-background">
+                Note
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  setIsFullScreen(false);
+                }}
+              >
+                <XIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Full Screen Content */}
+          <div className="flex-1 overflow-auto h-[calc(100vh-73px)]">
+            <NoteDetailsView 
+              note={selectedNote} 
+              onBack={() => setSelectedNote(null)} 
+            />
+          </div>
+        </div>
+      )
+
+      return typeof document !== "undefined" ? createPortal(content, document.body) : null
+    }
+    
+    // For desktop mode
     if (isDesktop) {
       return (
         <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
           <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
-            <NoteDetailsView 
-              note={selectedNote} 
-              onBack={() => setSelectedNote(null)} 
-            />
+            {/* Header */}
+            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" onClick={() => setSelectedNote(null)}>
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <Badge variant="outline" className="bg-background">
+                  Note
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
+                  <ExpandIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto">
+              <NoteDetailsView 
+                note={selectedNote} 
+                onBack={() => setSelectedNote(null)} 
+              />
+            </div>
           </SheetContent>
         </Sheet>
       )
     } else {
+      // For mobile mode
       return (
         <Dialog open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
           <DialogContent className="max-w-full h-[95vh] p-0">
-            <NoteDetailsView 
-              note={selectedNote} 
-              onBack={() => setSelectedNote(null)} 
-            />
+            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" onClick={() => setSelectedNote(null)}>
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <Badge variant="outline" className="bg-background">
+                  Note
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
+                  <ExpandIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto">
+              <NoteDetailsView 
+                note={selectedNote} 
+                onBack={() => setSelectedNote(null)} 
+              />
+            </div>
           </DialogContent>
         </Dialog>
       )
     }
   }
+
+  // ESC key handler for full screen mode
+  React.useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isFullScreen) {
+        setIsFullScreen(false)
+      }
+    }
+
+    if (isFullScreen) {
+      document.addEventListener("keydown", handleEscKey)
+      return () => {
+        document.removeEventListener("keydown", handleEscKey)
+      }
+    }
+  }, [isFullScreen])
 
   return (
     <SidebarProvider>

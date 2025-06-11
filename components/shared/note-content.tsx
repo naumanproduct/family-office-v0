@@ -76,6 +76,7 @@ export function NoteContent({
   onNoteSelect,
   title = "Notes" 
 }: NoteContentProps) {
+  const [notes, setNotes] = useState<any[]>(data);
   const [selectedNote, setSelectedNote] = useState<any>(null)
   const [viewMode, setViewMode] = useState(initialViewMode)
 
@@ -86,6 +87,28 @@ export function NoteContent({
       setSelectedNote(note)
     }
   }
+
+  const createNewNote = () => {
+    const newNote = {
+      id: `NOTE-${Math.floor(1000 + Math.random() * 9000)}`,
+      title: "New Note",
+      content: "Click to edit this note...",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      date: "Just now",
+      lastModified: "Just now",
+      author: "You",
+      priority: "Medium",
+      tags: ["new"],
+      relatedTo: { type: "", name: "" },
+    };
+    
+    // Add the new note to the beginning of the array
+    setNotes([newNote, ...notes]);
+    
+    // Select the new note to open the drawer
+    handleNoteSelect(newNote);
+  };
 
   return (
     <div className="space-y-4">
@@ -139,7 +162,7 @@ export function NoteContent({
             </DropdownMenuContent>
           </DropdownMenu>
           <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />
-          <Button size="sm">
+          <Button size="sm" onClick={createNewNote}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Note
           </Button>
@@ -161,7 +184,7 @@ export function NoteContent({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((note) => (
+                {notes.map((note) => (
                   <TableRow 
                     key={note.id} 
                     className="cursor-pointer hover:bg-muted/50" 
@@ -237,7 +260,7 @@ export function NoteContent({
         <Card>
           <CardContent className="p-4">
             <div className="space-y-4">
-              {data.map((note) => (
+              {notes.map((note) => (
                 <div 
                   key={note.id} 
                   className="flex items-center justify-between border-b pb-4 cursor-pointer hover:bg-muted/50 rounded-md p-2"
@@ -301,7 +324,7 @@ export function NoteContent({
 
       {viewMode === "card" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((note) => (
+          {notes.map((note) => (
             <Card key={note.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleNoteSelect(note)}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
