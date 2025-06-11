@@ -161,25 +161,29 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         style={{ minWidth: 320 }}
       >
         <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center gap-3">
-            {showBackButton && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleBackToList}
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            )}
-            <div>
-              <DialogTitle className="text-xl font-semibold">{getHeaderTitle()}</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">{getHeaderDescription()}</p>
-            </div>
-          </div>
+          <DialogTitle className="text-xl font-semibold">Settings</DialogTitle>
           <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
             <X className="h-4 w-4" />
           </Button>
         </div>
+
+        {showBackButton && (
+          <div className="flex items-center gap-3 px-6 py-3 bg-muted/20 border-b">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleBackToList}
+              className="mr-1"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
+            <div>
+              <h2 className="text-base font-medium">{getHeaderTitle()}</h2>
+              <p className="text-xs text-muted-foreground">{getHeaderDescription()}</p>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-1 h-full overflow-hidden">
           <div className={`${showBackButton ? 'hidden' : 'w-72'} border-r bg-background h-full`}>
@@ -303,3 +307,4 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     </Dialog>
   )
 }
+
