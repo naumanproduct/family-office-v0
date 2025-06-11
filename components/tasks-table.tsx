@@ -279,7 +279,7 @@ function TaskListView({
 }
 
 export function TasksTable() {
-  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("list")
+  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
   const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)

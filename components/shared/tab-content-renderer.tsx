@@ -276,6 +276,97 @@ function TableView({
                   </TableCell>
                 </>
               )}
+              {activeTab === "notes" && (
+                <>
+                  <TableCell className="font-medium">{item.title}</TableCell>
+                  <TableCell>{item.date}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <MoreVerticalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>View</DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </>
+              )}
+              {activeTab === "meetings" && (
+                <>
+                  <TableCell className="font-medium">{item.title}</TableCell>
+                  <TableCell>{item.date} {item.time && `• ${item.time}`}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{item.status}</Badge>
+                  </TableCell>
+                  <TableCell>{typeof item.attendees === 'number' ? `${item.attendees} people` : item.attendees?.join(', ') || '-'}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <MoreVerticalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>View</DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </>
+              )}
+              {activeTab === "files" && (
+                <>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell>{item.uploadedBy}</TableCell>
+                  <TableCell>{item.uploadedDate}</TableCell>
+                  <TableCell>{item.size}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <MoreVerticalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>View</DropdownMenuItem>
+                        <DropdownMenuItem>Download</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </>
+              )}
+              {activeTab === "team" && (
+                <>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell>{item.role}</TableCell>
+                  <TableCell>{item.email}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <MoreVerticalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>View Profile</DropdownMenuItem>
+                        <DropdownMenuItem>Send Message</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Schedule Meeting</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </>
+              )}
               {/* Add implementations for other tab types as needed */}
             </TableRow>
           ))}

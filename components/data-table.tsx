@@ -562,7 +562,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile()
   const [isFullScreen, setIsFullScreen] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState(isFullScreen ? "activity" : "details")
-  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("list")
+  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
 
   React.useEffect(() => {
     if (isFullScreen && activeTab !== "activity") {

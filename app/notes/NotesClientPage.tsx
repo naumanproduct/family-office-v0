@@ -36,6 +36,7 @@ export default function NotesClientPage() {
                 size="icon"
                 onClick={() => {
                   setIsFullScreen(false);
+                  setSelectedNote(null);
                 }}
               >
                 <ChevronLeftIcon className="h-4 w-4" />
@@ -50,6 +51,7 @@ export default function NotesClientPage() {
                 size="icon"
                 onClick={() => {
                   setIsFullScreen(false);
+                  setSelectedNote(null);
                 }}
               >
                 <XIcon className="h-4 w-4" />
@@ -137,6 +139,7 @@ export default function NotesClientPage() {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isFullScreen) {
         setIsFullScreen(false)
+        setSelectedNote(null)
       }
     }
 

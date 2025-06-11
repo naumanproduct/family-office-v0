@@ -53,7 +53,7 @@ export function MasterDrawer({
 }: MasterDrawerProps) {
   const [isFullScreen, setIsFullScreen] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState(isFullScreen ? "activity" : "details")
-  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("list")
+  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
