@@ -62,6 +62,7 @@ interface MasterCreationDialogProps {
 
   // Form configuration
   formFields: FormField[]
+  formHeaderContent?: React.ReactNode // Custom content to show at the top of the form
 
   // Validation
   requiredFields?: string[]
@@ -82,6 +83,7 @@ export function MasterCreationDialog({
   types,
   typeSelectionTitle,
   formFields,
+  formHeaderContent,
   requiredFields = [],
   onTypeSelect,
 }: MasterCreationDialogProps) {
@@ -351,6 +353,7 @@ export function MasterCreationDialog({
             ) : (
               // Form
               <div className="space-y-6">
+                {formHeaderContent && formHeaderContent}
                 <div className="grid grid-cols-2 gap-4">{formFields.map(renderFormField)}</div>
               </div>
             )}
@@ -359,11 +362,11 @@ export function MasterCreationDialog({
           {/* Footer */}
           {selectedType && (
             <div className="border-t bg-background px-6 py-4">
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={handleBackToSelection} className="flex-1">
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={handleBackToSelection}>
                   Back
                 </Button>
-                <Button onClick={handleSave} className="flex-1" disabled={!isFormValid()}>
+                <Button onClick={handleSave} disabled={!isFormValid()}>
                   Create {recordType}
                 </Button>
               </div>

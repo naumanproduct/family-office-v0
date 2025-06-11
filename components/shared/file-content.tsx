@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
+import { AddFileSheet, FileFormData } from "@/components/add-file-sheet"
 
 // Default mock data, can be overridden by passing data prop
 const defaultFiles = [
@@ -104,11 +105,36 @@ export function FileContent({
   title = "Files" 
 }: FileContentProps) {
   const [viewMode, setViewMode] = useState(initialViewMode)
+  const [isAddFileSheetOpen, setIsAddFileSheetOpen] = useState(false)
+  const [fileData, setFileData] = useState(data)
 
   const handleFileSelect = (file: any) => {
     if (onFileSelect) {
       onFileSelect(file)
     }
+  }
+
+  const handleFileUpload = (uploadData: FileFormData) => {
+    // Create a new file object with the provided data and some defaults
+    const newFile = {
+      id: `file-${Date.now()}`,
+      title: uploadData.name || `New ${uploadData.fileType || 'File'}`,
+      name: uploadData.name || `file-${Date.now()}.pdf`,
+      description: uploadData.description || "",
+      fileName: uploadData.name || `file-${Date.now()}.pdf`,
+      fileSize: "1.2 MB", // Mock size
+      uploadedAt: new Date().toISOString(),
+      uploadedBy: "Current User",
+      fileType: uploadData.fileType || "document",
+      type: uploadData.fileType || "document",
+      category: uploadData.category || "Other",
+      tags: uploadData.tags ? uploadData.tags.split(",").map(tag => tag.trim()) : [],
+      status: uploadData.status || "Draft",
+    }
+
+    // Add the new file to the data
+    setFileData([newFile, ...fileData])
+    console.log("File uploaded:", newFile)
   }
 
   return (
@@ -168,7 +194,7 @@ export function FileContent({
             </DropdownMenuContent>
           </DropdownMenu>
           <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />
-          <Button size="sm">
+          <Button size="sm" onClick={() => setIsAddFileSheetOpen(true)}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Add File
           </Button>
@@ -190,7 +216,7 @@ export function FileContent({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((file) => (
+                {fileData.map((file) => (
                   <TableRow key={file.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleFileSelect(file)}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -249,7 +275,7 @@ export function FileContent({
         <Card>
           <CardContent className="p-4">
             <div className="space-y-4">
-              {data.map((file) => (
+              {fileData.map((file) => (
                 <div 
                   key={file.id} 
                   className="flex items-center justify-between border-b pb-4 cursor-pointer hover:bg-muted/50 rounded-md p-2"
@@ -305,7 +331,7 @@ export function FileContent({
 
       {viewMode === "card" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((file) => (
+          {fileData.map((file) => (
             <Card key={file.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleFileSelect(file)}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
@@ -353,6 +379,12 @@ export function FileContent({
           ))}
         </div>
       )}
+
+      <AddFileSheet 
+        open={isAddFileSheetOpen}
+        onOpenChange={setIsAddFileSheetOpen}
+        onSubmit={handleFileUpload}
+      />
     </div>
   )
 }
