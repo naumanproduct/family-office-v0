@@ -79,7 +79,11 @@ const sampleWorkflows: WorkflowItem[] = [
   },
 ]
 
-export function WorkflowsManagement() {
+interface WorkflowsManagementProps {
+  onSelectWorkflow?: (name: string) => void;
+}
+
+export function WorkflowsManagement({ onSelectWorkflow }: WorkflowsManagementProps) {
   const [workflows, setWorkflows] = useState<WorkflowItem[]>(sampleWorkflows)
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowItem | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -107,6 +111,9 @@ export function WorkflowsManagement() {
   }
 
   const handleWorkflowClick = (workflow: WorkflowItem) => {
+    if (onSelectWorkflow) {
+      onSelectWorkflow(workflow.name);
+    }
     setSelectedWorkflow(workflow)
   }
 

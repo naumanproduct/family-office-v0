@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { FieldManagement } from "@/components/settings/field-management"
 
 interface SettingsCategory {
   id: string
@@ -91,6 +92,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [activeCategory, setActiveCategory] = useState("objects")
   const [activeCategoryPath, setActiveCategoryPath] = useState<string[]>(["data", "objects"])
   const [expandedCategories, setExpandedCategories] = useState<string[]>(["data"])
+  const [selectedItem, setSelectedItem] = useState<{ type: string; name: string } | null>(null)
 
   const handleNavigation = (category: SettingsCategory) => {
     const hasChildren = category.children && category.children.length > 0
@@ -112,7 +114,12 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
       }
       
       setActiveCategory(category.id)
+      setSelectedItem(null)
     }
+  }
+
+  const handleBackToList = () => {
+    setSelectedItem(null)
   }
 
   const getActiveCategory = () => {
@@ -125,6 +132,28 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 
   const active = getActiveCategory()
 
+  // Title and description to display in the header
+  const getHeaderTitle = () => {
+    if (selectedItem) {
+      return `${selectedItem.name} Fields`
+    }
+    return active?.label || ""
+  }
+
+  const getHeaderDescription = () => {
+    if (selectedItem) {
+      return `Manage fields for this ${selectedItem.type}.`
+    }
+    return active?.description || ""
+  }
+
+  const showBackButton = !!selectedItem
+
+  // Function to handle item selection (e.g., clicking on an object/workflow)
+  const handleItemClick = (type: string, name: string) => {
+    setSelectedItem({ type, name })
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -132,8 +161,20 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         style={{ minWidth: 320 }}
       >
         <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center gap-2">
-            <DialogTitle className="text-xl font-semibold">Settings</DialogTitle>
+          <div className="flex items-center gap-3">
+            {showBackButton && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleBackToList}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <div>
+              <DialogTitle className="text-xl font-semibold">{getHeaderTitle()}</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">{getHeaderDescription()}</p>
+            </div>
           </div>
           <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
             <X className="h-4 w-4" />
@@ -141,7 +182,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         </div>
 
         <div className="flex flex-1 h-full overflow-hidden">
-          <div className="w-72 border-r bg-background h-full">
+          <div className={`${showBackButton ? 'hidden' : 'w-72'} border-r bg-background h-full`}>
             <ScrollArea className="h-full">
               <div className="p-4">
                 <div className="space-y-1">
@@ -199,80 +240,63 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
           </div>
 
           <div className="flex-1 flex flex-col bg-background">
-            {active && (
-              <>
-                <div className="p-6 border-b">
-                  <div className="flex items-center gap-3">
-                    {activeCategoryPath.length > 1 && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => {
-                          setActiveCategoryPath([activeCategoryPath[0]])
-                          setActiveCategory(activeCategoryPath[0])
-                        }}
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <active.icon className="h-5 w-5 text-primary" />
-                    <div>
-                      <h2 className="text-xl font-semibold">{active.label}</h2>
-                      {active.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{active.description}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                <ScrollArea className="flex-1 p-6">
-                  {activeCategory === "objects" && <ObjectsManagement />}
-                  {activeCategory === "workflows" && <WorkflowsManagement />}
-                  {activeCategory === "general" && (
-                    <Card className="shadow-none border-0 bg-transparent">
-                      <CardContent className="px-0 pt-0">
-                        <p className="text-muted-foreground">General settings coming soon...</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {activeCategory === "security" && (
-                    <Card className="shadow-none border-0 bg-transparent">
-                      <CardContent className="px-0 pt-0">
-                        <p className="text-muted-foreground">Security settings coming soon...</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {activeCategory === "integrations" && (
-                    <Card className="shadow-none border-0 bg-transparent">
-                      <CardContent className="px-0 pt-0">
-                        <p className="text-muted-foreground">Integrations coming soon...</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {activeCategory === "notifications" && (
-                    <Card className="shadow-none border-0 bg-transparent">
-                      <CardContent className="px-0 pt-0">
-                        <p className="text-muted-foreground">Notification settings coming soon...</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {activeCategory === "users" && (
-                    <Card className="shadow-none border-0 bg-transparent">
-                      <CardContent className="px-0 pt-0">
-                        <p className="text-muted-foreground">User management coming soon...</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {activeCategory === "appearance" && (
-                    <Card className="shadow-none border-0 bg-transparent">
-                      <CardContent className="px-0 pt-0">
-                        <p className="text-muted-foreground">Appearance settings coming soon...</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </ScrollArea>
-              </>
-            )}
+            <ScrollArea className="flex-1 p-6">
+              {activeCategory === "objects" && !selectedItem && (
+                <ObjectsManagement onSelectObject={(name) => handleItemClick("object", name)} />
+              )}
+              {activeCategory === "workflows" && !selectedItem && (
+                <WorkflowsManagement onSelectWorkflow={(name) => handleItemClick("workflow", name)} />
+              )}
+              {selectedItem && (
+                <FieldManagement 
+                  objectType={selectedItem.type as "object" | "workflow"} 
+                  objectName={selectedItem.name} 
+                  onBack={handleBackToList} 
+                />
+              )}
+              {activeCategory === "general" && (
+                <Card className="shadow-none border-0 bg-transparent">
+                  <CardContent className="px-0 pt-0">
+                    <p className="text-muted-foreground">General settings coming soon...</p>
+                  </CardContent>
+                </Card>
+              )}
+              {activeCategory === "security" && (
+                <Card className="shadow-none border-0 bg-transparent">
+                  <CardContent className="px-0 pt-0">
+                    <p className="text-muted-foreground">Security settings coming soon...</p>
+                  </CardContent>
+                </Card>
+              )}
+              {activeCategory === "integrations" && (
+                <Card className="shadow-none border-0 bg-transparent">
+                  <CardContent className="px-0 pt-0">
+                    <p className="text-muted-foreground">Integrations coming soon...</p>
+                  </CardContent>
+                </Card>
+              )}
+              {activeCategory === "notifications" && (
+                <Card className="shadow-none border-0 bg-transparent">
+                  <CardContent className="px-0 pt-0">
+                    <p className="text-muted-foreground">Notification settings coming soon...</p>
+                  </CardContent>
+                </Card>
+              )}
+              {activeCategory === "users" && (
+                <Card className="shadow-none border-0 bg-transparent">
+                  <CardContent className="px-0 pt-0">
+                    <p className="text-muted-foreground">User management coming soon...</p>
+                  </CardContent>
+                </Card>
+              )}
+              {activeCategory === "appearance" && (
+                <Card className="shadow-none border-0 bg-transparent">
+                  <CardContent className="px-0 pt-0">
+                    <p className="text-muted-foreground">Appearance settings coming soon...</p>
+                  </CardContent>
+                </Card>
+              )}
+            </ScrollArea>
           </div>
         </div>
       </DialogContent>

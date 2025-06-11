@@ -135,7 +135,11 @@ const systemObjects: CustomObject[] = [
   },
 ]
 
-export function ObjectsManagement() {
+interface ObjectsManagementProps {
+  onSelectObject?: (name: string) => void;
+}
+
+export function ObjectsManagement({ onSelectObject }: ObjectsManagementProps) {
   const [objects, setObjects] = useState<CustomObject[]>(systemObjects)
   const [selectedObject, setSelectedObject] = useState<CustomObject | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -162,6 +166,9 @@ export function ObjectsManagement() {
   }
 
   const handleObjectClick = (object: CustomObject) => {
+    if (onSelectObject) {
+      onSelectObject(object.name);
+    }
     setSelectedObject(object)
   }
 
