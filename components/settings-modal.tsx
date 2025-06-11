@@ -230,66 +230,42 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                   {activeCategory === "workflows" && <WorkflowsManagement />}
                   {activeCategory === "general" && (
                     <Card className="shadow-none border-0">
-                      <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-lg">General Settings</CardTitle>
-                        <CardDescription>Manage your general application settings.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="px-0">
+                      <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">General settings coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "security" && (
                     <Card className="shadow-none border-0">
-                      <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-lg">Security Settings</CardTitle>
-                        <CardDescription>Configure security and authentication settings.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="px-0">
+                      <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">Security settings coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "integrations" && (
                     <Card className="shadow-none border-0">
-                      <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-lg">Integrations</CardTitle>
-                        <CardDescription>Manage third-party integrations and API connections.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="px-0">
+                      <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">Integrations coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "notifications" && (
                     <Card className="shadow-none border-0">
-                      <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-lg">Notifications</CardTitle>
-                        <CardDescription>Configure notification preferences and settings.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="px-0">
+                      <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">Notification settings coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "users" && (
                     <Card className="shadow-none border-0">
-                      <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-lg">Users & Permissions</CardTitle>
-                        <CardDescription>Manage user accounts and permission settings.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="px-0">
+                      <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">User management coming soon...</p>
                       </CardContent>
                     </Card>
                   )}
                   {activeCategory === "appearance" && (
                     <Card className="shadow-none border-0">
-                      <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-lg">Appearance</CardTitle>
-                        <CardDescription>Customize the look and feel of your application.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="px-0">
+                      <CardContent className="px-0 pt-0">
                         <p className="text-muted-foreground">Appearance settings coming soon...</p>
                       </CardContent>
                     </Card>

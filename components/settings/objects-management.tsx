@@ -178,11 +178,7 @@ export function ObjectsManagement() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-xl">Objects</CardTitle>
-            <CardDescription>
-              Manage your data objects and their field structures. Objects define the data models for your business
-              entities.
-            </CardDescription>
+            {/* Title and description removed to avoid redundancy with settings header */}
           </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>

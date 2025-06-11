@@ -136,11 +136,7 @@ export function WorkflowsManagement() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-xl">Workflows</CardTitle>
-            <CardDescription>
-              Create and manage automated workflows for your business processes. Workflows help streamline operations
-              and ensure consistency.
-            </CardDescription>
+            {/* Title and description removed to avoid redundancy with settings header */}
           </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
