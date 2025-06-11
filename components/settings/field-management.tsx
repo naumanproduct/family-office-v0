@@ -9,7 +9,7 @@ interface FieldManagementProps {
   backButtonText?: string
 }
 
-const FieldManagement: React.FC<FieldManagementProps> = ({ onBack, backButtonText = "Back" }) => {
+export function FieldManagement({ onBack, backButtonText = "Back" }: React.FC<FieldManagementProps>) {
   return (
     <div>
       <Button variant="ghost" size="sm" onClick={onBack} className="flex items-center gap-2">
@@ -24,5 +24,3 @@ const FieldManagement: React.FC<FieldManagementProps> = ({ onBack, backButtonTex
     </div>
   )
 }
-
-export default FieldManagement
