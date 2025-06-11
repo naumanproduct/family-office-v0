@@ -16,8 +16,10 @@ import {
   Workflow,
   ChevronRight,
   ChevronDown,
+  ArrowLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 interface SettingsCategory {
   id: string
@@ -89,9 +91,15 @@ export default function SettingsPage() {
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-          <p className="text-muted-foreground">Manage your application settings and configuration.</p>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+            <p className="text-muted-foreground">Manage your application settings and configuration.</p>
+          </div>
         </div>
       </div>
 
