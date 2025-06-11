@@ -91,9 +91,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="space-y-4 pb-8">
-        {" "}
-        {/* Added pb-8 here for more spacing */}
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
@@ -109,12 +107,12 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+      <div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0 lg:justify-center">
         <aside className="lg:w-64">
           <nav className="space-y-1">{settingsCategories.map((category) => renderNavItem(category))}</nav>
         </aside>
 
-        <div className="flex-1 lg:max-w-5xl">
+        <div className="flex-1 lg:max-w-5xl mx-auto">
           {activeCategory === "objects" && <ObjectsManagement />}
           {activeCategory === "workflows" && <WorkflowsManagement />}
           {activeCategory === "general" && (
