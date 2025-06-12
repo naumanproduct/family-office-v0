@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import {
   DndContext,
@@ -83,6 +84,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTasks } from "@/components/tasks-table"
 
 export const schema = z.object({
   id: z.number(),
@@ -1498,6 +1500,36 @@ function getTabData(activeTab: string, item: z.infer<typeof schema>) {
 }
 
 function TableView({ data, activeTab }: { data: any[]; activeTab: string }) {
+  // Get the updateTaskStatus function from the tasks context if we're on the tasks tab
+  const tasksContext = activeTab === "tasks" ? useTasks() : null;
+
+  // Use a ref to handle checkbox clicks
+  const checkboxRefs = React.useRef<Map<number, HTMLDivElement | null>>(new Map());
+
+  // Handle task status change
+  const handleTaskStatusChange = (taskId: number) => {
+    if (tasksContext) {
+      const task = data.find(task => task.id === taskId);
+      if (task) {
+        const newStatus = task.status.toLowerCase() === "completed" ? "pending" : "completed";
+        tasksContext.updateTaskStatus(taskId, newStatus);
+      }
+    }
+  };
+
+  // Set up event listeners for each checkbox after render
+  useEffect(() => {
+    if (activeTab === "tasks") {
+      checkboxRefs.current.forEach((ref, taskId) => {
+        if (ref) {
+          const handler = () => handleTaskStatusChange(taskId);
+          ref.addEventListener("click", handler);
+          return () => ref.removeEventListener("click", handler);
+        }
+      });
+    }
+  }, [data, activeTab]); // Re-run when data or active tab changes
+
   if (activeTab === "tasks") {
     return (
       <div className="rounded-lg border">
@@ -1518,13 +1550,21 @@ function TableView({ data, activeTab }: { data: any[]; activeTab: string }) {
           <TableBody>
             {data.map((task) => (
               <TableRow key={task.id}>
-                <TableCell>
-                  <Checkbox checked={task.status === "completed"} />
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Checkbox 
+                    checked={task.status.toLowerCase() === "completed"}
+                    onCheckedChange={() => {
+                      if (tasksContext) {
+                        const newStatus = task.status.toLowerCase() === "completed" ? "pending" : "completed";
+                        tasksContext.updateTaskStatus(task.id, newStatus);
+                      }
+                    }}
+                  />
                 </TableCell>
                 <TableCell>
                   <div>
                     <p
-                      className={`font-medium ${task.status === "completed" ? "line-through text-muted-foreground" : ""}`}
+                      className={`font-medium ${task.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}
                     >
                       {task.title}
                     </p>
@@ -1539,8 +1579,8 @@ function TableView({ data, activeTab }: { data: any[]; activeTab: string }) {
                 <TableCell>{task.assignee}</TableCell>
                 <TableCell>{task.dueDate}</TableCell>
                 <TableCell>
-                  <Badge variant={task.status === "completed" ? "secondary" : "outline"}>
-                    {task.status === "completed" ? "Completed" : "Pending"}
+                  <Badge variant={task.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
+                    {task.status.toLowerCase() === "completed" ? "Completed" : "Pending"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -1553,6 +1593,15 @@ function TableView({ data, activeTab }: { data: any[]; activeTab: string }) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>Edit</DropdownMenuItem>
                       <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTaskStatusChange(task.id);
+                        }}
+                      >
+                        {task.status.toLowerCase() === "completed" ? "Mark as Pending" : "Mark as Completed"}
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
                     </DropdownMenuContent>

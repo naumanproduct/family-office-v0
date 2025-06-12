@@ -15,7 +15,7 @@ import {
   ExpandIcon,
 } from "lucide-react"
 import { createPortal } from "react-dom"
-import { useState } from "react"
+import { useState, createContext, useContext } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { TaskDetailsView } from "./task-details-view"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { TaskTemplateDialog } from "./task-template-dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 
 // Task data - extended from investment tab but across all objects
 const tasksData = [
@@ -88,6 +89,56 @@ const tasksData = [
   },
 ]
 
+// Define the Task type
+type Task = {
+  id: number
+  title: string
+  priority: string
+  status: string
+  assignee: string
+  dueDate: string
+  description: string
+  relatedTo?: { type: string; name: string }
+}
+
+// Create the tasks context
+type TasksContextType = {
+  tasks: Task[]
+  updateTaskStatus: (taskId: number, newStatus: string) => void
+}
+
+const TasksContext = createContext<TasksContextType | undefined>(undefined)
+
+// Create a provider component
+export function TasksProvider({ children }: { children: React.ReactNode }) {
+  const [tasks, setTasks] = useState<Task[]>(tasksData)
+
+  const updateTaskStatus = (taskId: number, newStatus: string) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId
+          ? { ...task, status: newStatus }
+          : task
+      )
+    )
+  }
+
+  return (
+    <TasksContext.Provider value={{ tasks, updateTaskStatus }}>
+      {children}
+    </TasksContext.Provider>
+  )
+}
+
+// Create a hook to use the tasks context
+export function useTasks() {
+  const context = useContext(TasksContext)
+  if (context === undefined) {
+    throw new Error("useTasks must be used within a TasksProvider")
+  }
+  return context
+}
+
 function TaskTableView({
   data,
   onTaskClick,
@@ -95,11 +146,27 @@ function TaskTableView({
   data: any[]
   onTaskClick?: (task: any) => void
 }) {
+  const { updateTaskStatus } = useTasks()
+
+  // Updated function to handle task completion status toggle
+  const handleTaskStatusToggle = (e: React.MouseEvent, taskId: number) => {
+    e.stopPropagation()
+    // Find the task by ID
+    const task = data.find(task => task.id === taskId)
+    if (task) {
+      // Toggle the status between "completed" and "pending"
+      const newStatus = task.status.toLowerCase() === "completed" ? "pending" : "completed"
+      // Update the task status using the context
+      updateTaskStatus(taskId, newStatus)
+    }
+  }
+
   return (
     <div className="rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-12"></TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Due Date</TableHead>
             <TableHead>Priority</TableHead>
@@ -111,7 +178,15 @@ function TaskTableView({
         <TableBody>
           {data.map((item) => (
             <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onTaskClick?.(item)}>
-              <TableCell className="font-medium">{item.title}</TableCell>
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <Checkbox 
+                  checked={item.status.toLowerCase() === "completed"} 
+                  onCheckedChange={() => handleTaskStatusToggle(window.event as unknown as React.MouseEvent, item.id)}
+                />
+              </TableCell>
+              <TableCell className={`font-medium ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>
+                {item.title}
+              </TableCell>
               <TableCell>{item.dueDate}</TableCell>
               <TableCell>
                 <Badge
@@ -124,7 +199,9 @@ function TaskTableView({
               </TableCell>
               <TableCell>{item.assignee}</TableCell>
               <TableCell>
-                <Badge variant="outline">{item.status}</Badge>
+                <Badge variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
+                  {item.status}
+                </Badge>
               </TableCell>
               <TableCell>
                 <DropdownMenu>
@@ -136,6 +213,15 @@ function TaskTableView({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem>View</DropdownMenuItem>
                     <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTaskStatusToggle(e, item.id);
+                      }}
+                    >
+                      {item.status.toLowerCase() === "completed" ? "Mark as Pending" : "Mark as Completed"}
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
                   </DropdownMenuContent>
@@ -279,12 +365,16 @@ function TaskListView({
 }
 
 export function TasksTable() {
-  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
-  const [globalFilter, setGlobalFilter] = React.useState("")
-  const [selectedTask, setSelectedTask] = React.useState<any>(null)
-  const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
-  const [isFullScreen, setIsFullScreen] = React.useState(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<any>(null)
+  const [selectedSubtask, setSelectedSubtask] = useState<any>(null)
+  const [viewMode, setViewMode] = useState<"table" | "card" | "list">("table")
+  const [isFullScreen, setIsFullScreen] = useState(false)
+  const [globalFilter, setGlobalFilter] = useState("")
   const [isTaskTemplateOpen, setIsTaskTemplateOpen] = useState(false)
+  
+  // Use the tasks context
+  const { tasks } = useTasks()
 
   // Handle back navigation in the drawer
   const handleDrawerBackClick = () => {
@@ -349,12 +439,12 @@ export function TasksTable() {
 
   const renderTaskContent = () => {
     if (viewMode === "table") {
-      return <TaskTableView data={tasksData} onTaskClick={setSelectedTask} />
+      return <TaskTableView data={tasks} onTaskClick={setSelectedTask} />
     }
     if (viewMode === "card") {
-      return <TaskCardView data={tasksData} onTaskClick={setSelectedTask} />
+      return <TaskCardView data={tasks} onTaskClick={setSelectedTask} />
     }
-    return <TaskListView data={tasksData} onTaskClick={setSelectedTask} />
+    return <TaskListView data={tasks} onTaskClick={setSelectedTask} />
   }
 
   const FullScreenContent = () => {
@@ -501,5 +591,14 @@ export function TasksTable() {
       {/* Task Template Dialog */}
       <TaskTemplateDialog isOpen={isTaskTemplateOpen} onClose={() => setIsTaskTemplateOpen(false)} />
     </>
+  )
+}
+
+// Wrap the component export to include the provider
+export default function TasksTableWithProvider() {
+  return (
+    <TasksProvider>
+      <TasksTable />
+    </TasksProvider>
   )
 }

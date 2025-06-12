@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { TasksTable } from "@/components/tasks-table"
+import TasksTableWithProvider from "@/components/tasks-table"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
@@ -39,7 +39,7 @@ export default function TasksPage() {
                     <p className="text-muted-foreground">Manage and track all your tasks and to-dos</p>
                   </div>
                 </div>
-                <TasksTable />
+                <TasksTableWithProvider />
               </div>
             </div>
           </div>

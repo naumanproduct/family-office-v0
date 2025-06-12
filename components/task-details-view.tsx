@@ -31,6 +31,7 @@ import { TypableArea } from "@/components/typable-area"
 
 import { NoteContent } from "@/components/shared/note-content"
 import { FileContent } from "@/components/shared/file-content"
+import { useTasks } from "./tasks-table"
 
 interface TaskDetailsViewProps {
   task: any
@@ -65,6 +66,9 @@ export function TaskDetailsView({
     assignee: task.assignee || "John Smith",
     dueDate: task.dueDate || "2023-05-25",
   })
+
+  // Get the tasks context for updating task status
+  const tasksContext = useTasks();
 
   const [subtasks, setSubtasks] = React.useState(
     task.subtasks || [
@@ -138,6 +142,11 @@ export function TaskDetailsView({
   const handleFieldEdit = (field: string, value: string) => {
     setFieldValues((prev) => ({ ...prev, [field]: value }))
     setEditingField(null)
+    
+    // If the field is status and we have a task context, update the global state
+    if (field === "status" && tasksContext && task.id) {
+      tasksContext.updateTaskStatus(task.id, value);
+    }
   }
 
   const handleCommentSubmit = (comment: string) => {
@@ -430,7 +439,13 @@ export function TaskDetailsView({
                             onClick={(e) => {
                               e.stopPropagation()
                               const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
+                              // Update the local state
                               handleSubtaskStatusChange(subtask.id, newStatus)
+                              
+                              // If this is a task in the global context (has numeric ID), update global state too
+                              if (tasksContext && !isNaN(Number(subtask.id))) {
+                                tasksContext.updateTaskStatus(Number(subtask.id), newStatus);
+                              }
                             }}
                           >
                             {subtask.status === "Completed" ? (
