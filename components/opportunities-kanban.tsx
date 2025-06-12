@@ -117,7 +117,7 @@ function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           </CardContent>
         </Card>
       </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
+      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
         <OpportunityDrawerContent opportunity={opportunity} />
       </SheetContent>
     </Sheet>
@@ -162,7 +162,12 @@ function OpportunityDrawerContent({ opportunity }: { opportunity: Opportunity })
       {/* Header */}
       <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => document.querySelector('[data-state="open"]')?.click()}>
+          <Button variant="ghost" size="icon" onClick={() => {
+            const element = document.querySelector('[data-state="open"]');
+            if (element && element instanceof HTMLElement) {
+              element.click();
+            }
+          }}>
             <ChevronLeftIcon className="h-4 w-4" />
           </Button>
           <Badge variant="outline" className="bg-background">

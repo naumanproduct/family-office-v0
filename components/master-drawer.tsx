@@ -68,8 +68,8 @@ export function MasterDrawer({
   const [fullScreenHiddenTabs, setFullScreenHiddenTabs] = React.useState<Tab[]>([])
 
   React.useEffect(() => {
-    // For regular drawer, show first 6 tabs as visible, rest as hidden
-    const maxVisibleTabs = 6
+    // For regular drawer, show first 5 tabs as visible, rest as hidden
+    const maxVisibleTabs = 5
     if (tabs.length > maxVisibleTabs) {
       setVisibleTabs(tabs.slice(0, maxVisibleTabs))
       setHiddenTabs(tabs.slice(maxVisibleTabs))
@@ -286,7 +286,7 @@ export function MasterDrawer({
           {/* Full Screen Content - Two Column Layout */}
           <div className="flex h-[calc(100vh-73px)]">
             {/* Left Panel - Details (Persistent) */}
-            <div className="w-96 border-r bg-background">
+            <div className="w-[672px] border-r bg-background">
               {/* Record Header - Always show original record info in left panel */}
               <div className="border-b bg-background px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -311,14 +311,14 @@ export function MasterDrawer({
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`relative whitespace-nowrap py-3 px-4 text-sm font-medium flex items-center gap-2 min-w-0 ${
+                      className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
                         activeTab === tab.id
                           ? "border-b-2 border-primary text-primary"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      {tab.icon && <tab.icon className="h-4 w-4" />}
-                      <span className="truncate max-w-[120px]">{tab.label}</span>
+                      {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
+                      <span className="truncate">{tab.label}</span>
                       {tab.count !== null && (
                         <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
                           {tab.count}
@@ -392,7 +392,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
+              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
@@ -428,7 +428,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
+              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
@@ -459,7 +459,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedMeeting} onOpenChange={(open) => !open && setSelectedMeeting(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
+              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
@@ -490,7 +490,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedEmail} onOpenChange={(open) => !open && setSelectedEmail(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden z-[10000]"
+              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
@@ -531,7 +531,7 @@ export function MasterDrawer({
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-4xl flex-col p-0 sm:max-w-4xl [&>button]:hidden">
+      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
         {/* Header */}
         <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
           <div className="flex items-center gap-3">
@@ -604,14 +604,14 @@ export function MasterDrawer({
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 px-4 text-sm font-medium flex items-center gap-2 min-w-0 ${
+                    className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
                       activeTab === tab.id
                         ? "border-b-2 border-primary text-primary"
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {tab.icon && <tab.icon className="h-4 w-4" />}
-                    <span className="truncate max-w-[120px]">{tab.label}</span>
+                    {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
+                    <span className="truncate">{tab.label}</span>
                     {tab.count !== null && (
                       <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
                         {tab.count}

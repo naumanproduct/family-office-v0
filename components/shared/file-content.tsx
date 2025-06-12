@@ -41,6 +41,7 @@ import { AddFileSheet, FileFormData } from "@/components/add-file-sheet"
 import { MasterDrawer } from "@/components/master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { Label } from "@/components/ui/label"
+import { DocumentViewer } from "@/components/document-viewer"
 
 // Default mock data, can be overridden by passing data prop
 const defaultFiles = [
@@ -253,6 +254,7 @@ export function FileContent({
   const [isAddFileSheetOpen, setIsAddFileSheetOpen] = useState(false)
   const [fileData, setFileData] = useState(data)
   const [selectedFile, setSelectedFile] = useState<any>(null)
+  const [isDocumentViewerOpen, setIsDocumentViewerOpen] = useState(false)
 
   // Define tabs for the MasterDrawer
   const fileTabs = [
@@ -264,6 +266,7 @@ export function FileContent({
 
   const handleFileSelect = (file: any) => {
     setSelectedFile(file)
+    setIsDocumentViewerOpen(true)
     
     if (onFileSelect) {
       onFileSelect(file)
@@ -423,26 +426,18 @@ export function FileContent({
                 {fileData.map((file) => (
                   <TableRow key={file.id}>
                     <TableCell>
-                      <MasterDrawer
-                        trigger={
-                          <div className="flex items-center gap-3 cursor-pointer">
-                            {getFileIcon(file.fileType || file.type)}
-                            <div>
-                              <div className="font-medium">{file.title || file.name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {file.fileName || file.name} • {file.fileSize || file.size}
-                              </div>
-                            </div>
-                          </div>
-                        }
-                        title={file.title || file.name}
-                        recordType="File"
-                        subtitle={`${getFileTypeDisplay(file)} • ${file.fileSize || file.size}`}
-                        tabs={fileTabs}
-                        detailsPanel={() => renderDetailsPanel(false)}
+                      <div 
+                        className="flex items-center gap-3 cursor-pointer"
+                        onClick={() => handleFileSelect(file)}
                       >
-                        {renderTabContent}
-                      </MasterDrawer>
+                        {getFileIcon(file.fileType || file.type)}
+                        <div>
+                          <div className="font-medium">{file.title || file.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {file.fileName || file.name} • {file.fileSize || file.size}
+                          </div>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>{file.fileSize || file.size}</TableCell>
                     <TableCell>
@@ -489,29 +484,21 @@ export function FileContent({
             <div className="space-y-4">
               {fileData.map((file) => (
                 <div key={file.id} className="flex items-center justify-between border-b pb-4 rounded-md p-2">
-                  <MasterDrawer
-                    trigger={
-                      <div className="flex items-center gap-3 cursor-pointer">
-                        {getFileIcon(file.fileType || file.type)}
-                        <div>
-                          <div className="font-medium">{file.title || file.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {file.fileName || file.name} • {file.fileSize || file.size}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Uploaded {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()} by {file.uploadedBy}
-                          </div>
-                        </div>
-                      </div>
-                    }
-                    title={file.title || file.name}
-                    recordType="File"
-                    subtitle={`${getFileTypeDisplay(file)} • ${file.fileSize || file.size}`}
-                    tabs={fileTabs}
-                    detailsPanel={() => renderDetailsPanel(false)}
+                  <div 
+                    className="flex items-center gap-3 cursor-pointer"
+                    onClick={() => handleFileSelect(file)}
                   >
-                    {renderTabContent}
-                  </MasterDrawer>
+                    {getFileIcon(file.fileType || file.type)}
+                    <div>
+                      <div className="font-medium">{file.title || file.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {file.fileName || file.name} • {file.fileSize || file.size}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Uploaded {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()} by {file.uploadedBy}
+                      </div>
+                    </div>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="text-xs">
                       {(file.fileType || file.type || "FILE").toUpperCase()}
@@ -551,31 +538,23 @@ export function FileContent({
             <Card key={file.id}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
-                  <MasterDrawer
-                    trigger={
-                      <div className="flex-1 cursor-pointer">
-                        <div className="flex items-center gap-3 mb-2">
-                          {getFileIcon(file.fileType || file.type)}
-                          <h4 className="font-medium text-base">{file.title || file.name}</h4>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {file.fileName || file.name} • {file.fileSize || file.size}
-                        </p>
-                        <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
-                          <p>Uploaded: {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</p>
-                          <p>By: {file.uploadedBy}</p>
-                          {file.description && <p className="line-clamp-2">{file.description}</p>}
-                        </div>
-                      </div>
-                    }
-                    title={file.title || file.name}
-                    recordType="File"
-                    subtitle={`${getFileTypeDisplay(file)} • ${file.fileSize || file.size}`}
-                    tabs={fileTabs}
-                    detailsPanel={() => renderDetailsPanel(false)}
+                  <div 
+                    className="flex-1 cursor-pointer"
+                    onClick={() => handleFileSelect(file)}
                   >
-                    {renderTabContent}
-                  </MasterDrawer>
+                    <div className="flex items-center gap-3 mb-2">
+                      {getFileIcon(file.fileType || file.type)}
+                      <h4 className="font-medium text-base">{file.title || file.name}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {file.fileName || file.name} • {file.fileSize || file.size}
+                    </p>
+                    <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
+                      <p>Uploaded: {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</p>
+                      <p>By: {file.uploadedBy}</p>
+                      {file.description && <p className="line-clamp-2">{file.description}</p>}
+                    </div>
+                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -608,6 +587,12 @@ export function FileContent({
         open={isAddFileSheetOpen}
         onOpenChange={setIsAddFileSheetOpen}
         onSubmit={handleFileUpload}
+      />
+
+      <DocumentViewer 
+        isOpen={isDocumentViewerOpen} 
+        onOpenChange={setIsDocumentViewerOpen} 
+        file={selectedFile} 
       />
     </div>
   )
