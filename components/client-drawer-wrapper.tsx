@@ -1,24 +1,40 @@
 "use client"
 
 import * as React from "react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { MasterDrawer } from "./master-drawer"
+import dynamic from "next/dynamic"
+import { Button } from "@/components/ui/button"
+
+// Dynamically import MasterDrawer with no SSR to prevent hydration issues
+const DynamicMasterDrawer = dynamic(
+  () => import("./master-drawer").then((mod) => ({ default: mod.MasterDrawer })),
+  { ssr: false }
+)
 
 // This wrapper ensures proper client-side hydration for drawers
-// It fixes the React 19/Next.js 15 compatibility issues
-export function ClientDrawerWrapper(props: React.ComponentProps<typeof MasterDrawer>) {
-  const [isClient, setIsClient] = React.useState(false)
+export function ClientDrawerWrapper(props: React.ComponentProps<typeof DynamicMasterDrawer>) {
+  const [isOpen, setIsOpen] = React.useState(false)
   
-  React.useEffect(() => {
-    // This ensures hydration is complete before rendering the drawer
-    setIsClient(true)
-  }, [])
+  const handleTriggerClick = () => {
+    setIsOpen(true)
+  }
 
-  // Render only the trigger during server-side rendering
-  if (!isClient) {
-    return <>{props.trigger}</>
+  const handleClose = () => {
+    setIsOpen(false)
   }
   
-  // Once hydrated on client, render full MasterDrawer
-  return <MasterDrawer {...props} />
+  return (
+    <>
+      <div onClick={handleTriggerClick}>
+        {props.trigger}
+      </div>
+      
+      {isOpen && (
+        <DynamicMasterDrawer 
+          {...props} 
+          // Add an additional close handler to the original props
+          onClose={handleClose}
+        />
+      )}
+    </>
+  )
 } 
