@@ -42,15 +42,9 @@ const fileTypes = [
     category: "Sources",
   },
   {
-    id: "google-drive",
-    name: "Google Drive",
-    description: "Import files from your Google Drive account.",
-    category: "Sources",
-  },
-  {
-    id: "onedrive",
-    name: "OneDrive",
-    description: "Import files from your OneDrive account.",
+    id: "box",
+    name: "Box",
+    description: "Import files from your Box account.",
     category: "Sources",
   },
   {
@@ -60,9 +54,15 @@ const fileTypes = [
     category: "Sources",
   },
   {
-    id: "box",
-    name: "Box",
-    description: "Import files from your Box account.",
+    id: "google-drive",
+    name: "Google Drive",
+    description: "Import files from your Google Drive account.",
+    category: "Sources",
+  },
+  {
+    id: "onedrive",
+    name: "OneDrive",
+    description: "Import files from your OneDrive account.",
     category: "Sources",
   },
 ]

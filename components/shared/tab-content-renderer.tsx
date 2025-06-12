@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Card, CardContent } from "@/components/ui/card"
 import { MoreVerticalIcon, PlusIcon } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { UnifiedTaskTable } from "./unified-task-table"
 
 // Define the types of handlers for different item types
 interface TabContentRendererHandlers {
@@ -130,7 +132,12 @@ function TableView({
   activeTab: string
 } & TabContentRendererHandlers) {
   if (data.length === 0) {
-    return <EmptyState activeTab={activeTab} />
+    return <EmptyState activeTab={activeTab} onAdd={onAdd} />
+  }
+
+  // If this is the tasks tab, use our unified task table component
+  if (activeTab === "tasks") {
+    return <UnifiedTaskTable data={data} onTaskClick={onTaskClick} viewMode="table" />
   }
 
   return (
@@ -143,16 +150,6 @@ function TableView({
                 <TableHead>Subject</TableHead>
                 <TableHead>From</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </>
-            )}
-            {activeTab === "tasks" && (
-              <>
-                <TableHead>Title</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Assignee</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-12"></TableHead>
               </>
@@ -187,7 +184,6 @@ function TableView({
                 <TableHead>Name</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead className="w-12"></TableHead>
               </>
             )}
           </TableRow>
@@ -235,40 +231,6 @@ function TableView({
                         <DropdownMenuItem>View</DropdownMenuItem>
                         <DropdownMenuItem>Reply</DropdownMenuItem>
                         <DropdownMenuItem>Forward</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </>
-              )}
-              {activeTab === "tasks" && (
-                <>
-                  <TableCell className="font-medium">{item.title}</TableCell>
-                  <TableCell>{item.dueDate}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
-                      }
-                    >
-                      {item.priority}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{item.assignee}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{item.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                          <MoreVerticalIcon className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
                       </DropdownMenuContent>
@@ -392,13 +354,27 @@ function CardView({
   if (data.length === 0) {
     return <EmptyState activeTab={activeTab} onAdd={onAdd} />
   }
+  
+  // If this is the tasks tab, use our unified task table component
+  if (activeTab === "tasks") {
+    return <UnifiedTaskTable data={data} onTaskClick={onTaskClick} viewMode="card" />
+  }
+  
+  // Function to handle task completion toggle
+  const handleTaskStatusToggle = (e: React.MouseEvent, task: any) => {
+    e.stopPropagation();
+    // Toggle the status between "completed" and "pending"
+    const newStatus = task.status.toLowerCase() === "completed" ? "pending" : "completed";
+    // Update the task (in a real app, this would call an API or update global state)
+    task.status = newStatus;
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {data.map((item) => (
-        <div
+        <Card
           key={item.id}
-          className={`rounded-lg border p-4 ${
+          className={`${
             (activeTab === "tasks" && onTaskClick) ||
             (activeTab === "notes" && onNoteClick) ||
             (activeTab === "meetings" && onMeetingClick) ||
@@ -418,39 +394,208 @@ function CardView({
             }
           }}
         >
-          {/* Implement card views for different tab types */}
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium">{item.title || item.subject || item.name}</h3>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                    <MoreVerticalIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>View</DropdownMenuItem>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className="text-sm text-muted-foreground flex-1">
-              {item.description || item.preview || item.content}
-            </div>
-            <div className="mt-2 pt-2 border-t flex items-center justify-between">
-              <div className="text-xs text-muted-foreground">
-                {item.date || item.dueDate || (item.createdAt && new Date(item.createdAt).toLocaleDateString())}
+          <CardContent className="p-4">
+            {activeTab === "tasks" && (
+              <div className="flex gap-4">
+                <div onClick={(e) => e.stopPropagation()} className="mt-1">
+                  <div className="group relative flex items-center justify-center">
+                    <Checkbox 
+                      className="h-4 w-4 rounded-full border-2 group-hover:border-primary/70 transition-colors"
+                      checked={item.status.toLowerCase() === "completed"} 
+                      onCheckedChange={() => handleTaskStatusToggle(window.event as unknown as React.MouseEvent, item)}
+                    />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between">
+                    <h3 className={`font-medium ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>{item.title}</h3>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <MoreVerticalIcon className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>View</DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTaskStatusToggle(e, item);
+                          }}
+                        >
+                          {item.status.toLowerCase() === "completed" ? "Mark as Pending" : "Mark as Completed"}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge
+                      variant={
+                        item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+                      }
+                      className="mr-1"
+                    >
+                      {item.priority}
+                    </Badge>
+                    <Badge variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
+                      {item.status}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
+                    <span>{item.assignee}</span>
+                    <span>{item.dueDate}</span>
+                  </div>
+                </div>
               </div>
-              {item.status && (
-                <Badge variant="outline" className="text-xs">
-                  {item.status}
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
+            )}
+
+            {activeTab === "notes" && (
+              <>
+                <div className="flex items-start justify-between">
+                  <h3 className="font-medium">{item.title}</h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">{item.date}</p>
+              </>
+            )}
+
+            {activeTab === "emails" && (
+              <>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{item.subject}</p>
+                        <p className="text-xs text-muted-foreground">From: {item.from}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">{item.date}</p>
+                        <div className="mt-1">
+                          <Badge variant={item.status === "Unread" ? "default" : "outline"} className="text-xs">
+                            {item.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.preview}</p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Reply</DropdownMenuItem>
+                      <DropdownMenuItem>Forward</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </>
+            )}
+
+            {activeTab === "meetings" && (
+              <>
+                <div className="flex items-start justify-between">
+                  <h3 className="font-medium">{item.title}</h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">{item.date} {item.time && `• ${item.time}`}</p>
+              </>
+            )}
+
+            {activeTab === "files" && (
+              <>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">Uploaded by: {item.uploadedBy}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">{item.uploadedDate}</p>
+                        <div className="mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {item.size}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.description || item.preview || item.content}</p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Download</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </>
+            )}
+
+            {activeTab === "team" && (
+              <>
+                <div className="flex items-start justify-between">
+                  <h3 className="font-medium">{item.name}</h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View Profile</DropdownMenuItem>
+                      <DropdownMenuItem>Send Message</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>Schedule Meeting</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">{item.role}</p>
+                <p className="mt-2 text-xs text-muted-foreground">{item.email}</p>
+              </>
+            )}
+          </CardContent>
+        </Card>
       ))}
     </div>
   )
@@ -472,13 +617,27 @@ function ListView({
   if (data.length === 0) {
     return <EmptyState activeTab={activeTab} onAdd={onAdd} />
   }
+  
+  // If this is the tasks tab, use our unified task table component
+  if (activeTab === "tasks") {
+    return <UnifiedTaskTable data={data} onTaskClick={onTaskClick} viewMode="list" />
+  }
+  
+  // Function to handle task completion toggle
+  const handleTaskStatusToggle = (e: React.MouseEvent, task: any) => {
+    e.stopPropagation();
+    // Toggle the status between "completed" and "pending"
+    const newStatus = task.status.toLowerCase() === "completed" ? "pending" : "completed";
+    // Update the task (in a real app, this would call an API or update global state)
+    task.status = newStatus;
+  }
 
   return (
-    <div className="space-y-4">
+    <div className="divide-y">
       {data.map((item) => (
         <div
           key={item.id}
-          className={`rounded-lg border p-4 ${
+          className={`py-4 ${
             (activeTab === "tasks" && onTaskClick) ||
             (activeTab === "notes" && onNoteClick) ||
             (activeTab === "meetings" && onMeetingClick) ||
@@ -498,25 +657,123 @@ function ListView({
             }
           }}
         >
-          {/* Email List Item */}
+          {activeTab === "tasks" && (
+            <div className="flex items-start">
+              <div onClick={(e) => e.stopPropagation()} className="mt-1 mr-4">
+                <div className="group relative flex items-center justify-center">
+                  <Checkbox 
+                    className="h-4 w-4 rounded-full border-2 group-hover:border-primary/70 transition-colors"
+                    checked={item.status.toLowerCase() === "completed"} 
+                    onCheckedChange={() => handleTaskStatusToggle(window.event as unknown as React.MouseEvent, item)}
+                  />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
+                  <h3 className={`font-medium ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>{item.title}</h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>View</DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTaskStatusToggle(e, item);
+                        }}
+                      >
+                        {item.status.toLowerCase() === "completed" ? "Mark as Pending" : "Mark as Completed"}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge
+                    variant={
+                      item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+                    }
+                    className="mr-1"
+                  >
+                    {item.priority}
+                  </Badge>
+                  <Badge variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
+                    {item.status}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
+                  <span>{item.assignee}</span>
+                  <span>{item.dueDate}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "notes" && (
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-medium">{item.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{item.date}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+
+          {activeTab === "meetings" && (
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-medium">{item.title}</h3>
+                <div className="flex gap-2 mt-1">
+                  <p className="text-sm text-muted-foreground">{item.date} {item.time && `• ${item.time}`}</p>
+                  <Badge variant="outline">{item.status}</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {typeof item.attendees === 'number' ? `${item.attendees} people` : item.attendees?.join(', ') || '-'}
+                </p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <MoreVerticalIcon className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>View</DropdownMenuItem>
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+          
           {activeTab === "emails" && (
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.subject}</p>
-                    <p className="text-xs text-muted-foreground">From: {item.from}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">{item.date}</p>
-                    <div className="mt-1">
-                      <Badge variant={item.status === "Unread" ? "default" : "outline"} className="text-xs">
-                        {item.status}
-                      </Badge>
-                    </div>
-                  </div>
+                <h3 className="font-medium">{item.subject}</h3>
+                <p className="text-sm text-muted-foreground mt-1">From: {item.from}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-sm text-muted-foreground">{item.date}</p>
+                  <Badge variant={item.status === "Unread" ? "default" : "outline"}>{item.status}</Badge>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.preview}</p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -534,38 +791,16 @@ function ListView({
               </DropdownMenu>
             </div>
           )}
-
-          {/* Task List Item */}
-          {activeTab === "tasks" && (
+          
+          {activeTab === "files" && (
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">Assigned to: {item.assignee}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">Due: {item.dueDate}</p>
-                    <div className="mt-1 flex items-center gap-1 justify-end">
-                      <Badge
-                        variant={
-                          item.priority === "High"
-                            ? "destructive"
-                            : item.priority === "Medium"
-                              ? "default"
-                              : "secondary"
-                        }
-                        className="text-xs"
-                      >
-                        {item.priority}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {item.status}
-                      </Badge>
-                    </div>
-                  </div>
+                <h3 className="font-medium">{item.name}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-sm text-muted-foreground">Uploaded by: {item.uploadedBy}</p>
+                  <p className="text-sm text-muted-foreground">{item.uploadedDate}</p>
+                  <Badge variant="outline">{item.size}</Badge>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{item.description}</p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -575,31 +810,20 @@ function ListView({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem>View</DropdownMenuItem>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem>Download</DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           )}
-
-          {/* Generic list item for other types */}
-          {activeTab !== "emails" && activeTab !== "tasks" && (
+          
+          {activeTab === "team" && (
             <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.title || item.name || item.subject}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.date || 
-                       item.dueDate || 
-                       (item.createdAt && new Date(item.createdAt).toLocaleDateString())}
-                    </p>
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
-                  {item.description || item.content || item.preview}
-                </p>
+              <div>
+                <h3 className="font-medium">{item.name}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{item.role}</p>
+                <p className="text-sm text-muted-foreground mt-1">{item.email}</p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -608,10 +832,10 @@ function ListView({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>View</DropdownMenuItem>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem>View Profile</DropdownMenuItem>
+                  <DropdownMenuItem>Send Message</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
+                  <DropdownMenuItem>Schedule Meeting</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
