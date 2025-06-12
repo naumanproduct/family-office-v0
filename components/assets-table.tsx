@@ -30,8 +30,6 @@ import {
   ClockIcon,
   MessageSquareIcon,
   Users,
-  ChevronLeftIcon,
-  XIcon,
   LayoutIcon,
   MoreHorizontalIcon,
   ExternalLinkIcon,
@@ -52,10 +50,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { MasterDrawer } from "./master-drawer"
 import { AddAssetDialog } from "./add-asset-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
-import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 import { ClientDrawerWrapper } from "./client-drawer-wrapper"
 import { Label } from "@/components/ui/label"
 
@@ -456,12 +452,12 @@ function getAssetTabData(activeTab: string, asset: Asset) {
 function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
   // Add state for collapsible sections
   const [openSections, setOpenSections] = React.useState<{
-    details: boolean;
-    company: boolean;
-    people: boolean;
-    entities: boolean;
-    investments: boolean;
-    opportunities: boolean;
+    details: boolean
+    company: boolean
+    people: boolean
+    entities: boolean
+    investments: boolean
+    opportunities: boolean
   }>({
     details: true, // Details expanded by default
     company: false,
@@ -469,18 +465,18 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
     entities: false,
     investments: false,
     opportunities: false,
-  });
+  })
 
   // Add state for showing all values
-  const [showingAllValues, setShowingAllValues] = React.useState(false);
+  const [showingAllValues, setShowingAllValues] = React.useState(false)
 
   // Toggle function for collapsible sections
-  const toggleSection = (section: 'details' | 'company' | 'people' | 'entities' | 'investments' | 'opportunities') => {
-    setOpenSections(prev => ({
+  const toggleSection = (section: "details" | "company" | "people" | "entities" | "investments" | "opportunities") => {
+    setOpenSections((prev) => ({
       ...prev,
       [section]: !prev[section],
-    }));
-  };
+    }))
+  }
 
   // Mock data for related entities
   const relatedData = {
@@ -505,7 +501,7 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
       { id: 1, name: "Expansion Funding", status: "In Discussion" },
       { id: 2, name: "Strategic Partnership", status: "Initial Review" },
     ],
-  };
+  }
 
   // Basic fields for collapsed view
   const basicFields = [
@@ -543,7 +539,7 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
         </span>
       ),
     },
-  ];
+  ]
 
   // Extended fields for "Show all" view
   const extendedFields = [
@@ -609,17 +605,17 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
       label: "Geography",
       value: asset.geography,
     },
-  ];
+  ]
 
   // Navigation function for when a chip is clicked
   const navigateToRecord = (recordType: string, id: number) => {
-    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    console.log(`Navigate to ${recordType} record with ID: ${id}`)
     // This would be implemented to navigate to the record within the same panel
     // For example, this could update state to show the record details
-  };
+  }
 
   // Render the detail fields
-  const renderFields = (fields: typeof basicFields, showAllButton: boolean = false) => (
+  const renderFields = (fields: typeof basicFields, showAllButton = false) => (
     <div className="space-y-3">
       {fields.map((field, index) => (
         <div key={index} className="flex items-center">
@@ -636,8 +632,8 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
       ))}
       {showAllButton && (
         <div className="flex items-center mt-2">
-          <Button 
-            variant="link" 
+          <Button
+            variant="link"
             className="h-auto p-0 text-xs text-blue-600 ml-2"
             onClick={() => setShowingAllValues(true)}
           >
@@ -646,48 +642,48 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
         </div>
       )}
     </div>
-  );
+  )
 
   // Items section for related data
-  const ItemsSection = ({ 
-    items 
-  }: { 
-    items: any[] 
+  const ItemsSection = ({
+    items,
+  }: {
+    items: any[]
   }) => {
     // Mock function for adding a linked record
     const handleAddRecord = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      console.log("Add linked record");
+      e.stopPropagation()
+      console.log("Add linked record")
       // In a real implementation, this would open a dialog to select records to link
-    };
-    
+    }
+
     // Mock function for removing a linked record
     const handleUnlinkRecord = (e: React.MouseEvent, id: number) => {
-      e.stopPropagation();
-      console.log(`Unlink record with ID: ${id}`);
+      e.stopPropagation()
+      console.log(`Unlink record with ID: ${id}`)
       // In a real implementation, this would remove the link between records
-    };
+    }
 
     // Mock function for viewing a linked record
     const handleViewRecord = (e: React.MouseEvent, id: number) => {
-      e.stopPropagation();
-      console.log(`View record with ID: ${id}`);
+      e.stopPropagation()
+      console.log(`View record with ID: ${id}`)
       // In a real implementation, this would navigate to the record's details
-    };
-    
+    }
+
     return (
       <div className="ml-2 group/section">
         <div className="flex flex-col space-y-2">
           {items.map((item) => (
             <div key={item.id} className="flex items-center justify-between group">
-              <Badge 
-                variant="outline" 
+              <Badge
+                variant="outline"
                 className="cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-1 py-1 w-fit font-normal"
-                onClick={() => navigateToRecord(item.type || item.role || '', item.id)}
+                onClick={() => navigateToRecord(item.type || item.role || "", item.id)}
               >
                 {item.name}
               </Badge>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -704,7 +700,7 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
                     <span>View</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={(e) => handleUnlinkRecord(e, item.id)}
                     className="text-destructive focus:text-destructive"
                   >
@@ -716,10 +712,10 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
             </div>
           ))}
         </div>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
+
+        <Button
+          variant="ghost"
+          size="sm"
           className="mt-2 text-xs text-muted-foreground opacity-0 group-hover/section:opacity-100 transition-opacity"
           onClick={handleAddRecord}
         >
@@ -727,79 +723,81 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
           Add
         </Button>
       </div>
-    );
-  };
+    )
+  }
 
   // Apple-style section headers and content
   const sections = [
     {
-      id: 'details',
-      title: 'Record Details',
+      id: "details",
+      title: "Record Details",
       icon: FileTextIcon,
       content: renderFields(showingAllValues ? extendedFields : basicFields, !showingAllValues),
-      count: null
+      count: null,
     },
     {
-      id: 'company',
-      title: 'Company',
+      id: "company",
+      title: "Company",
       icon: BuildingIcon,
       content: <ItemsSection items={relatedData.companies} />,
-      count: relatedData.companies.length
+      count: relatedData.companies.length,
     },
     {
-      id: 'people',
-      title: 'People',
+      id: "people",
+      title: "People",
       icon: Users,
       content: <ItemsSection items={relatedData.people} />,
-      count: relatedData.people.length
+      count: relatedData.people.length,
     },
     {
-      id: 'entities',
-      title: 'Entities',
+      id: "entities",
+      title: "Entities",
       icon: LayoutIcon,
       content: <ItemsSection items={relatedData.entities} />,
-      count: relatedData.entities.length
+      count: relatedData.entities.length,
     },
     {
-      id: 'investments',
-      title: 'Investments',
+      id: "investments",
+      title: "Investments",
       icon: DollarSignIcon,
       content: <ItemsSection items={relatedData.investments} />,
-      count: relatedData.investments.length
+      count: relatedData.investments.length,
     },
     {
-      id: 'opportunities',
-      title: 'Opportunities',
+      id: "opportunities",
+      title: "Opportunities",
       icon: TrendingUpIcon,
       content: <ItemsSection items={relatedData.opportunities} />,
-      count: relatedData.opportunities.length
-    }
-  ];
+      count: relatedData.opportunities.length,
+    },
+  ]
 
   return (
     <div className="px-6 pt-2 pb-6">
       {/* Unified container with Apple-style cohesive design */}
       <div className="rounded-lg border border-muted overflow-hidden">
         {sections.map((section, index) => {
-          const isOpen = openSections[section.id as keyof typeof openSections];
-          const Icon = section.icon;
-          
+          const isOpen = openSections[section.id as keyof typeof openSections]
+          const Icon = section.icon
+
           return (
             <React.Fragment key={section.id}>
               {/* Divider between sections (except for the first one) */}
-              {index > 0 && (
-                <div className="h-px bg-muted mx-3" />
-              )}
-              
+              {index > 0 && <div className="h-px bg-muted mx-3" />}
+
               {/* Section Header */}
-              <button 
-                onClick={() => toggleSection(section.id as 'details' | 'company' | 'people' | 'entities' | 'investments' | 'opportunities')}
-                className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+              <button
+                onClick={() =>
+                  toggleSection(
+                    section.id as "details" | "company" | "people" | "entities" | "investments" | "opportunities",
+                  )
+                }
+                className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? "bg-muted/20" : ""}`}
               >
                 <div className="flex items-center">
                   <Icon className="h-4 w-4 text-muted-foreground ml-2" />
                   <h4 className="text-sm font-medium ml-2">{section.title}</h4>
-                  
+
                   {/* Show count badge for sections that have counts */}
                   {section.count !== null && (
                     <Badge variant="secondary" className="ml-1 h-5 px-1.5 rounded-full text-xs">
@@ -807,19 +805,15 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
                     </Badge>
                   )}
                 </div>
-                <ChevronDownIcon 
-                  className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+                <ChevronDownIcon
+                  className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
                 />
               </button>
-              
+
               {/* Section Content with smooth height transition */}
-              {isOpen && (
-                <div className="px-3 pb-3 pt-2 group/section">
-                  {section.content}
-                </div>
-              )}
+              {isOpen && <div className="px-3 pb-3 pt-2 group/section">{section.content}</div>}
             </React.Fragment>
-          );
+          )
         })}
       </div>
 
@@ -833,7 +827,7 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function AssetActivityContent({ asset }: { asset: Asset }) {
@@ -1036,17 +1030,12 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
   return (
     <div className="space-y-2">
       {activities.map((activity) => {
-        const isExpanded = expandedActivity === activity.id;
-        
+        const isExpanded = expandedActivity === activity.id
+
         return (
-          <div 
-            key={activity.id} 
-            className={`${
-              isExpanded ? 'border rounded-lg overflow-hidden' : ''
-            }`}
-          >
-            <div 
-              className={`flex items-center ${isExpanded ? 'p-3 border-b bg-muted/20' : 'py-2 px-3'} cursor-pointer`}
+          <div key={activity.id} className={`${isExpanded ? "border rounded-lg overflow-hidden" : ""}`}>
+            <div
+              className={`flex items-center ${isExpanded ? "p-3 border-b bg-muted/20" : "py-2 px-3"} cursor-pointer`}
               onClick={() => setExpandedActivity(isExpanded ? null : activity.id)}
             >
               <div className="flex items-center flex-1">
@@ -1054,19 +1043,13 @@ function AssetActivityContent({ asset }: { asset: Asset }) {
                 <div className="ml-3 flex-1">
                   <div className="flex items-center justify-between">
                     <div>{formatActivityText(activity)}</div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                      {activity.timestamp}
-                    </span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">{activity.timestamp}</span>
                   </div>
                 </div>
               </div>
             </div>
-            
-            {isExpanded && (
-              <div className="p-3">
-                {renderExpandedDetails(activity)}
-              </div>
-            )}
+
+            {isExpanded && <div className="p-3">{renderExpandedDetails(activity)}</div>}
           </div>
         )
       })}
