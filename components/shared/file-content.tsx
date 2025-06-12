@@ -16,7 +16,10 @@ import {
   LayoutGridIcon,
   ListIcon,
   TableIcon,
-  EyeIcon,
+  ClockIcon,
+  MessageSquareIcon,
+  MailIcon,
+  FolderIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -35,7 +38,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { AddFileSheet, FileFormData } from "@/components/add-file-sheet"
-import { FileNameCell } from "./file-name-cell"
+import { MasterDrawer } from "@/components/master-drawer"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { Label } from "@/components/ui/label"
 
 // Default mock data, can be overridden by passing data prop
 const defaultFiles = [
@@ -100,6 +105,135 @@ export type FileContentProps = {
   title?: string // Optional - section title
 }
 
+// File details panel component for use in the drawer
+function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScreen?: boolean }) {
+  // State for collapsible sections
+  const [openSections, setOpenSections] = useState({
+    details: true,
+    metadata: false,
+    related: false,
+  });
+
+  // Toggle function for collapsible sections
+  const toggleSection = (section: 'details' | 'metadata' | 'related') => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  return (
+    <div className={`px-6 py-4 space-y-6 ${isFullScreen ? 'overflow-y-auto max-h-[calc(100vh-73px)]' : ''}`}>
+      {/* Details Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Details</h3>
+          <Button variant="ghost" size="sm" onClick={() => toggleSection('details')}>
+            <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSections.details ? 'rotate-180' : ''}`} />
+          </Button>
+        </div>
+        {openSections.details && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">File Name</Label>
+                <span>{file.fileName || file.name}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Title</Label>
+                <span>{file.title || file.name}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Description</Label>
+                <span>{file.description || "No description provided"}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Category</Label>
+                <span>{file.category || "Uncategorized"}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Status</Label>
+                <span>{file.status || "Unknown"}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Metadata Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Metadata</h3>
+          <Button variant="ghost" size="sm" onClick={() => toggleSection('metadata')}>
+            <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSections.metadata ? 'rotate-180' : ''}`} />
+          </Button>
+        </div>
+        {openSections.metadata && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">File Type</Label>
+                <span>{(file.fileType || file.type || "FILE").toUpperCase()}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Size</Label>
+                <span>{file.fileSize || file.size}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Uploaded By</Label>
+                <span>{file.uploadedBy}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Upload Date</Label>
+                <span>{file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Tags</Label>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {file.tags && file.tags.length > 0 ? (
+                    file.tags.map((tag: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground text-sm">No tags</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Related Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Related</h3>
+          <Button variant="ghost" size="sm" onClick={() => toggleSection('related')}>
+            <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSections.related ? 'rotate-180' : ''}`} />
+          </Button>
+        </div>
+        {openSections.related && (
+          <div className="space-y-4">
+            {file.relatedTo ? (
+              <div className="flex items-center gap-2">
+                {file.relatedTo.type === "Company" ? <BuildingIcon className="h-4 w-4" /> : <UserIcon className="h-4 w-4" />}
+                <span>{file.relatedTo.name}</span>
+                <Badge variant="outline" className="ml-2">
+                  {file.relatedTo.type}
+                </Badge>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">No related records</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function FileContent({ 
   data = defaultFiles, 
   viewMode: initialViewMode = "table", 
@@ -109,8 +243,19 @@ export function FileContent({
   const [viewMode, setViewMode] = useState(initialViewMode)
   const [isAddFileSheetOpen, setIsAddFileSheetOpen] = useState(false)
   const [fileData, setFileData] = useState(data)
+  const [selectedFile, setSelectedFile] = useState<any>(null)
+
+  // Define tabs for the MasterDrawer
+  const fileTabs = [
+    { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", count: 0, icon: ClockIcon },
+    { id: "notes", label: "Notes", count: 0, icon: MessageSquareIcon },
+    { id: "emails", label: "Emails", count: 0, icon: MailIcon },
+  ]
 
   const handleFileSelect = (file: any) => {
+    setSelectedFile(file)
+    
     if (onFileSelect) {
       onFileSelect(file)
     }
@@ -137,6 +282,51 @@ export function FileContent({
     // Add the new file to the data
     setFileData([newFile, ...fileData])
     console.log("File uploaded:", newFile)
+  }
+
+  // Function to render tab content for the MasterDrawer
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    if (activeTab === "details") {
+      return <FileDetailsPanel file={selectedFile} />
+    }
+
+    // For other tabs, use TabContentRenderer
+    const tabData: any[] = []
+    
+    // Create a handler for "add" actions for empty states
+    const handleAdd = () => {
+      console.log(`Add new ${activeTab.slice(0, -1)} for ${selectedFile.name}`)
+    }
+
+    return (
+      <TabContentRenderer
+        activeTab={activeTab}
+        viewMode={viewMode}
+        data={tabData}
+        onTaskClick={setSelectedTask}
+        onNoteClick={setSelectedNote}
+        onEmailClick={setSelectedEmail}
+        onAdd={handleAdd}
+      />
+    )
+  }
+
+  // Function to render details panel for the MasterDrawer
+  const renderDetailsPanel = (isFullScreen = false) => {
+    return <FileDetailsPanel file={selectedFile} isFullScreen={isFullScreen} />
+  }
+
+  // Get file icon and type for the subtitle
+  const getFileTypeDisplay = (file: any) => {
+    const fileType = (file.fileType || file.type || "FILE").toUpperCase()
+    return fileType
   }
 
   return (
@@ -219,14 +409,28 @@ export function FileContent({
               </TableHeader>
               <TableBody>
                 {fileData.map((file) => (
-                  <TableRow key={file.id} className="cursor-pointer hover:bg-muted/50">
+                  <TableRow key={file.id}>
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        {getFileIcon(file.fileType || file.type)}
-                        <div>
-                          <FileNameCell file={file} />
-                        </div>
-                      </div>
+                      <MasterDrawer
+                        trigger={
+                          <div className="flex items-center gap-3 cursor-pointer">
+                            {getFileIcon(file.fileType || file.type)}
+                            <div>
+                              <div className="font-medium">{file.title || file.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {file.fileName || file.name} • {file.fileSize || file.size}
+                              </div>
+                            </div>
+                          </div>
+                        }
+                        title={file.title || file.name}
+                        recordType="File"
+                        subtitle={`${getFileTypeDisplay(file)} • ${file.fileSize || file.size}`}
+                        tabs={fileTabs}
+                        detailsPanel={() => renderDetailsPanel(false)}
+                      >
+                        {renderTabContent}
+                      </MasterDrawer>
                     </TableCell>
                     <TableCell>{file.fileSize || file.size}</TableCell>
                     <TableCell>
@@ -239,7 +443,7 @@ export function FileContent({
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
                             <DotsHorizontalIcon className="h-4 w-4" />
                             <span className="sr-only">Open menu</span>
                           </Button>
@@ -249,8 +453,7 @@ export function FileContent({
                             <DownloadIcon className="mr-2 h-4 w-4" />
                             Download
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <EyeIcon className="mr-2 h-4 w-4" />
+                          <DropdownMenuItem onClick={() => handleFileSelect(file)}>
                             View
                           </DropdownMenuItem>
                           <DropdownMenuItem>Edit</DropdownMenuItem>
@@ -273,26 +476,37 @@ export function FileContent({
           <CardContent className="p-4">
             <div className="space-y-4">
               {fileData.map((file) => (
-                <div 
-                  key={file.id} 
-                  className="flex items-center justify-between border-b pb-4 cursor-pointer hover:bg-muted/50 rounded-md p-2"
-                >
-                  <div className="flex items-center gap-3">
-                    {getFileIcon(file.fileType || file.type)}
-                    <div>
-                      <FileNameCell file={file} />
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Uploaded {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()} by {file.uploadedBy}
+                <div key={file.id} className="flex items-center justify-between border-b pb-4 rounded-md p-2">
+                  <MasterDrawer
+                    trigger={
+                      <div className="flex items-center gap-3 cursor-pointer">
+                        {getFileIcon(file.fileType || file.type)}
+                        <div>
+                          <div className="font-medium">{file.title || file.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {file.fileName || file.name} • {file.fileSize || file.size}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Uploaded {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()} by {file.uploadedBy}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    }
+                    title={file.title || file.name}
+                    recordType="File"
+                    subtitle={`${getFileTypeDisplay(file)} • ${file.fileSize || file.size}`}
+                    tabs={fileTabs}
+                    detailsPanel={() => renderDetailsPanel(false)}
+                  >
+                    {renderTabContent}
+                  </MasterDrawer>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="text-xs">
                       {(file.fileType || file.type || "FILE").toUpperCase()}
                     </Badge>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
                           <DotsHorizontalIcon className="h-4 w-4" />
                           <span className="sr-only">Open menu</span>
                         </Button>
@@ -302,8 +516,7 @@ export function FileContent({
                           <DownloadIcon className="mr-2 h-4 w-4" />
                           Download
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <EyeIcon className="mr-2 h-4 w-4" />
+                        <DropdownMenuItem onClick={() => handleFileSelect(file)}>
                           View
                         </DropdownMenuItem>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
@@ -321,50 +534,57 @@ export function FileContent({
       )}
 
       {viewMode === "card" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {fileData.map((file) => (
-            <Card key={file.id} className="cursor-pointer hover:bg-muted/50">
+            <Card key={file.id}>
               <CardContent className="p-4">
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {getFileIcon(file.fileType || file.type)}
-                      <div className="w-full overflow-hidden">
-                        <FileNameCell file={file} />
+                <div className="flex items-start justify-between">
+                  <MasterDrawer
+                    trigger={
+                      <div className="flex-1 cursor-pointer">
+                        <div className="flex items-center gap-3 mb-2">
+                          {getFileIcon(file.fileType || file.type)}
+                          <h4 className="font-medium text-base">{file.title || file.name}</h4>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {file.fileName || file.name} • {file.fileSize || file.size}
+                        </p>
+                        <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
+                          <p>Uploaded: {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</p>
+                          <p>By: {file.uploadedBy}</p>
+                          {file.description && <p className="line-clamp-2">{file.description}</p>}
+                        </div>
                       </div>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <DotsHorizontalIcon className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <DownloadIcon className="mr-2 h-4 w-4" />
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <EyeIcon className="mr-2 h-4 w-4" />
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Share</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{file.fileSize || file.size}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {(file.fileType || file.type || "FILE").toUpperCase()}
-                    </Badge>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-auto">
-                    Uploaded {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()} by {file.uploadedBy}
-                  </div>
+                    }
+                    title={file.title || file.name}
+                    recordType="File"
+                    subtitle={`${getFileTypeDisplay(file)} • ${file.fileSize || file.size}`}
+                    tabs={fileTabs}
+                    detailsPanel={() => renderDetailsPanel(false)}
+                  >
+                    {renderTabContent}
+                  </MasterDrawer>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <DotsHorizontalIcon className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <DownloadIcon className="mr-2 h-4 w-4" />
+                        Download
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleFileSelect(file)}>
+                        View
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuItem>Share</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </CardContent>
             </Card>
