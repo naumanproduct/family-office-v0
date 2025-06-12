@@ -58,6 +58,7 @@ import {
 import { AddEntityDialog } from "./add-entity-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { MasterDetailsPanel } from "./master-details-panel"
+import { ClientDrawerWrapper } from "./client-drawer-wrapper"
 
 export const entitySchema = z.object({
   id: z.number(),
@@ -598,7 +599,7 @@ function EntityNameCell({ entity }: { entity: Entity }) {
   const customActions: React.ReactNode[] = []
 
   return (
-    <MasterDrawer
+    <ClientDrawerWrapper
       trigger={
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
@@ -617,7 +618,7 @@ function EntityNameCell({ entity }: { entity: Entity }) {
       customActions={customActions}
     >
       {renderTabContent}
-    </MasterDrawer>
+    </ClientDrawerWrapper>
   )
 }
 

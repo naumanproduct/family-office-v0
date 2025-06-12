@@ -53,6 +53,7 @@ import { AddCompanyDialog } from "./add-company-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { ClientDrawerWrapper } from "./client-drawer-wrapper"
 
 export const companySchema = z.object({
   id: z.number(),
@@ -404,7 +405,7 @@ function CompanyNameCell({ company }: { company: Company }) {
   const customActions: React.ReactNode[] = []
 
   return (
-    <MasterDrawer
+    <ClientDrawerWrapper
       trigger={
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
@@ -423,7 +424,7 @@ function CompanyNameCell({ company }: { company: Company }) {
       customActions={customActions}
     >
       {renderTabContent}
-    </MasterDrawer>
+    </ClientDrawerWrapper>
   )
 }
 
