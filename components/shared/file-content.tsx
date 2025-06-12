@@ -16,6 +16,7 @@ import {
   LayoutGridIcon,
   ListIcon,
   TableIcon,
+  EyeIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -34,6 +35,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { AddFileSheet, FileFormData } from "@/components/add-file-sheet"
+import { FileNameCell } from "./file-name-cell"
 
 // Default mock data, can be overridden by passing data prop
 const defaultFiles = [
@@ -217,15 +219,12 @@ export function FileContent({
               </TableHeader>
               <TableBody>
                 {fileData.map((file) => (
-                  <TableRow key={file.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleFileSelect(file)}>
+                  <TableRow key={file.id} className="cursor-pointer hover:bg-muted/50">
                     <TableCell>
                       <div className="flex items-center gap-3">
                         {getFileIcon(file.fileType || file.type)}
                         <div>
-                          <div className="font-medium">{file.title || file.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {file.fileName || file.name} • {file.fileSize || file.size}
-                          </div>
+                          <FileNameCell file={file} />
                         </div>
                       </div>
                     </TableCell>
@@ -250,10 +249,8 @@ export function FileContent({
                             <DownloadIcon className="mr-2 h-4 w-4" />
                             Download
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            handleFileSelect(file);
-                          }}>
+                          <DropdownMenuItem>
+                            <EyeIcon className="mr-2 h-4 w-4" />
                             View
                           </DropdownMenuItem>
                           <DropdownMenuItem>Edit</DropdownMenuItem>
@@ -279,15 +276,11 @@ export function FileContent({
                 <div 
                   key={file.id} 
                   className="flex items-center justify-between border-b pb-4 cursor-pointer hover:bg-muted/50 rounded-md p-2"
-                  onClick={() => handleFileSelect(file)}
                 >
                   <div className="flex items-center gap-3">
                     {getFileIcon(file.fileType || file.type)}
                     <div>
-                      <div className="font-medium">{file.title || file.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {file.fileName || file.name} • {file.fileSize || file.size}
-                      </div>
+                      <FileNameCell file={file} />
                       <div className="text-xs text-muted-foreground mt-1">
                         Uploaded {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()} by {file.uploadedBy}
                       </div>
@@ -309,10 +302,8 @@ export function FileContent({
                           <DownloadIcon className="mr-2 h-4 w-4" />
                           Download
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => {
-                          e.stopPropagation();
-                          handleFileSelect(file);
-                        }}>
+                        <DropdownMenuItem>
+                          <EyeIcon className="mr-2 h-4 w-4" />
                           View
                         </DropdownMenuItem>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
@@ -330,49 +321,50 @@ export function FileContent({
       )}
 
       {viewMode === "card" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {fileData.map((file) => (
-            <Card key={file.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleFileSelect(file)}>
+            <Card key={file.id} className="cursor-pointer hover:bg-muted/50">
               <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                       {getFileIcon(file.fileType || file.type)}
-                      <h4 className="font-medium text-base">{file.title || file.name}</h4>
+                      <div className="w-full overflow-hidden">
+                        <FileNameCell file={file} />
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {file.fileName || file.name} • {file.fileSize || file.size}
-                    </p>
-                    <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
-                      <p>Uploaded: {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</p>
-                      <p>By: {file.uploadedBy}</p>
-                      {file.description && <p className="line-clamp-2">{file.description}</p>}
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <DotsHorizontalIcon className="h-4 w-4" />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <DownloadIcon className="mr-2 h-4 w-4" />
+                          Download
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <EyeIcon className="mr-2 h-4 w-4" />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>Share</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                        <DotsHorizontalIcon className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <DownloadIcon className="mr-2 h-4 w-4" />
-                        Download
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation();
-                        handleFileSelect(file);
-                      }}>
-                        View
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Share</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{file.fileSize || file.size}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {(file.fileType || file.type || "FILE").toUpperCase()}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-auto">
+                    Uploaded {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()} by {file.uploadedBy}
+                  </div>
                 </div>
               </CardContent>
             </Card>
