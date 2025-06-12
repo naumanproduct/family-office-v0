@@ -107,6 +107,15 @@ export type FileContentProps = {
 
 // File details panel component for use in the drawer
 function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScreen?: boolean }) {
+  // Guard against null file
+  if (!file) {
+    return (
+      <div className={`px-6 py-4 flex items-center justify-center ${isFullScreen ? 'h-[calc(100vh-73px)]' : 'h-[300px]'}`}>
+        <p className="text-muted-foreground">Select a file to view details</p>
+      </div>
+    );
+  }
+
   // State for collapsible sections
   const [openSections, setOpenSections] = useState({
     details: true,
@@ -137,11 +146,11 @@ function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScr
             <div className="grid grid-cols-1 gap-2">
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">File Name</Label>
-                <span>{file.fileName || file.name}</span>
+                <span>{file.fileName || file.name || "Untitled"}</span>
               </div>
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">Title</Label>
-                <span>{file.title || file.name}</span>
+                <span>{file.title || file.name || "Untitled"}</span>
               </div>
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">Description</Label>
@@ -177,20 +186,20 @@ function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScr
               </div>
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">Size</Label>
-                <span>{file.fileSize || file.size}</span>
+                <span>{file.fileSize || file.size || "Unknown"}</span>
               </div>
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">Uploaded By</Label>
-                <span>{file.uploadedBy}</span>
+                <span>{file.uploadedBy || "Unknown"}</span>
               </div>
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">Upload Date</Label>
-                <span>{file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</span>
+                <span>{file.uploadedDate || (file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Unknown")}</span>
               </div>
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">Tags</Label>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {file.tags && file.tags.length > 0 ? (
+                  {file.tags && Array.isArray(file.tags) && file.tags.length > 0 ? (
                     file.tags.map((tag: string, index: number) => (
                       <Badge key={index} variant="secondary" className="text-xs">
                         {tag}
@@ -302,7 +311,9 @@ export function FileContent({
     
     // Create a handler for "add" actions for empty states
     const handleAdd = () => {
-      console.log(`Add new ${activeTab.slice(0, -1)} for ${selectedFile.name}`)
+      if (selectedFile) {
+        console.log(`Add new ${activeTab.slice(0, -1)} for ${selectedFile.name || selectedFile.title || "File"}`)
+      }
     }
 
     return (
@@ -325,6 +336,7 @@ export function FileContent({
 
   // Get file icon and type for the subtitle
   const getFileTypeDisplay = (file: any) => {
+    if (!file) return "FILE";
     const fileType = (file.fileType || file.type || "FILE").toUpperCase()
     return fileType
   }
