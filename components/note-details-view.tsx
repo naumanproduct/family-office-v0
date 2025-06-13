@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
 import { FileContent } from "@/components/shared/file-content"
+import { RecordDetailsPanel, SectionConfig } from "@/components/shared/record-details-panel"
 
 interface NoteDetailsViewProps {
   note: any
@@ -220,80 +221,108 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       {/* Tab Content */}
       <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'} space-y-6`}>
         {activeTab === "details" && (
-          <div className="space-y-4">
-            {!isFullScreen && <h4 className="text-sm font-medium">Note Details</h4>}
-
-            <div className="rounded-lg border border-muted bg-muted/10 p-4">
-              <div className="space-y-4">
-                {renderEditableField(
-                  "content",
-                  fieldValues.content,
-                  <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Content",
-                  false,
-                  true,
-                )}
-
-                {renderEditableField(
-                  "priority",
-                  fieldValues.priority,
-                  <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Priority",
-                  true,
-                )}
-
-                {renderEditableField(
-                  "author",
-                  fieldValues.author,
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Author",
-                )}
-
-                {renderEditableField(
-                  "createdAt",
-                  fieldValues.createdAt,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Created",
-                )}
-
-                {renderEditableField(
-                  "updatedAt",
-                  fieldValues.updatedAt,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Updated",
-                )}
-
-                {renderEditableField(
-                  "tags",
-                  fieldValues.tags,
-                  <TagIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Tags",
-                )}
-
-                <div className="flex items-center gap-2">
-                  <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4">
-                      <Label className="text-xs text-muted-foreground">Related to</Label>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{fieldValues.relatedTo?.type || "N/A"}</span>
-                        <span className="text-sm font-medium">{fieldValues.relatedTo?.name || "N/A"}</span>
+          <RecordDetailsPanel
+            isFullScreen={isFullScreen}
+            sections={(
+              () => {
+                const detailsContent = (
+                  <div className="space-y-4">
+                    {renderEditableField(
+                      "content",
+                      fieldValues.content,
+                      <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
+                      "Content",
+                      false,
+                      true,
+                    )}
+                    {renderEditableField(
+                      "priority",
+                      fieldValues.priority,
+                      <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />,
+                      "Priority",
+                      true,
+                    )}
+                    {renderEditableField(
+                      "author",
+                      fieldValues.author,
+                      <UserIcon className="h-4 w-4 text-muted-foreground" />,
+                      "Author",
+                    )}
+                    {renderEditableField(
+                      "createdAt",
+                      fieldValues.createdAt,
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
+                      "Created",
+                    )}
+                    {renderEditableField(
+                      "updatedAt",
+                      fieldValues.updatedAt,
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
+                      "Updated",
+                    )}
+                    {renderEditableField(
+                      "tags",
+                      fieldValues.tags,
+                      <TagIcon className="h-4 w-4 text-muted-foreground" />,
+                      "Tags",
+                    )}
+                    <div className="flex items-center gap-2">
+                      <BuildingIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4">
+                          <Label className="text-xs text-muted-foreground">Related to</Label>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">{fieldValues.relatedTo?.type || "N/A"}</span>
+                            <span className="text-sm font-medium">{fieldValues.relatedTo?.name || "N/A"}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
+                )
+
+                const sections: SectionConfig[] = [
+                  {
+                    id: "details",
+                    title: "Record Details",
+                    icon: FileTextIcon,
+                    content: detailsContent,
+                    count: null,
+                  },
+                  {
+                    id: "company",
+                    title: "Company",
+                    icon: BuildingIcon,
+                    content: <p className="text-sm text-muted-foreground ml-2">No related companies</p>,
+                    count: 0,
+                  },
+                  {
+                    id: "people",
+                    title: "People",
+                    icon: UserIcon,
+                    content: <p className="text-sm text-muted-foreground ml-2">No related people</p>,
+                    count: 0,
+                  },
+                  {
+                    id: "entities",
+                    title: "Entities",
+                    icon: BuildingIcon,
+                    content: <p className="text-sm text-muted-foreground ml-2">No related entities</p>,
+                    count: 0,
+                  },
+                ]
+                return sections
+              }
+            )()}
+            activity={hideAddNotes ? null : (
+              <>
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium">Activity</h4>
                 </div>
-              </div>
-            </div>
-
-            <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-              Show all values
-            </Button>
-
-            {/* Typable Area - only show if hideAddNotes is false */}
-            {!hideAddNotes && (
-              <TypableArea value={noteText} onChange={setNoteText} placeholder="Add notes..." showButtons={false} />
+                <p className="text-muted-foreground">No recent activity for this note.</p>
+              </>
             )}
-          </div>
+          />
         )}
 
         {activeTab === "files" && <FileContent />}
