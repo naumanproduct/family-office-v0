@@ -145,4 +145,4 @@ export function AddFileDialog({ open, onOpenChange }: AddFileDialogProps) {
       onTypeSelect={handleTypeSelect}
     />
   )
-} 
+}

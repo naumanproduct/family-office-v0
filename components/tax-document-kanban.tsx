@@ -1022,4 +1022,3 @@ export function TaxDocumentKanban({ workflowConfig }: TaxDocumentKanbanProps) {
     </DndContext>
   )
 }
-

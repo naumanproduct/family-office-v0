@@ -133,4 +133,4 @@ export function AddNoteDialog({ open, onOpenChange }: AddNoteDialogProps) {
       onTypeSelect={handleTypeSelect}
     />
   )
-} 
+}

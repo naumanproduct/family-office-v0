@@ -118,4 +118,4 @@ export const defaultDetailsTabs = [
     icon: CalendarIcon,
     count: 0,
   },
-] 
+]
