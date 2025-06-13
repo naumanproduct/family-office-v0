@@ -58,7 +58,6 @@ import { MasterDrawer } from "@/components/master-drawer"
 import { AddLiabilityDialog } from "./add-liability-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
-import { ClientDrawerWrapper } from "./client-drawer-wrapper"
 
 export const liabilitySchema = z.object({
   id: z.number(),
@@ -247,7 +246,7 @@ function LiabilityNameCell({ liability }: { liability: Liability }) {
   const customActions: React.ReactNode[] = []
 
   return (
-    <ClientDrawerWrapper
+    <MasterDrawer
       trigger={
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
@@ -266,7 +265,7 @@ function LiabilityNameCell({ liability }: { liability: Liability }) {
       customActions={customActions}
     >
       {renderTabContent}
-    </ClientDrawerWrapper>
+    </MasterDrawer>
   )
 }
 

@@ -38,7 +38,6 @@ interface MasterDrawerProps {
   detailsPanel: (isFullScreen?: boolean) => React.ReactNode
   onComposeEmail?: () => void
   customActions?: React.ReactNode[]
-  onClose?: () => void
 }
 
 export function MasterDrawer({
@@ -51,7 +50,6 @@ export function MasterDrawer({
   detailsPanel,
   onComposeEmail,
   customActions = [],
-  onClose,
 }: MasterDrawerProps) {
   const [isFullScreen, setIsFullScreen] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState(isFullScreen ? "activity" : "details")
@@ -531,7 +529,7 @@ export function MasterDrawer({
   }
 
   return (
-    <Sheet onOpenChange={(open) => !open && onClose?.()}>
+    <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
         {/* Header */}
@@ -554,7 +552,6 @@ export function MasterDrawer({
                   if (openElement && "click" in openElement) {
                     ;(openElement as HTMLElement).click()
                   }
-                  onClose?.()
                 }
               }}
             >

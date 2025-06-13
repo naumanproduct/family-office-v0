@@ -44,19 +44,39 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
 import { opportunitiesData, type Opportunity } from "./opportunities-table"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
-const stages = [
-  { id: "initial-contact", title: "Initial Contact", color: "bg-gray-100" },
-  { id: "proposal", title: "Proposal", color: "bg-blue-100" },
-  { id: "due-diligence", title: "Due Diligence", color: "bg-yellow-100" },
-  { id: "term-sheet", title: "Term Sheet", color: "bg-purple-100" },
-  { id: "closed-won", title: "Closed Won", color: "bg-green-100" },
-  { id: "closed-lost", title: "Closed Lost", color: "bg-red-100" },
+// Default stages if no config provided
+const defaultStages = [
+  { id: "initial-contact", name: "Initial Contact", color: "bg-gray-100" },
+  { id: "proposal", name: "Proposal", color: "bg-blue-100" },
+  { id: "due-diligence", name: "Due Diligence", color: "bg-yellow-100" },
+  { id: "term-sheet", name: "Term Sheet", color: "bg-purple-100" },
+  { id: "closed-won", name: "Closed Won", color: "bg-green-100" },
+  { id: "closed-lost", name: "Closed Lost", color: "bg-red-100" },
+]
+
+// Default attributes for opportunities
+const defaultAttributes = [
+  { id: "name", name: "Name", type: "text" },
+  { id: "company", name: "Company", type: "relation" },
+  { id: "contact", name: "Contact", type: "relation" },
+  { id: "amount", name: "Amount", type: "currency" },
+  { id: "probability", name: "Probability", type: "number" },
+  { id: "expectedClose", name: "Expected Close", type: "date" },
 ]
 
 // Convert stage names to match kanban IDs
 const normalizeStage = (stage: string): string => {
   return stage.toLowerCase().replace(/\s+/g, "-")
+}
+
+interface OpportunityKanbanProps {
+  workflowConfig?: {
+    attributes: Array<{ id: string; name: string; type: string }>
+    stages: Array<{ id: string; name: string; color: string }>
+  }
 }
 
 // Separate the card UI from the sortable wrapper
@@ -319,7 +339,7 @@ function OpportunityDrawerContent({ opportunity }: { opportunity: Opportunity })
   )
 }
 
-function DroppableColumn({ stage, opportunities }: { stage: (typeof stages)[0]; opportunities: Opportunity[] }) {
+function DroppableColumn({ stage, opportunities }: { stage: { id: string; name: string; color: string }; opportunities: Opportunity[] }) {
   const { setNodeRef, isOver } = useSortable({
     id: stage.id,
   })
@@ -327,22 +347,22 @@ function DroppableColumn({ stage, opportunities }: { stage: (typeof stages)[0]; 
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col min-h-[600px] w-80 ${isOver ? "ring-2 ring-primary ring-opacity-50 bg-muted/20" : ""}`}
+      className={`flex flex-col min-h-[600px] w-80 transition-all duration-200 ${isOver ? "ring-2 ring-blue-500 ring-opacity-30 bg-blue-50/20" : ""}`}
     >
-      <div className={`rounded-t-lg p-3 ${stage.color}`}>
+      <div className={`rounded-t-xl p-4 border border-gray-200 ${stage.color}`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium text-sm">{stage.title}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs">
+          <div className="flex items-center gap-3">
+            <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
               {opportunities.length}
             </Badge>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6">
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 hover:text-gray-700">
             <PlusIcon className="h-3 w-3" />
           </Button>
         </div>
       </div>
-      <div className="flex-1 bg-gray-50 rounded-b-lg p-3 space-y-3">
+      <div className="flex-1 bg-gray-50/50 rounded-b-xl border-l border-r border-b border-gray-200 p-3 space-y-3">
         <SortableContext items={opportunities.map((o) => o.id.toString())} strategy={verticalListSortingStrategy}>
           {opportunities.map((opportunity) => (
             <SortableOpportunityCard key={opportunity.id} opportunity={opportunity} />
@@ -353,7 +373,105 @@ function DroppableColumn({ stage, opportunities }: { stage: (typeof stages)[0]; 
   )
 }
 
-export function OpportunitiesKanban() {
+// Add Column Button Component
+function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
+  return (
+    <div className="flex items-center justify-center w-16">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-12 w-12 rounded-full border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
+        onClick={onAddColumn}
+      >
+        <PlusIcon className="h-5 w-5 text-gray-400" />
+      </Button>
+    </div>
+  )
+}
+
+// New dialog for adding a column
+function AddColumnDialog({
+  open,
+  onOpenChange,
+  onAddColumn,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onAddColumn: (name: string, color: string) => void
+}) {
+  const [name, setName] = React.useState("")
+  const [color, setColor] = React.useState("bg-gray-100")
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (name.trim()) {
+      onAddColumn(name, color)
+      setName("")
+      onOpenChange(false)
+    }
+  }
+
+  const colorOptions = [
+    { value: "bg-gray-100", label: "Gray" },
+    { value: "bg-blue-100", label: "Blue" },
+    { value: "bg-green-100", label: "Green" },
+    { value: "bg-yellow-100", label: "Yellow" },
+    { value: "bg-purple-100", label: "Purple" },
+    { value: "bg-red-100", label: "Red" },
+    { value: "bg-orange-100", label: "Orange" },
+    { value: "bg-pink-100", label: "Pink" },
+  ]
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New Column</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="column-name">Column Name</Label>
+            <Input
+              id="column-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., In Review"
+              autoFocus
+              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Column Color</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {colorOptions.map((option) => (
+                <div
+                  key={option.value}
+                  className={`h-10 rounded-lg cursor-pointer ${option.value} border-2 transition-all ${
+                    color === option.value
+                      ? "border-blue-500 scale-105 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setColor(option.value)}
+                  title={option.label}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!name.trim()} className="bg-blue-600 hover:bg-blue-700">
+              Add Column
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export function OpportunitiesKanban({ workflowConfig }: OpportunityKanbanProps) {
   const [opportunities, setOpportunities] = React.useState(
     opportunitiesData.map((opp) => ({
       ...opp,
@@ -361,6 +479,15 @@ export function OpportunitiesKanban() {
     })),
   )
   const [activeOpportunity, setActiveOpportunity] = React.useState<Opportunity | null>(null)
+  const [stagesList, setStagesList] = React.useState(workflowConfig?.stages || defaultStages)
+  const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)
+
+  // Update stages when workflow config changes
+  React.useEffect(() => {
+    if (workflowConfig?.stages) {
+      setStagesList(workflowConfig.stages)
+    }
+  }, [workflowConfig?.stages])
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -402,7 +529,7 @@ export function OpportunitiesKanban() {
     let targetStage = overId
 
     // If dropping on another opportunity, find its stage
-    if (!stages.some((s) => s.id === overId)) {
+    if (!stagesList.some((s) => s.id === overId)) {
       const targetOpportunity = opportunities.find((o) => o.id.toString() === overId)
       if (targetOpportunity) {
         targetStage = targetOpportunity.stage
@@ -410,7 +537,7 @@ export function OpportunitiesKanban() {
     }
 
     // Update the opportunity's stage if it's different
-    if (activeOpportunity.stage !== targetStage && stages.some((s) => s.id === targetStage)) {
+    if (activeOpportunity.stage !== targetStage && stagesList.some((s) => s.id === targetStage)) {
       setOpportunities(
         opportunities.map((opportunity) =>
           opportunity.id.toString() === activeId ? { ...opportunity, stage: targetStage } : opportunity,
@@ -419,10 +546,21 @@ export function OpportunitiesKanban() {
     }
   }
 
-  const opportunitiesByStage = stages.map((stage) => ({
+  const handleAddColumn = (name: string, color: string) => {
+    const newStage = {
+      id: `stage-${Date.now()}`,
+      name: name,
+      color: color,
+    }
+    setStagesList([...stagesList, newStage])
+  }
+
+  const opportunitiesByStage = stagesList.map((stage) => ({
     stage,
     opportunities: opportunities.filter((opportunity) => opportunity.stage === stage.id),
   }))
+
+  const attributes = workflowConfig?.attributes || defaultAttributes
 
   return (
     <DndContext
@@ -435,6 +573,7 @@ export function OpportunitiesKanban() {
         {opportunitiesByStage.map(({ stage, opportunities }) => (
           <DroppableColumn key={stage.id} stage={stage} opportunities={opportunities} />
         ))}
+        <AddColumnButton onAddColumn={() => setAddColumnDialogOpen(true)} />
       </div>
       <DragOverlay>
         {activeOpportunity ? (
@@ -443,6 +582,7 @@ export function OpportunitiesKanban() {
           </div>
         ) : null}
       </DragOverlay>
+      <AddColumnDialog open={addColumnDialogOpen} onOpenChange={setAddColumnDialogOpen} onAddColumn={handleAddColumn} />
     </DndContext>
   )
 }

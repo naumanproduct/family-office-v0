@@ -325,29 +325,57 @@ export function MasterCreationDialog({
               <div className="space-y-4">
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium text-muted-foreground">{typeSelectionTitle}</h3>
-                  {types.map((type) => (
-                    <Card
-                      key={type.id}
-                      className="cursor-pointer transition-all duration-200 hover:shadow-md"
-                      onClick={() => handleTypeSelect(type)}
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-base font-medium">{type.name}</CardTitle>
-                            <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
+                  {/* Custom Workflow first */}
+                  {types
+                    .filter((t) => t.isCustom)
+                    .map((type) => (
+                      <Card
+                        key={type.id}
+                        className="cursor-pointer transition-all duration-200 hover:shadow-md"
+                        onClick={() => handleTypeSelect(type)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-base font-medium">{type.name}</CardTitle>
+                              <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
+                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      {type.category && (
-                        <CardContent className="pt-0">
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>Category: {type.category}</span>
+                        </CardHeader>
+                      </Card>
+                    ))}
+
+                  {/* Separator heading */}
+                  {types.some((t) => !t.isCustom) && (
+                    <div className="text-xs font-semibold text-muted-foreground uppercase mt-6 mb-2">Templates</div>
+                  )}
+
+                  {/* Other templates */}
+                  {types
+                    .filter((t) => !t.isCustom)
+                    .map((type) => (
+                      <Card
+                        key={type.id}
+                        className="cursor-pointer transition-all duration-200 hover:shadow-md"
+                        onClick={() => handleTypeSelect(type)}
+                      >
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-base font-medium">{type.name}</CardTitle>
+                              <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
+                            </div>
                           </div>
-                        </CardContent>
-                      )}
-                    </Card>
-                  ))}
+                        </CardHeader>
+                        {type.category && (
+                          <CardContent className="pt-0">
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                              <span>Category: {type.category}</span>
+                            </div>
+                          </CardContent>
+                        )}
+                      </Card>
+                    ))}
                 </div>
               </div>
             ) : (

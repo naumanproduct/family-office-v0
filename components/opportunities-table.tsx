@@ -57,7 +57,6 @@ import {
 import { MasterDrawer } from "./master-drawer"
 import { AddOpportunityDialog } from "./add-opportunity-dialog"
 import { MasterDetailsPanel } from "./shared/master-details-panel"
-import { ClientDrawerWrapper } from "./client-drawer-wrapper"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -587,7 +586,7 @@ function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
   const customActions: React.ReactNode[] = []
 
   return (
-    <ClientDrawerWrapper
+    <MasterDrawer
       trigger={
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
@@ -606,7 +605,7 @@ function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
       customActions={customActions}
     >
       {renderTabContent}
-    </ClientDrawerWrapper>
+    </MasterDrawer>
   )
 }
 

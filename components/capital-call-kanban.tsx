@@ -25,6 +25,11 @@ import {
   UserIcon,
   FileTextIcon,
   AlertCircleIcon,
+  ChevronDownIcon,
+  CheckCircleIcon,
+  UsersIcon,
+  FolderIcon,
+  BuildingIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -42,6 +47,7 @@ import { Label } from "@/components/ui/label"
 import { TaskDetailsView } from "@/components/task-details-view"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { MasterDrawer } from "./master-drawer"
 
 interface CapitalCall {
   id: string
@@ -213,97 +219,17 @@ function CapitalCallCard({
 }) {
   const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "done"
 
-  // Create a task object that matches the structure expected by TaskDetailsView
-  const capitalCallTask = {
-    id: capitalCall.id,
-    title: "Capital Call",
-    description: `Process capital call for ${capitalCall.fundName}`,
-    priority: "High",
-    status: capitalCall.stage === "done" ? "Completed" : capitalCall.stage === "in-progress" ? "In Progress" : "To Do",
-    assignee: "You",
-    dueDate: capitalCall.dueDate,
-    subtasks: [
-      {
-        id: "CC-1",
-        title: "Review Capital Call Notice PDF",
-        description: "Open and understand key terms (amount, due date)",
-        status: "Completed",
-        priority: "High",
-        assignee: "You",
-        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 5 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-      },
-      {
-        id: "CC-2",
-        title: "Validate with Principal",
-        description: "Confirm LP or internal commitment matches",
-        status: "Completed",
-        priority: "High",
-        assignee: "You",
-        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 4 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-      },
-      {
-        id: "CC-3",
-        title: "Record in System",
-        description: "Log in accounting system or ledger",
-        status: capitalCall.stage === "done" || capitalCall.stage === "in-progress" ? "Completed" : "In Progress",
-        priority: "Medium",
-        assignee: "You",
-        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 3 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-      },
-      {
-        id: "CC-4",
-        title: "Notify Accountant",
-        description: "Forward or tag accountant for payment setup",
-        status: capitalCall.stage === "done" ? "Completed" : "To Do",
-        priority: "Medium",
-        assignee: "Sarah Johnson",
-        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 2 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-      },
-      {
-        id: "CC-5",
-        title: "Confirm Wire Date",
-        description: "Align on when funds will be sent",
-        status: capitalCall.stage === "done" ? "Completed" : "To Do",
-        priority: "High",
-        assignee: "You",
-        dueDate: new Date(new Date(capitalCall.dueDate).getTime() - 1 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-      },
-      {
-        id: "CC-6",
-        title: "Follow-Up if Not Funded",
-        description: "If deadline passes, notify appropriate party",
-        status: capitalCall.stage === "done" ? "Completed" : "To Do",
-        priority: "Medium",
-        assignee: "You",
-        dueDate: new Date(new Date(capitalCall.dueDate).getTime() + 1 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-      },
-      {
-        id: "CC-7",
-        title: "Mark as Complete",
-        description: "Close the call internally",
-        status: capitalCall.stage === "done" ? "Completed" : "To Do",
-        priority: "Low",
-        assignee: "You",
-        dueDate: new Date(new Date(capitalCall.dueDate).getTime() + 2 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-      },
-    ],
-  }
-
-  const [selectedTask, setSelectedTask] = React.useState<any>(null)
+  // Define tabs for the drawer
+  const tabs = [
+    { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "contacts", label: "Contacts", count: 2, icon: UsersIcon },
+    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 7, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 2, icon: FileTextIcon },
+    { id: "meetings", label: "Meetings", count: 1, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 4, icon: FolderIcon },
+    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+  ]
 
   // Function to get the appropriate icon for each attribute type
   const getAttributeIcon = (type: string) => {
@@ -330,100 +256,435 @@ function CapitalCallCard({
         const isOverdueDate = attribute.id === "dueDate" && new Date(value) < new Date() && capitalCall.stage !== "done"
         return <span className={isOverdueDate ? "text-red-600 font-medium" : ""}>{value}</span>
       case "currency":
-        return <span className="font-medium">{value}</span>
+        return (
+          <span
+            className="font-medium outline-none hover:bg-primary/10 rounded-sm px-0.5 cursor-text transition-colors"
+            contentEditable
+            suppressContentEditableWarning
+          >
+            {value}
+          </span>
+        )
       default:
-        return value
+        return (
+          <span
+            className="outline-none hover:bg-primary/10 rounded-sm px-0.5 cursor-text transition-colors"
+            contentEditable
+            suppressContentEditableWarning
+          >
+            {value}
+          </span>
+        )
     }
   }
 
-  return (
-    <>
-      <Card
-        className="cursor-pointer hover:shadow-md transition-all duration-200 border-gray-200 hover:border-gray-300"
-        onClick={() => setSelectedTask(capitalCallTask)}
-      >
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-sm text-gray-900 truncate">{capitalCall.fundName}</h4>
-              <p className="text-xs text-gray-500 mt-1">{capitalCall.callNumber}</p>
-              {isOverdue && (
-                <Badge variant="destructive" className="mt-2 text-xs">
-                  <AlertCircleIcon className="h-3 w-3 mr-1" />
-                  Overdue
-                </Badge>
-              )}
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600">
-                  <MoreVerticalIcon className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Edit</DropdownMenuItem>
-                <DropdownMenuItem>Send Reminder</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">Cancel Call</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+  // Create details panel function
+  const detailsPanel = (isFullScreen = false) => {
+    // Add state for collapsible sections
+    const [openSections, setOpenSections] = React.useState<{
+      details: boolean;
+      fund: boolean;
+      contacts: boolean;
+      financials: boolean;
+    }>({
+      details: true, // Details expanded by default
+      fund: false,
+      contacts: false,
+      financials: false,
+    });
+
+    // Add state for showing all values
+    const [showingAllValues, setShowingAllValues] = React.useState(false);
+
+    // Toggle function for collapsible sections
+    const toggleSection = (section: 'details' | 'fund' | 'contacts' | 'financials') => {
+      setOpenSections(prev => ({
+        ...prev,
+        [section]: !prev[section],
+      }));
+    };
+
+    // Basic fields for collapsed view
+    const basicFields = [
+      {
+        label: "Fund Name",
+        value: capitalCall.fundName,
+      },
+      {
+        label: "Call Number",
+        value: capitalCall.callNumber,
+      },
+      {
+        label: "Call Amount",
+        value: capitalCall.callAmount,
+      },
+      {
+        label: "Due Date",
+        value: capitalCall.dueDate,
+      },
+      {
+        label: "Investor",
+        value: capitalCall.investor,
+      },
+    ] as Array<{
+      label: string;
+      value: React.ReactNode;
+      isLink?: boolean;
+    }>;
+
+    // Extended fields for "Show all" view
+    const extendedFields = [
+      {
+        label: "Fund Name",
+        value: capitalCall.fundName,
+      },
+      {
+        label: "Call Number",
+        value: capitalCall.callNumber,
+      },
+      {
+        label: "Call Amount",
+        value: capitalCall.callAmount,
+      },
+      {
+        label: "Commitment Amount",
+        value: capitalCall.commitmentAmount,
+      },
+      {
+        label: "Due Date",
+        value: capitalCall.dueDate,
+      },
+      {
+        label: "Notice Date",
+        value: capitalCall.noticeDate,
+      },
+      {
+        label: "Investor",
+        value: capitalCall.investor,
+      },
+      {
+        label: "Stage",
+        value: capitalCall.stage,
+      },
+      {
+        label: "Fund Manager",
+        value: capitalCall.fundManager || "N/A",
+      },
+      {
+        label: "Email",
+        value: capitalCall.email || "N/A",
+        isLink: true,
+      },
+      {
+        label: "Purpose",
+        value: capitalCall.purpose || "N/A",
+      },
+    ] as Array<{
+      label: string;
+      value: React.ReactNode;
+      isLink?: boolean;
+    }>;
+
+    // Mock data for related entities
+    const relatedData = {
+      contacts: [
+        { id: 1, name: "Fund Manager", value: capitalCall.fundManager || "N/A" },
+        { id: 2, name: "Investor Relations", value: "Sarah Johnson" },
+      ],
+      fundInfo: [
+        { id: 1, name: "Fund Type", value: capitalCall.fundType || "Private Equity" },
+        { id: 2, name: "Vintage", value: capitalCall.vintage || "2022" },
+        { id: 3, name: "Website", value: capitalCall.website || "N/A", isLink: true },
+      ],
+      financials: [
+        { id: 1, name: "Total Fund Size", value: capitalCall.totalFundSize || "$100M" },
+        { id: 2, name: "Remaining Commitment", value: capitalCall.remainingCommitment || "$25M" },
+        { id: 3, name: "Previous Calls", value: capitalCall.previousCalls || "3 calls ($15M)" },
+      ],
+    };
+
+    // Render the detail fields
+    const renderFields = (fields: typeof basicFields, showAllButton: boolean = false) => (
+      <div className="space-y-3">
+        {fields.map((field, index) => (
+          <div key={index} className="flex items-center">
+            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
+            {field.isLink ? (
+              <p className="text-sm text-blue-600 flex-1">{field.value}</p>
+            ) : (
+              <p className="text-sm flex-1">{field.value}</p>
+            )}
           </div>
-        </CardHeader>
-        <CardContent className="pt-0 space-y-2">
-          <div className="space-y-2">
-            {attributes.map((attribute) => {
-              const Icon = getAttributeIcon(attribute.type)
-              const value = (capitalCall as any)[attribute.id]
+        ))}
+        {showAllButton && (
+          <div className="flex items-center mt-2">
+            <Button 
+              variant="link" 
+              className="h-auto p-0 text-xs text-blue-600 ml-2"
+              onClick={() => setShowingAllValues(true)}
+            >
+              Show all
+            </Button>
+          </div>
+        )}
+      </div>
+    );
 
-              if (!value) return null
+    // Items section for related data
+    const ItemsSection = ({ 
+      items 
+    }: { 
+      items: any[] 
+    }) => {
+      return (
+        <div className="ml-2 group/section">
+          <div className="flex flex-col space-y-2">
+            {items.map((item) => (
+              <div key={item.id} className="flex items-center justify-between group">
+                <Badge 
+                  variant="outline" 
+                  className="cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-1 py-1 w-fit font-normal"
+                >
+                  {item.name}
+                  {item.role && <span className="text-muted-foreground"> - {item.role}</span>}
+                  {item.value && <span className="ml-2">{item.value}</span>}
+                </Badge>
+              </div>
+            ))}
+          </div>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mt-2 text-xs text-muted-foreground opacity-0 group-hover/section:opacity-100 transition-opacity"
+          >
+            <PlusIcon className="h-3 w-3 mr-1" />
+            Add
+          </Button>
+        </div>
+      );
+    };
 
-              return (
-                <div key={attribute.id} className="flex items-center gap-2 text-xs">
-                  <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-500 truncate">{attribute.name}:</span>
-                  <span className="truncate">{renderAttributeValue(attribute, value)}</span>
+    // Apple-style section headers and content
+    const sections = [
+      {
+        id: 'details',
+        title: 'Capital Call Details',
+        icon: FileTextIcon,
+        content: renderFields(showingAllValues ? extendedFields : basicFields, !showingAllValues),
+        count: null
+      },
+      {
+        id: 'fund',
+        title: 'Fund Information',
+        icon: BuildingIcon,
+        content: <ItemsSection items={relatedData.fundInfo} />,
+        count: relatedData.fundInfo.length
+      },
+      {
+        id: 'contacts',
+        title: 'Contacts',
+        icon: UsersIcon,
+        content: <ItemsSection items={relatedData.contacts} />,
+        count: relatedData.contacts.length
+      },
+      {
+        id: 'financials',
+        title: 'Financial Information',
+        icon: DollarSignIcon,
+        content: <ItemsSection items={relatedData.financials} />,
+        count: relatedData.financials.length
+      },
+    ];
+
+    // Mock activity data
+    const activities = [
+      {
+        id: 1,
+        type: "notice",
+        actor: "Fund Admin",
+        action: "sent capital call notice for",
+        target: capitalCall.fundName,
+        timestamp: "2 weeks ago",
+      },
+      {
+        id: 2,
+        type: "reminder",
+        actor: "System",
+        action: "sent payment reminder for",
+        target: capitalCall.fundName,
+        timestamp: "1 week ago",
+      },
+      {
+        id: 3,
+        type: "update",
+        actor: "Sarah Johnson",
+        action: "processed payment for",
+        target: capitalCall.fundName,
+        timestamp: isOverdue ? "Pending" : "3 days ago",
+      },
+    ];
+
+    return (
+      <div className="px-6 pt-2 pb-6">
+        {/* Unified container with Apple-style cohesive design */}
+        <div className="rounded-lg border border-muted overflow-hidden">
+          {sections.map((section, index) => {
+            const isOpen = openSections[section.id as keyof typeof openSections];
+            const Icon = section.icon;
+            
+            return (
+              <React.Fragment key={section.id}>
+                {/* Divider between sections (except for the first one) */}
+                {index > 0 && (
+                  <div className="h-px bg-muted mx-3" />
+                )}
+                
+                {/* Section Header */}
+                <button 
+                  onClick={() => toggleSection(section.id as 'details' | 'fund' | 'contacts' | 'financials')}
+                  className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+                >
+                  <div className="flex items-center">
+                    <Icon className="h-4 w-4 text-muted-foreground ml-2" />
+                    <h4 className="text-sm font-medium ml-2">{section.title}</h4>
+                    
+                    {/* Show count badge for sections that have counts */}
+                    {section.count !== null && (
+                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 rounded-full text-xs">
+                        {section.count}
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronDownIcon 
+                    className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {/* Section Content with smooth height transition */}
+                {isOpen && (
+                  <div className="px-3 pb-3 pt-2 group/section">
+                    {section.content}
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        {/* Activity Section - Only in Drawer View */}
+        {!isFullScreen && (
+          <div className="mt-8">
+            <div className="mb-4">
+              <h4 className="text-sm font-medium">Activity</h4>
+            </div>
+            <div className="space-y-4">
+              {activities.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div className="mt-1">
+                    <div className={`h-2 w-2 rounded-full ${
+                      activity.type === "notice" ? "bg-blue-500" : 
+                      activity.type === "reminder" ? "bg-yellow-500" : "bg-green-500"
+                    }`}></div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">
+                        <span className="font-medium">{activity.actor}</span>{" "}
+                        <span className="text-muted-foreground">{activity.action}</span>{" "}
+                        <Badge variant="outline" className="text-xs mx-1">
+                          {activity.target}
+                        </Badge>
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+                  </div>
                 </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {selectedTask && (
-        <Sheet open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
-          <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => setSelectedTask(null)}>
-                  <ChevronLeftIcon className="h-4 w-4" />
-                </Button>
-                <Badge variant="outline" className="bg-background">
-                  Task
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <ExpandIcon className="h-4 w-4" />
-                  Full screen
-                </Button>
-                <Button variant="outline" size="sm">
-                  <MailIcon className="h-4 w-4" />
-                  Compose email
-                </Button>
-              </div>
+              ))}
             </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
-            {/* Task Details View */}
-            <TaskDetailsView
-              task={selectedTask}
-              onBack={() => setSelectedTask(null)}
-              recordName={capitalCall.fundName}
-            />
-          </SheetContent>
-        </Sheet>
-      )}
-    </>
+  // Create children function for tabs
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+  ) => {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p>No {activeTab} found for this capital call</p>
+        <p className="text-sm">Add some {activeTab} to get started</p>
+      </div>
+    )
+  }
+
+  return (
+    <MasterDrawer
+      trigger={
+        <Card className="cursor-pointer hover:shadow-md transition-all duration-200 border-gray-200 hover:border-gray-300 group"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-sm text-gray-900 truncate cursor-pointer group-hover:underline">{capitalCall.fundName}</h4>
+                <p className="text-xs text-gray-500 mt-1">{capitalCall.callNumber}</p>
+                {isOverdue && (
+                  <Badge variant="destructive" className="mt-2 text-xs">
+                    <AlertCircleIcon className="h-3 w-3 mr-1" />
+                    Overdue
+                  </Badge>
+                )}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600">
+                    <MoreVerticalIcon className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem>Send Reminder</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600">Cancel Call</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CardHeader>
+          <CardContent
+            className="pt-0 space-y-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-2">
+              {attributes.map((attribute) => {
+                const Icon = getAttributeIcon(attribute.type)
+                const value = (capitalCall as any)[attribute.id]
+
+                if (!value) return null
+
+                return (
+                  <div key={attribute.id} className="flex items-center gap-2 text-xs">
+                    <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-500 truncate">{attribute.name}:</span>
+                    <span className="truncate">{renderAttributeValue(attribute, value)}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      }
+      title={capitalCall.fundName}
+      recordType="Capital Calls"
+      subtitle={`${capitalCall.callNumber} • ${capitalCall.callAmount}`}
+      tabs={tabs}
+      detailsPanel={detailsPanel}
+    >
+      {renderTabContent}
+    </MasterDrawer>
   )
 }
 
@@ -514,13 +775,13 @@ function AddColumnButton({ onAddColumn }: { onAddColumn: () => void }) {
         onClick={onAddColumn}
         title="Add Column"
       >
-        <PlusIcon className="h-5 w-5 text-gray-400" />
+        <PlusIcon className="h-4 w-4" />
       </Button>
     </div>
   )
 }
 
-// New dialog for adding a column
+// Add column dialog
 function AddColumnDialog({
   open,
   onOpenChange,
@@ -530,71 +791,61 @@ function AddColumnDialog({
   onOpenChange: (open: boolean) => void
   onAddColumn: (name: string, color: string) => void
 }) {
-  const [name, setName] = React.useState("")
-  const [color, setColor] = React.useState("bg-gray-100")
+  const [columnName, setColumnName] = React.useState("")
+  const [columnColor, setColumnColor] = React.useState("bg-gray-100")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (name.trim()) {
-      onAddColumn(name, color)
-      setName("")
+    if (columnName.trim()) {
+      onAddColumn(columnName.trim(), columnColor)
+      setColumnName("")
       onOpenChange(false)
     }
   }
 
   const colorOptions = [
-    { value: "bg-gray-100", label: "Gray" },
-    { value: "bg-blue-100", label: "Blue" },
-    { value: "bg-green-100", label: "Green" },
-    { value: "bg-yellow-100", label: "Yellow" },
-    { value: "bg-purple-100", label: "Purple" },
-    { value: "bg-red-100", label: "Red" },
-    { value: "bg-orange-100", label: "Orange" },
-    { value: "bg-pink-100", label: "Pink" },
+    { id: "bg-gray-100", label: "Gray" },
+    { id: "bg-blue-100", label: "Blue" },
+    { id: "bg-green-100", label: "Green" },
+    { id: "bg-yellow-100", label: "Yellow" },
+    { id: "bg-purple-100", label: "Purple" },
+    { id: "bg-red-100", label: "Red" },
   ]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Column</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="column-name">Column Name</Label>
             <Input
               id="column-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., In Review"
+              placeholder="Enter column name"
+              value={columnName}
+              onChange={(e) => setColumnName(e.target.value)}
               autoFocus
-              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
           <div className="space-y-2">
             <Label>Column Color</Label>
-            <div className="grid grid-cols-4 gap-2">
-              {colorOptions.map((option) => (
+            <div className="flex flex-wrap gap-2">
+              {colorOptions.map((color) => (
                 <div
-                  key={option.value}
-                  className={`h-10 rounded-lg cursor-pointer ${option.value} border-2 transition-all ${
-                    color === option.value
-                      ? "border-blue-500 scale-105 shadow-sm"
-                      : "border-gray-200 hover:border-gray-300"
+                  key={color.id}
+                  className={`w-8 h-8 rounded-full cursor-pointer border-2 ${color.id} ${
+                    columnColor === color.id ? "border-primary" : "border-transparent"
                   }`}
-                  onClick={() => setColor(option.value)}
-                  title={option.label}
+                  onClick={() => setColumnColor(color.id)}
+                  title={color.label}
                 />
               ))}
             </div>
           </div>
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim()} className="bg-blue-600 hover:bg-blue-700">
-              Add Column
-            </Button>
+          <div className="flex justify-end">
+            <Button type="submit">Add Column</Button>
           </div>
         </form>
       </DialogContent>
@@ -602,19 +853,26 @@ function AddColumnDialog({
   )
 }
 
+// Main component export
 export function CapitalCallKanban({ workflowConfig }: CapitalCallKanbanProps) {
   const [capitalCalls, setCapitalCalls] = React.useState(initialCapitalCalls)
-  const [activeCapitalCall, setActiveCapitalCall] = React.useState<CapitalCall | null>(null)
-  const [stagesList, setStagesList] = React.useState(workflowConfig?.stages || defaultStages)
+  const [activeId, setActiveId] = React.useState<string | null>(null)
   const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)
-
-  // Update stages when workflow config changes
-  React.useEffect(() => {
-    if (workflowConfig?.stages) {
-      setStagesList(workflowConfig.stages)
-    }
-  }, [workflowConfig?.stages])
-
+  
+  // Use config or defaults
+  const stages = workflowConfig?.stages || defaultStages
+  const attributes = workflowConfig?.attributes || defaultAttributes
+  
+  // Get capital calls grouped by stage
+  const capitalCallsByStage = stages.map((stage) => ({
+    stage,
+    capitalCalls: capitalCalls.filter((call) => call.stage === stage.id),
+  }))
+  
+  // Get the active capital call for drag overlay
+  const activeCapitalCall = activeId ? capitalCalls.find((call) => call.id === activeId) : null
+  
+  // Sensors for drag and drop
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -623,70 +881,51 @@ export function CapitalCallKanban({ workflowConfig }: CapitalCallKanbanProps) {
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 100,
-        tolerance: 5,
+        delay: 200,
+        tolerance: 8,
       },
     }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor)
   )
-
-  function handleDragStart(event: any) {
+  
+  // Handle drag start
+  const handleDragStart = (event: DragEndEvent) => {
     const { active } = event
-    const activeId = active.id as string
-    const capitalCall = capitalCalls.find((c) => c.id === activeId)
-    if (capitalCall) {
-      setActiveCapitalCall(capitalCall)
-    }
+    setActiveId(active.id as string)
   }
-
-  function handleDragEnd(event: DragEndEvent) {
-    setActiveCapitalCall(null)
+  
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
-
-    if (!over) return
-
-    const activeId = active.id as string
-    const overId = over.id as string
-
-    const activeCapitalCall = capitalCalls.find((c) => c.id === activeId)
-    if (!activeCapitalCall) return
-
-    // Find which stage the item is being dropped on
-    let targetStage = overId
-
-    // If dropping on another capital call, find its stage
-    if (!stagesList.some((s) => s.id === overId)) {
-      const targetCapitalCall = capitalCalls.find((c) => c.id === overId)
-      if (targetCapitalCall) {
-        targetStage = targetCapitalCall.stage
+    
+    if (over && active.id !== over.id) {
+      // Find the stage that was dropped on
+      const targetStage = stages.find((stage) => stage.id === over.id)
+      
+      if (targetStage) {
+        // Update the capital call's stage
+        setCapitalCalls((prev) =>
+          prev.map((call) => (call.id === active.id ? { ...call, stage: targetStage.id } : call))
+        )
       }
     }
-
-    // Update the capital call's stage if it's different
-    if (activeCapitalCall.stage !== targetStage && stagesList.some((s) => s.id === targetStage)) {
-      setCapitalCalls(
-        capitalCalls.map((capitalCall) =>
-          capitalCall.id === activeId ? { ...capitalCall, stage: targetStage } : capitalCall,
-        ),
-      )
-    }
+    
+    setActiveId(null)
   }
-
+  
+  // Handle adding a new column
   const handleAddColumn = (name: string, color: string) => {
+    const newStageId = name.toLowerCase().replace(/\s+/g, '-')
     const newStage = {
-      id: `stage-${Date.now()}`,
-      name: name,
-      color: color,
+      id: newStageId,
+      name,
+      color,
     }
-    setStagesList([...stagesList, newStage])
+    
+    if (workflowConfig && workflowConfig.stages) {
+      workflowConfig.stages.push(newStage)
+    }
   }
-
-  const capitalCallsByStage = stagesList.map((stage) => ({
-    stage,
-    capitalCalls: capitalCalls.filter((capitalCall) => capitalCall.stage === stage.id),
-  }))
-
-  const attributes = workflowConfig?.attributes || defaultAttributes
 
   return (
     <DndContext
@@ -708,7 +947,11 @@ export function CapitalCallKanban({ workflowConfig }: CapitalCallKanbanProps) {
           </div>
         ) : null}
       </DragOverlay>
-      <AddColumnDialog open={addColumnDialogOpen} onOpenChange={setAddColumnDialogOpen} onAddColumn={handleAddColumn} />
+      <AddColumnDialog 
+        open={addColumnDialogOpen} 
+        onOpenChange={setAddColumnDialogOpen} 
+        onAddColumn={handleAddColumn} 
+      />
     </DndContext>
   )
 }

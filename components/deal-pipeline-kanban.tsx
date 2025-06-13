@@ -28,6 +28,7 @@ import {
   FolderIcon,
   MailIcon,
   BuildingIcon,
+  ChevronDownIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -217,112 +218,334 @@ function DealCard({
   ]
 
   // Create details panel function
-  const detailsPanel = (isFullScreen = false) => (
-    <div className="p-6">
-      {/* Deal Details */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-medium">Opportunity Details</h4>
+  const detailsPanel = (isFullScreen = false) => {
+    // Add state for collapsible sections
+    const [openSections, setOpenSections] = React.useState<{
+      details: boolean;
+      company: boolean;
+      contacts: boolean;
+      financials: boolean;
+    }>({
+      details: true, // Details expanded by default
+      company: false,
+      contacts: false,
+      financials: false,
+    });
 
-        <div className="rounded-lg border border-muted bg-muted/10 p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Company</Label>
-                  <p className="text-sm font-medium">{deal.companyName}</p>
-                </div>
-              </div>
+    // Add state for showing all values
+    const [showingAllValues, setShowingAllValues] = React.useState(false);
 
-              <div className="flex items-center gap-2">
-                <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Funding Round</Label>
-                  <p className="text-sm">{deal.fundingRound}</p>
-                </div>
-              </div>
+    // Toggle function for collapsible sections
+    const toggleSection = (section: 'details' | 'company' | 'contacts' | 'financials') => {
+      setOpenSections(prev => ({
+        ...prev,
+        [section]: !prev[section],
+      }));
+    };
 
-              <div className="flex items-center gap-2">
-                <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Target Raise</Label>
-                  <p className="text-sm">{deal.targetRaise}</p>
-                </div>
-              </div>
+    // Basic fields for collapsed view
+    const basicFields = [
+      {
+        label: "Company Name",
+        value: deal.companyName,
+      },
+      {
+        label: "Funding Round",
+        value: deal.fundingRound,
+      },
+      {
+        label: "Target Raise",
+        value: deal.targetRaise,
+      },
+      {
+        label: "Deal Owner",
+        value: deal.owner,
+      },
+      {
+        label: "Stage",
+        value: opportunityStage,
+      },
+    ] as Array<{
+      label: string;
+      value: React.ReactNode;
+      isLink?: boolean;
+    }>;
 
-              <div className="flex items-center gap-2">
-                <UserIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Deal Owner</Label>
-                  <p className="text-sm">{deal.owner}</p>
-                </div>
-              </div>
+    // Extended fields for "Show all" view
+    const extendedFields = [
+      {
+        label: "Company Name",
+        value: deal.companyName,
+      },
+      {
+        label: "Sector",
+        value: deal.sector,
+      },
+      {
+        label: "Funding Round",
+        value: deal.fundingRound,
+      },
+      {
+        label: "Target Raise",
+        value: deal.targetRaise,
+      },
+      {
+        label: "Deal Owner",
+        value: deal.owner,
+      },
+      {
+        label: "Stage",
+        value: opportunityStage,
+      },
+      {
+        label: "Location",
+        value: deal.location || "N/A",
+      },
+      {
+        label: "Email",
+        value: deal.email || "N/A",
+        isLink: true,
+      },
+      {
+        label: "Last Contact",
+        value: deal.lastContact || "N/A",
+      },
+      {
+        label: "Next Meeting",
+        value: deal.nextMeeting || "N/A",
+      },
+      {
+        label: "Valuation",
+        value: deal.valuation || "TBD",
+      },
+      {
+        label: "Revenue",
+        value: deal.revenue || "N/A",
+      },
+      {
+        label: "Employees",
+        value: deal.employees || "N/A",
+      },
+      {
+        label: "Description",
+        value: deal.description || "No description available",
+      },
+    ] as Array<{
+      label: string;
+      value: React.ReactNode;
+      isLink?: boolean;
+    }>;
 
-              <div className="flex items-center gap-2">
-                <MapPinIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Location</Label>
-                  <p className="text-sm">{deal.location}</p>
-                </div>
-              </div>
-            </div>
+    // Mock data for related entities
+    const relatedData = {
+      contacts: [
+        { id: 1, name: "Sarah Johnson", role: "CEO" },
+        { id: 2, name: "Michael Chen", role: "CFO" },
+      ],
+      companyInfo: [
+        { id: 1, name: "Website", value: deal.website || "N/A", isLink: true },
+        { id: 2, name: "Phone", value: deal.phone || "N/A" },
+      ],
+      financials: [
+        { id: 1, name: "Valuation", value: deal.valuation || "TBD" },
+        { id: 2, name: "Revenue", value: deal.revenue || "N/A" },
+        { id: 3, name: "Employees", value: deal.employees || "N/A" },
+      ],
+    };
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Stage</Label>
-                  <p className="text-sm">{opportunityStage}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <MailIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Email</Label>
-                  <p className="text-sm text-blue-600">{deal.email}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Last Contact</Label>
-                  <p className="text-sm">{deal.lastContact}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Next Meeting</Label>
-                  <p className="text-sm">{deal.nextMeeting}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">Valuation</Label>
-                  <p className="text-sm">{deal.valuation || "TBD"}</p>
-                </div>
-              </div>
-            </div>
+    // Render the detail fields
+    const renderFields = (fields: typeof basicFields, showAllButton: boolean = false) => (
+      <div className="space-y-3">
+        {fields.map((field, index) => (
+          <div key={index} className="flex items-center">
+            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
+            {field.isLink ? (
+              <p className="text-sm text-blue-600 flex-1">{field.value}</p>
+            ) : (
+              <p className="text-sm flex-1">{field.value}</p>
+            )}
           </div>
-
-          <div className="mt-4 pt-4 border-t">
-            <div className="flex items-start gap-2">
-              <FileTextIcon className="h-4 w-4 text-muted-foreground mt-0.5" />
-              <div className="flex-1">
-                <Label className="text-xs text-muted-foreground">Description</Label>
-                <p className="text-sm">{deal.description}</p>
-              </div>
-            </div>
+        ))}
+        {showAllButton && (
+          <div className="flex items-center mt-2">
+            <Button 
+              variant="link" 
+              className="h-auto p-0 text-xs text-blue-600 ml-2"
+              onClick={() => setShowingAllValues(true)}
+            >
+              Show all
+            </Button>
           </div>
-        </div>
+        )}
       </div>
-    </div>
-  )
+    );
+
+    // Items section for related data
+    const ItemsSection = ({ 
+      items 
+    }: { 
+      items: any[] 
+    }) => {
+      return (
+        <div className="ml-2 group/section">
+          <div className="flex flex-col space-y-2">
+            {items.map((item) => (
+              <div key={item.id} className="flex items-center justify-between group">
+                <Badge 
+                  variant="outline" 
+                  className="cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-1 py-1 w-fit font-normal"
+                >
+                  {item.name}
+                  {item.role && <span className="text-muted-foreground"> - {item.role}</span>}
+                  {item.value && <span className="ml-2">{item.value}</span>}
+                </Badge>
+              </div>
+            ))}
+          </div>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mt-2 text-xs text-muted-foreground opacity-0 group-hover/section:opacity-100 transition-opacity"
+          >
+            <PlusIcon className="h-3 w-3 mr-1" />
+            Add
+          </Button>
+        </div>
+      );
+    };
+
+    // Apple-style section headers and content
+    const sections = [
+      {
+        id: 'details',
+        title: 'Deal Details',
+        icon: FileTextIcon,
+        content: renderFields(showingAllValues ? extendedFields : basicFields, !showingAllValues),
+        count: null
+      },
+      {
+        id: 'company',
+        title: 'Company Information',
+        icon: BuildingIcon,
+        content: <ItemsSection items={relatedData.companyInfo} />,
+        count: relatedData.companyInfo.length
+      },
+      {
+        id: 'contacts',
+        title: 'Contacts',
+        icon: UsersIcon,
+        content: <ItemsSection items={relatedData.contacts} />,
+        count: relatedData.contacts.length
+      },
+      {
+        id: 'financials',
+        title: 'Financials',
+        icon: DollarSignIcon,
+        content: <ItemsSection items={relatedData.financials} />,
+        count: relatedData.financials.length
+      },
+    ];
+
+    // Mock activity data
+    const activities = [
+      {
+        id: 1,
+        type: "meeting",
+        actor: "Deal Team",
+        action: "had a meeting with",
+        target: deal.companyName,
+        timestamp: "2 days ago",
+      },
+      {
+        id: 2,
+        type: "update",
+        actor: "Financial Analyst",
+        action: "updated valuation for",
+        target: deal.companyName,
+        timestamp: "1 week ago",
+      },
+    ];
+
+    return (
+      <div className="px-6 pt-2 pb-6">
+        {/* Unified container with Apple-style cohesive design */}
+        <div className="rounded-lg border border-muted overflow-hidden">
+          {sections.map((section, index) => {
+            const isOpen = openSections[section.id as keyof typeof openSections];
+            const Icon = section.icon;
+            
+            return (
+              <React.Fragment key={section.id}>
+                {/* Divider between sections (except for the first one) */}
+                {index > 0 && (
+                  <div className="h-px bg-muted mx-3" />
+                )}
+                
+                {/* Section Header */}
+                <button 
+                  onClick={() => toggleSection(section.id as 'details' | 'company' | 'contacts' | 'financials')}
+                  className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+                >
+                  <div className="flex items-center">
+                    <Icon className="h-4 w-4 text-muted-foreground ml-2" />
+                    <h4 className="text-sm font-medium ml-2">{section.title}</h4>
+                    
+                    {/* Show count badge for sections that have counts */}
+                    {section.count !== null && (
+                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 rounded-full text-xs">
+                        {section.count}
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronDownIcon 
+                    className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+                  />
+                </button>
+                
+                {/* Section Content with smooth height transition */}
+                {isOpen && (
+                  <div className="px-3 pb-3 pt-2 group/section">
+                    {section.content}
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        {/* Activity Section - Only in Drawer View */}
+        {!isFullScreen && (
+          <div className="mt-8">
+            <div className="mb-4">
+              <h4 className="text-sm font-medium">Activity</h4>
+            </div>
+            <div className="space-y-4">
+              {activities.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div className="mt-1">
+                    <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">
+                        <span className="font-medium">{activity.actor}</span>{" "}
+                        <span className="text-muted-foreground">{activity.action}</span>{" "}
+                        <Badge variant="outline" className="text-xs mx-1">
+                          {activity.target}
+                        </Badge>
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // Create children function for tabs
   const renderTabContent = (
@@ -363,20 +586,40 @@ function DealCard({
 
     switch (attribute.type) {
       case "currency":
-        return <span className="font-medium">{value}</span>
+        return (
+          <span
+            className="font-medium outline-none hover:bg-primary/10 rounded-sm px-0.5 cursor-text transition-colors"
+            contentEditable
+            suppressContentEditableWarning
+          >
+            {value}
+          </span>
+        )
       default:
-        return value
+        return (
+          <span
+            className="outline-none hover:bg-primary/10 rounded-sm px-0.5 cursor-text transition-colors"
+            contentEditable
+            suppressContentEditableWarning
+          >
+            {value}
+          </span>
+        )
     }
   }
 
   return (
     <MasterDrawer
       trigger={
-        <Card className="cursor-pointer hover:shadow-md transition-all duration-200 border-gray-200 hover:border-gray-300">
+        <Card className="cursor-pointer hover:shadow-md transition-all duration-200 border-gray-200 hover:border-gray-300 group"
+          onClick={(e) => e.stopPropagation()}
+        >
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-sm text-gray-900 truncate">{deal.companyName}</h4>
+                <h4 className="font-semibold text-sm text-gray-900 truncate cursor-pointer group-hover:underline">
+                  {deal.companyName}
+                </h4>
                 <p className="text-xs text-gray-500 mt-1">{deal.sector}</p>
               </div>
               <DropdownMenu>
@@ -394,7 +637,10 @@ function DealCard({
               </DropdownMenu>
             </div>
           </CardHeader>
-          <CardContent className="pt-0 space-y-2">
+          <CardContent
+            className="pt-0 space-y-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="space-y-2">
               {attributes.map((attribute) => {
                 const Icon = getAttributeIcon(attribute.type)

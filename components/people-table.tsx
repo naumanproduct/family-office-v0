@@ -52,7 +52,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AddPersonDialog } from "./add-person-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { MasterDetailsPanel } from "./shared/master-details-panel" // Fixed import path
-import { ClientDrawerWrapper } from "./client-drawer-wrapper"
 
 // Add missing component imports
 function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
@@ -453,7 +452,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
   const customActions: React.ReactNode[] = []
 
   return (
-    <ClientDrawerWrapper
+    <MasterDrawer
       trigger={
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
@@ -482,7 +481,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
       onComposeEmail={() => console.log("Compose email clicked")}
     >
       {renderTabContent}
-    </ClientDrawerWrapper>
+    </MasterDrawer>
   )
 }
 

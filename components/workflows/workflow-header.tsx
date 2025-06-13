@@ -15,6 +15,9 @@ import {
   SearchIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  LayoutIcon,
+  ListIcon,
+  BuildingIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -35,6 +38,7 @@ import {
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 
 interface WorkflowAttribute {
   id: string
@@ -508,9 +512,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   )
 
   const tabs = [
-    { id: "general", label: "General" },
-    { id: "attributes", label: "Card Attributes" },
-    { id: "stages", label: "Stages" },
+    { id: "general", label: "General", icon: FileTextIcon },
+    { id: "attributes", label: "Card Attributes", icon: LayoutIcon },
+    { id: "stages", label: "Stages", icon: ListIcon },
   ]
 
   return (
@@ -551,71 +555,143 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
         {/* Tabs - matches master-drawer pattern */}
         <div className="border-b bg-background px-6">
           <div className="flex gap-8 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? "border-b-2 border-primary text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tab.label}
-                {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
+                    activeTab === tab.id
+                      ? "border-b-2 border-primary text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {Icon && <Icon className="h-4 w-4" />}
+                  {tab.label}
+                  {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto">
           {activeTab === "general" && (
-            <div className="p-6 space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Workflow Name
-                  </Label>
-                  <Input
-                    id="name"
-                    value={config.name}
-                    onChange={(e) => setConfig({ ...config, name: e.target.value })}
-                  />
+            <MasterDetailsPanel 
+              fieldGroups={[
+                {
+                  id: "workflow-info",
+                  label: "Workflow Information",
+                  icon: FileTextIcon,
+                  fields: [
+                    { 
+                      label: "Workflow Name", 
+                      value: (
+                        <Input
+                          value={config.name}
+                          onChange={(e) => setConfig({ ...config, name: e.target.value })}
+                          className="mt-1"
+                        />
+                      )
+                    },
+                    { 
+                      label: "Description", 
+                      value: (
+                        <Textarea
+                          value={config.description}
+                          onChange={(e) => setConfig({ ...config, description: e.target.value })}
+                          className="resize-none mt-1"
+                          rows={3}
+                        />
+                      )
+                    },
+                    { 
+                      label: "Object Type", 
+                      value: (
+                        <Select
+                          value={config.objectType}
+                          onValueChange={(value) => setConfig({ ...config, objectType: value })}
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="task">Task</SelectItem>
+                            <SelectItem value="opportunity">Opportunity</SelectItem>
+                            <SelectItem value="capital-call">Capital Call</SelectItem>
+                            <SelectItem value="document">Document</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )
+                    },
+                  ],
+                },
+                {
+                  id: "workflow-stats",
+                  label: "Workflow Statistics",
+                  icon: LayoutIcon,
+                  fields: [
+                    { label: "Card Fields", value: `${config.attributes.length} fields configured` },
+                    { label: "Stages", value: `${config.stages.length} stages configured` },
+                    { label: "Created", value: "January 15, 2024" },
+                    { label: "Last Modified", value: "Today" },
+                  ],
+                },
+              ]}
+              additionalContent={
+                <div className="mt-8">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium">Activity</h4>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">
+                            <span className="font-medium">Sarah Johnson</span>{" "}
+                            <span className="text-muted-foreground">created this workflow</span>
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">January 15, 2024</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">
+                            <span className="font-medium">Michael Chen</span>{" "}
+                            <span className="text-muted-foreground">updated workflow stages</span>
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">2 days ago</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">
+                            <span className="font-medium">You</span>{" "}
+                            <span className="text-muted-foreground">modified card attributes</span>
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">Today</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-sm font-medium">
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={config.description}
-                    onChange={(e) => setConfig({ ...config, description: e.target.value })}
-                    className="resize-none"
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="objectType" className="text-sm font-medium">
-                    Object Type
-                  </Label>
-                  <Select
-                    value={config.objectType}
-                    onValueChange={(value) => setConfig({ ...config, objectType: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="task">Task</SelectItem>
-                      <SelectItem value="opportunity">Opportunity</SelectItem>
-                      <SelectItem value="capital-call">Capital Call</SelectItem>
-                      <SelectItem value="document">Document</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
+              }
+            />
           )}
 
           {activeTab === "attributes" && (

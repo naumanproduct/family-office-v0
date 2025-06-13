@@ -4,18 +4,22 @@ import type * as React from "react"
 import { useState } from "react"
 import {
   ArrowUpCircleIcon,
+  Building2Icon,
+  BuildingIcon,
+  CheckCircleIcon,
+  ChevronsUpDownIcon,
+  DollarSignIcon,
   FileIcon,
   FileTextIcon,
+  GanttChartIcon,
   HelpCircleIcon,
+  PlusCircleIcon,
+  ScaleIcon,
   SearchIcon,
   SettingsIcon,
-  CheckCircleIcon,
-  BuildingIcon,
-  UsersIcon,
-  Building2Icon,
-  TrendingUpIcon,
   TargetIcon,
-  PlusCircleIcon,
+  TrendingUpIcon,
+  UsersIcon,
 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
@@ -40,7 +44,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronsUpDownIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { WorkflowTemplateDialog } from "./workflows/workflow-template-dialog"
 import { SettingsModal } from "./settings-modal"
@@ -105,18 +108,22 @@ const data = {
         {
           title: "Deal Pipeline",
           url: "/deal-pipeline",
+          icon: GanttChartIcon,
         },
         {
           title: "Capital Call Tracking",
           url: "/capital-call-tracking",
+          icon: DollarSignIcon,
         },
         {
           title: "Tax Document Collection & Filing",
-          url: "/tax-documents",
+          url: "/tax-document-collection",
+          icon: FileTextIcon,
         },
         {
           title: "Entity Compliance & Legal Tasks",
-          url: "/entity-compliance",
+          url: "/entity-compliance-legal",
+          icon: ScaleIcon,
         },
       ],
     },

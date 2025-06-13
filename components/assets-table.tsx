@@ -56,7 +56,6 @@ import { MasterDrawer } from "./master-drawer"
 import { AddAssetDialog } from "./add-asset-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
-import { ClientDrawerWrapper } from "./client-drawer-wrapper"
 import { Label } from "@/components/ui/label"
 
 export const assetSchema = z.object({
@@ -252,7 +251,7 @@ function AssetNameCell({ asset }: { asset: Asset }) {
   const customActions: React.ReactNode[] = []
 
   return (
-    <ClientDrawerWrapper
+    <MasterDrawer
       trigger={
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
@@ -271,7 +270,7 @@ function AssetNameCell({ asset }: { asset: Asset }) {
       customActions={customActions}
     >
       {renderTabContent}
-    </ClientDrawerWrapper>
+    </MasterDrawer>
   )
 }
 

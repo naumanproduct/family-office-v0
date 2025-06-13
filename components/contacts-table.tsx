@@ -50,7 +50,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MasterDrawer } from "@/components/master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
-import { ClientDrawerWrapper } from "@/components/client-drawer-wrapper"
 
 export const contactSchema = z.object({
   id: z.number(),
@@ -330,7 +329,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
   const customActions: React.ReactNode[] = []
 
   return (
-    <ClientDrawerWrapper
+    <MasterDrawer
       trigger={
         <Button variant="link" className="px-0 h-auto font-medium flex items-center gap-2 text-left">
           <Avatar className="h-8 w-8">
@@ -362,7 +361,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
       onComposeEmail={() => console.log("Compose email to", contact.email)}
     >
       {renderTabContent}
-    </ClientDrawerWrapper>
+    </MasterDrawer>
   )
 }
 

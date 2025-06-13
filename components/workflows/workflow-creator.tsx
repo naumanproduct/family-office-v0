@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowRight, Check, Plus, X, ChevronLeftIcon } from "lucide-react"
+import { ArrowRight, Check, Plus, X, ChevronLeftIcon, FileTextIcon, LayoutIcon, ListIcon } from "lucide-react"
 
 // Define the object types that can be tracked in workflows
 const objectTypes = [
@@ -238,11 +238,16 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
             <div className="border-b bg-background px-6">
               <TabsList className="grid grid-cols-3 w-full">
-                <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="basic">
+                  <FileTextIcon className="h-4 w-4 mr-2" />
+                  Basic Info
+                </TabsTrigger>
                 <TabsTrigger value="attributes" disabled={!canProceedToAttributes}>
+                  <LayoutIcon className="h-4 w-4 mr-2" />
                   Card Attributes
                 </TabsTrigger>
                 <TabsTrigger value="stages" disabled={!canProceedToStages}>
+                  <ListIcon className="h-4 w-4 mr-2" />
                   Workflow Stages
                 </TabsTrigger>
               </TabsList>
