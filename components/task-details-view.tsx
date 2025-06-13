@@ -42,6 +42,8 @@ interface TaskDetailsViewProps {
   isInDrawer?: boolean
   onNavigateBack?: () => void
   onSubtaskClick?: (subtask: any) => void
+  isFullScreen?: boolean
+  hideSubtasks?: boolean
 }
 
 export function TaskDetailsView({
@@ -53,6 +55,8 @@ export function TaskDetailsView({
   isInDrawer,
   onNavigateBack,
   onSubtaskClick,
+  isFullScreen = false,
+  hideSubtasks = false,
 }: TaskDetailsViewProps) {
   const [commentText, setCommentText] = React.useState("")
   const [taskTitle, setTaskTitle] = React.useState(task.title || "")
@@ -271,83 +275,89 @@ export function TaskDetailsView({
         isInDrawer={isInDrawer}
         onNavigateBack={onNavigateBack}
         onSubtaskClick={onSubtaskClick}
+        isFullScreen={isFullScreen}
+        hideSubtasks={hideSubtasks}
       />
     )
   }
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Task Header - Exact same placement as main drawer record header */}
-      <div className="border-b bg-background px-6 py-2">
-        <div className="flex items-center gap-3">
-          {/* Back Button - Show only when there's a parent task (for subtask navigation) but not in drawer */}
-          {parentTask && !isInDrawer && (
-            <Button variant="ghost" size="icon" onClick={getBackHandler()}>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-          )}
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <CheckSquareIcon className="h-4 w-4" />
-          </div>
-          <div className="flex-1">
-            {isEditingTitle ? (
-              <Input
-                value={taskTitle}
-                onChange={(e) => setTaskTitle(e.target.value)}
-                onBlur={() => setIsEditingTitle(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setIsEditingTitle(false)
-                  }
-                  if (e.key === "Escape") {
-                    setTaskTitle(task.title || "")
-                    setIsEditingTitle(false)
-                  }
-                }}
-                className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                autoFocus
-              />
-            ) : (
-              <h2
-                className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
-                onClick={() => setIsEditingTitle(true)}
-              >
-                {taskTitle || "Untitled"}
-              </h2>
+      {/* Task Header - show only when not in fullscreen (parent container renders its own header) */}
+      {!isFullScreen && (
+        <div className="border-b bg-background px-6 py-2">
+          <div className="flex items-center gap-3">
+            {/* Back Button - Show only when there's a parent task (for subtask navigation) but not in drawer */}
+            {parentTask && !isInDrawer && (
+              <Button variant="ghost" size="icon" onClick={getBackHandler()}>
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
             )}
-            <p className="text-sm text-muted-foreground">
-              {parentTask ? `Subtask of ${parentTask.title}` : `Task in ${recordName}`}
-            </p>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <CheckSquareIcon className="h-4 w-4" />
+            </div>
+            <div className="flex-1">
+              {isEditingTitle ? (
+                <Input
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                  onBlur={() => setIsEditingTitle(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsEditingTitle(false)
+                    }
+                    if (e.key === "Escape") {
+                      setTaskTitle(task.title || "")
+                      setIsEditingTitle(false)
+                    }
+                  }}
+                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                  autoFocus
+                />
+              ) : (
+                <h2
+                  className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
+                  onClick={() => setIsEditingTitle(true)}
+                >
+                  {taskTitle || "Untitled"}
+                </h2>
+              )}
+              <p className="text-sm text-muted-foreground">
+                {parentTask ? `Subtask of ${parentTask.title}` : `Task in ${recordName}`}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Tabs - Exact same styling as main drawer tabs */}
-      <div className="border-b bg-background px-6 py-1">
-        <div className="flex gap-6 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {activeTab === tab.id && (
-                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
-                )}
-              </button>
-            )
-          })}
+      {/* Tabs - hide in fullscreen to avoid duplication */}
+      {!isFullScreen && (
+        <div className="border-b bg-background px-6 py-1">
+          <div className="flex gap-6 overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                    activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                  {activeTab === tab.id && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tab Content */}
-      <div className="p-6 space-y-6">
+      <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'} space-y-6`}>
         {activeTab === "details" && (
           <>
             {/* Task Details */}
@@ -410,8 +420,8 @@ export function TaskDetailsView({
               </Button>
             </div>
 
-            {/* Subtasks Section - Only show for main tasks, not subtasks */}
-            {!parentTask && (
+            {/* Subtasks Section - Only show for main tasks, not subtasks AND when not hidden */}
+            {!parentTask && !hideSubtasks && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium">Subtasks ({subtasks.length})</h4>

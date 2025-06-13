@@ -4,21 +4,39 @@ import { MasterCreationDialog } from "./master-creation-dialog"
 
 const assetTypes = [
   {
-    id: "cash-bank",
-    name: "Cash / Bank Accounts",
-    description: "Checking, savings, money market",
+    id: "cash-equivalents",
+    name: "Cash & Cash Equivalents",
+    description: "Checking, savings, money-market, T-bills",
     category: "Cash",
   },
   {
-    id: "digital-assets",
-    name: "Digital Assets",
-    description: "Crypto holdings, wallets",
-    category: "Alternatives",
+    id: "public-equities",
+    name: "Public Equities",
+    description: "Listed stocks, ETFs, mutual funds",
+    category: "Equity",
   },
   {
     id: "fixed-income",
     name: "Fixed Income",
     description: "Bonds, treasuries, structured notes",
+    category: "Debt",
+  },
+  {
+    id: "private-equity",
+    name: "Private Equity",
+    description: "Buyout, growth, secondaries, PE funds",
+    category: "Equity",
+  },
+  {
+    id: "venture-capital",
+    name: "Venture Capital",
+    description: "Seed, early-stage startups, VC funds",
+    category: "Equity",
+  },
+  {
+    id: "private-credit",
+    name: "Private Credit",
+    description: "Direct lending, mezzanine, special situations",
     category: "Debt",
   },
   {
@@ -28,40 +46,34 @@ const assetTypes = [
     category: "Alternatives",
   },
   {
-    id: "insurance-annuities",
-    name: "Insurance / Annuities",
-    description: "Investment-linked policies",
-    category: "Alternatives",
-  },
-  {
-    id: "other",
-    name: "Other",
-    description: "Art, collectibles, or uncategorized assets",
-    category: "Alternatives",
-  },
-  {
-    id: "private-equity",
-    name: "Private Equity",
-    description: "Direct investments, PE funds, co-invests",
-    category: "Alternatives",
-  },
-  {
-    id: "public-equity",
-    name: "Public Equity",
-    description: "Listed stocks, ETFs, mutual funds",
-    category: "Equity",
-  },
-  {
     id: "real-estate",
     name: "Real Estate",
     description: "Properties, REITs, real estate funds",
     category: "Real Estate",
   },
   {
-    id: "venture-capital",
-    name: "Venture Capital",
-    description: "Early-stage startups, VC funds",
+    id: "real-assets",
+    name: "Real Assets",
+    description: "Infrastructure, commodities, timber, etc.",
     category: "Alternatives",
+  },
+  {
+    id: "direct-investments",
+    name: "Direct Investments",
+    description: "Single-company stakes held directly",
+    category: "Equity",
+  },
+  {
+    id: "alternative-investments",
+    name: "Alternative Investments",
+    description: "Art, collectibles, crypto, other alts",
+    category: "Alternatives",
+  },
+  {
+    id: "other",
+    name: "Other",
+    description: "Uncategorized or miscellaneous assets",
+    category: "Other",
   },
 ]
 

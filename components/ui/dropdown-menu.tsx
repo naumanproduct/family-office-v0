@@ -2,7 +2,9 @@
 
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { Check, ChevronRight, Circle } from "lucide-react"
+import { Check, ChevronRight, Circle, GripVerticalIcon } from "lucide-react"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@/lib/utils"
 
@@ -181,11 +183,78 @@ const DropdownMenuShortcut = ({
 }
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
 
+const DropdownMenuDraggableItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
+    id: string | number
+    checked?: boolean
+    onCheckedChange?: (checked: boolean) => void
+    onDragStart?: () => void
+    onDragEnd?: () => void
+  }
+>(({ className, id, children, checked, onCheckedChange, onDragStart, onDragEnd, ...props }, ref) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({
+    id,
+  })
+
+  const handleClick = (e: React.MouseEvent) => {
+    // Prevent the dropdown from closing
+    e.preventDefault()
+    // Toggle the checkbox
+    onCheckedChange?.(!checked)
+  }
+
+  return (
+    <DropdownMenuPrimitive.Item
+      ref={setNodeRef}
+      className={cn(
+        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        isDragging && "opacity-50",
+        className
+      )}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition
+      }}
+      onClick={handleClick}
+      onSelect={(e) => {
+        // Prevent the default selection behavior which would close the dropdown
+        e.preventDefault()
+      }}
+      {...props}
+    >
+      <div 
+        className="mr-2 cursor-grab active:cursor-grabbing touch-none"
+        {...attributes}
+        {...listeners}
+        onClick={(e) => e.stopPropagation()}
+      >
+        ≡
+      </div>
+      <div className="flex-1 text-left">{children}</div>
+      {onCheckedChange ? (
+        <div className="ml-auto pl-3 opacity-70" onClick={(e) => e.stopPropagation()}>
+          {checked ? "✓" : ""}
+        </div>
+      ) : null}
+    </DropdownMenuPrimitive.Item>
+  )
+})
+DropdownMenuDraggableItem.displayName = "DropdownMenuDraggableItem"
+
 export {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuDraggableItem,
   DropdownMenuCheckboxItem,
   DropdownMenuRadioItem,
   DropdownMenuLabel,

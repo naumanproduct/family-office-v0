@@ -2,10 +2,12 @@
 
 import * as React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { DealPipelineKanban } from "@/components/deal-pipeline-kanban"
 import { WorkflowHeader } from "@/components/workflows/workflow-header"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
 
 export default function DealPipelinePage() {
   const [workflowConfig, setWorkflowConfig] = React.useState({
@@ -37,26 +39,42 @@ export default function DealPipelinePage() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <header className="flex h-12 shrink-0 items-center border-b">
+          <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Deal Pipeline</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
         <div className="flex flex-1 flex-col">
-          <SiteHeader />
-          <main className="flex-1 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Deal Pipeline</h1>
-                <p className="text-gray-600 mt-1">Track investment opportunities through the deal process</p>
+          <div className="@container/main flex flex-1 flex-col">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <div className="px-4 lg:px-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold">Deal Pipeline</h1>
+                    <p className="text-muted-foreground">Track investment opportunities through the deal process</p>
+                  </div>
+                  <WorkflowHeader
+                    workflowName="Deal Pipeline"
+                    workflowConfig={workflowConfig}
+                    onSave={handleSaveWorkflow}
+                  />
+                </div>
+                <DealPipelineKanban workflowConfig={workflowConfig} />
               </div>
-              <WorkflowHeader
-                workflowName="Deal Pipeline"
-                workflowConfig={workflowConfig}
-                onSave={handleSaveWorkflow}
-              />
             </div>
-            <DealPipelineKanban workflowConfig={workflowConfig} />
-          </main>
+          </div>
         </div>
-      </div>
+      </SidebarInset>
     </SidebarProvider>
   )
 }

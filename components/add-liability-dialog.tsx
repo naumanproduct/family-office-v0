@@ -3,66 +3,18 @@
 import { MasterCreationDialog } from "./master-creation-dialog"
 
 const liabilityTypes = [
-  {
-    id: "bridge-financing",
-    name: "Bridge Financing",
-    description: "Short-term bridge loans, interim financing",
-    category: "Development Debt",
-  },
-  {
-    id: "credit-line",
-    name: "Credit Line",
-    description: "Revolving credit facilities, operating lines",
-    category: "Operating Debt",
-  },
-  {
-    id: "equipment-financing",
-    name: "Equipment Financing",
-    description: "Asset-based loans, equipment purchases",
-    category: "Asset-Based Debt",
-  },
-  {
-    id: "guarantees",
-    name: "Guarantees & Contingent",
-    description: "Performance bonds, guarantees, contingent liabilities",
-    category: "Contingent Liabilities",
-  },
-  {
-    id: "mezzanine-debt",
-    name: "Mezzanine Debt",
-    description: "Subordinated debt, convertible instruments",
-    category: "Hybrid Debt",
-  },
-  {
-    id: "other",
-    name: "Other",
-    description: "Miscellaneous debt instruments",
-    category: "Other Debt",
-  },
-  {
-    id: "real-estate-debt",
-    name: "Real Estate Debt",
-    description: "Property mortgages, construction loans",
-    category: "Real Estate Debt",
-  },
-  {
-    id: "subscription-credit",
-    name: "Subscription Credit Line",
-    description: "Capital call facilities, LP commitment-backed",
-    category: "Capital Call Facility",
-  },
-  {
-    id: "term-loan",
-    name: "Term Loan",
-    description: "Fixed-term loans, acquisition financing",
-    category: "Investment Debt",
-  },
-  {
-    id: "trade-finance",
-    name: "Trade Finance",
-    description: "Letters of credit, trade facilities",
-    category: "Trade Debt",
-  },
+  { id: "accounts-payable", name: "Accounts Payable", description: "Outstanding supplier invoices", category: "Current Liability" },
+  { id: "accrued-expenses", name: "Accrued Expenses", description: "Expenses incurred but not yet paid", category: "Current Liability" },
+  { id: "short-term-loans", name: "Short-Term Loans", description: "Loans due within 12 months", category: "Debt" },
+  { id: "lines-of-credit", name: "Lines of Credit", description: "Revolving credit facilities", category: "Debt" },
+  { id: "margin-loans", name: "Margin Loans", description: "Brokerage margin balances", category: "Debt" },
+  { id: "tax-liabilities", name: "Tax Liabilities", description: "Income, property, or other taxes owed", category: "Tax" },
+  { id: "mortgages-long-term-debt", name: "Mortgages & Long-Term Debt", description: "Obligations beyond one year", category: "Debt" },
+  { id: "unsecured-loans", name: "Unsecured Loans", description: "Loans without collateral", category: "Debt" },
+  { id: "pension-post-retirement", name: "Pension & Post-Retirement Obligations", description: "Employee benefit commitments", category: "Benefit Obligation" },
+  { id: "deferred-compensation", name: "Deferred Compensation", description: "Compensation payable in the future", category: "Benefit Obligation" },
+  { id: "contingent-liabilities", name: "Contingent Liabilities", description: "Guarantees, lawsuits, other contingencies", category: "Contingent" },
+  { id: "other", name: "Other", description: "Miscellaneous liabilities", category: "Other" },
 ]
 
 const formFields = [

@@ -13,6 +13,14 @@ import {
   ChevronLeftIcon,
   XIcon,
   ExpandIcon,
+  ActivityIcon,
+  CheckSquareIcon,
+  CheckCircleIcon,
+  CircleIcon,
+  ClockIcon,
+  FileTextIcon,
+  UserIcon,
+  CalendarIcon,
 } from "lucide-react"
 import { createPortal } from "react-dom"
 import { useState, createContext, useContext } from "react"
@@ -35,6 +43,9 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { TaskTemplateDialog } from "./task-template-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { UnifiedTaskTable } from "./shared/unified-task-table"
+import { NoteContent } from "@/components/shared/note-content"
+import { FileContent } from "@/components/shared/file-content"
+import { TypableArea } from "@/components/typable-area"
 
 // Task data - extended from investment tab but across all objects
 const tasksData = [
@@ -217,6 +228,56 @@ export function TasksTable() {
   const FullScreenContent = () => {
     if (typeof document === "undefined") return null
 
+    // Local state for tabs in fullscreen right pane
+    const [activeTab, setActiveTab] = useState<"activity" | "subtasks" | "notes" | "files">("activity")
+
+    const [noteText, setNoteText] = useState("")
+
+    // Manage subtasks locally for the right-hand pane (fallback to sample data if none)
+    const defaultSubtasks = [
+      {
+        id: "SUBTASK-1",
+        title: "Review financial statements",
+        status: "Completed",
+        priority: "High",
+        assignee: "John Smith",
+        dueDate: "2023-05-18",
+      },
+      {
+        id: "SUBTASK-2",
+        title: "Analyze market conditions",
+        status: "In Progress",
+        priority: "Medium",
+        assignee: "Sarah Johnson",
+        dueDate: "2023-05-20",
+      },
+      {
+        id: "SUBTASK-3",
+        title: "Prepare investment memo",
+        status: "To Do",
+        priority: "High",
+        assignee: "Michael Brown",
+        dueDate: "2023-05-22",
+      },
+    ]
+
+    const { updateTaskStatus } = useTasks()
+
+    const [subtasksState, setSubtasksState] = useState<any[]>(
+      (selectedTask && (selectedTask as any).subtasks) || defaultSubtasks,
+    )
+
+    const handleSubtaskStatusChange = (subtaskId: string, newStatus: string) => {
+      setSubtasksState((prev) =>
+        prev.map((st) => (st.id === subtaskId ? { ...st, status: newStatus } : st)),
+      )
+
+      // Update global context if numeric id
+      if (!isNaN(Number(subtaskId))) {
+        updateTaskStatus(Number(subtaskId), newStatus)
+      }
+    }
+
     return createPortal(
       <div className="fixed inset-0 z-[9999] bg-background">
         {/* Full Screen Header */}
@@ -227,7 +288,6 @@ export function TasksTable() {
               size="icon"
               onClick={() => {
                 setIsFullScreen(false)
-                // Clear selected tasks when exiting fullscreen
                 setSelectedTask(null)
                 setSelectedSubtask(null)
               }}
@@ -244,7 +304,6 @@ export function TasksTable() {
               size="icon"
               onClick={() => {
                 setIsFullScreen(false)
-                // Clear selected tasks when exiting fullscreen
                 setSelectedTask(null)
                 setSelectedSubtask(null)
               }}
@@ -254,17 +313,186 @@ export function TasksTable() {
           </div>
         </div>
 
-        {/* Task Details Content */}
-        <div className="flex-1 overflow-auto">
-          <TaskDetailsView
-            task={selectedSubtask || selectedTask}
-            onBack={handleDrawerBackClick}
-            recordName="All Tasks"
-            isInDrawer={true}
-            parentTask={selectedSubtask ? selectedTask : undefined}
-            onBackToParent={() => setSelectedSubtask(null)}
-            onSubtaskClick={handleSubtaskClick}
-          />
+        {/* Split Pane Content */}
+        <div className="flex h-[calc(100vh-73px)]">
+          {/* Left Panel */}
+          <div className="w-[672px] border-r bg-background flex flex-col">
+            {/* Record Header */}
+            <div className="border-b bg-background px-6 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <CheckSquareIcon className="h-4 w-4" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold">{selectedTask?.title || "Untitled"}</h2>
+                  <p className="text-sm text-muted-foreground">Task • {selectedTask?.id}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Details Panel Content */}
+            <TaskDetailsView
+              task={selectedSubtask || selectedTask}
+              onBack={handleDrawerBackClick}
+              recordName="All Tasks"
+              isInDrawer={true}
+              parentTask={selectedSubtask ? selectedTask : undefined}
+              onBackToParent={() => setSelectedSubtask(null)}
+              onSubtaskClick={handleSubtaskClick}
+              isFullScreen={true}
+              hideSubtasks={true}
+            />
+          </div>
+
+          {/* Right Panel */}
+          <div className="flex-1 overflow-y-auto flex flex-col">
+            {/* Tabs */}
+            <div className="border-b bg-background px-6">
+              <div className="flex relative overflow-x-auto">
+                <button
+                  onClick={() => setActiveTab("activity")}
+                  className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
+                    activeTab === "activity"
+                      ? "border-b-2 border-primary text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <ActivityIcon className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">Activity</span>
+                  {activeTab === "activity" && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab("subtasks")}
+                  className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
+                    activeTab === "subtasks"
+                      ? "border-b-2 border-primary text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <ListIcon className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">Subtasks</span>
+                  {activeTab === "subtasks" && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab("notes")}
+                  className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
+                    activeTab === "notes"
+                      ? "border-b-2 border-primary text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <FileTextIcon className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">Notes</span>
+                  {activeTab === "notes" && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab("files")}
+                  className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
+                    activeTab === "files"
+                      ? "border-b-2 border-primary text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <FileTextIcon className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">Files</span>
+                  {activeTab === "files" && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6 flex-1 space-y-4">
+              {activeTab === "activity" && (
+                <p className="text-muted-foreground">No recent activity for this task.</p>
+              )}
+
+              {activeTab === "subtasks" && (
+                <div className="space-y-2">
+                  {subtasksState.map((st) => (
+                    <div
+                      key={st.id}
+                      className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
+                      onClick={() => handleSubtaskClick(st)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const newStatus = st.status === "Completed" ? "To Do" : "Completed"
+                              handleSubtaskStatusChange(st.id, newStatus)
+                            }}
+                          >
+                            {st.status === "Completed" ? (
+                              <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                            ) : st.status === "In Progress" ? (
+                              <ClockIcon className="h-4 w-4 text-blue-500" />
+                            ) : (
+                              <CircleIcon className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                          <div className="flex-1">
+                            <p
+                              className={`text-sm font-medium ${
+                                st.status === "Completed" ? "line-through text-muted-foreground" : ""
+                              }`}
+                            >
+                              {st.title}
+                            </p>
+                            <div className="flex items-center gap-4 mt-1">
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <UserIcon className="h-3 w-3" />
+                                {st.assignee}
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <CalendarIcon className="h-3 w-3" />
+                                {new Date(st.dueDate).toLocaleDateString()}
+                              </div>
+                              <Badge className="text-xs" variant="secondary">
+                                {st.priority}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          {st.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {subtasksState.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No subtasks yet</p>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "notes" && (
+                <div className="space-y-4">
+                  <NoteContent />
+                  <TypableArea
+                    value={noteText}
+                    onChange={setNoteText}
+                    placeholder="Add a note..."
+                    showButtons={true}
+                    submitLabel="Add note"
+                  />
+                </div>
+              )}
+
+              {activeTab === "files" && <FileContent />}
+            </div>
+          </div>
         </div>
       </div>,
       document.body,

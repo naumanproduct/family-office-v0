@@ -88,6 +88,7 @@ export function MasterCreationDialog({
   onTypeSelect,
 }: MasterCreationDialogProps) {
   const [selectedType, setSelectedType] = useState<CreationType | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [isDirty, setIsDirty] = useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -323,10 +324,22 @@ export function MasterCreationDialog({
             {!selectedType ? (
               // Type Selection
               <div className="space-y-4">
+                {/* Search field */}
+                <Input
+                  placeholder={`Search ${recordType.toLowerCase()} types...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+
                 <div className="space-y-3">
-                  <h3 className="text-sm font-medium text-muted-foreground">{typeSelectionTitle}</h3>
                   {/* Custom Workflow first */}
                   {types
+                    .filter((t) =>
+                      `${t.name} ${t.description}`
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
+                    )
                     .filter((t) => t.isCustom)
                     .map((type) => (
                       <Card
@@ -345,13 +358,13 @@ export function MasterCreationDialog({
                       </Card>
                     ))}
 
-                  {/* Separator heading */}
-                  {types.some((t) => !t.isCustom) && (
-                    <div className="text-xs font-semibold text-muted-foreground uppercase mt-6 mb-2">Templates</div>
-                  )}
-
                   {/* Other templates */}
                   {types
+                    .filter((t) =>
+                      `${t.name} ${t.description}`
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
+                    )
                     .filter((t) => !t.isCustom)
                     .map((type) => (
                       <Card
@@ -367,13 +380,6 @@ export function MasterCreationDialog({
                             </div>
                           </div>
                         </CardHeader>
-                        {type.category && (
-                          <CardContent className="pt-0">
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span>Category: {type.category}</span>
-                            </div>
-                          </CardContent>
-                        )}
                       </Card>
                     ))}
                 </div>
@@ -382,7 +388,12 @@ export function MasterCreationDialog({
               // Form
               <div className="space-y-6">
                 {formHeaderContent && formHeaderContent}
-                <div className="grid grid-cols-2 gap-4">{formFields.map(renderFormField)}</div>
+                {/*
+                  Use a single-column layout to reduce cognitive load and make
+                  each field/value pair clearer. We keep vertical spacing
+                  between fields instead of a two-column grid.
+                */}
+                <div className="space-y-6">{formFields.map(renderFormField)}</div>
               </div>
             )}
           </div>

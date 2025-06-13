@@ -11,7 +11,6 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
@@ -39,6 +38,17 @@ import {
   MessageSquareIcon,
 } from "lucide-react"
 import { z } from "zod"
+import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -46,6 +56,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuDraggableItem,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -179,13 +190,13 @@ const getStatusColor = (status: string) => {
 function LiabilityNameCell({ liability }: { liability: Liability }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: ClockIcon },
     { id: "notes", label: "Notes", count: 1, icon: MessageSquareIcon },
     { id: "meetings", label: "Meetings", count: 1, icon: UsersIcon },
     { id: "emails", label: "Emails", count: 1, icon: MailIcon },
     { id: "files", label: "Files", count: 1, icon: FolderIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
-    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
   ]
 
   const renderTabContent = (
@@ -719,8 +730,7 @@ function LiabilityCompanyContent({ liability }: { liability: Liability }) {
 function LiabilityPerformanceContent({ liability }: { liability: Liability }) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Performance</h3>
+      <div className="flex items-center justify-end">
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             1Y
@@ -866,6 +876,8 @@ export function LiabilitiesTable() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false)
+  const [columnOrder, setColumnOrder] = React.useState<string[]>([])
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor))
 
   const table = useReactTable({
     data: liabilitiesData,
@@ -873,7 +885,6 @@ export function LiabilitiesTable() {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -886,19 +897,32 @@ export function LiabilitiesTable() {
       columnVisibility,
       globalFilter,
     },
-    initialState: {
-      pagination: {
-        pageSize: 25,
-      },
-    },
   })
 
-  return (
-    <div className="space-y-4">
-      {/* Toolbar        pageSize: 25,
-      },
-    },
-  })
+  // Initialize column order from table columns
+  React.useEffect(() => {
+    const visibleColumns = table
+      .getAllColumns()
+      .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
+      .map((column) => column.id);
+    
+    if (columnOrder.length === 0 && visibleColumns.length > 0) {
+      setColumnOrder(visibleColumns);
+    }
+  }, [table.getAllColumns(), columnOrder]);
+
+  // Handle drag end for column reordering
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -942,21 +966,30 @@ export function LiabilitiesTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              {table
-                .getAllColumns()
-                .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
+                  {columnOrder.map((columnId) => {
+                    const column = table.getColumn(columnId);
+                    if (!column) return null;
+                    
+                    return (
+                      <DropdownMenuDraggableItem
+                        key={columnId}
+                        id={columnId}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(checked) => column.toggleVisibility(checked)}
+                      >
+                        {columnId}
+                      </DropdownMenuDraggableItem>
+                    );
+                  })}
+                </SortableContext>
+              </DndContext>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
@@ -1008,75 +1041,10 @@ export function LiabilitiesTable() {
         </Table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between px-2">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} liability(s) total.
-        </div>
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
-            <Select
-              value={`${table.getState().pagination.pageSize}`}
-              onValueChange={(value) => {
-                table.setPageSize(Number(value))
-              }}
-            >
-              <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={table.getState().pagination.pageSize} />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[10, 20, 30, 40, 50].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <span className="sr-only">Go to first page</span>
-              <ChevronsLeftIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              <span className="sr-only">Go to previous page</span>
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              <span className="sr-only">Go to next page</span>
-              <ChevronRightIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              <span className="sr-only">Go to last page</span>
-              <ChevronsRightIcon className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+      <div className="flex-1 text-sm text-muted-foreground">
+        {table.getFilteredRowModel().rows.length} liability(s) total.
       </div>
+      
       <AddLiabilityDialog isOpen={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)} />
     </div>
   )

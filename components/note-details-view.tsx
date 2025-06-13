@@ -18,13 +18,16 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
+import { FileContent } from "@/components/shared/file-content"
 
 interface NoteDetailsViewProps {
   note: any
   onBack: () => void
+  hideAddNotes?: boolean
+  isFullScreen?: boolean
 }
 
-export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
+export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScreen = false }: NoteDetailsViewProps) {
   const [noteTitle, setNoteTitle] = React.useState(note.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
@@ -41,7 +44,10 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
 
   const [noteText, setNoteText] = React.useState("")
 
-  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
+  const tabs = [
+    { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "files", label: "Files", icon: FileTextIcon },
+  ]
 
   const getPriorityColor = (priority: string | undefined | null) => {
     if (!priority) return "bg-gray-100 text-gray-800"
@@ -146,72 +152,76 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Note Header - Same placement as task header */}
-      <div className="border-b bg-background px-6 py-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <StickyNoteIcon className="h-4 w-4" />
-          </div>
-          <div className="flex-1">
-            {isEditingTitle ? (
-              <Input
-                value={noteTitle}
-                onChange={(e) => setNoteTitle(e.target.value)}
-                onBlur={() => setIsEditingTitle(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setIsEditingTitle(false)
-                  }
-                  if (e.key === "Escape") {
-                    setNoteTitle(note.title || "")
-                    setIsEditingTitle(false)
-                  }
-                }}
-                className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                autoFocus
-              />
-            ) : (
-              <h2
-                className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
-                onClick={() => setIsEditingTitle(true)}
-              >
-                {noteTitle || "Untitled"}
-              </h2>
-            )}
-            <p className="text-sm text-muted-foreground">Note • {note.id}</p>
+      {/* Note Header - Only show when not in fullscreen mode */}
+      {!isFullScreen && (
+        <div className="border-b bg-background px-6 py-2">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <StickyNoteIcon className="h-4 w-4" />
+            </div>
+            <div className="flex-1">
+              {isEditingTitle ? (
+                <Input
+                  value={noteTitle}
+                  onChange={(e) => setNoteTitle(e.target.value)}
+                  onBlur={() => setIsEditingTitle(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsEditingTitle(false)
+                    }
+                    if (e.key === "Escape") {
+                      setNoteTitle(note.title || "")
+                      setIsEditingTitle(false)
+                    }
+                  }}
+                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                  autoFocus
+                />
+              ) : (
+                <h2
+                  className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
+                  onClick={() => setIsEditingTitle(true)}
+                >
+                  {noteTitle || "Untitled"}
+                </h2>
+              )}
+              <p className="text-sm text-muted-foreground">Note • {note.id}</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Tabs - Same styling as task tabs */}
-      <div className="border-b bg-background px-6 py-1">
-        <div className="flex gap-6 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {activeTab === tab.id && (
-                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
-                )}
-              </button>
-            )
-          })}
+      {/* Tabs - Only show when not in fullscreen mode */}
+      {!isFullScreen && (
+        <div className="border-b bg-background px-6 py-1">
+          <div className="flex gap-6 overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                    activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                  {activeTab === tab.id && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tab Content */}
-      <div className="p-6 space-y-6">
+      <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'} space-y-6`}>
         {activeTab === "details" && (
           <div className="space-y-4">
-            <h4 className="text-sm font-medium">Note Details</h4>
+            {!isFullScreen && <h4 className="text-sm font-medium">Note Details</h4>}
 
             <div className="rounded-lg border border-muted bg-muted/10 p-4">
               <div className="space-y-4">
@@ -279,10 +289,14 @@ export function NoteDetailsView({ note, onBack }: NoteDetailsViewProps) {
               Show all values
             </Button>
 
-            {/* Typable Area */}
-            <TypableArea value={noteText} onChange={setNoteText} placeholder="Add notes..." showButtons={false} />
+            {/* Typable Area - only show if hideAddNotes is false */}
+            {!hideAddNotes && (
+              <TypableArea value={noteText} onChange={setNoteText} placeholder="Add notes..." showButtons={false} />
+            )}
           </div>
         )}
+
+        {activeTab === "files" && <FileContent />}
       </div>
     </div>
   )

@@ -439,7 +439,7 @@ export function TaskCreator({
               </TabsList>
             </div>
 
-            <TabsContent value="basic" className="flex-1 p-6 space-y-4 m-0">
+            <TabsContent value="basic" className="flex-1 p-6 space-y-6 m-0">
               <div className="grid gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="title">Task Title</Label>
@@ -461,7 +461,12 @@ export function TaskCreator({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                {/*
+                  Use a single-column layout to present one field/value pair per
+                  row, matching the simplified UX applied elsewhere (e.g., Add
+                  Asset dialog). This reduces cognitive load for users.
+                */}
+                <div className="space-y-6">
                   <div className="grid gap-2">
                     <Label htmlFor="priority">Priority</Label>
                     <Select value={task.priority} onValueChange={(value) => updateTask({ priority: value })}>
@@ -498,7 +503,8 @@ export function TaskCreator({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                {/* Same single-column layout for assignee and due date */}
+                <div className="space-y-6">
                   <div className="grid gap-2">
                     <Label htmlFor="assignee">Assignee</Label>
                     <Select value={task.assignee} onValueChange={(value) => updateTask({ assignee: value })}>

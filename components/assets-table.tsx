@@ -38,6 +38,17 @@ import {
   UnlinkIcon,
 } from "lucide-react"
 import { z } from "zod"
+import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -45,6 +56,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuDraggableItem,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -184,13 +196,13 @@ const getGainColor = (percentage: number) => {
 function AssetNameCell({ asset }: { asset: Asset }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: ClockIcon },
     { id: "notes", label: "Notes", count: 1, icon: MessageSquareIcon },
     { id: "meetings", label: "Meetings", count: 3, icon: CalendarIcon },
     { id: "emails", label: "Emails", count: 2, icon: MailIcon },
     { id: "files", label: "Files", count: 4, icon: FolderIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
-    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
   ]
 
   const renderTabContent = (
@@ -1172,8 +1184,7 @@ function AssetCompanyContent({ asset }: { asset: Asset }) {
 function AssetPerformanceContent({ asset }: { asset: Asset }) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Performance</h3>
+      <div className="flex items-center justify-end">
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             1Y
@@ -1300,6 +1311,8 @@ export function AssetsTable() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [isAddAssetDialogOpen, setIsAddAssetDialogOpen] = React.useState(false)
+  const [columnOrder, setColumnOrder] = React.useState<string[]>([])
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor))
 
   const table = useReactTable({
     data: assetsData,
@@ -1320,6 +1333,31 @@ export function AssetsTable() {
       globalFilter,
     },
   })
+
+  // Initialize column order from table columns
+  React.useEffect(() => {
+    const visibleColumns = table
+      .getAllColumns()
+      .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
+      .map((column) => column.id);
+    
+    if (columnOrder.length === 0 && visibleColumns.length > 0) {
+      setColumnOrder(visibleColumns);
+    }
+  }, [table.getAllColumns(), columnOrder]);
+
+  // Handle drag end for column reordering
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -1345,11 +1383,11 @@ export function AssetsTable() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-[200px]">
               <DropdownMenuItem>Active assets</DropdownMenuItem>
-              <DropdownMenuItem>High performers</DropdownMenuItem>
-              <DropdownMenuItem>Under review</DropdownMenuItem>
+              <DropdownMenuItem>Liquid assets</DropdownMenuItem>
+              <DropdownMenuItem>Alternative investments</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Private equity</DropdownMenuItem>
-              <DropdownMenuItem>Venture capital</DropdownMenuItem>
+              <DropdownMenuItem>High performance</DropdownMenuItem>
+              <DropdownMenuItem>Recently acquired</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -1363,21 +1401,30 @@ export function AssetsTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              {table
-                .getAllColumns()
-                .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
+                  {columnOrder.map((columnId) => {
+                    const column = table.getColumn(columnId);
+                    if (!column) return null;
+                    
+                    return (
+                      <DropdownMenuDraggableItem
+                        key={columnId}
+                        id={columnId}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(checked) => column.toggleVisibility(checked)}
+                      >
+                        {columnId}
+                      </DropdownMenuDraggableItem>
+                    );
+                  })}
+                </SortableContext>
+              </DndContext>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button size="sm" onClick={() => setIsAddAssetDialogOpen(true)}>
@@ -1406,7 +1453,11 @@ export function AssetsTable() {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="h-12">
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="h-12 cursor-pointer hover:bg-muted/50"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-2">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -1424,6 +1475,11 @@ export function AssetsTable() {
           </TableBody>
         </Table>
       </div>
+
+      <div className="flex-1 text-sm text-muted-foreground">
+        {table.getFilteredRowModel().rows.length} asset(s) total.
+      </div>
+      
       <AddAssetDialog isOpen={isAddAssetDialogOpen} onClose={() => setIsAddAssetDialogOpen(false)} />
     </div>
   )
