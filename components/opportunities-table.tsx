@@ -27,6 +27,10 @@ import {
   SearchIcon,
   SortAscIcon,
   SortDescIcon,
+  BuildingIcon,
+  UsersIcon,
+  LandmarkIcon,
+  BarChartIcon,
 } from "lucide-react"
 import { z } from "zod"
 import {
@@ -57,17 +61,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   MailIcon,
-  BuildingIcon,
   FileTextIcon,
   CalendarIcon,
   FolderIcon,
-  UsersIcon,
   CheckCircleIcon,
   TrendingUpIcon,
 } from "lucide-react"
 import { MasterDrawer } from "./master-drawer"
 import { AddOpportunityDialog } from "./add-opportunity-dialog"
-import { MasterDetailsPanel } from "./shared/master-details-panel"
+import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
+import { Label } from "@/components/ui/label"
+import { UnifiedActivitySection, ActivityItem } from "./shared/unified-activity-section"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -621,9 +626,7 @@ function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
 }
 
 function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
-
-  const activities = [
+  const activities: ActivityItem[] = [
     {
       id: 1,
       type: "stage_change",
@@ -649,7 +652,7 @@ function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity 
       timestamp: "1 week ago",
       date: "2025-01-23",
       details: {
-        meetingType: "Management Presentation",
+        type: "Management Presentation",
         duration: "2 hours",
         attendees: ["CEO", "CFO", "CTO", "Investment Team"],
         topics: ["Business model", "Market opportunity", "Financial projections", "Use of funds"],
@@ -674,205 +677,127 @@ function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity 
     },
   ]
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "stage_change":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-      case "meeting":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-      case "due_diligence":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-    }
-  }
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span>{" "}
-        <span className="text-muted-foreground">{activity.action}</span>{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    )
-  }
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "stage_change":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Stage Change Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Previous Stage:</span>{" "}
-                  <span>{activity.details.previousStage}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">New Stage:</span> <span>{activity.details.newStage}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Timeline:</span> <span>{activity.details.timeline}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Reason</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
-              <ul className="text-sm text-muted-foreground list-disc list-inside">
-                {activity.details.nextSteps.map((step: string, index: number) => (
-                  <li key={index}>{step}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )
-      case "meeting":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.meetingType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Duration:</span> <span>{activity.details.duration}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Attendees</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.attendees.join(", ")}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.topics.join(", ")}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Outcome</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.outcome}</p>
-            </div>
-          </div>
-        )
-      case "due_diligence":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Due Diligence Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Review Type:</span> <span>{activity.details.reviewType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Status:</span> <span>{activity.details.status}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Scope</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.scope.join(", ")}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Findings</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.findings}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Recommendations</h5>
-              <ul className="text-sm text-muted-foreground list-disc list-inside">
-                {activity.details.recommendations.map((rec: string, index: number) => (
-                  <li key={index}>{rec}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
+  return <UnifiedActivitySection activities={activities} />
 }
 
 function OpportunityDetailsPanel({
   opportunity,
   isFullScreen = false,
 }: { opportunity: Opportunity; isFullScreen?: boolean }) {
-  // Define additional content with Activity section
-  const additionalContent = (
-    <>
-      {/* Show all values button */}
-      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-        Show all values
-      </Button>
+  // Mock data for related records
+  const relatedData = {
+    companies: [
+      { id: 1, name: opportunity.company.name, type: opportunity.company.type },
+      { id: 2, name: "Venture Partners LLC", type: "Co-Investor" },
+    ],
+    people: [
+      { id: 1, name: opportunity.contact.name, role: opportunity.contact.role },
+      { id: 2, name: "Michael Chen", role: "Investment Manager" },
+      { id: 3, name: "David Williams", role: "Board Member" },
+    ],
+    entities: [
+      { id: 1, name: opportunity.legalEntity.name, type: opportunity.legalEntity.type },
+      { id: 2, name: "Offshore Holdings LLC", type: "Holding Company" },
+    ],
+    investments: [
+      { id: 1, name: "Previous Funding Round", amount: "$3M" },
+      { id: 2, name: "Strategic Investment", amount: "$1.5M" },
+    ],
+    opportunities: [
+      { id: 1, name: "Follow-on Investment", status: "In Discussion" },
+      { id: 2, name: "Related Partnership Deal", status: "Initial Review" },
+    ],
+  };
 
-      {/* Activity Section - Only in Drawer View */}
-      {!isFullScreen && (
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-sm font-medium">Activity</h4>
-            <Button variant="outline" size="sm">
-              <PlusIcon className="h-4 w-4" />
-              Add meeting
-            </Button>
-          </div>
-          <OpportunityActivityContent opportunity={opportunity} />
-        </div>
-      )}
-    </>
-  )
+  // Mock navigation handler for related records
+  const navigateToRecord = (recordType: string, id: number) => {
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    // This would be implemented to navigate to the record
+  };
+
+  // Mock handler for adding a linked record
+  const handleAddRecord = (sectionId: string) => {
+    console.log(`Add new ${sectionId} record for ${opportunity.name}`);
+    // This would open the appropriate creation dialog
+  };
+
+  // Mock handler for removing a linked record
+  const handleUnlinkRecord = (sectionId: string, id: number) => {
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${opportunity.name}`);
+    // This would handle removal of the relationship
+  };
+  
+  // Define all sections for the details panel
+  const sections: DetailSection[] = [
+    {
+      id: "information",
+      title: "Opportunity Information",
+      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: [
+        { label: "Opportunity Name", value: opportunity.name },
+        { label: "Company", value: `${opportunity.company.name} (${opportunity.company.type})` },
+        { label: "Contact", value: `${opportunity.contact.name} - ${opportunity.contact.role}` },
+        { label: "Legal Entity", value: `${opportunity.legalEntity.name} (${opportunity.legalEntity.type})` },
+        { label: "Investment Amount", value: opportunity.amount },
+        { label: "Expected Close", value: opportunity.expectedClose },
+        { label: "Probability", value: `${opportunity.probability}%` },
+        { label: "Description", value: opportunity.description },
+        { label: "Stage", value: opportunity.stage },
+        { label: "Priority", value: opportunity.priority },
+        { label: "Status", value: opportunity.status },
+        { label: "Last Activity", value: opportunity.lastActivity },
+      ],
+    },
+    {
+      id: "companies",
+      title: "Companies",
+      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.companies
+      },
+    },
+    {
+      id: "people",
+      title: "People",
+      icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.people
+      },
+    },
+    {
+      id: "entities",
+      title: "Entities",
+      icon: <LandmarkIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.entities
+      },
+    },
+    {
+      id: "investments",
+      title: "Investments",
+      icon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.investments
+      },
+    },
+    {
+      id: "opportunities",
+      title: "Related Opportunities",
+      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.opportunities
+      },
+    },
+  ];
 
   return (
-    <MasterDetailsPanel
-      fieldGroups={[
-        {
-          id: "opportunity-info",
-          label: "Opportunity Information",
-          icon: TrendingUpIcon,
-          fields: [
-            { label: "Opportunity Name", value: opportunity.name },
-            { label: "Company", value: `${opportunity.company.name} (${opportunity.company.type})` },
-            { label: "Contact", value: `${opportunity.contact.name} - ${opportunity.contact.role}` },
-            { label: "Legal Entity", value: `${opportunity.legalEntity.name} (${opportunity.legalEntity.type})` },
-            { label: "Investment Amount", value: opportunity.amount },
-            { label: "Expected Close", value: opportunity.expectedClose },
-            { label: "Probability", value: `${opportunity.probability}%` },
-            { label: "Description", value: opportunity.description },
-          ],
-        },
-      ]}
+    <UnifiedDetailsPanel
+      sections={sections}
       isFullScreen={isFullScreen}
-      additionalContent={additionalContent}
+      onNavigateToRecord={navigateToRecord}
+      onAddRecord={handleAddRecord}
+      onUnlinkRecord={handleUnlinkRecord}
+      activityContent={<OpportunityActivityContent opportunity={opportunity} />}
     />
   )
 }

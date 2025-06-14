@@ -28,6 +28,10 @@ import {
   SearchIcon,
   SortAscIcon,
   SortDescIcon,
+  BarChartIcon,
+  ClipboardIcon,
+  GlobeIcon,
+  LandmarkIcon,
 } from "lucide-react"
 import { z } from "zod"
 import {
@@ -69,7 +73,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 // Import the AddEntityDialog
 import { AddEntityDialog } from "./add-entity-dialog"
 import { MasterDrawer } from "./master-drawer"
-import { MasterDetailsPanel } from "./master-details-panel"
+import { MasterDetailsPanel } from "./shared/master-details-panel"
+import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
+import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 
 export const entitySchema = z.object({
   id: z.number(),
@@ -634,9 +640,7 @@ function EntityNameCell({ entity }: { entity: Entity }) {
 }
 
 function EntityActivityContent({ entity }: { entity: Entity }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
-
-  const activities = [
+  const activities: ActivityItem[] = [
     {
       id: 1,
       type: "compliance",
@@ -688,201 +692,173 @@ function EntityActivityContent({ entity }: { entity: Entity }) {
     },
   ]
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "compliance":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-      case "structure_change":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-      case "document":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-    }
-  }
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span>{" "}
-        <span className="text-muted-foreground">{activity.action}</span>{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    )
-  }
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "compliance":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Filing Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Filing Type:</span> <span>{activity.details.filingType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Jurisdiction:</span>{" "}
-                  <span>{activity.details.jurisdiction}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Status:</span> <span>{activity.details.status}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Filed Date:</span> <span>{activity.details.filedDate}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Next Filing Due</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.nextFiling}</p>
-            </div>
-          </div>
-        )
-      case "structure_change":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Structure Change Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Change Type:</span> <span>{activity.details.changeType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Previous:</span>{" "}
-                  <span>{activity.details.previousOwnership}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">New:</span> <span>{activity.details.newOwnership}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Effective Date:</span>{" "}
-                  <span>{activity.details.effectiveDate}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Reason</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
-            </div>
-          </div>
-        )
-      case "document":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Document Update Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Document Type:</span>{" "}
-                  <span>{activity.details.documentType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Version:</span> <span>{activity.details.version}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Approved By:</span> <span>{activity.details.approvedBy}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Effective Date:</span>{" "}
-                  <span>{activity.details.effectiveDate}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Changes Made</h5>
-              <ul className="text-sm text-muted-foreground list-disc list-inside">
-                {activity.details.changes.map((change: string, index: number) => (
-                  <li key={index}>{change}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
+  return <UnifiedActivitySection activities={activities} />
 }
 
 function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; isFullScreen?: boolean }) {
-  // Define additional content with Activity section
-  const additionalContent = (
-    <>
-      {/* Show all values button */}
-      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-        Show all values
-      </Button>
+  // Mock data for related items
+  const relatedData = {
+    investments: [
+      { id: 1, name: "Tech Investments LP", type: "Investment Vehicle" },
+      { id: 2, name: "Growth Fund Series A", type: "Fund Investment" },
+    ],
+    people: [
+      { id: 1, name: entity.managerController, role: "Manager" },
+      { id: 2, name: "Jane Smith", role: "Director" },
+    ],
+    companies: [
+      { id: 1, name: "Portfolio Holdings Inc", type: "Portfolio Company" },
+      { id: 2, name: "Tech Ventures LLC", type: "Operating Company" },
+    ],
+    entities: entity.parentEntity 
+      ? [{ id: 1, name: entity.parentEntity, type: "Parent Entity" }] 
+      : [],
+  };
 
-      {/* Activity Section - Only in Drawer View */}
-      {!isFullScreen && (
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-sm font-medium">Activity</h4>
-            <Button variant="outline" size="sm">
-              <PlusIcon className="h-4 w-4" />
-              Add meeting
-            </Button>
-          </div>
-          <EntityActivityContent entity={entity} />
-        </div>
-      )}
-    </>
-  )
+  // Basic fields for main section
+  const basicFields = [
+    {
+      label: "Entity Name",
+      value: entity.entityName,
+    },
+    {
+      label: "Entity Type",
+      value: entity.entityType,
+    },
+    {
+      label: "Role / Purpose",
+      value: entity.rolePurpose,
+    },
+    {
+      label: "Jurisdiction",
+      value: entity.jurisdiction,
+    },
+    {
+      label: "Status",
+      value: entity.status,
+    },
+    {
+      label: "Manager / Controller",
+      value: entity.managerController,
+    },
+    {
+      label: "Date Formed",
+      value: new Date(entity.dateFormed).toLocaleDateString(),
+    },
+  ];
+  
+  // Extended fields for comprehensive view
+  const extendedFields = [
+    ...basicFields,
+    {
+      label: "Ownership %",
+      value: entity.ownershipPercent ? `${entity.ownershipPercent}%` : "—",
+    },
+    {
+      label: "Parent Entity",
+      value: entity.parentEntity || "—",
+      isLink: !!entity.parentEntity,
+    },
+    {
+      label: "Last Modified",
+      value: new Date(entity.lastModified).toLocaleDateString(),
+    },
+    {
+      label: "Linked Documents",
+      value: entity.linkedDocs.toString(),
+    },
+    {
+      label: "Notes",
+      value: entity.notes,
+    },
+  ];
+  
+  // Navigation handler for related records
+  const navigateToRecord = (recordType: string, id: number) => {
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    // This would be implemented to navigate to the record
+  };
+  
+  // Add record handler
+  const handleAddRecord = (sectionId: string) => {
+    console.log(`Add new ${sectionId} record for ${entity.entityName}`);
+    // This would open the appropriate creation dialog
+  };
+  
+  // Unlink record handler
+  const handleUnlinkRecord = (sectionId: string, id: number) => {
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${entity.entityName}`);
+    // This would handle removal of the relationship
+  };
+
+  // Define all sections for the details panel
+  const sections: DetailSection[] = [
+    {
+      id: "Details",
+      title: "Entity Information",
+      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: isFullScreen || basicFields.length <= 7 ? extendedFields : basicFields,
+    },
+    {
+      id: "Compliance",
+      title: "Compliance Information",
+      icon: <ClipboardIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: [
+        { 
+          label: "Upcoming Deadlines", 
+          value: entity.upcomingDeadlines.length > 0
+            ? entity.upcomingDeadlines.join(", ")
+            : "No upcoming deadlines"
+        },
+        { label: "Jurisdiction", value: entity.jurisdiction }
+      ],
+      hideWhenEmpty: entity.upcomingDeadlines.length === 0,
+    },
+    {
+      id: "People",
+      title: "Key People",
+      icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.people
+      },
+    },
+    {
+      id: "Companies",
+      title: "Related Companies",
+      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.companies
+      },
+    },
+    {
+      id: "Entities",
+      title: "Related Entities",
+      icon: <LandmarkIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.entities
+      },
+      hideWhenEmpty: relatedData.entities.length === 0,
+    },
+    {
+      id: "Investments",
+      title: "Investments",
+      icon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.investments
+      },
+    },
+  ];
 
   return (
-    <MasterDetailsPanel
-      fieldGroups={[
-        {
-          id: "entity-info",
-          label: "Entity Information",
-          icon: BuildingIcon,
-          fields: [
-            { label: "Entity Name", value: entity.entityName },
-            { label: "Entity Type", value: entity.entityType },
-            { label: "Role / Purpose", value: entity.rolePurpose },
-            { label: "Jurisdiction", value: entity.jurisdiction },
-            { label: "Status", value: entity.status },
-            { label: "Ownership %", value: entity.ownershipPercent ? `${entity.ownershipPercent}%` : "—" },
-            { label: "Parent Entity", value: entity.parentEntity || "—", isLink: !!entity.parentEntity },
-            { label: "Manager / Controller", value: entity.managerController },
-            { label: "Date Formed", value: new Date(entity.dateFormed).toLocaleDateString() },
-            { label: "Notes", value: entity.notes },
-          ],
-        },
-      ]}
+    <UnifiedDetailsPanel
+      sections={sections}
       isFullScreen={isFullScreen}
-      additionalContent={additionalContent}
+      onNavigateToRecord={navigateToRecord}
+      onAddRecord={handleAddRecord}
+      onUnlinkRecord={handleUnlinkRecord}
+      activityContent={<EntityActivityContent entity={entity} />}
     />
-  )
+  );
 }
 
 const columns: ColumnDef<Entity>[] = [

@@ -4,9 +4,10 @@ import { useState } from "react"
 import { MasterCreationDialog } from "../master-creation-dialog"
 import { CreateWorkflowDialog } from "./create-workflow-dialog"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { PlusIcon } from "lucide-react"
+import { PlusIcon, ChevronLeftIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Badge } from "@/components/ui/badge"
 
 // Updated workflow templates with complete configurations
 const workflowTypes = [
@@ -154,7 +155,12 @@ export function WorkflowTemplateDialog({ isOpen, onClose }: WorkflowTemplateDial
           {/* Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">
-              <div>Create New Workflow</div>
+              <Button variant="ghost" size="icon" onClick={onClose}>
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="outline" className="bg-background">
+                Workflow
+              </Badge>
             </div>
           </div>
 

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ChevronLeftIcon } from "lucide-react"
+import { ChevronLeftIcon, MoreVerticalIcon } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface CreationType {
   id: string
@@ -93,17 +99,25 @@ export function MasterCreationDialog({
   const [isDirty, setIsDirty] = useState(false)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [pendingAction, setPendingAction] = useState<"close" | "back" | null>(null)
+  
+  // Editable types state
+  const [typesState, setTypesState] = useState(types)
+  const [editingTypeId, setEditingTypeId] = useState<string | null>(null)
+  const [editName, setEditName] = useState("")
+  const [editDescription, setEditDescription] = useState("")
+  
+  // Delete confirmation
+  const [typeToDelete, setTypeToDelete] = useState<CreationType | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  // Initialize form data with default values
+  // Reset local types when dialog opens
   useEffect(() => {
-    const initialData: Record<string, any> = {}
-    formFields.forEach((field) => {
-      if (field.defaultValue !== undefined) {
-        initialData[field.id] = field.defaultValue
-      }
-    })
-    setFormData(initialData)
-  }, [formFields])
+    if (isOpen) {
+      setTypesState(types)
+      setEditingTypeId(null)
+      setTypeToDelete(null)
+    }
+  }, [isOpen, types])
 
   const handleTypeSelect = (type: CreationType) => {
     setSelectedType(type)
@@ -288,6 +302,98 @@ export function MasterCreationDialog({
     }
   }
 
+  const startEditType = (type: CreationType) => {
+    setEditingTypeId(type.id)
+    setEditName(type.name)
+    setEditDescription(type.description)
+  }
+
+  const saveEditType = () => {
+    setTypesState((prev) =>
+      prev.map((t) => (t.id === editingTypeId ? { ...t, name: editName, description: editDescription } : t)),
+    )
+    setEditingTypeId(null)
+  }
+  
+  const cancelEditType = () => {
+    setEditingTypeId(null)
+  }
+  
+  const confirmDeleteType = (type: CreationType) => {
+    setTypeToDelete(type)
+    setShowDeleteConfirm(true)
+  }
+  
+  const executeDeleteType = () => {
+    if (typeToDelete) {
+      setTypesState((prev) => prev.filter((t) => t.id !== typeToDelete.id))
+      setShowDeleteConfirm(false)
+      setTypeToDelete(null)
+    }
+  }
+
+  const renderTypeCard = (type: CreationType) => {
+    return (
+      <Card
+        key={type.id}
+        className="group relative transition-all duration-200 hover:shadow-md"
+      >
+        {/* More menu button */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVerticalIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => startEditType(type)}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => confirmDeleteType(type)} className="text-red-600 focus:text-red-600">Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {editingTypeId === type.id ? (
+          <CardHeader className="space-y-3">
+            <CardTitle className="text-sm font-medium">Edit {recordType} Type</CardTitle>
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="h-8 text-sm"
+              placeholder="Name"
+            />
+            <Textarea
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              rows={3}
+              placeholder="Description"
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={saveEditType} disabled={!editName.trim()}>
+                Save
+              </Button>
+              <Button variant="outline" size="sm" onClick={cancelEditType}>
+                Cancel
+              </Button>
+            </div>
+          </CardHeader>
+        ) : (
+          <CardHeader
+            className="cursor-pointer pb-3"
+            onClick={() => handleTypeSelect(type)}
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-base font-medium">{type.name}</CardTitle>
+                <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+        )}
+      </Card>
+    )
+  }
+
   return (
     <>
       <Sheet open={isOpen} onOpenChange={handleClose}>
@@ -298,7 +404,7 @@ export function MasterCreationDialog({
               <Button variant="ghost" size="icon" onClick={selectedType ? handleBackToSelection : handleClose}>
                 <ChevronLeftIcon className="h-4 w-4" />
               </Button>
-              <Badge variant="secondary">{selectedType ? `${recordType} Details` : `${recordType} Type`}</Badge>
+              <Badge variant="outline" className="bg-background">{selectedType ? `${recordType} Details` : `${recordType} Type`}</Badge>
             </div>
           </div>
 
@@ -334,54 +440,20 @@ export function MasterCreationDialog({
 
                 <div className="space-y-3">
                   {/* Custom Workflow first */}
-                  {types
+                  {typesState
                     .filter((t) =>
-                      `${t.name} ${t.description}`
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()),
+                      `${t.name} ${t.description}`.toLowerCase().includes(searchQuery.toLowerCase()),
                     )
                     .filter((t) => t.isCustom)
-                    .map((type) => (
-                      <Card
-                        key={type.id}
-                        className="cursor-pointer transition-all duration-200 hover:shadow-md"
-                        onClick={() => handleTypeSelect(type)}
-                      >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-1 min-w-0">
-                              <CardTitle className="text-base font-medium">{type.name}</CardTitle>
-                              <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
-                            </div>
-                          </div>
-                        </CardHeader>
-                      </Card>
-                    ))}
+                    .map((type) => renderTypeCard(type))}
 
                   {/* Other templates */}
-                  {types
+                  {typesState
                     .filter((t) =>
-                      `${t.name} ${t.description}`
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()),
+                      `${t.name} ${t.description}`.toLowerCase().includes(searchQuery.toLowerCase()),
                     )
                     .filter((t) => !t.isCustom)
-                    .map((type) => (
-                      <Card
-                        key={type.id}
-                        className="cursor-pointer transition-all duration-200 hover:shadow-md"
-                        onClick={() => handleTypeSelect(type)}
-                      >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-1 min-w-0">
-                              <CardTitle className="text-base font-medium">{type.name}</CardTitle>
-                              <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
-                            </div>
-                          </div>
-                        </CardHeader>
-                      </Card>
-                    ))}
+                    .map((type) => renderTypeCard(type))}
                 </div>
               </div>
             ) : (
@@ -414,6 +486,7 @@ export function MasterCreationDialog({
         </SheetContent>
       </Sheet>
 
+      {/* Unsaved changes confirmation dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -425,6 +498,22 @@ export function MasterCreationDialog({
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleCancelAction}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmAction}>Discard</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {recordType} Type</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{typeToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowDeleteConfirm(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeDeleteType} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

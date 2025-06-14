@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PlusIcon } from "lucide-react"
+import { PlusIcon, ChevronLeftIcon } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -575,8 +575,11 @@ export function CreateWorkflowDialog({ isOpen, onClose, onSave, existingWorkflow
           {/* Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={handleCloseRequest}>
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
               <Badge variant="outline" className="bg-background">
-                Create New Workflow
+                Workflow
               </Badge>
             </div>
             <div className="flex items-center gap-2"></div>

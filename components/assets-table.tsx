@@ -68,7 +68,9 @@ import { MasterDrawer } from "./master-drawer"
 import { AddAssetDialog } from "./add-asset-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
 import { Label } from "@/components/ui/label"
+import { UnifiedActivitySection, ActivityItem } from "./shared/unified-activity-section"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -460,34 +462,6 @@ function getAssetTabData(activeTab: string, asset: Asset) {
 }
 
 function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
-  // Add state for collapsible sections
-  const [openSections, setOpenSections] = React.useState<{
-    details: boolean;
-    company: boolean;
-    people: boolean;
-    entities: boolean;
-    investments: boolean;
-    opportunities: boolean;
-  }>({
-    details: true, // Details expanded by default
-    company: false,
-    people: false,
-    entities: false,
-    investments: false,
-    opportunities: false,
-  });
-
-  // Add state for showing all values
-  const [showingAllValues, setShowingAllValues] = React.useState(false);
-
-  // Toggle function for collapsible sections
-  const toggleSection = (section: 'details' | 'company' | 'people' | 'entities' | 'investments' | 'opportunities') => {
-    setOpenSections(prev => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
   // Mock data for related entities
   const relatedData = {
     companies: [
@@ -513,571 +487,202 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
     ],
   };
 
-  // Basic fields for collapsed view
-  const basicFields = [
-    {
-      label: "Asset Name",
-      value: asset.name,
-    },
-    {
-      label: "Asset Type",
-      value: asset.type,
-    },
-    {
-      label: "Investment Thesis",
-      value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
-    },
-    {
-      label: "Owning Entity",
-      value: asset.entity,
-      isLink: true,
-    },
-    {
-      label: "Acquisition Date",
-      value: asset.acquisitionDate,
-    },
-    {
-      label: "Current Value",
-      value: asset.currentValue,
-    },
-    {
-      label: "Performance",
-      value: (
-        <span className={getGainColor(asset.percentageGain)}>
-          {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
-          {asset.percentageGain}%)
-        </span>
-      ),
-    },
-  ];
-
-  // Extended fields for "Show all" view
-  const extendedFields = [
-    {
-      label: "Asset Name",
-      value: asset.name,
-    },
-    {
-      label: "Asset Type",
-      value: asset.type,
-    },
-    {
-      label: "Category",
-      value: asset.category,
-    },
-    {
-      label: "Investment Thesis",
-      value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
-    },
-    {
-      label: "Owning Entity",
-      value: asset.entity,
-      isLink: true,
-    },
-    {
-      label: "Status",
-      value: asset.status,
-    },
-    {
-      label: "Acquisition Date",
-      value: asset.acquisitionDate,
-    },
-    {
-      label: "Last Valuation",
-      value: asset.lastValuation,
-    },
-    {
-      label: "Current Value",
-      value: asset.currentValue,
-    },
-    {
-      label: "Original Cost",
-      value: asset.originalCost,
-    },
-    {
-      label: "Unrealized Gain",
-      value: asset.unrealizedGain,
-    },
-    {
-      label: "Performance",
-      value: (
-        <span className={getGainColor(asset.percentageGain)}>
-          {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
-          {asset.percentageGain}%)
-        </span>
-      ),
-    },
-    {
-      label: "Sector",
-      value: asset.sector,
-    },
-    {
-      label: "Geography",
-      value: asset.geography,
-    },
-  ];
-
   // Navigation function for when a chip is clicked
   const navigateToRecord = (recordType: string, id: number) => {
     console.log(`Navigate to ${recordType} record with ID: ${id}`);
     // This would be implemented to navigate to the record within the same panel
-    // For example, this could update state to show the record details
   };
 
-  // Render the detail fields
-  const renderFields = (fields: typeof basicFields, showAllButton: boolean = false) => (
-    <div className="space-y-3">
-      {fields.map((field, index) => (
-        <div key={index} className="flex items-center">
-          {/* Field name aligned directly with section icons (matching the ml-2 of icons) */}
-          <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
-
-          {/* Field value */}
-          {field.isLink ? (
-            <p className="text-sm text-blue-600 flex-1">{field.value}</p>
-          ) : (
-            <p className="text-sm flex-1">{field.value}</p>
-          )}
-        </div>
-      ))}
-      {showAllButton && (
-        <div className="flex items-center mt-2">
-          <Button 
-            variant="link" 
-            className="h-auto p-0 text-xs text-blue-600 ml-2"
-            onClick={() => setShowingAllValues(true)}
-          >
-            Show all
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  // Items section for related data
-  const ItemsSection = ({ 
-    items 
-  }: { 
-    items: any[] 
-  }) => {
-    // Mock function for adding a linked record
-    const handleAddRecord = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      console.log("Add linked record");
-      // In a real implementation, this would open a dialog to select records to link
-    };
-    
-    // Mock function for removing a linked record
-    const handleUnlinkRecord = (e: React.MouseEvent, id: number) => {
-      e.stopPropagation();
-      console.log(`Unlink record with ID: ${id}`);
-      // In a real implementation, this would remove the link between records
-    };
-
-    // Mock function for viewing a linked record
-    const handleViewRecord = (e: React.MouseEvent, id: number) => {
-      e.stopPropagation();
-      console.log(`View record with ID: ${id}`);
-      // In a real implementation, this would navigate to the record's details
-    };
-    
-    return (
-      <div className="ml-2 group/section">
-        <div className="flex flex-col space-y-2">
-          {items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between group">
-              <Badge 
-                variant="outline" 
-                className="cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-1 py-1 w-fit font-normal"
-                onClick={() => navigateToRecord(item.type || item.role || '', item.id)}
-              >
-                {item.name}
-              </Badge>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <MoreHorizontalIcon className="h-3 w-3 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[160px]">
-                  <DropdownMenuItem onClick={(e) => handleViewRecord(e, item.id)}>
-                    <ExternalLinkIcon className="mr-2 h-3.5 w-3.5" />
-                    <span>View</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={(e) => handleUnlinkRecord(e, item.id)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <UnlinkIcon className="mr-2 h-3.5 w-3.5" />
-                    <span>Unlink</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ))}
-        </div>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="mt-2 text-xs text-muted-foreground opacity-0 group-hover/section:opacity-100 transition-opacity"
-          onClick={handleAddRecord}
-        >
-          <PlusIcon className="h-3 w-3 mr-1" />
-          Add
-        </Button>
-      </div>
-    );
+  // Handler for adding a linked record
+  const handleAddRecord = (sectionId: string) => {
+    console.log(`Add linked ${sectionId} for ${asset.name}`);
+    // In a real implementation, this would open a dialog to select records to link
+  };
+  
+  // Handler for removing a linked record
+  const handleUnlinkRecord = (sectionId: string, id: number) => {
+    console.log(`Unlink ${sectionId} record with ID: ${id} from ${asset.name}`);
+    // In a real implementation, this would remove the link between records
   };
 
-  // Apple-style section headers and content
-  const sections = [
+  // Define all sections for the unified details panel
+  const sections: DetailSection[] = [
     {
-      id: 'details',
-      title: 'Record Details',
-      icon: FileTextIcon,
-      content: renderFields(showingAllValues ? extendedFields : basicFields, !showingAllValues),
-      count: null
+      id: "details",
+      title: "Asset Details",
+      icon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: [
+        {
+          label: "Asset Name",
+          value: asset.name,
+        },
+        {
+          label: "Asset Type",
+          value: asset.type,
+        },
+        {
+          label: "Category",
+          value: asset.category,
+        },
+        {
+          label: "Investment Thesis",
+          value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
+        },
+        {
+          label: "Owning Entity",
+          value: asset.entity,
+          isLink: true,
+        },
+        {
+          label: "Status",
+          value: asset.status,
+        },
+        {
+          label: "Acquisition Date",
+          value: asset.acquisitionDate,
+        },
+        {
+          label: "Last Valuation",
+          value: asset.lastValuation,
+        },
+        {
+          label: "Current Value",
+          value: asset.currentValue,
+        },
+        {
+          label: "Original Cost",
+          value: asset.originalCost,
+        },
+        {
+          label: "Unrealized Gain",
+          value: asset.unrealizedGain,
+        },
+        {
+          label: "Performance",
+          value: (
+            <span className={getGainColor(asset.percentageGain)}>
+              {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
+              {asset.percentageGain}%)
+            </span>
+          ),
+        },
+        {
+          label: "Sector",
+          value: asset.sector,
+        },
+        {
+          label: "Geography",
+          value: asset.geography,
+        },
+      ],
     },
     {
-      id: 'company',
-      title: 'Company',
-      icon: BuildingIcon,
-      content: <ItemsSection items={relatedData.companies} />,
-      count: relatedData.companies.length
+      id: "companies",
+      title: "Companies",
+      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.companies,
+      },
     },
     {
-      id: 'people',
-      title: 'People',
-      icon: Users,
-      content: <ItemsSection items={relatedData.people} />,
-      count: relatedData.people.length
+      id: "people",
+      title: "People",
+      icon: <Users className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.people,
+      },
     },
     {
-      id: 'entities',
-      title: 'Entities',
-      icon: LayoutIcon,
-      content: <ItemsSection items={relatedData.entities} />,
-      count: relatedData.entities.length
+      id: "entities",
+      title: "Entities",
+      icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.entities,
+      },
     },
     {
-      id: 'investments',
-      title: 'Investments',
-      icon: DollarSignIcon,
-      content: <ItemsSection items={relatedData.investments} />,
-      count: relatedData.investments.length
+      id: "investments",
+      title: "Investments",
+      icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.investments,
+      },
     },
     {
-      id: 'opportunities',
-      title: 'Opportunities',
-      icon: TrendingUpIcon,
-      content: <ItemsSection items={relatedData.opportunities} />,
-      count: relatedData.opportunities.length
-    }
+      id: "opportunities",
+      title: "Opportunities",
+      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.opportunities,
+      },
+    },
   ];
 
   return (
-    <div className="px-6 pt-2 pb-6">
-      {/* Unified container with Apple-style cohesive design */}
-      <div className="rounded-lg border border-muted overflow-hidden">
-        {sections.map((section, index) => {
-          const isOpen = openSections[section.id as keyof typeof openSections];
-          const Icon = section.icon;
-          
-          return (
-            <React.Fragment key={section.id}>
-              {/* Divider between sections (except for the first one) */}
-              {index > 0 && (
-                <div className="h-px bg-muted mx-3" />
-              )}
-              
-              {/* Section Header */}
-              <button 
-                onClick={() => toggleSection(section.id as 'details' | 'company' | 'people' | 'entities' | 'investments' | 'opportunities')}
-                className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
-              >
-                <div className="flex items-center">
-                  <Icon className="h-4 w-4 text-muted-foreground ml-2" />
-                  <h4 className="text-sm font-medium ml-2">{section.title}</h4>
-                  
-                  {/* Show count badge for sections that have counts */}
-                  {section.count !== null && (
-                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 rounded-full text-xs">
-                      {section.count}
-                    </Badge>
-                  )}
-                </div>
-                <ChevronDownIcon 
-                  className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-                />
-              </button>
-              
-              {/* Section Content with smooth height transition */}
-              {isOpen && (
-                <div className="px-3 pb-3 pt-2 group/section">
-                  {section.content}
-                </div>
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
-
-      {/* Activity Section - Only in Drawer View */}
-      {!isFullScreen && (
-        <div className="mt-8">
-          <div className="mb-4">
-            <h4 className="text-sm font-medium">Activity</h4>
-          </div>
-          <AssetActivityContent asset={asset} />
-        </div>
-      )}
-    </div>
+    <UnifiedDetailsPanel
+      sections={sections}
+      isFullScreen={isFullScreen}
+      onNavigateToRecord={navigateToRecord}
+      onAddRecord={handleAddRecord}
+      onUnlinkRecord={handleUnlinkRecord}
+      activityContent={<AssetActivityContent asset={asset} />}
+    />
   );
 }
 
 function AssetActivityContent({ asset }: { asset: Asset }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
-
-  const activities = [
+  const activities: ActivityItem[] = [
     {
       id: 1,
-      type: "valuation",
-      actor: "Portfolio Team",
-      action: "updated valuation for",
-      target: asset.name,
-      timestamp: "2 days ago",
-      date: "2025-01-28",
+      type: "distribution",
+      actor: "ABC Fund",
+      action: "issued",
+      target: "Q2 dividend distribution",
+      timestamp: "2 weeks ago",
+      date: "2024-06-15",
       details: {
-        previousValue: "$17.2M",
-        newValue: asset.currentValue,
-        reason: "Q4 2024 performance review and market comparables analysis",
-        methodology: "DCF and comparable company analysis",
+        amount: "$5,000",
+        type: "Dividend",
+        perShare: "$0.50",
+        totalShares: "10,000",
+        paymentDate: "June 15, 2024",
       },
     },
     {
       id: 2,
-      type: "distribution",
-      actor: asset.name,
-      action: "distributed",
-      target: "$500K",
-      timestamp: "1 week ago",
-      date: "2025-01-23",
+      type: "update",
+      actor: "System",
+      action: "updated the valuation to",
+      target: "$220,000",
+      timestamp: "1 month ago",
+      date: "2024-05-30",
       details: {
-        amount: "$500,000",
-        type: "Quarterly Distribution",
-        perShare: "$2.50",
-        totalShares: "200,000",
-        paymentDate: "2025-01-25",
+        previousValue: "$200,000",
+        newValue: "$220,000",
+        change: "+10%",
+        reason: "Market appreciation",
       },
     },
     {
       id: 3,
       type: "investment",
-      actor: "Investment Committee",
-      action: "approved investment in",
-      target: asset.name,
-      timestamp: "6 months ago",
-      date: "2024-08-15",
+      actor: "You",
+      action: "made an additional investment of",
+      target: "$25,000",
+      timestamp: "3 months ago",
+      date: "2024-04-12",
       details: {
-        amount: asset.originalCost,
-        investmentType: asset.type,
-        sector: asset.sector,
-        geography: asset.geography,
-        approvalDate: "2024-08-10",
-        fundingDate: "2024-08-15",
+        amount: "$25,000",
+        investmentType: "Follow-on",
+        sector: "Technology",
+        geography: "United States",
+        approvalDate: "April 5, 2024",
+        fundingDate: "April 12, 2024",
       },
     },
   ]
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "valuation":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-      case "distribution":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
-      case "investment":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-    }
-  }
-
-  const formatActivityText = (activity: any) => {
-    switch (activity.type) {
-      case "valuation":
-        return (
-          <span className="text-sm">
-            <span className="font-medium">{activity.actor}</span>{" "}
-            <span className="text-muted-foreground">{activity.action}</span>{" "}
-            <Badge variant="outline" className="text-xs mx-1">
-              {activity.target}
-            </Badge>
-          </span>
-        )
-      case "distribution":
-        return (
-          <span className="text-sm">
-            <span className="font-medium">{activity.actor}</span>{" "}
-            <span className="text-muted-foreground">{activity.action}</span>{" "}
-            <span className="font-medium text-green-600">{activity.target}</span>
-          </span>
-        )
-      case "investment":
-        return (
-          <span className="text-sm">
-            <span className="font-medium">{activity.actor}</span>{" "}
-            <span className="text-muted-foreground">{activity.action}</span>{" "}
-            <span className="font-medium">{activity.target}</span>
-          </span>
-        )
-      default:
-        return (
-          <span className="text-sm">
-            <span className="font-medium">{activity.actor}</span>{" "}
-            <span className="text-muted-foreground">{activity.action}</span>{" "}
-            <span className="font-medium">{activity.target}</span>
-          </span>
-        )
-    }
-  }
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "valuation":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Valuation Update</h5>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Previous Value:</span>{" "}
-                  <span>{activity.details.previousValue}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">New Value:</span>{" "}
-                  <span className="font-medium">{activity.details.newValue}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Methodology</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.methodology}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Reason</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
-            </div>
-          </div>
-        )
-      case "distribution":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Distribution Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Per Share:</span> <span>{activity.details.perShare}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Total Shares:</span>{" "}
-                  <span>{activity.details.totalShares}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Payment Date</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.paymentDate}</p>
-            </div>
-          </div>
-        )
-      case "investment":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Investment Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.investmentType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Sector:</span> <span>{activity.details.sector}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Geography:</span> <span>{activity.details.geography}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Approval Date:</span>{" "}
-                <span>{activity.details.approvalDate}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Funding Date:</span> <span>{activity.details.fundingDate}</span>
-              </div>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="space-y-2">
-      {activities.map((activity) => {
-        const isExpanded = expandedActivity === activity.id;
-        
-        return (
-          <div 
-            key={activity.id} 
-            className={`${
-              isExpanded ? 'border rounded-lg overflow-hidden' : ''
-            }`}
-          >
-            <div 
-              className={`flex items-center ${isExpanded ? 'p-3 border-b bg-muted/20' : 'py-2 px-3'} cursor-pointer`}
-              onClick={() => setExpandedActivity(isExpanded ? null : activity.id)}
-            >
-              <div className="flex items-center flex-1">
-                {getActivityIcon(activity.type)}
-                <div className="ml-3 flex-1">
-                  <div className="flex items-center justify-between">
-                    <div>{formatActivityText(activity)}</div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                      {activity.timestamp}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {isExpanded && (
-              <div className="p-3">
-                {renderExpandedDetails(activity)}
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
+  return <UnifiedActivitySection activities={activities} />
 }
 
 function AssetCompanyContent({ asset }: { asset: Asset }) {

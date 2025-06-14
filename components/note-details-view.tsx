@@ -10,6 +10,12 @@ import {
   InfoIcon,
   TagIcon,
   BuildingIcon,
+  UsersIcon,
+  LayoutIcon,
+  DollarSignIcon,
+  TrendingUpIcon,
+  ChevronDownIcon,
+  PlusIcon
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -19,6 +25,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
 import { FileContent } from "@/components/shared/file-content"
+import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
+import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 
 interface NoteDetailsViewProps {
   note: any
@@ -43,11 +51,81 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
   })
 
   const [noteText, setNoteText] = React.useState("")
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
     { id: "files", label: "Files", icon: FileTextIcon },
   ]
+
+  // Mock data for related entities
+  const relatedData = {
+    companies: [
+      { id: 1, name: "Acme Corp", type: "Portfolio Company" },
+      { id: 2, name: "TechFlow Inc.", type: "Investment Target" },
+    ],
+    people: [
+      { id: 1, name: "Sarah Johnson", role: "CEO" },
+      { id: 2, name: "Michael Chen", role: "Investment Manager" },
+    ],
+    entities: [
+      { id: 1, name: "Family Trust #1231", type: "Family Trust" },
+      { id: 2, name: "Offshore Holdings LLC", type: "Holding Company" },
+    ],
+    investments: [
+      { id: 1, name: "Series B Round", amount: "$5M" },
+      { id: 2, name: "Real Estate Venture", amount: "$3.2M" },
+    ],
+    opportunities: [
+      { id: 1, name: "Green Energy Fund", status: "In Discussion" },
+      { id: 2, name: "Tech Startup Acquisition", status: "Due Diligence" },
+    ],
+  };
+
+  // Mock activities for activity section
+  const activities: ActivityItem[] = [
+    {
+      id: 1,
+      type: "update",
+      actor: "Sarah Johnson",
+      action: "updated",
+      target: "note contents",
+      timestamp: "2 days ago",
+      date: "2025-01-28",
+      details: {
+        previousContent: "Initial draft of investment thesis",
+        newContent: "Updated investment thesis with market analysis",
+        reason: "Incorporated new market research findings",
+      },
+    },
+    {
+      id: 2,
+      type: "meeting",
+      actor: "Investment Team",
+      action: "referenced this note in",
+      target: "quarterly planning meeting",
+      timestamp: "1 week ago",
+      date: "2025-01-23",
+      details: {
+        meetingTitle: "Q1 Investment Strategy",
+        participants: ["Sarah Johnson", "Michael Chen", "David Williams"],
+        relevance: "Key document for understanding target market",
+      },
+    },
+    {
+      id: 3,
+      type: "creation",
+      actor: "Michael Chen",
+      action: "created",
+      target: "this note",
+      timestamp: "1 month ago",
+      date: "2024-12-28",
+      details: {
+        purpose: "Document investment thesis for upcoming opportunities",
+        initialTags: ["Investment", "Strategy", "Research"],
+      },
+    },
+  ];
 
   const getPriorityColor = (priority: string | undefined | null) => {
     if (!priority) return "bg-gray-100 text-gray-800"
@@ -69,86 +147,140 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
     setEditingField(null)
   }
 
-  const renderEditableField = (
-    field: string,
-    value: string,
-    icon: React.ReactNode,
-    label: string,
-    isBadge = false,
-    isTextarea = false,
-  ) => {
-    const isEditing = editingField === field
+  // Mock navigation handler for related records
+  const navigateToRecord = (recordType: string, id: number) => {
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    // This would be implemented to navigate to the record
+  };
 
+  // Mock handler for adding a linked record
+  const handleAddRecord = (sectionId: string) => {
+    console.log(`Add new ${sectionId} record for ${note.title}`);
+    // This would open the appropriate creation dialog
+  };
+
+  // Mock handler for removing a linked record
+  const handleUnlinkRecord = (sectionId: string, id: number) => {
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${note.title}`);
+    // This would handle removal of the relationship
+  };
+
+  // Custom note input component
+  const renderNoteInput = () => {
+    if (hideAddNotes) return null;
+    
     return (
-      <div className="flex items-start gap-2">
-        <div className="mt-1">{icon}</div>
-        <div className="flex-1">
-          <div className="flex items-start gap-4">
-            <Label className="text-xs text-muted-foreground mt-1">{label}</Label>
-            {isEditing ? (
-              isTextarea ? (
-                <Textarea
-                  value={value}
-                  onChange={(e) => setFieldValues((prev) => ({ ...prev, [field]: e.target.value }))}
-                  onBlur={() => handleFieldEdit(field, value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      setEditingField(null)
-                    }
-                  }}
-                  className="text-sm min-h-[80px]"
-                  autoFocus
-                />
+      <TypableArea 
+        value={noteText} 
+        onChange={setNoteText} 
+        placeholder="Add notes..." 
+        showButtons={false} 
+      />
+    );
+  };
+
+  // Activity content component
+  const NoteActivityContent = () => {
+    return <UnifiedActivitySection activities={activities} />;
+  };
+  
+  // Define all sections for the details panel
+  const sections: DetailSection[] = [
+    {
+      id: "details",
+      title: "Note Details",
+      icon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: [
+        {
+          label: "Content",
+          value: fieldValues.content,
+        },
+        {
+          label: "Priority",
+          value: <Badge className={getPriorityColor(fieldValues.priority)}>{fieldValues.priority}</Badge>
+        },
+        {
+          label: "Author",
+          value: fieldValues.author,
+        },
+        {
+          label: "Created",
+          value: new Date(fieldValues.createdAt).toLocaleDateString(),
+        },
+        {
+          label: "Updated",
+          value: new Date(fieldValues.updatedAt).toLocaleDateString(),
+        },
+        {
+          label: "Tags",
+          value: (
+            <div className="flex flex-wrap gap-1">
+              {Array.isArray(fieldValues.tags) ? (
+                fieldValues.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))
               ) : (
-                <Input
-                  value={value}
-                  onChange={(e) => setFieldValues((prev) => ({ ...prev, [field]: e.target.value }))}
-                  onBlur={() => handleFieldEdit(field, value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleFieldEdit(field, value)
-                    }
-                    if (e.key === "Escape") {
-                      setEditingField(null)
-                    }
-                  }}
-                  className="h-6 text-sm w-32"
-                  autoFocus
-                />
-              )
-            ) : (
-              <div
-                className="cursor-pointer hover:bg-muted/50 px-2 py-1 rounded text-sm"
-                onClick={() => setEditingField(field)}
-              >
-                {isBadge ? (
-                  <Badge className={`text-xs ${getPriorityColor(value)}`}>{value}</Badge>
-                ) : field === "tags" ? (
-                  <div className="flex flex-wrap gap-1">
-                    {Array.isArray(value) ? (
-                      value.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">
-                        {value}
-                      </Badge>
-                    )}
-                  </div>
-                ) : field === "createdAt" || field === "updatedAt" ? (
-                  new Date(value).toLocaleDateString()
-                ) : (
-                  value
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
+                <Badge variant="secondary" className="text-xs">
+                  {fieldValues.tags}
+                </Badge>
+              )}
+            </div>
+          ),
+        },
+        {
+          label: "Related to",
+          value: (
+            <div className="flex items-center gap-2">
+              <span className="text-sm">{fieldValues.relatedTo?.type || "N/A"}</span>
+              <span className="text-sm font-medium">{fieldValues.relatedTo?.name || "N/A"}</span>
+            </div>
+          ),
+        },
+      ],
+    },
+    {
+      id: "companies",
+      title: "Companies",
+      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.companies
+      },
+    },
+    {
+      id: "people",
+      title: "People",
+      icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.people
+      },
+    },
+    {
+      id: "entities",
+      title: "Entities",
+      icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.entities
+      },
+    },
+    {
+      id: "investments",
+      title: "Investments",
+      icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.investments
+      },
+    },
+    {
+      id: "opportunities",
+      title: "Opportunities",
+      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.opportunities
+      },
+    },
+  ];
 
   return (
     <div className="flex flex-col flex-1">
@@ -218,86 +350,21 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       )}
 
       {/* Tab Content */}
-      <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'} space-y-6`}>
-        {activeTab === "details" && (
-          <div className="space-y-4">
-            {!isFullScreen && <h4 className="text-sm font-medium">Note Details</h4>}
-
-            <div className="rounded-lg border border-muted bg-muted/10 p-4">
-              <div className="space-y-4">
-                {renderEditableField(
-                  "content",
-                  fieldValues.content,
-                  <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Content",
-                  false,
-                  true,
-                )}
-
-                {renderEditableField(
-                  "priority",
-                  fieldValues.priority,
-                  <AlertTriangleIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Priority",
-                  true,
-                )}
-
-                {renderEditableField(
-                  "author",
-                  fieldValues.author,
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Author",
-                )}
-
-                {renderEditableField(
-                  "createdAt",
-                  fieldValues.createdAt,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Created",
-                )}
-
-                {renderEditableField(
-                  "updatedAt",
-                  fieldValues.updatedAt,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Updated",
-                )}
-
-                {renderEditableField(
-                  "tags",
-                  fieldValues.tags,
-                  <TagIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Tags",
-                )}
-
-                <div className="flex items-center gap-2">
-                  <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4">
-                      <Label className="text-xs text-muted-foreground">Related to</Label>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{fieldValues.relatedTo?.type || "N/A"}</span>
-                        <span className="text-sm font-medium">{fieldValues.relatedTo?.name || "N/A"}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-              Show all values
-            </Button>
-
-            {/* Typable Area - only show if hideAddNotes is false */}
-            {!hideAddNotes && (
-              <TypableArea value={noteText} onChange={setNoteText} placeholder="Add notes..." showButtons={false} />
-            )}
-          </div>
-        )}
-
-        {activeTab === "files" && <FileContent />}
-      </div>
+      {activeTab === "details" ? (
+        <UnifiedDetailsPanel
+          sections={sections}
+          isFullScreen={isFullScreen}
+          onNavigateToRecord={navigateToRecord}
+          onAddRecord={handleAddRecord}
+          onUnlinkRecord={handleUnlinkRecord}
+          activityContent={<NoteActivityContent />}
+          additionalContent={renderNoteInput()}
+        />
+      ) : (
+        <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>
+          <FileContent />
+        </div>
+      )}
     </div>
   )
 }

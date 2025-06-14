@@ -69,6 +69,7 @@ import { MasterDrawer } from "@/components/master-drawer"
 import { AddLiabilityDialog } from "./add-liability-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 
 export const liabilitySchema = z.object({
   id: z.number(),
@@ -382,9 +383,7 @@ function getLiabilityTabData(activeTab: string, liability: Liability) {
 }
 
 function LiabilityActivityContent({ liability }: { liability: Liability }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
-
-  const activities = [
+  const activities: ActivityItem[] = [
     {
       id: 1,
       type: "payment",
@@ -436,152 +435,7 @@ function LiabilityActivityContent({ liability }: { liability: Liability }) {
     },
   ]
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "payment":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
-      case "rate_change":
-        return <div className="h-2 w-2 rounded-full bg-orange-500"></div>
-      case "review":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-    }
-  }
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span>{" "}
-        <span className="text-muted-foreground">{activity.action}</span>{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    )
-  }
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "payment":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Payment Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Total Amount:</span> <span>{activity.details.amount}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Payment Date:</span>{" "}
-                  <span>{activity.details.paymentDate}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Principal:</span> <span>{activity.details.principal}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Interest:</span> <span>{activity.details.interest}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Method:</span> <span>{activity.details.method}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Remaining Balance</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.remainingBalance}</p>
-            </div>
-          </div>
-        )
-      case "rate_change":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Rate Change Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Previous Rate:</span>{" "}
-                  <span>{activity.details.previousRate}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">New Rate:</span> <span>{activity.details.newRate}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Effective Date:</span>{" "}
-                  <span>{activity.details.effectiveDate}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Reason</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.reason}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Impact</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.impact}</p>
-            </div>
-          </div>
-        )
-      case "review":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Review Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Review Type:</span> <span>{activity.details.reviewType}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Outcome:</span> <span>{activity.details.outcome}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Credit Rating:</span>{" "}
-                  <span>{activity.details.creditRating}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Next Review:</span> <span>{activity.details.nextReview}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Recommendations</h5>
-              <ul className="text-sm text-muted-foreground list-disc list-inside">
-                {activity.details.recommendations.map((rec: string, index: number) => (
-                  <li key={index}>{rec}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
+  return <UnifiedActivitySection activities={activities} />
 }
 
 function LiabilityDetailsPanel({ liability, isFullScreen = false }: { liability: Liability; isFullScreen?: boolean }) {

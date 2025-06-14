@@ -293,15 +293,15 @@ export function MasterDrawer({
           <div className="flex h-[calc(100vh-73px)]">
             {/* Left Panel - Details (Persistent) */}
             <div className="w-[672px] border-r bg-background">
-              {/* Record Header - Always show original record info in left panel */}
-              <div className="border-b bg-background px-6 py-4">
+              {/* Record Header - Always show original record info in left panel (no bottom border to align with tab line) */}
+              <div className="bg-background px-6 py-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
                     {headerInfo.firstLetter}
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold">{headerInfo.title}</h2>
-                    {headerInfo.subtitle && <p className="text-sm text-muted-foreground">{headerInfo.subtitle}</p>}
+                    {/* Subtitle removed in full screen mode */}
                   </div>
                 </div>
               </div>
@@ -596,7 +596,7 @@ export function MasterDrawer({
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold">{title}</h2>
-                  {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+                  {/* Subtitle removed per design update */}
                 </div>
               </div>
             </div>

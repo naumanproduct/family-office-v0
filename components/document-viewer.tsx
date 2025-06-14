@@ -38,6 +38,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
@@ -648,127 +649,9 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
 
   // File activity content component
   const FileActivityContent = ({ file, activities }: { file: any, activities: any[] }) => {
-    const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null);
+    return <UnifiedActivitySection activities={activities as ActivityItem[]} />;
 
-    const getActivityIcon = (type: string) => {
-      switch (type) {
-        case "upload":
-          return <div className="h-2 w-2 rounded-full bg-blue-500"></div>;
-        case "edit":
-          return <div className="h-2 w-2 rounded-full bg-amber-500"></div>;
-        case "share":
-          return <div className="h-2 w-2 rounded-full bg-green-500"></div>;
-        default:
-          return <div className="h-2 w-2 rounded-full bg-gray-500"></div>;
-      }
-    };
 
-    const formatActivityText = (activity: any) => {
-      return (
-        <span className="text-sm">
-          <span className="font-medium">{activity.actor}</span>{" "}
-          <span className="text-muted-foreground">{activity.action}</span>{" "}
-          <Badge variant="outline" className="text-xs mx-1">
-            {activity.target}
-          </Badge>
-        </span>
-      );
-    };
-
-    const renderExpandedDetails = (activity: any) => {
-      switch (activity.type) {
-        case "upload":
-          return (
-            <div className="mt-4 space-y-3">
-              <div>
-                <h5 className="text-sm font-medium mb-2">Upload Details</h5>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">File Size:</span>{" "}
-                    <span>{activity.details.size}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">File Type:</span>{" "}
-                    <span>{activity.details.type}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        case "edit":
-          return (
-            <div className="mt-4 space-y-3">
-              <div>
-                <h5 className="text-sm font-medium mb-2">Edit Details</h5>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Changes:</span>{" "}
-                    <span>{activity.details.changes}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Previous Category:</span>{" "}
-                    <span>{activity.details.previousCategory}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">New Category:</span>{" "}
-                    <span>{activity.details.newCategory}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        case "share":
-          return (
-            <div className="mt-4 space-y-3">
-              <div>
-                <h5 className="text-sm font-medium mb-2">Share Details</h5>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Shared With:</span>{" "}
-                    <span>{activity.details.sharedWith}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Access Level:</span>{" "}
-                    <span>{activity.details.accessLevel}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Expiration:</span>{" "}
-                    <span>{activity.details.expirationDate}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        default:
-          return null;
-      }
-    };
-
-    return (
-      <div className="space-y-2">
-        {activities.map((activity) => (
-          <div
-            key={activity.id}
-            className="rounded-md border border-muted p-3 hover:bg-muted/20 cursor-pointer transition-colors"
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-          >
-            <div className="flex items-start gap-2">
-              <div className="mt-1.5">{getActivityIcon(activity.type)}</div>
-              <div className="flex-1">
-                <div className="flex flex-col">
-                  {formatActivityText(activity)}
-                  <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    <CalendarIcon className="h-3 w-3 mr-1" />
-                    <span>{activity.timestamp}</span>
-                  </div>
-                </div>
-                {expandedActivity === activity.id && renderExpandedDetails(activity)}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   // Render empty tab content for tasks, notes, etc.

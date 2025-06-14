@@ -5,35 +5,100 @@ import { MasterCreationDialog } from "./master-creation-dialog"
 // Company types
 const companyTypes = [
   {
-    id: "corporation",
-    name: "Corporation",
-    description: "A legal entity that is separate from its owners, with limited liability protection.",
-    category: "For-profit",
+    id: "accounting-tax-firm",
+    name: "Accounting / Tax Firm",
+    description: "Professional firm providing accounting and tax services.",
+    category: "Service Provider",
   },
   {
-    id: "llc",
-    name: "Limited Liability Company",
-    description: "Combines the pass-through taxation of a partnership with the limited liability of a corporation.",
-    category: "For-profit",
+    id: "co-investor-lp",
+    name: "Co-Investor / LP",
+    description: "Limited partner or co-investor contributing capital alongside primary investor.",
+    category: "Investor",
   },
   {
-    id: "partnership",
-    name: "Partnership",
-    description: "A business relationship between two or more individuals who share management and profits.",
-    category: "For-profit",
+    id: "custodian-bank",
+    name: "Custodian / Bank",
+    description: "Financial institution safeguarding assets and providing banking services.",
+    category: "Financial Institution",
   },
   {
-    id: "sole-proprietorship",
-    name: "Sole Proprietorship",
-    description: "An unincorporated business with a single owner who pays personal income tax on profits.",
-    category: "For-profit",
+    id: "family-operating-business",
+    name: "Family Operating Business",
+    description: "Business owned and operated by the family office principals.",
+    category: "Internal",
   },
   {
-    id: "non-profit",
-    name: "Non-profit Organization",
-    description:
-      "An organization that uses its profits for its stated purpose rather than distributing to shareholders.",
-    category: "Non-profit",
+    id: "fund-investment-vehicle",
+    name: "Fund / Investment Vehicle",
+    description: "Legal entity or structure used to pool capital for investments.",
+    category: "Investment Vehicle",
+  },
+  {
+    id: "gp-fund-manager",
+    name: "GP / Fund Manager",
+    description: "General partner or manager responsible for investment decisions.",
+    category: "Investment Manager",
+  },
+  {
+    id: "internal-family-entity",
+    name: "Internal Entity / Family Entity",
+    description: "Entity within the family office structure.",
+    category: "Internal",
+  },
+  {
+    id: "investment-bank-broker",
+    name: "Investment Bank / Broker",
+    description: "Institution providing investment banking or brokerage services.",
+    category: "Financial Institution",
+  },
+  {
+    id: "law-firm",
+    name: "Law Firm",
+    description: "Legal services provider.",
+    category: "Service Provider",
+  },
+  {
+    id: "portfolio-company",
+    name: "Portfolio Company",
+    description: "Company in which the family office has invested.",
+    category: "Portfolio",
+  },
+  {
+    id: "prospective-investment",
+    name: "Prospective Investment",
+    description: "Company or opportunity under consideration for investment.",
+    category: "Prospect",
+  },
+  {
+    id: "referral-source",
+    name: "Referral Source",
+    description: "Person or entity that refers investment opportunities.",
+    category: "Relationship",
+  },
+  {
+    id: "research-provider",
+    name: "Research Provider",
+    description: "Firm supplying market or investment research.",
+    category: "Service Provider",
+  },
+  {
+    id: "service-provider",
+    name: "Service Provider",
+    description: "Vendor offering specialized services to the family office.",
+    category: "Service Provider",
+  },
+  {
+    id: "strategic-partner",
+    name: "Strategic Partner",
+    description: "Entity collaborating on strategic initiatives and investments.",
+    category: "Partner",
+  },
+  {
+    id: "other",
+    name: "Other",
+    description: "Other type of company not covered by these categories.",
+    category: "Other",
   },
 ]
 
@@ -42,14 +107,14 @@ const companyFormFields = [
   {
     id: "companyName",
     label: "Company Name",
-    type: "text",
+    type: "text" as const,
     placeholder: "Enter company name",
     required: true,
   },
   {
     id: "industry",
     label: "Industry",
-    type: "select",
+    type: "select" as const,
     placeholder: "Select industry",
     options: [
       "Accounting",
@@ -83,7 +148,7 @@ const companyFormFields = [
   {
     id: "revenue",
     label: "Annual Revenue",
-    type: "select",
+    type: "select" as const,
     placeholder: "Select revenue range",
     options: [
       { value: "<1M", label: "Less than $1M" },
@@ -98,7 +163,7 @@ const companyFormFields = [
   {
     id: "employees",
     label: "Number of Employees",
-    type: "select",
+    type: "select" as const,
     placeholder: "Select employee range",
     options: [
       { value: "1-10", label: "1-10" },
@@ -113,19 +178,19 @@ const companyFormFields = [
   {
     id: "website",
     label: "Website",
-    type: "text",
+    type: "text" as const,
     placeholder: "https://",
   },
   {
     id: "location",
     label: "Headquarters Location",
-    type: "text",
+    type: "text" as const,
     placeholder: "City, State/Province, Country",
   },
   {
     id: "description",
     label: "Description",
-    type: "textarea",
+    type: "textarea" as const,
     placeholder: "Brief description of the company",
     rows: 4,
   },

@@ -29,6 +29,15 @@ import {
   SortAscIcon,
   SortDescIcon,
   UsersIcon,
+  BuildingIcon,
+  FileTextIcon,
+  CalendarIcon,
+  FolderIcon,
+  CheckCircleIcon,
+  UserIcon,
+  LayoutIcon,
+  DollarSignIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 import { z } from "zod"
 import {
@@ -57,13 +66,16 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { MailIcon, BuildingIcon, FileTextIcon, CalendarIcon, FolderIcon, CheckCircleIcon, UserIcon } from "lucide-react"
+import { MailIcon } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 // Import the AddPersonDialog at the top of the file
 import { AddPersonDialog } from "./add-person-dialog"
 import { MasterDrawer } from "./master-drawer"
-import { MasterDetailsPanel } from "./shared/master-details-panel" // Fixed import path
+import { MasterDetailsPanel } from "./shared/master-details-panel"
+import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
+import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { Label } from "@/components/ui/label"
 
 // Add missing component imports
 function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
@@ -498,9 +510,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
 }
 
 function PersonActivityContent({ contact }: { contact: Contact }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
-
-  const activities = [
+  const activities: ActivityItem[] = [
     {
       id: 1,
       type: "meeting",
@@ -551,189 +561,122 @@ function PersonActivityContent({ contact }: { contact: Contact }) {
     },
   ]
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "meeting":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-      case "email":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
-      case "role_change":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-    }
-  }
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span>{" "}
-        <span className="text-muted-foreground">{activity.action}</span>{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    )
-  }
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "meeting":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Duration:</span> <span>{activity.details.duration}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.topics.join(", ")}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Outcome</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.outcome}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
-            </div>
-          </div>
-        )
-      case "email":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Email Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Subject:</span> <span>{activity.details.subject}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Sentiment:</span> <span>{activity.details.sentiment}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Key Points</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.keyPoints.join(", ")}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Follow Up</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.followUp}</p>
-            </div>
-          </div>
-        )
-      case "role_change":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Role Change Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Previous Role:</span>{" "}
-                  <span>{activity.details.previousRole}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">New Role:</span> <span>{activity.details.newRole}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Company:</span> <span>{activity.details.company}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Effective Date:</span>{" "}
-                  <span>{activity.details.effectiveDate}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Impact</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.impact}</p>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
+  return <UnifiedActivitySection activities={activities} />
 }
 
 function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Contact; isFullScreen?: boolean }) {
-  return (
-    <MasterDetailsPanel
-      fieldGroups={[
-        {
-          id: "contact-info",
-          label: "Contact Details",
-          icon: UserIcon,
-          fields: [
-            { label: "Name", value: `${contact.firstName} ${contact.lastName}` },
-            { label: "Email", value: contact.email, isLink: true },
-            { label: "Phone", value: contact.phone },
-            { label: "Job Title", value: contact.jobTitle },
-            { label: "Company", value: contact.company, isLink: true },
-            { label: "Location", value: contact.location },
-            { label: "Bio", value: contact.bio },
-          ],
-        },
-      ]}
-      isFullScreen={isFullScreen}
-      additionalContent={
-        <>
-          {/* Show all values button */}
-          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-            Show all values (including social profiles)
-          </Button>
+  // Mock data for related records
+  const relatedData = {
+    companies: [
+      { id: 1, name: contact.company, type: "Employer" },
+      { id: 2, name: "TechFlow Inc.", type: "Portfolio Company" },
+    ],
+    people: [
+      { id: 1, name: "Sarah Johnson", role: "Colleague" },
+      { id: 2, name: "Michael Chen", role: "Business Partner" },
+    ],
+    entities: [
+      { id: 1, name: "Family Trust #1231", type: "Family Trust" },
+      { id: 2, name: "Offshore Holdings LLC", type: "Holding Company" },
+    ],
+    investments: [
+      { id: 1, name: "Series B Round", amount: "$5M" },
+      { id: 2, name: "Real Estate Venture", amount: "$3.2M" },
+    ],
+    opportunities: [
+      { id: 1, name: "Green Energy Fund", status: "In Discussion" },
+      { id: 2, name: "Tech Startup Acquisition", status: "Due Diligence" },
+    ],
+  };
 
-          {/* Activity Section - Only in Drawer View */}
-          {!isFullScreen && (
-            <div className="mt-8">
-              <div className="mb-4 flex items-center justify-between">
-                <h4 className="text-sm font-medium">Activity</h4>
-                <Button variant="outline" size="sm">
-                  <PlusIcon className="h-4 w-4" />
-                  Add meeting
-                </Button>
-              </div>
-              <PersonActivityContent contact={contact} />
-            </div>
-          )}
-        </>
-      }
+  // Mock navigation handler for related records
+  const navigateToRecord = (recordType: string, id: number) => {
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    // This would be implemented to navigate to the record
+  };
+
+  // Mock handler for adding a linked record
+  const handleAddRecord = (sectionId: string) => {
+    console.log(`Add new ${sectionId} record for ${contact.firstName} ${contact.lastName}`);
+    // This would open the appropriate creation dialog
+  };
+
+  // Mock handler for removing a linked record
+  const handleUnlinkRecord = (sectionId: string, id: number) => {
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${contact.firstName} ${contact.lastName}`);
+    // This would handle removal of the relationship
+  };
+  
+  // Define all sections for the details panel
+  const sections: DetailSection[] = [
+    {
+      id: "personalInfo",
+      title: "Personal Information",
+      icon: <UserIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: [
+        { label: "First Name", value: contact.firstName },
+        { label: "Last Name", value: contact.lastName },
+        { label: "Email", value: contact.email, isLink: true },
+        { label: "Phone", value: contact.phone },
+        { label: "Job Title", value: contact.jobTitle },
+        { label: "Company", value: contact.company, isLink: true },
+        { label: "Location", value: contact.location },
+        { label: "Bio", value: contact.bio },
+        { label: "Status", value: contact.status },
+        { label: "Last Interaction", value: contact.lastInteraction },
+        { label: "Connection Strength", value: contact.connectionStrength },
+      ],
+    },
+    {
+      id: "companies",
+      title: "Companies",
+      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.companies
+      },
+    },
+    {
+      id: "people",
+      title: "Related People",
+      icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.people
+      },
+    },
+    {
+      id: "entities",
+      title: "Entities",
+      icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.entities
+      },
+    },
+    {
+      id: "investments",
+      title: "Investments",
+      icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.investments
+      },
+    },
+    {
+      id: "opportunities",
+      title: "Opportunities",
+      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.opportunities
+      },
+    },
+  ];
+
+  return (
+    <UnifiedDetailsPanel
+      sections={sections}
+      isFullScreen={isFullScreen}
+      onNavigateToRecord={navigateToRecord}
+      onAddRecord={handleAddRecord}
+      onUnlinkRecord={handleUnlinkRecord}
+      activityContent={<PersonActivityContent contact={contact} />}
     />
   )
 }

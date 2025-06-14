@@ -28,6 +28,10 @@ import {
   SearchIcon,
   SortAscIcon,
   SortDescIcon,
+  BarChartIcon,
+  DollarSignIcon,
+  LayoutIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 import { z } from "zod"
 import {
@@ -64,6 +68,8 @@ import { AddCompanyDialog } from "./add-company-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
+import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 
 export const companySchema = z.object({
   id: z.number(),
@@ -714,9 +720,7 @@ function CompanyTabContent({ company }: { company: Company }) {
 }
 
 function CompanyActivityContent({ company }: { company: Company }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
-
-  const activities = [
+  const activities: ActivityItem[] = [
     {
       id: 1,
       type: "funding",
@@ -765,185 +769,193 @@ function CompanyActivityContent({ company }: { company: Company }) {
     },
   ]
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "funding":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
-      case "partnership":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-      case "meeting":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-    }
-  }
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span>{" "}
-        <span className="text-muted-foreground">{activity.action}</span>{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    )
-  }
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "funding":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Funding Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Amount:</span> <span>{activity.details.amount}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Round:</span> <span>{activity.details.round}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Lead Investor:</span>{" "}
-                  <span>{activity.details.leadInvestor}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Valuation:</span> <span>{activity.details.valuation}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Use of Funds</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.useOfFunds}</p>
-            </div>
-          </div>
-        )
-      case "partnership":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Partnership Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Duration:</span> <span>{activity.details.duration}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Value:</span> <span>{activity.details.value}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Scope</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.scope}</p>
-            </div>
-          </div>
-        )
-      case "meeting":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Attendees:</span>{" "}
-                  <span>{activity.details.attendees.join(", ")}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Topics:</span>{" "}
-                  <span>{activity.details.topics.join(", ")}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Outcome</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.outcome}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
+  return <UnifiedActivitySection activities={activities} />
 }
 
 function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Company; isFullScreen?: boolean }) {
-  const fieldGroups = [
+  // Mock data for related items
+  const relatedData = {
+    investments: [
+      { id: 1, name: "Series C Investment", type: "Lead Investor" },
+      { id: 2, name: "Strategic Partnership", type: "Co-investor" },
+    ],
+    people: [
+      { id: 1, name: "Sarah Johnson", role: "CEO" },
+      { id: 2, name: "Michael Chen", role: "CFO" },
+      { id: 3, name: "David Williams", role: "Board Member" },
+    ],
+    entities: [
+      { id: 1, name: "Meridian Capital Fund III", type: "Investment Fund" },
+      { id: 2, name: "Tech Partners LLC", type: "Holding Company" },
+    ],
+    opportunities: [
+      { id: 1, name: "Expansion Funding", status: "In Discussion" },
+      { id: 2, name: "Strategic Partnership", status: "Initial Review" },
+    ],
+  };
+
+  // Basic fields for main section
+  const basicFields = [
     {
-      id: "company-info",
-      label: "Company Information",
-      icon: BuildingIcon,
-      fields: [
-        { label: "Company Name", value: company.name },
-        { label: "Industry", value: company.industry },
-        { label: "Revenue", value: company.revenue },
-        { label: "Employees", value: company.employees },
-        { label: "Website", value: company.website, isLink: true },
-        { label: "Location", value: company.location },
-        { label: "Description", value: company.description },
-      ],
+      label: "Company Name",
+      value: company.name,
     },
-  ]
+    {
+      label: "Industry",
+      value: company.industry,
+    },
+    {
+      label: "Stage",
+      value: company.stage,
+    },
+    {
+      label: "Website",
+      value: company.website,
+      isLink: true,
+    },
+    {
+      label: "Location",
+      value: company.location,
+    },
+    {
+      label: "Revenue",
+      value: company.revenue,
+    },
+    {
+      label: "Employees",
+      value: company.employees,
+    },
+  ];
+  
+  // Extended fields for comprehensive view
+  const extendedFields = [
+    ...basicFields,
+    {
+      label: "Description",
+      value: company.description,
+    },
+    {
+      label: "LinkedIn",
+      value: company.linkedin,
+      isLink: true,
+    },
+    {
+      label: "Twitter",
+      value: company.twitter,
+      isLink: true,
+    },
+    {
+      label: "Twitter Followers",
+      value: formatNumber(company.twitterFollowers),
+    },
+    {
+      label: "Estimated ARR",
+      value: company.estimatedArr,
+    },
+    {
+      label: "Funding Raised",
+      value: company.fundingRaised,
+    },
+    {
+      label: "Investment Score",
+      value: company.investmentScore,
+    },
+    {
+      label: "Last Interaction",
+      value: company.lastInteraction,
+    },
+    {
+      label: "Connection Strength",
+      value: company.connectionStrength,
+    },
+    {
+      label: "Status",
+      value: company.status,
+    },
+  ];
+  
+  // Navigation handler for related records
+  const navigateToRecord = (recordType: string, id: number) => {
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    // This would be implemented to navigate to the record
+  };
+  
+  // Add record handler
+  const handleAddRecord = (sectionId: string) => {
+    console.log(`Add new ${sectionId} record for ${company.name}`);
+    // This would open the appropriate creation dialog
+  };
+  
+  // Unlink record handler
+  const handleUnlinkRecord = (sectionId: string, id: number) => {
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${company.name}`);
+    // This would handle removal of the relationship
+  };
 
-  // Define additional content with Activity section
-  const additionalContent = (
-    <>
-      {/* Show all values button */}
-      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-        Show all values
-      </Button>
-
-      {/* Activity Section - Only in Drawer View */}
-      {!isFullScreen && (
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-sm font-medium">Activity</h4>
-            <Button variant="outline" size="sm">
-              <PlusIcon className="h-4 w-4" />
-              Add meeting
-            </Button>
-          </div>
-          <CompanyActivityContent company={company} />
-        </div>
-      )}
-    </>
-  )
+  // Define all sections for the details panel
+  const sections: DetailSection[] = [
+    {
+      id: "Details",
+      title: "Company Information",
+      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: isFullScreen || basicFields.length <= 7 ? extendedFields : basicFields,
+    },
+    {
+      id: "Performance",
+      title: "Performance Metrics",
+      icon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: [
+        { label: "Revenue", value: company.revenue },
+        { label: "Funding Raised", value: company.fundingRaised },
+        { label: "Estimated ARR", value: company.estimatedArr },
+        { label: "Investment Score", value: company.investmentScore },
+      ],
+      hideWhenEmpty: true,
+    },
+    {
+      id: "People",
+      title: "Key People",
+      icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.people
+      },
+    },
+    {
+      id: "Investments",
+      title: "Investments",
+      icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.investments
+      },
+    },
+    {
+      id: "Entities",
+      title: "Related Entities",
+      icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.entities
+      },
+    },
+    {
+      id: "Opportunities",
+      title: "Opportunities",
+      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.opportunities
+      },
+    },
+  ];
 
   return (
-    <MasterDetailsPanel fieldGroups={fieldGroups} isFullScreen={isFullScreen} additionalContent={additionalContent} />
-  )
+    <UnifiedDetailsPanel
+      sections={sections}
+      isFullScreen={isFullScreen}
+      onNavigateToRecord={navigateToRecord}
+      onAddRecord={handleAddRecord}
+      onUnlinkRecord={handleUnlinkRecord}
+      activityContent={<CompanyActivityContent company={company} />}
+    />
+  );
 }
 
 const columns: ColumnDef<Company>[] = [
