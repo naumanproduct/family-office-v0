@@ -569,6 +569,7 @@ function getCompanyTabData(activeTab: string, company: Company) {
           id: 1,
           title: "Investment thesis review",
           date: "3 days ago",
+          author: "Sarah Johnson",
           content: `Strong performance in ${company.industry} sector. Key growth drivers remain intact.`,
           tags: ["Investment", "Review"],
         },

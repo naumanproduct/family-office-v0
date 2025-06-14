@@ -321,6 +321,7 @@ function getLiabilityTabData(activeTab: string, liability: Liability) {
           id: 1,
           title: "Refinancing opportunity",
           date: "1 week ago",
+          author: "Michael Chen",
           content: `Potential to refinance ${liability.name} at lower rate.`,
           tags: ["Refinancing", "Cost Savings"],
         },

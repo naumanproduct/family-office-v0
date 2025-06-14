@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreVerticalIcon } from "lucide-react"
+import { RecordCard } from "./record-card"
+import { RecordListItem } from "./record-list-item"
 
 // Define the Task type
 export type Task = {
@@ -130,10 +132,10 @@ function TableView({
                   />
                 </div>
               </TableCell>
-              <TableCell className={`font-medium ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>
+              <TableCell className={`font-medium text-sm ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>
                 {item.title}
               </TableCell>
-              <TableCell>{item.dueDate}</TableCell>
+              <TableCell className="text-sm">{item.dueDate}</TableCell>
               <TableCell>
                 <Badge
                   variant={
@@ -143,7 +145,7 @@ function TableView({
                   {item.priority}
                 </Badge>
               </TableCell>
-              <TableCell>{item.assignee}</TableCell>
+              <TableCell className="text-sm">{item.assignee}</TableCell>
               <TableCell>
                 <Badge variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
                   {item.status}
@@ -193,73 +195,64 @@ function CardView({
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {data.map((item) => (
-        <Card
-          key={item.id}
-          className="cursor-pointer hover:bg-muted/50"
-          onClick={() => onTaskClick?.(item)}
-        >
-          <CardContent className="p-4">
-            <div className="flex gap-4">
-              <div onClick={(e) => e.stopPropagation()} className="mt-1">
-                <div className="group relative flex items-center justify-center">
-                  <Checkbox 
-                    className="h-4 w-4 rounded-full border-2 group-hover:border-primary/70 transition-colors"
-                    checked={item.status.toLowerCase() === "completed"} 
-                    onCheckedChange={() => handleTaskStatusToggle(window.event as unknown as React.MouseEvent, item)}
-                  />
-                </div>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <h3 className={`font-medium ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>
-                    {item.title}
-                  </h3>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                        <MoreVerticalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View</DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleTaskStatusToggle(e, item);
-                        }}
-                      >
-                        {item.status.toLowerCase() === "completed" ? "Mark as Pending" : "Mark as Completed"}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge
-                    variant={
-                      item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
-                    }
-                    className="mr-1"
-                  >
-                    {item.priority}
-                  </Badge>
-                  <Badge variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
-                    {item.status}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
-                  <span>{item.assignee}</span>
-                  <span>{item.dueDate}</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      {data.map((item) => {
+        // Create checkbox element for tasks
+        const taskCheckbox = (
+          <div className="group relative flex items-center justify-center">
+            <Checkbox 
+              className="h-4 w-4 rounded-full border-2 group-hover:border-primary/70 transition-colors"
+              checked={item.status.toLowerCase() === "completed"} 
+              onCheckedChange={() => handleTaskStatusToggle(window.event as unknown as React.MouseEvent, item)}
+            />
+          </div>
+        );
+        
+        // Define task actions
+        const taskActions = [
+          { label: "View", onClick: () => {} },
+          { label: "Edit", onClick: () => {} },
+          { 
+            label: item.status.toLowerCase() === "completed" ? "Mark as Pending" : "Mark as Completed", 
+            onClick: (e: React.MouseEvent) => handleTaskStatusToggle(e, item)
+          },
+          { label: "Delete", onClick: () => {}, variant: "destructive" as const },
+        ];
+        
+        // Create primary metadata (badges)
+        const primaryMetadata = [
+          <Badge
+            key="priority"
+            variant={
+              item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+            }
+            className="mr-1"
+          >
+            {item.priority}
+          </Badge>,
+          <Badge 
+            key="status"
+            variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}
+          >
+            {item.status}
+          </Badge>
+        ];
+        
+        return (
+          <RecordCard
+            key={item.id}
+            title={item.title}
+            titleStatus={item.status.toLowerCase() === "completed" ? "completed" : "normal"}
+            primaryMetadata={primaryMetadata}
+            secondaryMetadata={{
+              left: item.assignee,
+              right: item.dueDate
+            }}
+            onClick={() => onTaskClick?.(item)}
+            actions={taskActions}
+            leadingElement={taskCheckbox}
+          />
+        );
+      })}
     </div>
   )
 }
@@ -276,71 +269,64 @@ function ListView({
 }) {
   return (
     <div className="divide-y">
-      {data.map((item) => (
-        <div
-          key={item.id}
-          className="py-4 cursor-pointer hover:bg-muted/50"
-          onClick={() => onTaskClick?.(item)}
-        >
-          <div className="flex items-start">
-            <div onClick={(e) => e.stopPropagation()} className="mt-1 mr-4">
-              <div className="group relative flex items-center justify-center">
-                <Checkbox 
-                  className="h-4 w-4 rounded-full border-2 group-hover:border-primary/70 transition-colors"
-                  checked={item.status.toLowerCase() === "completed"} 
-                  onCheckedChange={() => handleTaskStatusToggle(window.event as unknown as React.MouseEvent, item)}
-                />
-              </div>
-            </div>
-            <div className="flex-1">
-              <div className="flex items-start justify-between">
-                <h3 className={`font-medium ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>
-                  {item.title}
-                </h3>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                      <MoreVerticalIcon className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>View</DropdownMenuItem>
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTaskStatusToggle(e, item);
-                      }}
-                    >
-                      {item.status.toLowerCase() === "completed" ? "Mark as Pending" : "Mark as Completed"}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge
-                  variant={
-                    item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
-                  }
-                  className="mr-1"
-                >
-                  {item.priority}
-                </Badge>
-                <Badge variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
-                  {item.status}
-                </Badge>
-              </div>
-              <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
-                <span>{item.assignee}</span>
-                <span>{item.dueDate}</span>
-              </div>
-            </div>
+      {data.map((item) => {
+        // Create checkbox element for tasks
+        const taskCheckbox = (
+          <div className="group relative flex items-center justify-center">
+            <Checkbox 
+              className="h-4 w-4 rounded-full border-2 group-hover:border-primary/70 transition-colors"
+              checked={item.status.toLowerCase() === "completed"} 
+              onCheckedChange={() => handleTaskStatusToggle(window.event as unknown as React.MouseEvent, item)}
+            />
           </div>
-        </div>
-      ))}
+        );
+        
+        // Define task actions
+        const taskActions = [
+          { label: "View", onClick: () => {} },
+          { label: "Edit", onClick: () => {} },
+          { 
+            label: item.status.toLowerCase() === "completed" ? "Mark as Pending" : "Mark as Completed", 
+            onClick: (e: React.MouseEvent) => handleTaskStatusToggle(e, item)
+          },
+          { label: "Delete", onClick: () => {}, variant: "destructive" as const },
+        ];
+        
+        // Create primary metadata (badges)
+        const primaryMetadata = [
+          <Badge
+            key="priority"
+            variant={
+              item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
+            }
+            className="mr-1"
+          >
+            {item.priority}
+          </Badge>,
+          <Badge 
+            key="status"
+            variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}
+          >
+            {item.status}
+          </Badge>
+        ];
+        
+        return (
+          <RecordListItem
+            key={item.id}
+            title={item.title}
+            titleStatus={item.status.toLowerCase() === "completed" ? "completed" : "normal"}
+            primaryMetadata={primaryMetadata}
+            secondaryMetadata={{
+              left: item.assignee,
+              right: item.dueDate
+            }}
+            onClick={() => onTaskClick?.(item)}
+            actions={taskActions}
+            leadingElement={taskCheckbox}
+          />
+        );
+      })}
     </div>
   )
 } 

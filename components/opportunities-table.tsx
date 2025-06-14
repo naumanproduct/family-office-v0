@@ -53,7 +53,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -68,7 +67,7 @@ import {
 } from "lucide-react"
 import { MasterDrawer } from "./master-drawer"
 import { AddOpportunityDialog } from "./add-opportunity-dialog"
-import { RecordDetailsPanel, SectionConfig } from "./shared/record-details-panel"
+import { MasterDetailsPanel } from "./shared/master-details-panel"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -825,79 +824,57 @@ function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity 
   )
 }
 
-function OpportunityDetailsPanel({ opportunity, isFullScreen = false }: { opportunity: Opportunity; isFullScreen?: boolean }) {
-  // Build Record Details section content
-  const detailsContent = (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Label className="text-xs text-muted-foreground">Company</Label>
-        <p className="text-sm">{`${opportunity.company.name} (${opportunity.company.type})`}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Label className="text-xs text-muted-foreground">Contact</Label>
-        <p className="text-sm">{`${opportunity.contact.name} - ${opportunity.contact.role}`}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Label className="text-xs text-muted-foreground">Legal Entity</Label>
-        <p className="text-sm">{`${opportunity.legalEntity.name} (${opportunity.legalEntity.type})`}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Label className="text-xs text-muted-foreground">Investment Amount</Label>
-        <p className="text-sm">{opportunity.amount}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Label className="text-xs text-muted-foreground">Expected Close</Label>
-        <p className="text-sm">{opportunity.expectedClose}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Label className="text-xs text-muted-foreground">Probability</Label>
-        <p className="text-sm">{`${opportunity.probability}%`}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Label className="text-xs text-muted-foreground">Description</Label>
-        <p className="text-sm">{opportunity.description}</p>
-      </div>
-    </div>
-  )
-
-  const sections: SectionConfig[] = [
-    {
-      id: "details",
-      title: "Record Details",
-      icon: TrendingUpIcon,
-      content: detailsContent,
-      count: null,
-    },
-    {
-      id: "company",
-      title: "Company",
-      icon: BuildingIcon,
-      content: <p className="text-sm text-muted-foreground ml-2">{opportunity.company.name}</p>,
-      count: 1,
-    },
-    {
-      id: "people",
-      title: "People",
-      icon: UsersIcon,
-      content: <p className="text-sm text-muted-foreground ml-2">{opportunity.contact.name}</p>,
-      count: 1,
-    },
-  ]
-
-  const activityContent = (
+function OpportunityDetailsPanel({
+  opportunity,
+  isFullScreen = false,
+}: { opportunity: Opportunity; isFullScreen?: boolean }) {
+  // Define additional content with Activity section
+  const additionalContent = (
     <>
-      <div className="mb-4 flex items-center justify-between">
-        <h4 className="text-sm font-medium">Activity</h4>
-        <Button variant="outline" size="sm">
-          <PlusIcon className="h-4 w-4" />
-          Add meeting
-        </Button>
-      </div>
-      <OpportunityActivityContent opportunity={opportunity} />
+      {/* Show all values button */}
+      <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+        Show all values
+      </Button>
+
+      {/* Activity Section - Only in Drawer View */}
+      {!isFullScreen && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-medium">Activity</h4>
+            <Button variant="outline" size="sm">
+              <PlusIcon className="h-4 w-4" />
+              Add meeting
+            </Button>
+          </div>
+          <OpportunityActivityContent opportunity={opportunity} />
+        </div>
+      )}
     </>
   )
 
-  return <RecordDetailsPanel sections={sections} activity={activityContent} isFullScreen={isFullScreen} />
+  return (
+    <MasterDetailsPanel
+      fieldGroups={[
+        {
+          id: "opportunity-info",
+          label: "Opportunity Information",
+          icon: TrendingUpIcon,
+          fields: [
+            { label: "Opportunity Name", value: opportunity.name },
+            { label: "Company", value: `${opportunity.company.name} (${opportunity.company.type})` },
+            { label: "Contact", value: `${opportunity.contact.name} - ${opportunity.contact.role}` },
+            { label: "Legal Entity", value: `${opportunity.legalEntity.name} (${opportunity.legalEntity.type})` },
+            { label: "Investment Amount", value: opportunity.amount },
+            { label: "Expected Close", value: opportunity.expectedClose },
+            { label: "Probability", value: `${opportunity.probability}%` },
+            { label: "Description", value: opportunity.description },
+          ],
+        },
+      ]}
+      isFullScreen={isFullScreen}
+      additionalContent={additionalContent}
+    />
+  )
 }
 
 const columns: ColumnDef<Opportunity>[] = [

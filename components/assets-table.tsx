@@ -202,7 +202,6 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     { id: "meetings", label: "Meetings", count: 3, icon: CalendarIcon },
     { id: "emails", label: "Emails", count: 2, icon: MailIcon },
     { id: "files", label: "Files", count: 4, icon: FolderIcon },
-    { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
   const renderTabContent = (
@@ -217,10 +216,6 @@ function AssetNameCell({ asset }: { asset: Asset }) {
       return <AssetDetailsPanel asset={asset} isFullScreen={false} />
     }
 
-    if (activeTab === "company") {
-      return <AssetCompanyContent asset={asset} />
-    }
-
     if (activeTab === "performance") {
       return <AssetPerformanceContent asset={asset} />
     }
@@ -231,7 +226,6 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     // Create custom tab renderers for special tabs
     const customTabRenderers = {
       details: (isFullScreen = false) => <AssetDetailsPanel asset={asset} isFullScreen={isFullScreen} />,
-      company: (isFullScreen = false) => <AssetCompanyContent asset={asset} />,
       performance: (isFullScreen = false) => <AssetPerformanceContent asset={asset} />,
     }
 
@@ -417,6 +411,7 @@ function getAssetTabData(activeTab: string, asset: Asset) {
           id: 1,
           title: "Investment thesis review",
           date: "3 days ago",
+          author: "Sarah Johnson",
           content: `Strong performance in ${asset.sector} sector. Key growth drivers remain intact.`,
           tags: ["Investment", "Review"],
         },

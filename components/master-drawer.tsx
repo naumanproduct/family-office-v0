@@ -53,7 +53,7 @@ export function MasterDrawer({
 }: MasterDrawerProps) {
   const [isFullScreen, setIsFullScreen] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState(isFullScreen ? "activity" : "details")
-  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
+  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">(isFullScreen ? "table" : "list")
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
@@ -147,6 +147,12 @@ export function MasterDrawer({
       setActiveTab("details")
     }
   }, [isFullScreen, activeTab, fullScreenVisibleTabs, fullScreenHiddenTabs, tabs])
+
+  // Add this effect to update viewMode when isFullScreen changes
+  React.useEffect(() => {
+    // Update viewMode based on isFullScreen state
+    setViewMode(isFullScreen ? "table" : "list")
+  }, [isFullScreen])
 
   const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table", isCurrentFullScreen = false) => {
     if (activeTab === "details") {
@@ -367,7 +373,7 @@ export function MasterDrawer({
                   </h3>
                   <div className="flex items-center gap-2">
                     {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
-                    {activeTab !== "activity" && activeTab !== "company" && activeTab !== "details" && (
+                    {activeTab !== "activity" && activeTab !== "details" && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4" />
                         Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
@@ -662,7 +668,7 @@ export function MasterDrawer({
                 </h3>
                 <div className="flex items-center gap-2">
                   {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
-                  {activeTab !== "activity" && activeTab !== "company" && activeTab !== "details" && (
+                  {activeTab !== "activity" && activeTab !== "details" && (
                     <Button variant="outline" size="sm">
                       <PlusIcon className="h-4 w-4" />
                       Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
