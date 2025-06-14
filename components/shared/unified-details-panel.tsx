@@ -233,9 +233,6 @@ export function UnifiedDetailsPanel({
         {/* Activity Section - Only in Drawer View */}
         {!isFullScreen && activityContent && (
           <div className="mt-8">
-            <div className="mb-4">
-              <h4 className="text-sm font-medium">Activity</h4>
-            </div>
             <div className="space-y-2">
               {activityContent}
             </div>

@@ -270,7 +270,7 @@ export function TaskDetailsView({
     if (parentTask || hideSubtasks) return null;
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-sm font-medium">Subtasks ({subtasks.length})</h4>
           <Button variant="outline" size="sm" onClick={() => setIsAddingSubtask(true)} className="h-8">
@@ -478,7 +478,12 @@ export function TaskDetailsView({
     ];
     
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 mt-8">
+        {/* Comment Section Heading */}
+        <div className="mb-2">
+          <h4 className="text-sm font-medium">Add a comment about this task</h4>
+        </div>
+        
         {/* Comment Input */}
         <TypableArea
           value={commentText}
@@ -488,6 +493,11 @@ export function TaskDetailsView({
           showButtons={true}
           submitLabel="Add comment"
         />
+        
+        {/* Activity Section Heading */}
+        <div className="mt-8 mb-2">
+          <h4 className="text-sm font-medium">Activity</h4>
+        </div>
         
         {/* Comments List */}
         <div className="mt-4">
@@ -683,8 +693,13 @@ export function TaskDetailsView({
           onNavigateToRecord={navigateToRecord}
           onAddRecord={handleAddRecord}
           onUnlinkRecord={handleUnlinkRecord}
-          activityContent={renderCommentSection()}
-          additionalContent={renderSubtasksSection()}
+          activityContent={
+            <>
+              {renderSubtasksSection()}
+              {renderCommentSection()}
+            </>
+          }
+          additionalContent={null}
         />
       ) : (
         <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>
