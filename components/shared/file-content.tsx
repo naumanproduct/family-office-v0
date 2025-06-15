@@ -121,11 +121,10 @@ function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScr
   const [openSections, setOpenSections] = useState({
     details: true,
     metadata: false,
-    related: false,
   });
 
   // Toggle function for collapsible sections
-  const toggleSection = (section: 'details' | 'metadata' | 'related') => {
+  const toggleSection = (section: 'details' | 'metadata') => {
     setOpenSections(prev => ({
       ...prev,
       [section]: !prev[section],
@@ -212,31 +211,6 @@ function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScr
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Related Section */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Related</h3>
-          <Button variant="ghost" size="sm" onClick={() => toggleSection('related')}>
-            <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSections.related ? 'rotate-180' : ''}`} />
-          </Button>
-        </div>
-        {openSections.related && (
-          <div className="space-y-4">
-            {file.relatedTo ? (
-              <div className="flex items-center gap-2">
-                {file.relatedTo.type === "Company" ? <BuildingIcon className="h-4 w-4" /> : <UserIcon className="h-4 w-4" />}
-                <span>{file.relatedTo.name}</span>
-                <Badge variant="outline" className="ml-2">
-                  {file.relatedTo.type}
-                </Badge>
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-sm">No related records</p>
-            )}
           </div>
         )}
       </div>
