@@ -3,23 +3,18 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { TrendingUpIcon, TrendingDownIcon } from "lucide-react"
-import { AssetsTable } from "./assets-table"
+import { AssetsTable, type Asset } from "./assets-table"
 import { LiabilitiesTable } from "./liabilities-table"
 import { MasterDrawer } from "./master-drawer"
-import {
-  FileTextIcon,
-  ActivityIcon,
-  CheckSquareIcon,
-  StickyNoteIcon,
-  PaperclipIcon,
-  UsersIcon,
-  BuildingIcon,
-  DollarSignIcon,
-} from "lucide-react"
+import { FileTextIcon, CheckSquareIcon, StickyNoteIcon, PaperclipIcon, DollarSignIcon } from "lucide-react"
 
 export function InvestmentsView() {
   const [view, setView] = React.useState<"assets" | "liabilities">("assets")
   const [selectedInvestment, setSelectedInvestment] = React.useState<any>(null)
+
+  const handleAssetClick = (asset: Asset) => {
+    setSelectedInvestment(asset)
+  }
 
   return (
     <div className="space-y-4">
@@ -49,7 +44,7 @@ export function InvestmentsView() {
 
       {/* Content */}
       {view === "assets" ? (
-        <AssetsTable onAssetClick={setSelectedInvestment} />
+        <AssetsTable onAssetClick={handleAssetClick} />
       ) : (
         <LiabilitiesTable onLiabilityClick={setSelectedInvestment} />
       )}
@@ -63,13 +58,10 @@ export function InvestmentsView() {
           subtitle={selectedInvestment.type}
           tabs={[
             { id: "details", label: "Details", count: null, icon: FileTextIcon },
-            { id: "activity", label: "Activity", count: 12, icon: ActivityIcon },
+            { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
             { id: "tasks", label: "Tasks", count: 3, icon: CheckSquareIcon },
             { id: "notes", label: "Notes", count: 5, icon: StickyNoteIcon },
             { id: "files", label: "Files", count: 8, icon: PaperclipIcon },
-            { id: "team", label: "Team", count: 4, icon: UsersIcon },
-            { id: "companies", label: "Companies", count: 2, icon: BuildingIcon },
-            { id: "investments", label: "Related", count: 1, icon: DollarSignIcon },
           ]}
           detailsPanel={(isFullScreen) => (
             <div className="p-6">
@@ -83,7 +75,7 @@ export function InvestmentsView() {
                         <div className="flex-1">
                           <div className="flex items-center gap-4">
                             <span className="text-xs text-muted-foreground">Amount</span>
-                            <span className="text-sm">{selectedInvestment.amount || "$2.5M"}</span>
+                            <span className="text-sm">{selectedInvestment.currentValue || "$2.5M"}</span>
                           </div>
                         </div>
                       </div>
@@ -120,9 +112,6 @@ export function InvestmentsView() {
             }
             if (activeTab === "files") {
               return <div className="p-4 text-muted-foreground">Files related to this investment...</div>
-            }
-            if (activeTab === "activity") {
-              return <div className="p-4 text-muted-foreground">Recent activity for this investment...</div>
             }
             return <div className="p-4 text-muted-foreground">Content for {activeTab}</div>
           }}
