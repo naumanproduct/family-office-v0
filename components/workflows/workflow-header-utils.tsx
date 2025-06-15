@@ -354,4 +354,4 @@ export function SortableStageItem({
       </div>
     </div>
   )
-} 
+}

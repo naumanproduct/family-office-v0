@@ -248,4 +248,4 @@ export function UnifiedDetailsPanel({
       </div>
     </div>
   );
-} 
+}

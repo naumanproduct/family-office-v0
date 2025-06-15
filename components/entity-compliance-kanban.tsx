@@ -1070,4 +1070,3 @@ export function EntityComplianceKanban({ workflowConfig }: EntityComplianceKanba
     </DndContext>
   )
 }
-

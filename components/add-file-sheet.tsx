@@ -304,4 +304,4 @@ export function AddFileSheet({ open, onOpenChange, onSubmit }: AddFileSheetProps
       onTypeSelect={handleTypeSelect}
     />
   )
-} 
+}
