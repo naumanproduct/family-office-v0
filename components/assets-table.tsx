@@ -49,6 +49,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -196,6 +197,12 @@ const getGainColor = (percentage: number) => {
 }
 
 function AssetNameCell({ asset }: { asset: Asset }) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<any>(null)
+  const [selectedNote, setSelectedNote] = useState<any>(null)
+  const [selectedMeeting, setSelectedMeeting] = useState<any>(null)
+  const [selectedEmail, setSelectedEmail] = useState<any>(null)
+  
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
     { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
@@ -256,8 +263,6 @@ function AssetNameCell({ asset }: { asset: Asset }) {
     return <AssetDetailsPanel asset={asset} isFullScreen={isFullScreen} />
   }
 
-  const customActions: React.ReactNode[] = []
-
   return (
     <MasterDrawer
       trigger={
@@ -271,11 +276,10 @@ function AssetNameCell({ asset }: { asset: Asset }) {
         </Button>
       }
       title={asset.name}
-      recordType="Assets"
+      recordType="Investment"
       subtitle={`${asset.type} • ${asset.category}`}
       tabs={tabs}
       detailsPanel={renderDetailsPanel}
-      customActions={customActions}
     >
       {renderTabContent}
     </MasterDrawer>
@@ -512,68 +516,68 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
       title: "Asset Details",
       icon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
       fields: [
-        {
-          label: "Asset Name",
-          value: asset.name,
-        },
-        {
-          label: "Asset Type",
-          value: asset.type,
-        },
-        {
-          label: "Category",
-          value: asset.category,
-        },
-        {
-          label: "Investment Thesis",
-          value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
-        },
-        {
-          label: "Owning Entity",
-          value: asset.entity,
-          isLink: true,
-        },
-        {
-          label: "Status",
-          value: asset.status,
-        },
-        {
-          label: "Acquisition Date",
-          value: asset.acquisitionDate,
-        },
-        {
-          label: "Last Valuation",
-          value: asset.lastValuation,
-        },
-        {
-          label: "Current Value",
-          value: asset.currentValue,
-        },
-        {
-          label: "Original Cost",
-          value: asset.originalCost,
-        },
-        {
-          label: "Unrealized Gain",
-          value: asset.unrealizedGain,
-        },
-        {
-          label: "Performance",
-          value: (
-            <span className={getGainColor(asset.percentageGain)}>
-              {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
-              {asset.percentageGain}%)
-            </span>
-          ),
-        },
-        {
-          label: "Sector",
-          value: asset.sector,
-        },
-        {
-          label: "Geography",
-          value: asset.geography,
-        },
+    {
+      label: "Asset Name",
+      value: asset.name,
+    },
+    {
+      label: "Asset Type",
+      value: asset.type,
+    },
+    {
+      label: "Category",
+      value: asset.category,
+    },
+    {
+      label: "Investment Thesis",
+      value: `Strategic investment in ${asset.sector} sector with strong growth potential and market leadership position...`,
+    },
+    {
+      label: "Owning Entity",
+      value: asset.entity,
+      isLink: true,
+    },
+    {
+      label: "Status",
+      value: asset.status,
+    },
+    {
+      label: "Acquisition Date",
+      value: asset.acquisitionDate,
+    },
+    {
+      label: "Last Valuation",
+      value: asset.lastValuation,
+    },
+    {
+      label: "Current Value",
+      value: asset.currentValue,
+    },
+    {
+      label: "Original Cost",
+      value: asset.originalCost,
+    },
+    {
+      label: "Unrealized Gain",
+      value: asset.unrealizedGain,
+    },
+    {
+      label: "Performance",
+      value: (
+        <span className={getGainColor(asset.percentageGain)}>
+          {asset.unrealizedGain} ({asset.percentageGain > 0 ? "+" : ""}
+          {asset.percentageGain}%)
+        </span>
+      ),
+    },
+    {
+      label: "Sector",
+      value: asset.sector,
+    },
+    {
+      label: "Geography",
+      value: asset.geography,
+    },
       ],
     },
     {
