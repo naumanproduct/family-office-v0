@@ -20,6 +20,7 @@ import {
   TargetIcon,
   TrendingUpIcon,
   UsersIcon,
+  CalendarIcon,
 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
@@ -55,6 +56,11 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
+    {
+      title: "Activity",
+      url: "/activity",
+      icon: CalendarIcon,
+    },
     {
       title: "Investments",
       url: "/investments",
