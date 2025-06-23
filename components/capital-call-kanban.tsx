@@ -49,7 +49,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
-import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper";
+import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper"
+import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 
 interface CapitalCall {
   id: string
@@ -242,9 +243,6 @@ function CapitalCallCard({
   capitalCall: CapitalCall
   attributes?: Array<{ id: string; name: string; type: string }>
 }) {
-  // Check if call is overdue
-  const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "done"
-
   // Define tabs for the drawer
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
@@ -320,11 +318,38 @@ function CapitalCallCard({
     }
   }
 
-  // Create details panel function
-  const detailsPanel = () => buildWorkflowDetailsPanel({
-                infoTitle: "Workflow Information",
-                infoFields: [],
-              });
+  // Build details panel with mock data for every record
+  const detailsPanel = buildWorkflowDetailsPanel({
+    infoTitle: "Workflow Information",
+    infoFields: [
+      { label: "Fund", value: capitalCall.fundName },
+      { label: "Call #", value: capitalCall.callNumber },
+      { label: "Call Amount", value: capitalCall.callAmount },
+      { label: "Commitment", value: capitalCall.commitmentAmount },
+      { label: "Due Date", value: capitalCall.dueDate },
+      { label: "Notice Date", value: capitalCall.noticeDate },
+      { label: "Investor", value: capitalCall.investor },
+    ],
+    // Generic related data so every drawer has something to show
+    companies: [
+      { id: 1, name: capitalCall.fundManager || `${capitalCall.fundName} Manager`, type: "Fund Manager" },
+    ],
+    entities: [
+      { id: 1, name: `${capitalCall.fundName}, L.P.`, type: "Fund Entity" },
+    ],
+    people: [
+      { id: 1, name: "Alex Johnson", role: "Investor Relations" },
+      { id: 2, name: "Jamie Lee", role: "Portfolio Manager" },
+    ],
+    opportunities: [
+      { id: 1, name: `${capitalCall.fundName} – Follow-on Round`, type: "Opportunity" },
+    ],
+    investments: [
+      { id: 1, name: `${capitalCall.fundName} Sidecar`, type: "Co-Investment" },
+      { id: 2, name: `${capitalCall.fundName} Parallel Fund`, type: "Parallel Vehicle" },
+    ],
+    activities: generateWorkflowActivities(),
+  });
 
   // Create children function for tabs
   const renderTabContent = (
@@ -335,86 +360,67 @@ function CapitalCallCard({
     setSelectedMeeting?: (meeting: any) => void,
     setSelectedEmail?: (email: any) => void,
   ) => {
-    if (capitalCall.fundName === "Growth Fund III") {
-      // ---------------- Mock data for Growth Fund III ----------------
-      const tasks = [
-        {
-          id: 1,
-          title: "Prepare investor notice",
-          priority: "High",
-          status: "pending",
-          assignee: "You",
-          dueDate: "2024-06-20",
-          description: "Draft and review the capital call notice for Growth Fund III.",
-          relatedTo: { type: "Capital Call", name: "Growth Fund III" },
-        },
-        {
-          id: 2,
-          title: "Update capital schedule",
-          priority: "Medium",
-          status: "pending",
-          assignee: "Finance Team",
-          dueDate: "2024-06-22",
-          description: "Reflect the new call in the fund's capital schedule.",
-          relatedTo: { type: "Capital Call", name: "Growth Fund III" },
-        },
-      ]
+    // ---------- Generate generic mock data for each tab ----------
+    const tasks = [
+      {
+        id: 1,
+        title: `Prepare notice for ${capitalCall.fundName}`,
+        priority: "High",
+        status: "pending",
+        assignee: "You",
+        dueDate: capitalCall.dueDate,
+        description: `Draft and review the capital call notice for ${capitalCall.fundName}.`,
+        relatedTo: { type: "Capital Call", name: capitalCall.fundName },
+      },
+      {
+        id: 2,
+        title: `Update capital schedule – ${capitalCall.callNumber}`,
+        priority: "Medium",
+        status: "pending",
+        assignee: "Finance Team",
+        dueDate: capitalCall.dueDate,
+        description: "Reflect the new call in the fund's capital schedule.",
+        relatedTo: { type: "Capital Call", name: capitalCall.fundName },
+      },
+    ];
 
-      const notes = [
-        { id: 1, title: "Initial call rationale", author: "You", date: "2024-06-15", tags: ["call", "growth"] },
-        { id: 2, title: "Fee breakdown", author: "Controller", date: "2024-06-16", tags: ["fees"] },
-      ]
+    const notes = [
+      { id: 1, title: "Call rationale", author: "You", date: capitalCall.noticeDate, tags: ["call"] },
+      { id: 2, title: "Fee breakdown", author: "Controller", date: capitalCall.noticeDate, tags: ["fees"] },
+    ];
 
-      const emails = [
-        { id: 1, subject: "Capital call draft", from: "admin@growthfund.com", date: "2024-06-17", status: "Read" },
-        { id: 2, subject: "Questions on commitment", from: "investor@epsilon.com", date: "2024-06-18", status: "Unread" },
-      ]
+    const emails = [
+      { id: 1, subject: "Capital call draft", from: "admin@fund.com", date: capitalCall.noticeDate, status: "Read" },
+      { id: 2, subject: "Questions on commitment", from: "investor@fund.com", date: capitalCall.noticeDate, status: "Unread" },
+    ];
 
-      const meetings = [
-        { id: 1, title: "Internal review meeting", date: "2024-06-19", time: "9:00 AM", status: "Scheduled", attendees: ["You", "Finance Team"] },
-        { id: 2, title: "Investor Q&A", date: "2024-06-23", time: "11:00 AM", status: "Planned", attendees: ["Investor Relations"] },
-      ]
+    const meetings = [
+      { id: 1, title: "Internal review", date: capitalCall.noticeDate, time: "9:00 AM", status: "Scheduled", attendees: ["You", "Finance Team"] },
+      { id: 2, title: "Investor Q&A", date: capitalCall.dueDate, time: "11:00 AM", status: "Planned", attendees: ["Investor Relations"] },
+    ];
 
-      const files = [
-        { id: 1, name: "GrowthFundIII_CallNotice.pdf", uploadedBy: "You", uploadedDate: "2024-06-17", size: "1.2 MB" },
-        { id: 2, name: "CapitalSchedule.xlsx", uploadedBy: "Finance Team", uploadedDate: "2024-06-18", size: "550 KB" },
-      ]
+    const files = [
+      { id: 1, name: `${capitalCall.fundName.replace(/ /g, "")}_CallNotice.pdf`, uploadedBy: "You", uploadedDate: capitalCall.noticeDate, size: "1.2 MB" },
+    ];
 
-      const contacts = [
-        { id: 1, name: "Laura Kim", role: "Investor Relations", email: "laura@growthfund.com", phone: "+1 (555) 321-6547" },
-        { id: 2, name: "Michael Chen", role: "Fund Manager", email: "mchen@growthfund.com", phone: "+1 (555) 987-1234" },
-        { id: 3, name: "James Wilson", role: "Investor", email: "jwilson@epsilon.com", phone: "+1 (555) 555-0011" },
-      ]
+    const contacts = [
+      { id: 1, name: "Alex Johnson", role: "Investor Relations", email: "alex@fund.com", phone: "+1 (555) 123-0000" },
+      { id: 2, name: "Jamie Lee", role: "Fund Manager", email: "jamie@fund.com", phone: "+1 (555) 123-1111" },
+    ];
 
-      const dataMap: Record<string, any[]> = {
-        tasks,
-        notes,
-        emails,
-        meetings,
-        files,
-        contacts,
-      }
+    const dataMap: Record<string, any[]> = { tasks, notes, emails, meetings, files, contacts };
 
-      return (
-        <TabContentRenderer
-          activeTab={activeTab}
-          viewMode={viewMode}
-          data={dataMap[activeTab] || []}
-          onTaskClick={setSelectedTask}
-          onNoteClick={setSelectedNote}
-          onMeetingClick={setSelectedMeeting}
-          onEmailClick={setSelectedEmail}
-        />
-      )
-    }
-
-    // Default placeholder for other calls
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p>No {activeTab} found for this capital call</p>
-        <p className="text-sm">Add some {activeTab} to get started</p>
-      </div>
-    )
+      <TabContentRenderer
+        activeTab={activeTab}
+        viewMode={viewMode}
+        data={dataMap[activeTab] || []}
+        onTaskClick={setSelectedTask}
+        onNoteClick={setSelectedNote}
+        onMeetingClick={setSelectedMeeting}
+        onEmailClick={setSelectedEmail}
+      />
+    );
   }
 
   return (
@@ -428,12 +434,7 @@ function CapitalCallCard({
               <div className="flex-1 min-w-0">
                 <h4 className="font-semibold text-sm text-gray-900 truncate cursor-pointer group-hover:underline">{capitalCall.fundName}</h4>
                 <p className="text-xs text-gray-500 mt-1">{capitalCall.callNumber}</p>
-                {isOverdue && (
-                  <Badge variant="destructive" className="mt-2 text-xs">
-                    <AlertCircleIcon className="h-3 w-3 mr-1" />
-                    Overdue
-                  </Badge>
-                )}
+                {/* Removed overdue badge */}
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>

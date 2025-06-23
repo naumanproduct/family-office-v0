@@ -18,6 +18,7 @@ import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateInvestmentActivities } from "@/components/shared/activity-generators"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 
 export function InvestmentsView() {
   const [view, setView] = React.useState<"assets" | "liabilities">("assets")
@@ -131,17 +132,84 @@ export function InvestmentsView() {
               )
             })()
           )}
-          children={(activeTab, viewMode) => {
-            if (activeTab === "tasks") {
-              return <div className="p-4 text-muted-foreground">Tasks related to this investment...</div>
+          children={(activeTab, viewMode, setSelectedTask, setSelectedNote, setSelectedMeeting, setSelectedEmail) => {
+            // ---- Generate mock data per tab ----
+            const tasks = [
+              {
+                id: 1,
+                title: `Quarterly valuation for ${selectedInvestment.name}`,
+                priority: "High",
+                status: "pending",
+                assignee: "You",
+                dueDate: "2024-08-15",
+                description: "Update fair-value marks and supporting memo.",
+              },
+              {
+                id: 2,
+                title: "Update IRR model",
+                priority: "Medium",
+                status: "pending",
+                assignee: "Analyst Team",
+                dueDate: "2024-08-20",
+                description: "Incorporate latest actuals into return model.",
+              },
+            ]
+
+            const notes = [
+              { id: 1, title: "CEO update summary", author: "You", date: "2024-07-30", tags: ["update"] },
+              { id: 2, title: "Board slides highlights", author: "Associate", date: "2024-06-15", tags: ["board"] },
+            ]
+
+            const emails = [
+              { id: 1, subject: "Q2 KPIs", from: "cfo@company.com", date: "2024-07-25", status: "Read" },
+              { id: 2, subject: "Follow-up items", from: "investor.relations@fund.com", date: "2024-07-28", status: "Unread" },
+            ]
+
+            const meetings = [
+              { id: 1, title: "Portfolio review call", date: "2024-08-01", time: "10:00 AM", status: "Scheduled", attendees: ["You", "PM"] },
+            ]
+
+            const files = [
+              { id: 1, name: `${selectedInvestment.name.replace(/ /g, "_")}_Q2_Report.pdf`, uploadedBy: "You", uploadedDate: "2024-07-26", size: "1.8 MB" },
+            ]
+
+            const performance = [
+              { id: 1, metric: "MOIC", value: "1.23x" },
+              { id: 2, metric: "IRR", value: "14.8%" },
+              { id: 3, metric: "TVPI", value: "1.40x" },
+            ]
+
+            const dataMap: Record<string, any[]> = { tasks, notes, emails, meetings, files, performance }
+
+            if (activeTab === "details") {
+              return null // details handled by detailsPanel prop
             }
-            if (activeTab === "notes") {
-              return <div className="p-4 text-muted-foreground">Notes about this investment...</div>
+
+            // Custom simple renderer for performance tab
+            if (activeTab === "performance") {
+              return (
+                <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {performance.map((p) => (
+                    <div key={p.id} className="rounded-lg border p-4 text-center">
+                      <p className="text-xs text-muted-foreground uppercase mb-1">{p.metric}</p>
+                      <p className="text-xl font-semibold">{p.value}</p>
+                    </div>
+                  ))}
+                </div>
+              )
             }
-            if (activeTab === "files") {
-              return <div className="p-4 text-muted-foreground">Files related to this investment...</div>
-            }
-            return <div className="p-4 text-muted-foreground">Content for {activeTab}</div>
+
+            return (
+              <TabContentRenderer
+                activeTab={activeTab}
+                viewMode={viewMode}
+                data={dataMap[activeTab] || []}
+                onTaskClick={setSelectedTask}
+                onNoteClick={setSelectedNote}
+                onMeetingClick={setSelectedMeeting}
+                onEmailClick={setSelectedEmail}
+              />
+            )
           }}
         />
       )}

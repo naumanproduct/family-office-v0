@@ -34,19 +34,21 @@ export function UnifiedActivitySection({ activities }: UnifiedActivitySectionPro
   const formatActivityText = (activity: ActivityItem) => {
     return (
       <span className="text-sm">
-        <span className="font-medium">{activity.actor}</span>{" "}
-        <span>{activity.action}</span>{" "}
-        {activity.objectType && <span>{activity.objectType}: </span>}
+        <span className="font-medium text-foreground">{activity.actor}</span>{" "}
+        <span className="text-muted-foreground">
+          {activity.action}{" "}
+          {activity.objectType && <>{activity.objectType}: </>}
+        </span>
         {activity.url ? (
           <a
             href={activity.url}
-            className="font-medium underline text-primary hover:opacity-80"
+            className="font-medium underline text-foreground hover:opacity-80"
             onClick={(e) => e.stopPropagation()}
           >
             {activity.target}
           </a>
         ) : (
-          <span className="font-medium">{activity.target}</span>
+          <span className="font-medium text-foreground">{activity.target}</span>
         )}
       </span>
     )

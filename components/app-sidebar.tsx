@@ -110,6 +110,16 @@ const data = {
           url: "/deal-pipeline",
           icon: GanttChartIcon,
         },
+        {
+          title: "Capital Calls",
+          url: "/capital-calls",
+          icon: DollarSignIcon,
+        },
+        {
+          title: "Distributions Tracking",
+          url: "/distributions-tracking",
+          icon: ArrowUpCircleIcon,
+        },
       ],
     },
   ],

@@ -39,6 +39,8 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 
 interface WorkflowAttribute {
   id: string
@@ -386,7 +388,7 @@ const getAttributeIcon = (type: string) => {
 
 export function WorkflowHeader({ workflowName, workflowConfig, onSave }: WorkflowHeaderProps) {
   const [config, setConfig] = React.useState<WorkflowConfig>(workflowConfig)
-  const [activeTab, setActiveTab] = React.useState("general")
+  const [activeTab, setActiveTab] = React.useState("details")
   const [showAddFields, setShowAddFields] = React.useState(false)
   const [showCustomField, setShowCustomField] = React.useState(false)
   const [customName, setCustomName] = React.useState("")
@@ -512,7 +514,8 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   )
 
   const tabs = [
-    { id: "general", label: "General", icon: FileTextIcon },
+    { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "activity", label: "Activity", icon: CalendarIcon },
     { id: "attributes", label: "Card Attributes", icon: LayoutIcon },
     { id: "stages", label: "Stages", icon: ListIcon },
   ]
@@ -578,7 +581,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto">
-          {activeTab === "general" && (
+          {activeTab === "details" && (
             <MasterDetailsPanel 
               fieldGroups={[
                 {
@@ -607,25 +610,6 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         />
                       )
                     },
-                    { 
-                      label: "Object Type", 
-                      value: (
-                        <Select
-                          value={config.objectType}
-                          onValueChange={(value) => setConfig({ ...config, objectType: value })}
-                        >
-                          <SelectTrigger className="mt-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="task">Task</SelectItem>
-                            <SelectItem value="opportunity">Opportunity</SelectItem>
-                            <SelectItem value="capital-call">Capital Call</SelectItem>
-                            <SelectItem value="document">Document</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )
-                    },
                   ],
                 },
                 {
@@ -633,6 +617,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                   label: "Workflow Statistics",
                   icon: LayoutIcon,
                   fields: [
+                    { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span> },
                     { label: "Card Fields", value: `${config.attributes.length} fields configured` },
                     { label: "Stages", value: `${config.stages.length} stages configured` },
                     { label: "Created", value: "January 15, 2024" },
@@ -640,58 +625,14 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                   ],
                 },
               ]}
-              additionalContent={
-                <div className="mt-8">
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium">Activity</h4>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">
-                            <span className="font-medium">Sarah Johnson</span>{" "}
-                            <span className="text-muted-foreground">created this workflow</span>
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">January 15, 2024</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">
-                            <span className="font-medium">Michael Chen</span>{" "}
-                            <span className="text-muted-foreground">updated workflow stages</span>
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">2 days ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">
-                            <span className="font-medium">You</span>{" "}
-                            <span className="text-muted-foreground">modified card attributes</span>
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">Today</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              }
             />
+          )}
+
+          {activeTab === "activity" && (
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Workflow Activity</h3>
+              <UnifiedActivitySection activities={generateWorkflowActivities()} />
+            </div>
           )}
 
           {activeTab === "attributes" && (
