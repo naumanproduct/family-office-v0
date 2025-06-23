@@ -38,7 +38,8 @@ import {
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateFileActivities } from "@/components/shared/activity-generators"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
@@ -543,49 +544,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
     ];
 
     // Mock activities for the file
-    const activities = [
-      {
-        id: 1,
-        type: "upload",
-        actor: "Sarah Johnson",
-        action: "uploaded",
-        target: file.fileName || file.name || "Untitled",
-        timestamp: "2 days ago",
-        date: "2023-05-15",
-        details: {
-          size: file.fileSize || file.size || "2.4 MB",
-          type: (file.fileType || file.type || "FILE").toUpperCase(),
-        },
-      },
-      {
-        id: 2,
-        type: "edit",
-        actor: "Michael Chen",
-        action: "edited metadata for",
-        target: file.fileName || file.name || "Untitled",
-        timestamp: "1 week ago",
-        date: "2023-05-10",
-        details: {
-          changes: "Updated file description and category",
-          previousCategory: "Uncategorized",
-          newCategory: file.category || "Uncategorized",
-        },
-      },
-      {
-        id: 3,
-        type: "share",
-        actor: "David Williams",
-        action: "shared",
-        target: file.fileName || file.name || "Untitled",
-        timestamp: "2 weeks ago",
-        date: "2023-05-03",
-        details: {
-          sharedWith: "Investment Committee",
-          accessLevel: "View Only",
-          expirationDate: "None",
-        },
-      },
-    ];
+    const activities = generateFileActivities()
 
     return (
       <div className="px-6 pt-2 pb-6">
@@ -648,10 +607,8 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
   };
 
   // File activity content component
-  const FileActivityContent = ({ file, activities }: { file: any, activities: any[] }) => {
-    return <UnifiedActivitySection activities={activities as ActivityItem[]} />;
-
-
+  const FileActivityContent = ({ file, activities }: { file: any; activities: any[] }) => {
+    return <UnifiedActivitySection activities={activities} />;
   };
 
   // Render empty tab content for tasks, notes, etc.

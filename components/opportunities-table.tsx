@@ -71,7 +71,8 @@ import { AddOpportunityDialog } from "./add-opportunity-dialog"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
 import { Label } from "@/components/ui/label"
-import { UnifiedActivitySection, ActivityItem } from "./shared/unified-activity-section"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateOpportunityActivities } from "@/components/shared/activity-generators"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
 
@@ -635,58 +636,8 @@ function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
   )
 }
 
-function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity }) {
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "stage_change",
-      actor: "Deal Team",
-      action: "moved opportunity to",
-      target: opportunity.stage,
-      timestamp: "3 days ago",
-      date: "2025-01-27",
-      details: {
-        previousStage: "Initial Contact",
-        newStage: opportunity.stage,
-        reason: "Completed preliminary due diligence",
-        nextSteps: ["Management presentation", "Financial model review", "Reference calls"],
-        timeline: "2-3 weeks",
-      },
-    },
-    {
-      id: 2,
-      type: "meeting",
-      actor: "Investment Team",
-      action: "conducted management meeting for",
-      target: opportunity.name,
-      timestamp: "1 week ago",
-      date: "2025-01-23",
-      details: {
-        type: "Management Presentation",
-        duration: "2 hours",
-        attendees: ["CEO", "CFO", "CTO", "Investment Team"],
-        topics: ["Business model", "Market opportunity", "Financial projections", "Use of funds"],
-        outcome: "Positive feedback, proceeding to next stage",
-      },
-    },
-    {
-      id: 3,
-      type: "due_diligence",
-      actor: "Legal Team",
-      action: "completed legal review for",
-      target: opportunity.name,
-      timestamp: "2 weeks ago",
-      date: "2025-01-16",
-      details: {
-        reviewType: "Legal Due Diligence",
-        scope: ["Corporate structure", "Contracts review", "IP analysis", "Compliance check"],
-        findings: "No material issues identified",
-        recommendations: ["Standard legal documentation", "IP protection enhancement"],
-        status: "Completed",
-      },
-    },
-  ]
-
+function OpportunityActivityContent() {
+  const activities = generateOpportunityActivities()
   return <UnifiedActivitySection activities={activities} />
 }
 
@@ -770,7 +721,7 @@ function OpportunityDetailsPanel({
       onNavigateToRecord={navigateToRecord}
       onAddRecord={handleAddRecord}
       onUnlinkRecord={handleUnlinkRecord}
-      activityContent={<OpportunityActivityContent opportunity={opportunity} />}
+      activityContent={<OpportunityActivityContent />}
     />
   )
 }

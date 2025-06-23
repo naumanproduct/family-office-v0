@@ -51,6 +51,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { MasterDrawer } from "./master-drawer"
+import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper";
 
 interface TaxDocument {
   id: string

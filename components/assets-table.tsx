@@ -525,29 +525,23 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
       id: 1,
       type: "valuation",
       actor: "Analyst Team",
-      action: "updated valuation for",
-      target: asset.name,
+      action: "updated valuation",
+      target: "Current Value",
+      objectType: "field",
+      url: "#valuation-history", // hypothetical anchor or modal link
       timestamp: "2 days ago",
       date: "2025-06-21",
-      details: {
-        previousValue: asset.currentValue,
-        newValue: "$19.0M",
-        reason: "Quarterly review",
-      },
     },
     {
       id: 2,
       type: "meeting",
       actor: "Portfolio Manager",
-      action: "held board meeting for",
-      target: asset.name,
+      action: "held board meeting",
+      target: "Q2 Performance Review",
+      objectType: "meeting",
+      url: "/meetings/2001",
       timestamp: "1 week ago",
       date: "2025-06-15",
-      details: {
-        attendees: ["CFO", "CEO"],
-        topics: ["Performance", "Strategic initiatives"],
-        outcome: "Positive",
-      },
     },
   ]
 
@@ -578,11 +572,20 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
     { label: "Status", value: asset.status },
   ]
 
+  // Mock companies based on entity or asset name
+  const companies = [
+    {
+      id: 1,
+      name: asset.entity || asset.name.split(" ")[0] + " Corp",
+      type: "Portfolio Company",
+    },
+  ]
+
   const sections = buildStandardDetailSections({
     infoTitle: "Asset Information",
     infoIcon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
     infoFields,
-    companies: [], // N/A for assets, but included for consistency
+    companies,
     people: relatedData.people,
     entities: relatedData.entities,
     investments: [],

@@ -6,7 +6,18 @@ import { TrendingUpIcon, TrendingDownIcon } from "lucide-react"
 import { AssetsTable, type Asset } from "./assets-table"
 import { LiabilitiesTable } from "./liabilities-table"
 import { MasterDrawer } from "./master-drawer"
-import { FileTextIcon, CheckSquareIcon, StickyNoteIcon, PaperclipIcon, DollarSignIcon } from "lucide-react"
+import {
+  FileTextIcon,
+  CheckSquareIcon,
+  StickyNoteIcon,
+  PaperclipIcon,
+  DollarSignIcon,
+  BarChartIcon,
+} from "lucide-react"
+import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
+import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateInvestmentActivities } from "@/components/shared/activity-generators"
 
 export function InvestmentsView() {
   const [view, setView] = React.useState<"assets" | "liabilities">("assets")
@@ -46,7 +57,7 @@ export function InvestmentsView() {
       {view === "assets" ? (
         <AssetsTable onAssetClick={handleAssetClick} />
       ) : (
-        <LiabilitiesTable onLiabilityClick={setSelectedInvestment} />
+        <LiabilitiesTable />
       )}
 
       {/* Investment Drawer */}
@@ -64,44 +75,61 @@ export function InvestmentsView() {
             { id: "files", label: "Files", count: 8, icon: PaperclipIcon },
           ]}
           detailsPanel={(isFullScreen) => (
-            <div className="p-6">
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <h4 className="text-sm font-medium">Investment Details</h4>
-                  <div className="rounded-lg border border-muted bg-muted/10 p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4">
-                            <span className="text-xs text-muted-foreground">Amount</span>
-                            <span className="text-sm">{selectedInvestment.currentValue || "$2.5M"}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4">
-                            <span className="text-xs text-muted-foreground">Type</span>
-                            <span className="text-sm">{selectedInvestment.type || "Equity Investment"}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4">
-                            <span className="text-xs text-muted-foreground">Status</span>
-                            <span className="text-sm">{selectedInvestment.status || "Active"}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            (() => {
+              // ----- Info fields -----
+              const infoFields = [
+                { label: "Name", value: selectedInvestment.name },
+                { label: "Type", value: selectedInvestment.type ?? "Equity Investment" },
+                { label: "Status", value: selectedInvestment.status ?? "Active" },
+                { label: "Amount", value: selectedInvestment.currentValue ?? "$2.5M" },
+              ]
+
+              // ----- Mock related data -----
+              const companies = [
+                {
+                  id: 1,
+                  name: selectedInvestment.name.split(" ")[0] + " Corp",
+                  type: "Portfolio Company",
+                },
+                {
+                  id: 2,
+                  name: "Example Holdings",
+                  type: "Co-Investor",
+                },
+              ]
+
+              // Optional: simple activity feed (can be expanded later)
+              const activities = generateInvestmentActivities()
+
+              const sections = buildStandardDetailSections({
+                infoTitle: "Investment Information",
+                infoIcon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
+                infoFields,
+                companies,
+              })
+
+              // Stubs – hook up navigation later if needed
+              const navigateToRecord = (recordType: string, id: number) => {
+                console.log(`Navigate to ${recordType} ${id}`)
+              }
+              const handleAddRecord = (sectionId: string) => {
+                console.log(`Add record to ${sectionId}`)
+              }
+              const handleUnlinkRecord = (sectionId: string, id: number) => {
+                console.log(`Unlink ${sectionId} ${id}`)
+              }
+
+              return (
+                <UnifiedDetailsPanel
+                  sections={sections}
+                  isFullScreen={isFullScreen}
+                  onNavigateToRecord={navigateToRecord}
+                  onAddRecord={handleAddRecord}
+                  onUnlinkRecord={handleUnlinkRecord}
+                  activityContent={<UnifiedActivitySection activities={activities} />}
+                />
+              )
+            })()
           )}
           children={(activeTab, viewMode) => {
             if (activeTab === "tasks") {

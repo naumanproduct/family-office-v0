@@ -47,6 +47,7 @@ import { Label } from "@/components/ui/label"
 import { opportunitiesData, type Opportunity } from "./opportunities-table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper";
 
 // Default stages if no config provided
 const defaultStages = [
@@ -127,158 +128,10 @@ function OpportunityCard({
   const [showingAllValues, setShowingAllValues] = React.useState(false);
 
   // Create details panel function
-  const detailsPanel = (isFullScreen = false) => {
-    // Toggle function for collapsible sections
-    const toggleSection = (section: 'details' | 'company' | 'financials' | 'contacts') => {
-      setOpenSections(prev => ({
-        ...prev,
-        [section]: !prev[section],
-      }));
-    };
-
-    // Toggle showing all values
-    const toggleShowAll = () => {
-      setShowingAllValues(prev => !prev);
-    };
-
-    // Define sections for the accordion
-    const sections = [
-      {
-        id: 'details',
-        title: 'Opportunity Details',
-        icon: FileTextIcon,
-        content: (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Status</span>
-                <Badge variant={opportunity.stage === "closed-won" ? "default" : opportunity.stage === "closed-lost" ? "destructive" : "outline"}>
-                  {opportunityStage}
-                </Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Deal Value</span>
-                <span className="text-sm">${opportunity.amount.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Close Date</span>
-                <span className="text-sm">{new Date(opportunity.expectedClose).toLocaleDateString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Probability</span>
-                <span className="text-sm">{opportunity.probability}%</span>
-              </div>
-            </div>
-          </div>
-        ),
-      },
-      {
-        id: 'company',
-        title: 'Company Information',
-        icon: BuildingIcon,
-        content: (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Company</span>
-                <span className="text-sm">{opportunity.company.name}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Industry</span>
-                <span className="text-sm">{opportunity.company.industry}</span>
-              </div>
-            </div>
-          </div>
-        ),
-      },
-      {
-        id: 'financials',
-        title: 'Financial Details',
-        icon: DollarSignIcon,
-        content: (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Expected Revenue</span>
-                <span className="text-sm">${(opportunity.amount * opportunity.probability / 100).toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Deal Size</span>
-                <Badge variant={opportunity.amount > 100000 ? "default" : "outline"}>
-                  {opportunity.amount > 100000 ? "Large" : "Small"}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        ),
-      },
-      {
-        id: 'contacts',
-        title: 'Key Contacts',
-        icon: UsersIcon,
-        content: (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Primary Contact</span>
-                <span className="text-sm">{opportunity.contact.name}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Decision Maker</span>
-                <span className="text-sm">{opportunity.contact.role || "Not specified"}</span>
-              </div>
-            </div>
-          </div>
-        ),
-      },
-    ];
-
-    return (
-      <div className={`space-y-6 ${isFullScreen ? 'p-6' : 'p-4'}`}>
-        {/* Sections */}
-        <div className="space-y-4">
-          {sections.map((section) => {
-            const isOpen = openSections[section.id as keyof typeof openSections];
-            
-            return (
-              <div key={section.id} className="border rounded-lg overflow-hidden">
-                {/* Section Header */}
-                <button 
-                  onClick={() => toggleSection(section.id as 'details' | 'company' | 'financials' | 'contacts')}
-                  className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
-                >
-                  <div className="flex items-center gap-2">
-                    <section.icon className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{section.title}</span>
-                  </div>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
-                </button>
-                
-                {/* Section Content */}
-                {isOpen && (
-                  <div className="p-3 border-t">
-                    {section.content}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        
-        {/* Show All Toggle */}
-        <div className="flex justify-end">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleShowAll}
-            className="text-xs text-muted-foreground"
-          >
-            {showingAllValues ? "Show Less" : "Show All"}
-          </Button>
-        </div>
-      </div>
-    );
-  };
+  const detailsPanel = () => buildWorkflowDetailsPanel({
+                infoTitle: "Workflow Information",
+                infoFields: [],
+              });
 
   return (
     <Sheet>

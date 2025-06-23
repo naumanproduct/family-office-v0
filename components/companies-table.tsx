@@ -70,6 +70,7 @@ import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
 import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { generateCompanyActivities } from "@/components/shared/activity-generators"
 
 export const companySchema = z.object({
   id: z.number(),
@@ -720,54 +721,7 @@ function CompanyTabContent({ company }: { company: Company }) {
 }
 
 function CompanyActivityContent({ company }: { company: Company }) {
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "funding",
-      actor: company.name,
-      action: "completed",
-      target: "Series C funding round",
-      timestamp: "1 week ago",
-      date: "2025-01-23",
-      details: {
-        amount: "$25M",
-        round: "Series C",
-        leadInvestor: "Venture Capital Partners",
-        valuation: "$150M",
-        useOfFunds: "Product development and market expansion",
-      },
-    },
-    {
-      id: 2,
-      type: "partnership",
-      actor: company.name,
-      action: "announced partnership with",
-      target: "Microsoft",
-      timestamp: "2 weeks ago",
-      date: "2025-01-16",
-      details: {
-        type: "Strategic Partnership",
-        duration: "3 years",
-        value: "$5M",
-        scope: "Cloud infrastructure and AI integration",
-      },
-    },
-    {
-      id: 3,
-      type: "meeting",
-      actor: "Investment Team",
-      action: "conducted quarterly review with",
-      target: company.name,
-      timestamp: "1 month ago",
-      date: "2024-12-28",
-      details: {
-        attendees: ["CEO", "CFO", "Investment Team"],
-        topics: ["Q4 Performance", "2025 Strategy", "Market Expansion"],
-        outcome: "Positive outlook, continued support",
-        nextSteps: "Monthly check-ins, board seat discussion",
-      },
-    },
-  ]
+  const activities = generateCompanyActivities()
 
   return <UnifiedActivitySection activities={activities} />
 }

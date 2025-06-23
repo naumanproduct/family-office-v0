@@ -110,66 +110,6 @@ const data = {
           url: "/deal-pipeline",
           icon: GanttChartIcon,
         },
-        {
-          title: "Capital Calls",
-          url: "/capital-calls",
-          icon: DollarSignIcon,
-        },
-        {
-          title: "Capital Call Tracking",
-          url: "/capital-call-tracking",
-          icon: DollarSignIcon,
-        },
-        {
-          title: "K-1 Processing",
-          url: "/k1-processing",
-          icon: FileTextIcon,
-        },
-        {
-          title: "Investment Onboarding",
-          url: "/investment-onboarding",
-          icon: TrendingUpIcon,
-        },
-        {
-          title: "Quarterly Reporting Review",
-          url: "/quarterly-reporting-review",
-          icon: FileTextIcon,
-        },
-        {
-          title: "Distributions Tracking",
-          url: "/distributions-tracking",
-          icon: DollarSignIcon,
-        },
-        {
-          title: "Entity Annual Tax Prep",
-          url: "/entity-annual-tax-prep",
-          icon: Building2Icon,
-        },
-        {
-          title: "Diligence Process",
-          url: "/diligence-process",
-          icon: TargetIcon,
-        },
-        {
-          title: "Document Review Queue",
-          url: "/document-review-queue",
-          icon: FileTextIcon,
-        },
-        {
-          title: "Audit Preparation",
-          url: "/audit-preparation",
-          icon: ScaleIcon,
-        },
-        {
-          title: "Tax Document Collection",
-          url: "/tax-document-collection",
-          icon: FileTextIcon,
-        },
-        {
-          title: "Entity Compliance & Legal",
-          url: "/entity-compliance-legal",
-          icon: ScaleIcon,
-        },
       ],
     },
   ],

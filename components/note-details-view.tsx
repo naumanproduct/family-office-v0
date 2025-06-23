@@ -27,6 +27,7 @@ import { TypableArea } from "@/components/typable-area"
 import { FileContent } from "@/components/shared/file-content"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
 import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { generateNoteActivities } from "@/components/shared/activity-generators"
 
 interface NoteDetailsViewProps {
   note: any
@@ -83,49 +84,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
   };
 
   // Mock activities for activity section
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "update",
-      actor: "Sarah Johnson",
-      action: "updated",
-      target: "note contents",
-      timestamp: "2 days ago",
-      date: "2025-01-28",
-      details: {
-        previousContent: "Initial draft of investment thesis",
-        newContent: "Updated investment thesis with market analysis",
-        reason: "Incorporated new market research findings",
-      },
-    },
-    {
-      id: 2,
-      type: "meeting",
-      actor: "Investment Team",
-      action: "referenced this note in",
-      target: "quarterly planning meeting",
-      timestamp: "1 week ago",
-      date: "2025-01-23",
-      details: {
-        meetingTitle: "Q1 Investment Strategy",
-        participants: ["Sarah Johnson", "Michael Chen", "David Williams"],
-        relevance: "Key document for understanding target market",
-      },
-    },
-    {
-      id: 3,
-      type: "creation",
-      actor: "Michael Chen",
-      action: "created",
-      target: "this note",
-      timestamp: "1 month ago",
-      date: "2024-12-28",
-      details: {
-        purpose: "Document investment thesis for upcoming opportunities",
-        initialTags: ["Investment", "Strategy", "Research"],
-      },
-    },
-  ];
+  const activities = generateNoteActivities()
 
   const getPriorityColor = (priority: string | undefined | null) => {
     if (!priority) return "bg-gray-100 text-gray-800"

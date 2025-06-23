@@ -38,7 +38,8 @@ import { NoteContent } from "@/components/shared/note-content"
 import { FileContent } from "@/components/shared/file-content"
 import { useTasks } from "./tasks-table"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateTaskActivities } from "@/components/shared/activity-generators"
 
 interface TaskDetailsViewProps {
   task: any
@@ -436,47 +437,16 @@ export function TaskDetailsView({
 
   // Custom comment section rendering (for activity)
   const renderCommentSection = () => {
-    if (isInDrawer) return null;
-    
-    // Mock comment/activity data
-    const activities: ActivityItem[] = [
-      {
-        id: 1,
-        type: "comment",
-        actor: "Sarah Johnson",
-        action: "commented on",
-        target: "task progress",
-        timestamp: "2 days ago",
-        content: "I've started working on this. Will have an update by tomorrow."
-      },
-      {
-        id: 2,
-        type: "status_change",
-        actor: "Michael Chen",
-        action: "changed status from",
-        target: "To Do to In Progress",
-        timestamp: "3 days ago",
-        details: {
-          previousStatus: "To Do",
-          newStatus: "In Progress",
-          reason: "Starting implementation phase"
-        }
-      },
-      {
-        id: 3,
-        type: "assignee_change",
-        actor: "Emily Davis",
-        action: "assigned task to",
-        target: "Sarah Johnson",
-        timestamp: "4 days ago",
-        details: {
-          previous: "Unassigned",
-          new: "Sarah Johnson",
-          reason: "Sarah has expertise in this area"
-        }
-      }
-    ];
-    
+    const activities = generateTaskActivities()
+
+    if (isInDrawer) {
+      return (
+        <div className="mt-4">
+          <UnifiedActivitySection activities={activities} />
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-4 mt-8">
         {/* Comment Section Heading */}

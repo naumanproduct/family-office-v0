@@ -127,7 +127,7 @@ export function UnifiedDetailsPanel({
     return (
       <div className="mt-2 space-y-2">
         {items.map((item) => (
-          <div key={item.id} className="flex items-center justify-between">
+          <div key={item.id} className="flex items-center">
             <div className="flex items-center gap-2 ml-2">
               <div 
                 className="cursor-pointer text-blue-600 hover:underline text-sm"
@@ -140,39 +140,8 @@ export function UnifiedDetailsPanel({
               {item.amount && <span className="text-xs text-muted-foreground">{item.amount}</span>}
               {item.status && <span className="text-xs text-muted-foreground">{item.status}</span>}
             </div>
-
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => onNavigateToRecord && onNavigateToRecord(sectionId, item.id)}
-              >
-                <ExternalLinkIcon className="h-3.5 w-3.5" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => onUnlinkRecord && onUnlinkRecord(sectionId, item.id)}
-              >
-                <UnlinkIcon className="h-3.5 w-3.5" />
-              </Button>
-            </div>
           </div>
         ))}
-
-        {/* Add button */}
-        <div className="ml-2">
-          <Button 
-            variant="link" 
-            className="h-auto p-0 text-xs text-blue-600"
-            onClick={() => onAddRecord && onAddRecord(sectionId)}
-          >
-            + Add {sectionId.toLowerCase()}
-          </Button>
-        </div>
       </div>
     );
   };
@@ -191,21 +160,37 @@ export function UnifiedDetailsPanel({
           const isOpen = openSections[section.id] || false;
 
           return (
-            <div key={section.id} className="rounded-lg border border-muted p-3">
+            <div key={section.id} className="rounded-lg border border-muted p-3 group">
               {/* Section Header */}
-              <div 
-                className="flex items-center cursor-pointer" 
-                onClick={() => toggleSection(section.id)}
-              >
-                {isOpen ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground mr-2" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground mr-2" /> 
-                )}
-                <div className="flex items-center gap-2">
-                  {section.icon}
-                  <span className="font-medium text-sm">{section.title}</span>
+              <div className="flex items-center justify-between">
+                <div 
+                  className="flex items-center cursor-pointer" 
+                  onClick={() => toggleSection(section.id)}
+                >
+                  {isOpen ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground mr-2" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground mr-2" /> 
+                  )}
+                  <div className="flex items-center gap-2">
+                    {section.icon}
+                    <span className="font-medium text-sm">{section.title}</span>
+                  </div>
                 </div>
+                
+                {/* Add button - visible on hover */}
+                {section.sectionData && isOpen && (
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 text-xs text-muted-foreground hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddRecord && onAddRecord(section.id);
+                    }}
+                  >
+                    + Add
+                  </Button>
+                )}
               </div>
 
               {/* Section Content */}

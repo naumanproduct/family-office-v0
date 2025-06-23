@@ -75,8 +75,9 @@ import { AddEntityDialog } from "./add-entity-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { MasterDetailsPanel } from "./shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { generateEntityActivities } from "@/components/shared/activity-generators"
 
 export const entitySchema = z.object({
   id: z.number(),
@@ -648,59 +649,8 @@ function EntityNameCell({ entity }: { entity: Entity }) {
   )
 }
 
-function EntityActivityContent({ entity }: { entity: Entity }) {
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "compliance",
-      actor: "Legal Team",
-      action: "filed annual report for",
-      target: entity.entityName,
-      timestamp: "2 weeks ago",
-      date: "2025-01-16",
-      details: {
-        filingType: "Annual Report",
-        jurisdiction: entity.jurisdiction,
-        status: "Filed",
-        dueDate: "2025-01-31",
-        filedDate: "2025-01-16",
-        nextFiling: "2026-01-31",
-      },
-    },
-    {
-      id: 2,
-      type: "structure_change",
-      actor: "Corporate Secretary",
-      action: "updated ownership structure for",
-      target: entity.entityName,
-      timestamp: "1 month ago",
-      date: "2024-12-28",
-      details: {
-        changeType: "Ownership Transfer",
-        previousOwnership: "75%",
-        newOwnership: entity.ownershipPercent ? `${entity.ownershipPercent}%` : "100%",
-        effectiveDate: "2024-12-28",
-        reason: "Corporate restructuring",
-      },
-    },
-    {
-      id: 3,
-      type: "document",
-      actor: "Legal Team",
-      action: "updated governing documents for",
-      target: entity.entityName,
-      timestamp: "3 months ago",
-      date: "2024-10-28",
-      details: {
-        documentType: "Operating Agreement",
-        version: "v2.1",
-        changes: ["Updated management structure", "Revised distribution terms", "Added compliance provisions"],
-        approvedBy: "Board of Directors",
-        effectiveDate: "2024-11-01",
-      },
-    },
-  ]
-
+function EntityActivityContent() {
+  const activities = generateEntityActivities()
   return <UnifiedActivitySection activities={activities} />
 }
 
@@ -865,7 +815,7 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       onNavigateToRecord={navigateToRecord}
       onAddRecord={handleAddRecord}
       onUnlinkRecord={handleUnlinkRecord}
-      activityContent={<EntityActivityContent entity={entity} />}
+      activityContent={<EntityActivityContent />}
     />
   );
 }

@@ -46,6 +46,10 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
+import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 
 interface Deal {
   id: string
@@ -217,334 +221,83 @@ function DealCard({
     { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
-  // Move these state hooks outside of the detailsPanel function
-  const [openSections, setOpenSections] = React.useState<{
-    details: boolean;
-    company: boolean;
-    contacts: boolean;
-    financials: boolean;
-  }>({
-    details: true, // Details expanded by default
-    company: false,
-    contacts: false,
-    financials: false,
-  });
-
-  // Add state for showing all values
-  const [showingAllValues, setShowingAllValues] = React.useState(false);
-
-  // Create details panel function
+  // Create details panel function using shared builder
   const detailsPanel = (isFullScreen = false) => {
-    // Toggle function for collapsible sections
-    const toggleSection = (section: 'details' | 'company' | 'contacts' | 'financials') => {
-      setOpenSections(prev => ({
-        ...prev,
-        [section]: !prev[section],
-      }));
-    };
+    const infoFields = [
+      { label: "Company", value: deal.companyName },
+      { label: "Funding Round", value: deal.fundingRound },
+      { label: "Target Raise", value: deal.targetRaise },
+      { label: "Owner", value: deal.owner },
+      { label: "Stage", value: opportunityStage },
+    ]
 
-    // Basic fields for collapsed view
-    const basicFields = [
-      {
-        label: "Company Name",
-        value: deal.companyName,
-      },
-      {
-        label: "Funding Round",
-        value: deal.fundingRound,
-      },
-      {
-        label: "Target Raise",
-        value: deal.targetRaise,
-      },
-      {
-        label: "Deal Owner",
-        value: deal.owner,
-      },
-      {
-        label: "Stage",
-        value: opportunityStage,
-      },
-    ] as Array<{
-      label: string;
-      value: React.ReactNode;
-      isLink?: boolean;
-    }>;
+    // Provide mock related records only for the showcase deal
+    const companies =
+      deal.companyName === "TechFlow Solutions"
+        ? [{ id: 1, name: "TechFlow Solutions", type: "Target Company" }]
+        : []
 
-    // Extended fields for "Show all" view
-    const extendedFields = [
-      {
-        label: "Company Name",
-        value: deal.companyName,
-      },
-      {
-        label: "Sector",
-        value: deal.sector,
-      },
-      {
-        label: "Funding Round",
-        value: deal.fundingRound,
-      },
-      {
-        label: "Target Raise",
-        value: deal.targetRaise,
-      },
-      {
-        label: "Deal Owner",
-        value: deal.owner,
-      },
-      {
-        label: "Stage",
-        value: opportunityStage,
-      },
-      {
-        label: "Location",
-        value: deal.location || "N/A",
-      },
-      {
-        label: "Email",
-        value: deal.email || "N/A",
-        isLink: true,
-      },
-      {
-        label: "Last Contact",
-        value: deal.lastContact || "N/A",
-      },
-      {
-        label: "Next Meeting",
-        value: deal.nextMeeting || "N/A",
-      },
-      {
-        label: "Valuation",
-        value: deal.valuation || "TBD",
-      },
-      {
-        label: "Revenue",
-        value: deal.revenue || "N/A",
-      },
-      {
-        label: "Employees",
-        value: deal.employees || "N/A",
-      },
-      {
-        label: "Description",
-        value: deal.description || "No description available",
-      },
-    ] as Array<{
-      label: string;
-      value: React.ReactNode;
-      isLink?: boolean;
-    }>;
+    const entities =
+      deal.companyName === "TechFlow Solutions"
+        ? [
+            {
+              id: 1,
+              name: "TechFlow Solutions Holdings LLC",
+              type: "Holding Entity",
+            },
+          ]
+        : []
 
-    // Mock data for related entities
-    const relatedData = {
-      contacts: [
+    const investments =
+      deal.companyName === "TechFlow Solutions"
+        ? [
+            {
+              id: 1,
+              name: "Series A – TechFlow Solutions",
+              amount: "$15M",
+              status: "Proposed",
+            },
+            {
+              id: 2,
+              name: "Seed Round – TechFlow Solutions",
+              amount: "$3M",
+              status: "Closed",
+            },
+          ]
+        : []
+
+    const opportunities =
+      deal.companyName === "TechFlow Solutions"
+        ? [
+            {
+              id: 1,
+              name: "TechFlow Series A",
+              type: "Investment Opportunity",
+            },
+          ]
+        : []
+
+    const sections = buildStandardDetailSections({
+      infoTitle: "Workflow Information",
+      infoIcon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
+      infoFields,
+      companies,
+      entities,
+      investments,
+      opportunities,
+      people: [
         { id: 1, name: "Sarah Johnson", role: "CEO" },
         { id: 2, name: "Michael Chen", role: "CFO" },
       ],
-      companyInfo: [
-        { id: 1, name: "Website", value: deal.website || "N/A", isLink: true },
-        { id: 2, name: "Phone", value: deal.phone || "N/A" },
-      ],
-      financials: [
-        { id: 1, name: "Valuation", value: deal.valuation || "TBD" },
-        { id: 2, name: "Revenue", value: deal.revenue || "N/A" },
-        { id: 3, name: "Employees", value: deal.employees || "N/A" },
-      ],
-    };
-
-    // Render the detail fields
-    const renderFields = (fields: typeof basicFields, showAllButton: boolean = false) => (
-      <div className="space-y-3">
-        {fields.map((field, index) => (
-          <div key={index} className="flex items-center">
-            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
-            {field.isLink ? (
-              <p className="text-sm text-blue-600 flex-1">{field.value}</p>
-            ) : (
-              <p className="text-sm flex-1">{field.value}</p>
-            )}
-          </div>
-        ))}
-        {showAllButton && (
-          <div className="flex items-center mt-2">
-            <Button 
-              variant="link" 
-              className="h-auto p-0 text-xs text-blue-600 ml-2"
-              onClick={() => setShowingAllValues(true)}
-            >
-              Show all
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-
-    // Items section for related data
-    const ItemsSection = ({ 
-      items 
-    }: { 
-      items: any[] 
-    }) => {
-      return (
-        <div className="ml-2 group/section">
-          <div className="flex flex-col space-y-2">
-            {items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between group">
-                <Badge 
-                  variant="outline" 
-                  className="cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-1 py-1 w-fit font-normal"
-                >
-                  {item.name}
-                  {item.role && <span className="text-muted-foreground"> - {item.role}</span>}
-                  {item.value && <span className="ml-2">{item.value}</span>}
-                </Badge>
-              </div>
-            ))}
-          </div>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mt-2 text-xs text-muted-foreground opacity-0 group-hover/section:opacity-100 transition-opacity"
-          >
-            <PlusIcon className="h-3 w-3 mr-1" />
-            Add
-          </Button>
-        </div>
-      );
-    };
-
-    // Apple-style section headers and content
-    const sections = [
-      {
-        id: 'details',
-        title: 'Deal Details',
-        icon: FileTextIcon,
-        content: renderFields(showingAllValues ? extendedFields : basicFields, !showingAllValues),
-        count: null
-      },
-      {
-        id: 'company',
-        title: 'Company Information',
-        icon: BuildingIcon,
-        content: <ItemsSection items={relatedData.companyInfo} />,
-        count: relatedData.companyInfo.length
-      },
-      {
-        id: 'contacts',
-        title: 'Contacts',
-        icon: UsersIcon,
-        content: <ItemsSection items={relatedData.contacts} />,
-        count: relatedData.contacts.length
-      },
-      {
-        id: 'financials',
-        title: 'Financials',
-        icon: DollarSignIcon,
-        content: <ItemsSection items={relatedData.financials} />,
-        count: relatedData.financials.length
-      },
-    ];
-
-    // Mock activity data
-    const activities = [
-      {
-        id: 1,
-        type: "meeting",
-        actor: "Deal Team",
-        action: "had a meeting with",
-        target: deal.companyName,
-        timestamp: "2 days ago",
-      },
-      {
-        id: 2,
-        type: "update",
-        actor: "Financial Analyst",
-        action: "updated valuation for",
-        target: deal.companyName,
-        timestamp: "1 week ago",
-      },
-    ];
+    })
 
     return (
-      <div className="px-6 pt-2 pb-6">
-        {/* Unified container with Apple-style cohesive design */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          {sections.map((section, index) => {
-            const isOpen = openSections[section.id as keyof typeof openSections];
-            const Icon = section.icon;
-            
-            return (
-              <React.Fragment key={section.id}>
-                {/* Divider between sections (except for the first one) */}
-                {index > 0 && (
-                  <div className="h-px bg-muted mx-3" />
-                )}
-                
-                {/* Section Header */}
-                <button 
-                  onClick={() => toggleSection(section.id as 'details' | 'company' | 'contacts' | 'financials')}
-                  className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
-                >
-                  <div className="flex items-center">
-                    <Icon className="h-4 w-4 text-muted-foreground ml-2" />
-                    <h4 className="text-sm font-medium ml-2">{section.title}</h4>
-                    
-                    {/* Show count badge for sections that have counts */}
-                    {section.count !== null && (
-                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 rounded-full text-xs">
-                        {section.count}
-                      </Badge>
-                    )}
-                  </div>
-                  <ChevronDownIcon 
-                    className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-                  />
-                </button>
-                
-                {/* Section Content with smooth height transition */}
-                {isOpen && (
-                  <div className="px-3 pb-3 pt-2 group/section">
-                    {section.content}
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-
-        {/* Activity Section - Only in Drawer View */}
-        {!isFullScreen && (
-          <div className="mt-8">
-            <div className="mb-4">
-              <h4 className="text-sm font-medium">Activity</h4>
-            </div>
-            <div className="space-y-4">
-              {activities.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3">
-                  <div className="mt-1">
-                    <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-sm">
-                        <span className="font-medium">{activity.actor}</span>{" "}
-                        <span className="text-muted-foreground">{activity.action}</span>{" "}
-                        <Badge variant="outline" className="text-xs mx-1">
-                          {activity.target}
-                        </Badge>
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
+      <UnifiedDetailsPanel
+        sections={sections}
+        isFullScreen={isFullScreen}
+        activityContent={<UnifiedActivitySection activities={generateWorkflowActivities()} />}
+      />
+    )
   }
 
   // Create children function for tabs
@@ -806,7 +559,7 @@ function DealCard({
         </Card>
       }
       title={opportunityTitle}
-      recordType="Opportunity"
+      recordType="Workflow"
       subtitle={opportunitySubtitle}
       tabs={tabs}
       children={renderTabContent}

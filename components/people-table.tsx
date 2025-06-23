@@ -77,6 +77,7 @@ import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/uni
 import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 import { Label } from "@/components/ui/label"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { generatePersonActivities } from "@/components/shared/activity-generators"
 
 // Add missing component imports
 function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
@@ -517,56 +518,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
 }
 
 function PersonActivityContent({ contact }: { contact: Contact }) {
-  const activities: ActivityItem[] = [
-    {
-      id: 1,
-      type: "meeting",
-      actor: "You",
-      action: "had a meeting with",
-      target: `${contact.firstName} ${contact.lastName}`,
-      timestamp: "3 days ago",
-      date: "2025-01-27",
-      details: {
-        type: "Video Call",
-        duration: "45 minutes",
-        topics: ["Partnership opportunities", "Q1 planning", "Budget discussion"],
-        outcome: "Positive discussion, follow-up scheduled",
-        nextSteps: "Send proposal by Friday, schedule technical review",
-      },
-    },
-    {
-      id: 2,
-      type: "email",
-      actor: contact.firstName,
-      action: "sent email about",
-      target: "Project collaboration",
-      timestamp: "1 week ago",
-      date: "2025-01-23",
-      details: {
-        subject: "Re: Partnership Proposal",
-        type: "Response",
-        sentiment: "Positive",
-        keyPoints: ["Interested in collaboration", "Budget approved", "Timeline discussion needed"],
-        followUp: "Schedule technical review meeting",
-      },
-    },
-    {
-      id: 3,
-      type: "role_change",
-      actor: contact.firstName,
-      action: "was promoted to",
-      target: contact.jobTitle,
-      timestamp: "2 months ago",
-      date: "2024-11-28",
-      details: {
-        previousRole: "Senior Manager",
-        newRole: contact.jobTitle,
-        company: contact.company,
-        effectiveDate: "2024-12-01",
-        impact: "Increased decision-making authority, larger budget responsibility",
-      },
-    },
-  ]
+  const activities = generatePersonActivities(contact)
 
   return <UnifiedActivitySection activities={activities} />
 }
