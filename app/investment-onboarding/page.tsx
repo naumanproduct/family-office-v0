@@ -246,4 +246,4 @@ export default function InvestmentOnboardingPage() {
       </SidebarInset>
     </SidebarProvider>
   )
-} 
+}

@@ -216,4 +216,4 @@ export default function CapitalCallsPage() {
       </SidebarInset>
     </SidebarProvider>
   )
-} 
+}
