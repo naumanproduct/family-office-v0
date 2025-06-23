@@ -16,6 +16,10 @@ import {
 } from "@tanstack/react-table"
 import {
   ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
   ColumnsIcon,
   FilterIcon,
   MoreVerticalIcon,
@@ -45,6 +49,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuDraggableItem,
   DropdownMenuItem,
@@ -52,12 +57,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { MailIcon, FileTextIcon, CalendarIcon, FolderIcon, CheckCircleIcon, TrendingUpIcon } from "lucide-react"
+import {
+  MailIcon,
+  FileTextIcon,
+  CalendarIcon,
+  FolderIcon,
+  CheckCircleIcon,
+  TrendingUpIcon,
+} from "lucide-react"
 import { MasterDrawer } from "./master-drawer"
 import { AddOpportunityDialog } from "./add-opportunity-dialog"
+import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection, type ActivityItem } from "./shared/unified-activity-section"
+import { Label } from "@/components/ui/label"
+import { UnifiedActivitySection, ActivityItem } from "./shared/unified-activity-section"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -624,8 +639,8 @@ function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity 
         previousStage: "Initial Contact",
         newStage: opportunity.stage,
         reason: "Completed preliminary due diligence",
-        timeline: "2-3 weeks",
         nextSteps: ["Management presentation", "Financial model review", "Reference calls"],
+        timeline: "2-3 weeks",
       },
     },
     {
@@ -639,9 +654,9 @@ function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity 
       details: {
         type: "Management Presentation",
         duration: "2 hours",
-        outcome: "Positive feedback, proceeding to next stage",
         attendees: ["CEO", "CFO", "CTO", "Investment Team"],
         topics: ["Business model", "Market opportunity", "Financial projections", "Use of funds"],
+        outcome: "Positive feedback, proceeding to next stage",
       },
     },
     {
@@ -654,10 +669,10 @@ function OpportunityActivityContent({ opportunity }: { opportunity: Opportunity 
       date: "2025-01-16",
       details: {
         reviewType: "Legal Due Diligence",
-        status: "Completed",
-        findings: "No material issues identified",
         scope: ["Corporate structure", "Contracts review", "IP analysis", "Compliance check"],
+        findings: "No material issues identified",
         recommendations: ["Standard legal documentation", "IP protection enhancement"],
+        status: "Completed",
       },
     },
   ]
@@ -692,26 +707,26 @@ function OpportunityDetailsPanel({
       { id: 1, name: "Follow-on Investment", status: "In Discussion" },
       { id: 2, name: "Related Partnership Deal", status: "Initial Review" },
     ],
-  }
+  };
 
   // Mock navigation handler for related records
   const navigateToRecord = (recordType: string, id: number) => {
-    console.log(`Navigate to ${recordType} record with ID: ${id}`)
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
     // This would be implemented to navigate to the record
-  }
+  };
 
   // Mock handler for adding a linked record
   const handleAddRecord = (sectionId: string) => {
-    console.log(`Add new ${sectionId} record for ${opportunity.name}`)
+    console.log(`Add new ${sectionId} record for ${opportunity.name}`);
     // This would open the appropriate creation dialog
-  }
+  };
 
   // Mock handler for removing a linked record
   const handleUnlinkRecord = (sectionId: string, id: number) => {
-    console.log(`Unlink ${sectionId} record with ID ${id} from ${opportunity.name}`)
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${opportunity.name}`);
     // This would handle removal of the relationship
-  }
-
+  };
+  
   // Define all sections for the details panel
   const sections: DetailSection[] = [
     {
@@ -738,7 +753,7 @@ function OpportunityDetailsPanel({
       title: "Companies",
       icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.companies,
+        items: relatedData.companies
       },
     },
     {
@@ -746,7 +761,7 @@ function OpportunityDetailsPanel({
       title: "People",
       icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.people,
+        items: relatedData.people
       },
     },
     {
@@ -754,7 +769,7 @@ function OpportunityDetailsPanel({
       title: "Entities",
       icon: <LandmarkIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.entities,
+        items: relatedData.entities
       },
     },
     {
@@ -762,7 +777,7 @@ function OpportunityDetailsPanel({
       title: "Investments",
       icon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.investments,
+        items: relatedData.investments
       },
     },
     {
@@ -770,10 +785,10 @@ function OpportunityDetailsPanel({
       title: "Related Opportunities",
       icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.opportunities,
+        items: relatedData.opportunities
       },
     },
-  ]
+  ];
 
   return (
     <UnifiedDetailsPanel
@@ -928,25 +943,25 @@ export function OpportunitiesTable() {
     const visibleColumns = table
       .getAllColumns()
       .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-      .map((column) => column.id)
-
+      .map((column) => column.id);
+    
     if (columnOrder.length === 0 && visibleColumns.length > 0) {
-      setColumnOrder(visibleColumns)
+      setColumnOrder(visibleColumns);
     }
-  }, [table.getAllColumns(), columnOrder])
+  }, [table.getAllColumns(), columnOrder]);
 
   // Handle drag end for column reordering
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-
+    const { active, over } = event;
+    
     if (active && over && active.id !== over.id) {
       setColumnOrder((items) => {
-        const oldIndex = items.indexOf(active.id as string)
-        const newIndex = items.indexOf(over.id as string)
-        return arrayMove(items, oldIndex, newIndex)
-      })
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -993,12 +1008,16 @@ export function OpportunitiesTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
                 <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
                   {columnOrder.map((columnId) => {
-                    const column = table.getColumn(columnId)
-                    if (!column) return null
-
+                    const column = table.getColumn(columnId);
+                    if (!column) return null;
+                    
                     return (
                       <DropdownMenuDraggableItem
                         key={columnId}
@@ -1009,7 +1028,7 @@ export function OpportunitiesTable() {
                       >
                         {columnId}
                       </DropdownMenuDraggableItem>
-                    )
+                    );
                   })}
                 </SortableContext>
               </DndContext>

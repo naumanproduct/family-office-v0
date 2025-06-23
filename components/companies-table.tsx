@@ -16,6 +16,10 @@ import {
 } from "@tanstack/react-table"
 import {
   ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
+  ChevronsRightIcon,
   ColumnsIcon,
   ExternalLinkIcon,
   FilterIcon,
@@ -46,6 +50,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuDraggableItem,
   DropdownMenuItem,
@@ -53,6 +58,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { MailIcon, BuildingIcon, FileTextIcon, UsersIcon, ClockIcon, MessageSquareIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -61,8 +67,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { AddCompanyDialog } from "./add-company-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 
 export const companySchema = z.object({
   id: z.number(),
@@ -727,7 +734,7 @@ function CompanyActivityContent({ company }: { company: Company }) {
         round: "Series C",
         leadInvestor: "Venture Capital Partners",
         valuation: "$150M",
-        useOfFunds: ["Product development", "Market expansion", "Team growth"],
+        useOfFunds: "Product development and market expansion",
       },
     },
     {
@@ -754,12 +761,10 @@ function CompanyActivityContent({ company }: { company: Company }) {
       timestamp: "1 month ago",
       date: "2024-12-28",
       details: {
-        type: "Quarterly Review",
-        duration: "45 minutes",
-        outcome: "Positive outlook, continued support",
         attendees: ["CEO", "CFO", "Investment Team"],
         topics: ["Q4 Performance", "2025 Strategy", "Market Expansion"],
-        nextSteps: ["Monthly check-ins", "Board seat discussion"],
+        outcome: "Positive outlook, continued support",
+        nextSteps: "Monthly check-ins, board seat discussion",
       },
     },
   ]
@@ -787,7 +792,7 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       { id: 1, name: "Expansion Funding", status: "In Discussion" },
       { id: 2, name: "Strategic Partnership", status: "Initial Review" },
     ],
-  }
+  };
 
   // Basic fields for main section
   const basicFields = [
@@ -820,8 +825,8 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       label: "Employees",
       value: company.employees,
     },
-  ]
-
+  ];
+  
   // Extended fields for comprehensive view
   const extendedFields = [
     ...basicFields,
@@ -867,25 +872,25 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       label: "Status",
       value: company.status,
     },
-  ]
-
+  ];
+  
   // Navigation handler for related records
   const navigateToRecord = (recordType: string, id: number) => {
-    console.log(`Navigate to ${recordType} record with ID: ${id}`)
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
     // This would be implemented to navigate to the record
-  }
-
+  };
+  
   // Add record handler
   const handleAddRecord = (sectionId: string) => {
-    console.log(`Add new ${sectionId} record for ${company.name}`)
+    console.log(`Add new ${sectionId} record for ${company.name}`);
     // This would open the appropriate creation dialog
-  }
-
+  };
+  
   // Unlink record handler
   const handleUnlinkRecord = (sectionId: string, id: number) => {
-    console.log(`Unlink ${sectionId} record with ID ${id} from ${company.name}`)
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${company.name}`);
     // This would handle removal of the relationship
-  }
+  };
 
   // Define all sections for the details panel
   const sections: DetailSection[] = [
@@ -912,7 +917,7 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       title: "Key People",
       icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.people,
+        items: relatedData.people
       },
     },
     {
@@ -920,7 +925,7 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       title: "Investments",
       icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.investments,
+        items: relatedData.investments
       },
     },
     {
@@ -928,7 +933,7 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       title: "Related Entities",
       icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.entities,
+        items: relatedData.entities
       },
     },
     {
@@ -936,10 +941,10 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       title: "Opportunities",
       icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.opportunities,
+        items: relatedData.opportunities
       },
     },
-  ]
+  ];
 
   return (
     <UnifiedDetailsPanel
@@ -950,7 +955,7 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       onUnlinkRecord={handleUnlinkRecord}
       activityContent={<CompanyActivityContent company={company} />}
     />
-  )
+  );
 }
 
 const columns: ColumnDef<Company>[] = [
@@ -1148,25 +1153,25 @@ export function CompaniesTable() {
     const visibleColumns = table
       .getAllColumns()
       .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-      .map((column) => column.id)
-
+      .map((column) => column.id);
+    
     if (columnOrder.length === 0 && visibleColumns.length > 0) {
-      setColumnOrder(visibleColumns)
+      setColumnOrder(visibleColumns);
     }
-  }, [table.getAllColumns(), columnOrder])
+  }, [table.getAllColumns(), columnOrder]);
 
   // Handle drag end for column reordering
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-
+    const { active, over } = event;
+    
     if (active && over && active.id !== over.id) {
       setColumnOrder((items) => {
-        const oldIndex = items.indexOf(active.id as string)
-        const newIndex = items.indexOf(over.id as string)
-        return arrayMove(items, oldIndex, newIndex)
-      })
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -1213,12 +1218,16 @@ export function CompaniesTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
                 <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
                   {columnOrder.map((columnId) => {
-                    const column = table.getColumn(columnId)
-                    if (!column) return null
-
+                    const column = table.getColumn(columnId);
+                    if (!column) return null;
+                    
                     return (
                       <DropdownMenuDraggableItem
                         key={columnId}
@@ -1229,7 +1238,7 @@ export function CompaniesTable() {
                       >
                         {columnId}
                       </DropdownMenuDraggableItem>
-                    )
+                    );
                   })}
                 </SortableContext>
               </DndContext>

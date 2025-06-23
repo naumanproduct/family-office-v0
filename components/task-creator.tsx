@@ -20,6 +20,8 @@ import {
   ChevronRight,
   Bookmark,
   ChevronLeftIcon,
+  LayoutIcon,
+  DollarSignIcon,
 } from "lucide-react"
 
 const priorityOptions = [
@@ -42,6 +44,22 @@ const assigneeOptions = [
   { value: "michael-brown", label: "Michael Brown" },
   { value: "legal-team", label: "Legal Team" },
   { value: "compliance-team", label: "Compliance Team" },
+]
+
+const entityOptions = [
+  { value: "trust-1231", label: "Trust #1231" },
+  { value: "offshore-holdings", label: "Offshore Holdings LLC" },
+  { value: "family-trust-2", label: "Family Trust #2" },
+  { value: "investment-fund-a", label: "Investment Fund A" },
+  { value: "holding-company-b", label: "Holding Company B" },
+]
+
+const investmentOptions = [
+  { value: "series-a-techflow", label: "Series A - TechFlow Inc." },
+  { value: "series-b-meridian", label: "Series B - Meridian Capital" },
+  { value: "real-estate-portfolio", label: "Real Estate Portfolio #1" },
+  { value: "private-equity-fund", label: "Private Equity Fund III" },
+  { value: "venture-capital-round", label: "Venture Capital Round C" },
 ]
 
 interface TaskCreatorProps {
@@ -74,6 +92,8 @@ export function TaskCreator({
         status: "todo",
         assignee: "you",
         dueDate: "",
+        entity: "",
+        investment: "",
         subtasks: existingTemplate.subtasks?.map((st: any) => ({ ...st, included: true })) || [],
       }
     }
@@ -84,6 +104,8 @@ export function TaskCreator({
       status: "todo",
       assignee: "you",
       dueDate: "",
+      entity: "",
+      investment: "",
       subtasks: [],
     }
   })
@@ -99,6 +121,8 @@ export function TaskCreator({
         status: "todo",
         assignee: "you",
         dueDate: "",
+        entity: "",
+        investment: "",
         subtasks: existingTemplate.subtasks?.map((st: any) => ({ ...st, included: true })) || [],
       }
       setTask(newTask)
@@ -160,6 +184,8 @@ export function TaskCreator({
       status: "todo",
       assignee: "you",
       dueDate: "",
+      entity: "",
+      investment: "",
       subtasks: [],
     })
     setActiveTab("basic")
@@ -533,6 +559,44 @@ export function TaskCreator({
                       onChange={(e) => updateTask({ dueDate: e.target.value })}
                     />
                   </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="entity">Related Entity</Label>
+                  <Select value={task.entity} onValueChange={(value) => updateTask({ entity: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select entity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {entityOptions.map((entity) => (
+                        <SelectItem key={entity.value} value={entity.value}>
+                          <div className="flex items-center gap-2">
+                            <LayoutIcon className="h-3 w-3" />
+                            {entity.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="investment">Related Investment</Label>
+                  <Select value={task.investment} onValueChange={(value) => updateTask({ investment: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select investment" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {investmentOptions.map((investment) => (
+                        <SelectItem key={investment.value} value={investment.value}>
+                          <div className="flex items-center gap-2">
+                            <DollarSignIcon className="h-3 w-3" />
+                            {investment.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </TabsContent>

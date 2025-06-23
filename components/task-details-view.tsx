@@ -5,6 +5,7 @@ import {
   CheckCircleIcon,
   CalendarIcon,
   UserIcon,
+  AlertTriangleIcon,
   FileTextIcon,
   CheckSquareIcon,
   PlusIcon,
@@ -29,6 +30,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { TypableArea } from "@/components/typable-area"
 
@@ -36,7 +38,7 @@ import { NoteContent } from "@/components/shared/note-content"
 import { FileContent } from "@/components/shared/file-content"
 import { useTasks } from "./tasks-table"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 
 interface TaskDetailsViewProps {
   task: any
@@ -77,7 +79,7 @@ export function TaskDetailsView({
   })
 
   // Get the tasks context for updating task status
-  const tasksContext = useTasks()
+  const tasksContext = useTasks();
 
   const [subtasks, setSubtasks] = React.useState(
     task.subtasks || [
@@ -151,10 +153,10 @@ export function TaskDetailsView({
   const handleFieldEdit = (field: string, value: string) => {
     setFieldValues((prev) => ({ ...prev, [field]: value }))
     setEditingField(null)
-
+    
     // If the field is status and we have a task context, update the global state
     if (field === "status" && tasksContext && task.id) {
-      tasksContext.updateTaskStatus(task.id, value)
+      tasksContext.updateTaskStatus(task.id, value);
     }
   }
 
@@ -223,21 +225,21 @@ export function TaskDetailsView({
 
   // Mock navigation handler for related records
   const navigateToRecord = (recordType: string, id: number) => {
-    console.log(`Navigate to ${recordType} record with ID: ${id}`)
+    console.log(`Navigate to ${recordType} record with ID: ${id}`);
     // This would be implemented to navigate to the record
-  }
+  };
 
   // Mock handler for adding a linked record
   const handleAddRecord = (sectionId: string) => {
-    console.log(`Add new ${sectionId} record for ${task.title}`)
+    console.log(`Add new ${sectionId} record for ${task.title}`);
     // This would open the appropriate creation dialog
-  }
+  };
 
   // Mock handler for removing a linked record
   const handleUnlinkRecord = (sectionId: string, id: number) => {
-    console.log(`Unlink ${sectionId} record with ID ${id} from ${task.title}`)
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${task.title}`);
     // This would handle removal of the relationship
-  }
+  };
 
   // Mock data for related entities
   const relatedData = {
@@ -261,11 +263,11 @@ export function TaskDetailsView({
       { id: 1, name: "Expansion Funding", status: "In Discussion" },
       { id: 2, name: "Strategic Partnership", status: "Initial Review" },
     ],
-  }
+  };
 
   // Custom subtasks section rendering
   const renderSubtasksSection = () => {
-    if (parentTask || hideSubtasks) return null
+    if (parentTask || hideSubtasks) return null;
 
     return (
       <div className="space-y-2 mb-8">
@@ -296,10 +298,10 @@ export function TaskDetailsView({
                     const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
                     // Update the local state
                     handleSubtaskStatusChange(subtask.id, newStatus)
-
+                    
                     // If this is a task in the global context (has numeric ID), update global state too
                     if (tasksContext && !isNaN(Number(subtask.id))) {
-                      tasksContext.updateTaskStatus(Number(subtask.id), newStatus)
+                      tasksContext.updateTaskStatus(Number(subtask.id), newStatus);
                     }
                   }}
                 >
@@ -338,18 +340,27 @@ export function TaskDetailsView({
                     >
                       {subtask.status}
                     </Badge>
-                    <Badge className={`text-xs ${getPriorityColor(subtask.priority)}`}>{subtask.priority}</Badge>
+                    <Badge className={`text-xs ${getPriorityColor(subtask.priority)}`}>
+                      {subtask.priority}
+                    </Badge>
                   </div>
                 </div>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <DotsHorizontalIcon className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>Open Details</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>
+                    Open Details
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
                     Mark as To Do
@@ -361,7 +372,10 @@ export function TaskDetailsView({
                     Mark as Completed
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleDeleteSubtask(subtask.id)} className="text-destructive">
+                  <DropdownMenuItem
+                    onClick={() => handleDeleteSubtask(subtask.id)}
+                    className="text-destructive"
+                  >
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -417,13 +431,13 @@ export function TaskDetailsView({
           </div>
         )}
       </div>
-    )
-  }
+    );
+  };
 
   // Custom comment section rendering (for activity)
   const renderCommentSection = () => {
-    if (isInDrawer) return null
-
+    if (isInDrawer) return null;
+    
     // Mock comment/activity data
     const activities: ActivityItem[] = [
       {
@@ -433,7 +447,7 @@ export function TaskDetailsView({
         action: "commented on",
         target: "task progress",
         timestamp: "2 days ago",
-        content: "I've started working on this. Will have an update by tomorrow.",
+        content: "I've started working on this. Will have an update by tomorrow."
       },
       {
         id: 2,
@@ -445,8 +459,8 @@ export function TaskDetailsView({
         details: {
           previousStatus: "To Do",
           newStatus: "In Progress",
-          reason: "Starting implementation phase",
-        },
+          reason: "Starting implementation phase"
+        }
       },
       {
         id: 3,
@@ -456,20 +470,20 @@ export function TaskDetailsView({
         target: "Sarah Johnson",
         timestamp: "4 days ago",
         details: {
-          previousAssignee: "Unassigned",
-          newAssignee: "Sarah Johnson",
-          reason: "Sarah has expertise in this area",
-        },
-      },
-    ]
-
+          previous: "Unassigned",
+          new: "Sarah Johnson",
+          reason: "Sarah has expertise in this area"
+        }
+      }
+    ];
+    
     return (
       <div className="space-y-4 mt-8">
         {/* Comment Section Heading */}
         <div className="mb-2">
           <h4 className="text-sm font-medium">Add a comment about this task</h4>
         </div>
-
+        
         {/* Comment Input */}
         <TypableArea
           value={commentText}
@@ -479,21 +493,21 @@ export function TaskDetailsView({
           showButtons={true}
           submitLabel="Add comment"
         />
-
+        
         {/* Activity Section Heading */}
         <div className="mt-8 mb-2">
           <h4 className="text-sm font-medium">Activity</h4>
         </div>
-
+        
         {/* Comments List */}
         <div className="mt-4">
           <UnifiedActivitySection activities={activities} />
         </div>
       </div>
-    )
-  }
+    );
+  };
 
-  // Define all sections for the details panel
+  // Define all sections for the details panel 
   const sections: DetailSection[] = [
     {
       id: "details",
@@ -506,11 +520,11 @@ export function TaskDetailsView({
         },
         {
           label: "Priority",
-          value: <Badge className={getPriorityColor(fieldValues.priority)}>{fieldValues.priority}</Badge>,
+          value: <Badge className={getPriorityColor(fieldValues.priority)}>{fieldValues.priority}</Badge>
         },
         {
           label: "Status",
-          value: <Badge className={getStatusColor(fieldValues.status)}>{fieldValues.status}</Badge>,
+          value: <Badge className={getStatusColor(fieldValues.status)}>{fieldValues.status}</Badge>
         },
         {
           label: "Assignee",
@@ -531,7 +545,7 @@ export function TaskDetailsView({
       title: "Companies",
       icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.companies,
+        items: relatedData.companies
       },
     },
     {
@@ -539,7 +553,7 @@ export function TaskDetailsView({
       title: "People",
       icon: <UserRoundIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.people,
+        items: relatedData.people
       },
     },
     {
@@ -547,7 +561,7 @@ export function TaskDetailsView({
       title: "Entities",
       icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.entities,
+        items: relatedData.entities
       },
     },
     {
@@ -555,7 +569,7 @@ export function TaskDetailsView({
       title: "Investments",
       icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.investments,
+        items: relatedData.investments
       },
     },
     {
@@ -563,10 +577,10 @@ export function TaskDetailsView({
       title: "Opportunities",
       icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.opportunities,
+        items: relatedData.opportunities
       },
     },
-  ]
+  ];
 
   // If a subtask is selected, render the subtask view
   if (selectedSubtask && !onSubtaskClick) {
@@ -589,12 +603,12 @@ export function TaskDetailsView({
   // Custom content for tabs other than details
   const getTabContent = () => {
     if (activeTab === "notes") {
-      return <NoteContent />
+      return <NoteContent />;
     } else if (activeTab === "files") {
-      return <FileContent />
+      return <FileContent />;
     }
-    return null
-  }
+    return null;
+  };
 
   return (
     <div className="flex flex-col flex-1">
@@ -688,7 +702,9 @@ export function TaskDetailsView({
           additionalContent={null}
         />
       ) : (
-        <div className={`${isFullScreen ? "px-6 py-6" : "p-6"}`}>{getTabContent()}</div>
+        <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>
+          {getTabContent()}
+        </div>
       )}
     </div>
   )
