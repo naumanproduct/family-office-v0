@@ -68,6 +68,32 @@ export function getAttributesForObjectType(objectType: string): WorkflowAttribut
         { id: "lastContact", name: "Last Contact", type: "date" },
         { id: "nextStep", name: "Next Step", type: "text" },
       ]
+    case "investment":
+      return [
+        { id: "name", name: "Investment Name", type: "text" },
+        { id: "type", name: "Investment Type", type: "select" },
+        { id: "amount", name: "Amount Invested", type: "currency" },
+        { id: "date", name: "Investment Date", type: "date" },
+        { id: "status", name: "Status", type: "select" },
+        { id: "owner", name: "Owner", type: "user" },
+      ]
+    case "person":
+      return [
+        { id: "firstName", name: "First Name", type: "text" },
+        { id: "lastName", name: "Last Name", type: "text" },
+        { id: "role", name: "Role", type: "text" },
+        { id: "email", name: "Email", type: "text" },
+        { id: "phone", name: "Phone", type: "text" },
+      ]
+    case "company":
+      return [
+        { id: "name", name: "Company Name", type: "text" },
+        { id: "industry", name: "Industry", type: "text" },
+        { id: "size", name: "Company Size", type: "number" },
+        { id: "country", name: "Country", type: "text" },
+        { id: "founded", name: "Founded", type: "date" },
+        { id: "website", name: "Website", type: "text" },
+      ]
     case "capital-call":
       return [
         { id: "fundName", name: "Fund Name", type: "text" },

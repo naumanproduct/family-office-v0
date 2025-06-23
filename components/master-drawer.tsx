@@ -59,6 +59,13 @@ export function MasterDrawer({
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
   const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
 
+  // Exclude specific tab ids across all drawers
+  const excludedTabIds = ["contacts", "people", "team", "company"]
+  const filteredTabs = React.useMemo(
+    () => tabs.filter((tab) => !excludedTabIds.includes(tab.id.toLowerCase())),
+    [tabs],
+  )
+
   const [hiddenTabs, setHiddenTabs] = React.useState<Tab[]>([])
   const [visibleTabs, setVisibleTabs] = React.useState<Tab[]>([])
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = React.useState(false)
@@ -70,16 +77,16 @@ export function MasterDrawer({
   React.useEffect(() => {
     // For regular drawer, show first 5 tabs as visible, rest as hidden
     const maxVisibleTabs = 5
-    if (tabs.length > maxVisibleTabs) {
-      setVisibleTabs(tabs.slice(0, maxVisibleTabs))
-      setHiddenTabs(tabs.slice(maxVisibleTabs))
+    if (filteredTabs.length > maxVisibleTabs) {
+      setVisibleTabs(filteredTabs.slice(0, maxVisibleTabs))
+      setHiddenTabs(filteredTabs.slice(maxVisibleTabs))
     } else {
-      setVisibleTabs(tabs)
+      setVisibleTabs(filteredTabs)
       setHiddenTabs([])
     }
 
     // For full screen, show first 10 tabs as visible, rest as hidden, but exclude details tab
-    const tabsWithoutDetails = tabs.filter((tab) => tab.id !== "details")
+    const tabsWithoutDetails = filteredTabs.filter((tab) => tab.id !== "details")
     const maxFullScreenVisibleTabs = 10
     if (tabsWithoutDetails.length > maxFullScreenVisibleTabs) {
       setFullScreenVisibleTabs(tabsWithoutDetails.slice(0, maxFullScreenVisibleTabs))
@@ -88,7 +95,7 @@ export function MasterDrawer({
       setFullScreenVisibleTabs(tabsWithoutDetails)
       setFullScreenHiddenTabs([])
     }
-  }, [tabs])
+  }, [filteredTabs])
 
   const handleTabSwap = (selectedTab: Tab) => {
     if (visibleTabs.length === 0) return
@@ -143,10 +150,10 @@ export function MasterDrawer({
       }
     }
     // When switching back from full screen, if current tab doesn't exist in regular tabs, switch to details
-    if (!isFullScreen && !tabs.find((tab) => tab.id === activeTab)) {
+    if (!isFullScreen && !filteredTabs.find((tab) => tab.id === activeTab)) {
       setActiveTab("details")
     }
-  }, [isFullScreen, activeTab, fullScreenVisibleTabs, fullScreenHiddenTabs, tabs])
+  }, [isFullScreen, activeTab, fullScreenVisibleTabs, fullScreenHiddenTabs, filteredTabs])
 
   // Add this effect to update viewMode when isFullScreen changes
   React.useEffect(() => {

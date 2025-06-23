@@ -171,7 +171,7 @@ export function WorkflowTemplateDialog({ isOpen, onClose }: WorkflowTemplateDial
                 W
               </div>
               <div>
-                <h2 className="text-lg font-semibold">Choose Template</h2>
+                <h2 className="text-lg font-semibold">Create Workflow</h2>
                 <p className="text-sm text-muted-foreground">
                   Select a template or start from scratch
                 </p>
@@ -183,13 +183,13 @@ export function WorkflowTemplateDialog({ isOpen, onClose }: WorkflowTemplateDial
           <div className="flex-1 overflow-y-auto p-6">
             <div className="grid grid-cols-1 gap-4">
               {/* Custom Workflow Option */}
-              <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => handleTemplateSelect({ id: "from-scratch" })}>
+              <Card className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]" onClick={() => handleTemplateSelect({ id: "from-scratch" })}>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-lg flex items-center font-normal">
                     <div className="bg-purple-100 text-purple-800 p-2 rounded-full mr-2">
                       <PlusIcon className="h-4 w-4" />
                     </div>
-                    Start from scratch
+                    <span className="font-normal">Start from scratch</span>
                   </CardTitle>
                   <CardDescription>Create a completely custom workflow with your own stages and fields</CardDescription>
                 </CardHeader>
@@ -199,27 +199,18 @@ export function WorkflowTemplateDialog({ isOpen, onClose }: WorkflowTemplateDial
               {workflowTypes.map((template) => (
                 <Card 
                   key={template.id} 
-                  className="cursor-pointer hover:shadow-md transition-all"
+                  className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]"
                   onClick={() => handleTemplateSelect(template)}
                 >
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center">
+                    <CardTitle className="text-lg flex items-center font-normal">
                       <div className="bg-blue-100 text-blue-800 p-2 rounded-full mr-2">
                         <PlusIcon className="h-4 w-4" />
                       </div>
-                      {template.name}
+                      <span className="font-normal">{template.name}</span>
                     </CardTitle>
                     <CardDescription>{template.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <span className="capitalize">{template.category}</span>
-                      <span className="mx-2">•</span>
-                      <span>{template.stages.length} stages</span>
-                      <span className="mx-2">•</span>
-                      <span>{template.attributes.length} attributes</span>
-                    </div>
-                  </CardContent>
                 </Card>
               ))}
             </div>

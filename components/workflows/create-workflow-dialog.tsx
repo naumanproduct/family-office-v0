@@ -94,7 +94,7 @@ export function CreateWorkflowDialog({ isOpen, onClose, onSave, existingWorkflow
 
   // Step labels (acts as non-clickable stepper)
   const steps = [
-    { id: 1, label: "General" },
+    { id: 1, label: "Details" },
     { id: 2, label: "Card Attributes" },
     { id: 3, label: "Stages" },
   ]
@@ -363,28 +363,14 @@ export function CreateWorkflowDialog({ isOpen, onClose, onSave, existingWorkflow
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="task">Task</SelectItem>
+                          <SelectItem value="investment">Investment</SelectItem>
                           <SelectItem value="opportunity">Opportunity</SelectItem>
-                          <SelectItem value="capital-call">Capital Call</SelectItem>
-                          <SelectItem value="document">Document</SelectItem>
+                          <SelectItem value="task">Task</SelectItem>
+                          <SelectItem value="person">Person</SelectItem>
+                          <SelectItem value="company">Company</SelectItem>
                         </SelectContent>
                       </Select>
                     )
-                  },
-                ],
-              },
-              {
-                id: "workflow-templates",
-                label: "Template Options",
-                icon: LayoutIcon,
-                fields: [
-                  { 
-                    label: "Start From", 
-                    value: "Custom workflow (from scratch)" 
-                  },
-                  { 
-                    label: "Available Templates", 
-                    value: "3 templates available for this object type" 
                   },
                 ],
               },
@@ -610,7 +596,7 @@ export function CreateWorkflowDialog({ isOpen, onClose, onSave, existingWorkflow
                     className="pointer-events-none"
                   >
                     <FileTextIcon className="h-4 w-4 mr-2" />
-                    General
+                    Details
                   </TabsTrigger>
                   <TabsTrigger 
                     value="2"

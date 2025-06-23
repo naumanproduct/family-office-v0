@@ -19,6 +19,8 @@ import { buildStandardDetailSections } from "@/components/shared/detail-section-
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateInvestmentActivities } from "@/components/shared/activity-generators"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { ChartAreaInteractive } from "./chart-area-interactive"
+import { SectionCards } from "./section-cards"
 
 export function InvestmentsView() {
   const [view, setView] = React.useState<"assets" | "liabilities">("assets")
@@ -52,6 +54,16 @@ export function InvestmentsView() {
             Liabilities
           </Button>
         </div>
+      </div>
+      
+      {/* Metrics Cards */}
+      <div className="px-0">
+        <SectionCards viewType={view} />
+      </div>
+      
+      {/* Chart */}
+      <div className="px-0">
+        <ChartAreaInteractive viewType={view} />
       </div>
 
       {/* Content */}

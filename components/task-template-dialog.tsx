@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { ChevronLeftIcon, MoreHorizontal, Edit, Copy, Trash2 } from "lucide-react"
+import { ChevronLeftIcon, MoreHorizontal, Edit, Copy, Trash2, PlusIcon } from "lucide-react"
 import { TaskCreator } from "./task-creator"
 
 const taskTemplates = [
@@ -193,8 +193,11 @@ export function TaskTemplateDialog({ isOpen, onClose }: TaskTemplateDialogProps)
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <CardTitle className="text-base font-medium">Start from Scratch</CardTitle>
+                    <div className="p-2 rounded-full bg-purple-100 text-purple-800">
+                      <PlusIcon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base font-normal">Start from Scratch</CardTitle>
                       <CardDescription className="text-sm">
                         Create a custom task tailored to your specific needs
                       </CardDescription>
@@ -214,8 +217,11 @@ export function TaskTemplateDialog({ isOpen, onClose }: TaskTemplateDialogProps)
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-full bg-blue-100 text-blue-800 mr-2 flex-shrink-0">
+                          <PlusIcon className="h-4 w-4" />
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base font-medium">{template.name}</CardTitle>
+                          <CardTitle className="text-base font-normal">{template.name}</CardTitle>
                           <CardDescription className="text-sm mt-1">{template.description}</CardDescription>
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { ChevronLeftIcon, MoreVerticalIcon } from "lucide-react"
+import { ChevronLeftIcon, MoreVerticalIcon, PlusIcon } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -383,9 +383,18 @@ export function MasterCreationDialog({
             onClick={() => handleTypeSelect(type)}
           >
             <div className="flex items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-base font-medium">{type.name}</CardTitle>
-                <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
+              <div className="flex items-center gap-2 min-w-0">
+                <div
+                  className={`p-2 rounded-full flex-shrink-0 ${
+                    type.isCustom ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+                  }`}
+                >
+                  <PlusIcon className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base font-normal">{type.name}</CardTitle>
+                  <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
+                </div>
               </div>
             </div>
           </CardHeader>
