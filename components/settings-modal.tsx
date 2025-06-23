@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ObjectsManagement } from "@/components/settings/objects-management"
 import { WorkflowsManagement } from "@/components/settings/workflows-management"
+import { AutomationsManagement } from "@/components/settings/automations-management"
 import {
   Settings,
   Database,
@@ -28,6 +29,7 @@ import {
   Globe,
   FileText,
   Plus,
+  Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -76,6 +78,7 @@ const settingsCategories: SettingsCategory[] = [
     children: [
       { id: "objects", label: "Objects", icon: Box },
       { id: "workflows", label: "Workflows", icon: Workflow },
+      { id: "automations", label: "Automations", icon: Zap },
       { id: "files", label: "Files & Media", icon: FileText },
     ],
   },
@@ -121,6 +124,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   // State for managing dialogs
   const [isObjectsDialogOpen, setIsObjectsDialogOpen] = useState(false)
   const [isWorkflowsDialogOpen, setIsWorkflowsDialogOpen] = useState(false)
+  const [isAutomationsDialogOpen, setIsAutomationsDialogOpen] = useState(false)
   
   // Update breadcrumbs when navigation changes
   useEffect(() => {
@@ -186,6 +190,8 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
       setIsObjectsDialogOpen(true)
     } else if (subCategory === "workflows") {
       setIsWorkflowsDialogOpen(true)
+    } else if (subCategory === "automations") {
+      setIsAutomationsDialogOpen(true)
     }
   }
   
@@ -362,6 +368,14 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                   hideButton 
                   isDialogOpen={isWorkflowsDialogOpen}
                   onDialogOpenChange={setIsWorkflowsDialogOpen}
+                />
+              )}
+              {subCategory === "automations" && (
+                <AutomationsManagement 
+                  hideTitle 
+                  hideButton 
+                  isDialogOpen={isAutomationsDialogOpen}
+                  onDialogOpenChange={setIsAutomationsDialogOpen}
                 />
               )}
               

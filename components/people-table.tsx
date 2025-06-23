@@ -76,6 +76,7 @@ import { MasterDetailsPanel } from "./shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
 import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 import { Label } from "@/components/ui/label"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 
 // Add missing component imports
 function ContactTabContent({ activeTab, contact }: { activeTab: string; contact: Contact }) {
@@ -113,15 +114,17 @@ function TableView({
   onMeetingClick?: (meeting: any) => void
   onEmailClick?: (email: any) => void
 }) {
-  if (data.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No {activeTab} found</p>
-      </div>
-    )
-  }
-  // Basic table implementation - would need full implementation
-  return <div className="text-center py-8 text-muted-foreground">Table view</div>
+  return (
+    <TabContentRenderer
+      activeTab={activeTab}
+      viewMode="table"
+      data={data}
+      onTaskClick={onTaskClick}
+      onNoteClick={onNoteClick}
+      onMeetingClick={onMeetingClick}
+      onEmailClick={onEmailClick}
+    />
+  )
 }
 
 function CardView({
@@ -139,15 +142,17 @@ function CardView({
   onMeetingClick?: (meeting: any) => void
   onEmailClick?: (email: any) => void
 }) {
-  if (data.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No {activeTab} found</p>
-      </div>
-    )
-  }
-  // Basic card implementation - would need full implementation
-  return <div className="text-center py-8 text-muted-foreground">Card view</div>
+  return (
+    <TabContentRenderer
+      activeTab={activeTab}
+      viewMode="card"
+      data={data}
+      onTaskClick={onTaskClick}
+      onNoteClick={onNoteClick}
+      onMeetingClick={onMeetingClick}
+      onEmailClick={onEmailClick}
+    />
+  )
 }
 
 function ListView({
@@ -165,15 +170,17 @@ function ListView({
   onMeetingClick?: (meeting: any) => void
   onEmailClick?: (email: any) => void
 }) {
-  if (data.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No {activeTab} found</p>
-      </div>
-    )
-  }
-  // Basic list implementation - would need full implementation
-  return <div className="text-center py-8 text-muted-foreground">List view</div>
+  return (
+    <TabContentRenderer
+      activeTab={activeTab}
+      viewMode="list"
+      data={data}
+      onTaskClick={onTaskClick}
+      onNoteClick={onNoteClick}
+      onMeetingClick={onMeetingClick}
+      onEmailClick={onEmailClick}
+    />
+  )
 }
 
 export const contactSchema = z.object({

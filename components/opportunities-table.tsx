@@ -73,6 +73,7 @@ import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
 import { Label } from "@/components/ui/label"
 import { UnifiedActivitySection, ActivityItem } from "./shared/unified-activity-section"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -297,34 +298,43 @@ const getStatusColor = (status: string) => {
 
 function TableView({ data, activeTab, onTaskClick, onNoteClick, onMeetingClick, onEmailClick }: any) {
   return (
-    <div className="space-y-4">
-      <div className="text-center py-8 text-muted-foreground">
-        <p>Table view for {activeTab}</p>
-        <p className="text-sm">{data.length} items</p>
-      </div>
-    </div>
+    <TabContentRenderer
+      activeTab={activeTab}
+      viewMode="table"
+      data={data}
+      onTaskClick={onTaskClick}
+      onNoteClick={onNoteClick}
+      onMeetingClick={onMeetingClick}
+      onEmailClick={onEmailClick}
+    />
   )
 }
 
 function CardView({ data, activeTab, onTaskClick, onNoteClick, onMeetingClick, onEmailClick }: any) {
   return (
-    <div className="space-y-4">
-      <div className="text-center py-8 text-muted-foreground">
-        <p>Card view for {activeTab}</p>
-        <p className="text-sm">{data.length} items</p>
-      </div>
-    </div>
+    <TabContentRenderer
+      activeTab={activeTab}
+      viewMode="card"
+      data={data}
+      onTaskClick={onTaskClick}
+      onNoteClick={onNoteClick}
+      onMeetingClick={onMeetingClick}
+      onEmailClick={onEmailClick}
+    />
   )
 }
 
 function ListView({ data, activeTab, onTaskClick, onNoteClick, onMeetingClick, onEmailClick }: any) {
   return (
-    <div className="space-y-4">
-      <div className="text-center py-8 text-muted-foreground">
-        <p>List view for {activeTab}</p>
-        <p className="text-sm">{data.length} items</p>
-      </div>
-    </div>
+    <TabContentRenderer
+      activeTab={activeTab}
+      viewMode="list"
+      data={data}
+      onTaskClick={onTaskClick}
+      onNoteClick={onNoteClick}
+      onMeetingClick={onMeetingClick}
+      onEmailClick={onEmailClick}
+    />
   )
 }
 
@@ -432,7 +442,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
           name: "Investment Memorandum.pdf",
           size: "2.4 MB",
           type: "PDF",
-          uploadDate: "2024-01-15",
+          uploadedDate: "2024-01-15",
           uploadedBy: "John Smith",
         },
         {
@@ -440,7 +450,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
           name: "Financial Statements Q4.xlsx",
           size: "1.1 MB",
           type: "Excel",
-          uploadDate: "2024-01-20",
+          uploadedDate: "2024-01-20",
           uploadedBy: "Sarah Johnson",
         },
         {
@@ -448,7 +458,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
           name: "Due Diligence Checklist.docx",
           size: "850 KB",
           type: "Word",
-          uploadDate: "2024-01-25",
+          uploadedDate: "2024-01-25",
           uploadedBy: "Mike Wilson",
         },
         {
@@ -456,7 +466,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
           name: "Market Analysis Report.pdf",
           size: "3.2 MB",
           type: "PDF",
-          uploadDate: "2024-02-01",
+          uploadedDate: "2024-02-01",
           uploadedBy: "Analysis Team",
         },
         {
@@ -464,7 +474,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
           name: "Legal Documents.zip",
           size: "5.8 MB",
           type: "Archive",
-          uploadDate: "2024-02-05",
+          uploadedDate: "2024-02-05",
           uploadedBy: "Legal Team",
         },
       ]
