@@ -11,16 +11,11 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
 import {
   ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
   ColumnsIcon,
   FilterIcon,
   MoreVerticalIcon,
@@ -30,7 +25,6 @@ import {
   SortDescIcon,
   BarChartIcon,
   ClipboardIcon,
-  GlobeIcon,
   LandmarkIcon,
 } from "lucide-react"
 import { z } from "zod"
@@ -47,7 +41,6 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuDraggableItem,
   DropdownMenuItem,
@@ -55,7 +48,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   MailIcon,
@@ -68,14 +60,12 @@ import {
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 
 // Import the AddEntityDialog
 import { AddEntityDialog } from "./add-entity-dialog"
 import { MasterDrawer } from "./master-drawer"
-import { MasterDetailsPanel } from "./shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 
 export const entitySchema = z.object({
   id: z.number(),
@@ -685,9 +675,9 @@ function EntityActivityContent({ entity }: { entity: Entity }) {
       details: {
         documentType: "Operating Agreement",
         version: "v2.1",
-        changes: ["Updated management structure", "Revised distribution terms", "Added compliance provisions"],
         approvedBy: "Board of Directors",
         effectiveDate: "2024-11-01",
+        changes: ["Updated management structure", "Revised distribution terms", "Added compliance provisions"],
       },
     },
   ]
@@ -710,10 +700,8 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       { id: 1, name: "Portfolio Holdings Inc", type: "Portfolio Company" },
       { id: 2, name: "Tech Ventures LLC", type: "Operating Company" },
     ],
-    entities: entity.parentEntity 
-      ? [{ id: 1, name: entity.parentEntity, type: "Parent Entity" }] 
-      : [],
-  };
+    entities: entity.parentEntity ? [{ id: 1, name: entity.parentEntity, type: "Parent Entity" }] : [],
+  }
 
   // Basic fields for main section
   const basicFields = [
@@ -745,8 +733,8 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       label: "Date Formed",
       value: new Date(entity.dateFormed).toLocaleDateString(),
     },
-  ];
-  
+  ]
+
   // Extended fields for comprehensive view
   const extendedFields = [
     ...basicFields,
@@ -771,25 +759,25 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       label: "Notes",
       value: entity.notes,
     },
-  ];
-  
+  ]
+
   // Navigation handler for related records
   const navigateToRecord = (recordType: string, id: number) => {
-    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    console.log(`Navigate to ${recordType} record with ID: ${id}`)
     // This would be implemented to navigate to the record
-  };
-  
+  }
+
   // Add record handler
   const handleAddRecord = (sectionId: string) => {
-    console.log(`Add new ${sectionId} record for ${entity.entityName}`);
+    console.log(`Add new ${sectionId} record for ${entity.entityName}`)
     // This would open the appropriate creation dialog
-  };
-  
+  }
+
   // Unlink record handler
   const handleUnlinkRecord = (sectionId: string, id: number) => {
-    console.log(`Unlink ${sectionId} record with ID ${id} from ${entity.entityName}`);
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${entity.entityName}`)
     // This would handle removal of the relationship
-  };
+  }
 
   // Define all sections for the details panel
   const sections: DetailSection[] = [
@@ -804,13 +792,11 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       title: "Compliance Information",
       icon: <ClipboardIcon className="h-4 w-4 text-muted-foreground" />,
       fields: [
-        { 
-          label: "Upcoming Deadlines", 
-          value: entity.upcomingDeadlines.length > 0
-            ? entity.upcomingDeadlines.join(", ")
-            : "No upcoming deadlines"
+        {
+          label: "Upcoming Deadlines",
+          value: entity.upcomingDeadlines.length > 0 ? entity.upcomingDeadlines.join(", ") : "No upcoming deadlines",
         },
-        { label: "Jurisdiction", value: entity.jurisdiction }
+        { label: "Jurisdiction", value: entity.jurisdiction },
       ],
       hideWhenEmpty: entity.upcomingDeadlines.length === 0,
     },
@@ -819,7 +805,7 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       title: "Key People",
       icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.people
+        items: relatedData.people,
       },
     },
     {
@@ -827,7 +813,7 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       title: "Related Companies",
       icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.companies
+        items: relatedData.companies,
       },
     },
     {
@@ -835,7 +821,7 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       title: "Related Entities",
       icon: <LandmarkIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.entities
+        items: relatedData.entities,
       },
       hideWhenEmpty: relatedData.entities.length === 0,
     },
@@ -844,10 +830,10 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       title: "Investments",
       icon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.investments
+        items: relatedData.investments,
       },
     },
-  ];
+  ]
 
   return (
     <UnifiedDetailsPanel
@@ -858,7 +844,7 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       onUnlinkRecord={handleUnlinkRecord}
       activityContent={<EntityActivityContent entity={entity} />}
     />
-  );
+  )
 }
 
 const columns: ColumnDef<Entity>[] = [
@@ -1028,25 +1014,25 @@ export function EntitiesTable() {
     const visibleColumns = table
       .getAllColumns()
       .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-      .map((column) => column.id);
-    
+      .map((column) => column.id)
+
     if (columnOrder.length === 0 && visibleColumns.length > 0) {
-      setColumnOrder(visibleColumns);
+      setColumnOrder(visibleColumns)
     }
-  }, [table.getAllColumns(), columnOrder]);
+  }, [table.getAllColumns(), columnOrder])
 
   // Handle drag end for column reordering
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
+    const { active, over } = event
+
     if (active && over && active.id !== over.id) {
       setColumnOrder((items) => {
-        const oldIndex = items.indexOf(active.id as string);
-        const newIndex = items.indexOf(over.id as string);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+        const oldIndex = items.indexOf(active.id as string)
+        const newIndex = items.indexOf(over.id as string)
+        return arrayMove(items, oldIndex, newIndex)
+      })
     }
-  };
+  }
 
   return (
     <div className="space-y-4">
@@ -1093,16 +1079,12 @@ export function EntitiesTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
                   {columnOrder.map((columnId) => {
-                    const column = table.getColumn(columnId);
-                    if (!column) return null;
-                    
+                    const column = table.getColumn(columnId)
+                    if (!column) return null
+
                     return (
                       <DropdownMenuDraggableItem
                         key={columnId}
@@ -1113,7 +1095,7 @@ export function EntitiesTable() {
                       >
                         {columnId}
                       </DropdownMenuDraggableItem>
-                    );
+                    )
                   })}
                 </SortableContext>
               </DndContext>

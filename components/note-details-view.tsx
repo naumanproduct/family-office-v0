@@ -2,31 +2,21 @@
 
 import * as React from "react"
 import {
-  CalendarIcon,
-  UserIcon,
-  AlertTriangleIcon,
   FileTextIcon,
   StickyNoteIcon,
-  InfoIcon,
-  TagIcon,
   BuildingIcon,
   UsersIcon,
   LayoutIcon,
   DollarSignIcon,
   TrendingUpIcon,
-  ChevronDownIcon,
-  PlusIcon
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
 import { FileContent } from "@/components/shared/file-content"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 
 interface NoteDetailsViewProps {
   note: any
@@ -80,7 +70,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       { id: 1, name: "Green Energy Fund", status: "In Discussion" },
       { id: 2, name: "Tech Startup Acquisition", status: "Due Diligence" },
     ],
-  };
+  }
 
   // Mock activities for activity section
   const activities: ActivityItem[] = [
@@ -108,8 +98,8 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       date: "2025-01-23",
       details: {
         meetingTitle: "Q1 Investment Strategy",
-        participants: ["Sarah Johnson", "Michael Chen", "David Williams"],
         relevance: "Key document for understanding target market",
+        participants: ["Sarah Johnson", "Michael Chen", "David Williams"],
       },
     },
     {
@@ -125,7 +115,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
         initialTags: ["Investment", "Strategy", "Research"],
       },
     },
-  ];
+  ]
 
   const getPriorityColor = (priority: string | undefined | null) => {
     if (!priority) return "bg-gray-100 text-gray-800"
@@ -149,41 +139,34 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
 
   // Mock navigation handler for related records
   const navigateToRecord = (recordType: string, id: number) => {
-    console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    console.log(`Navigate to ${recordType} record with ID: ${id}`)
     // This would be implemented to navigate to the record
-  };
+  }
 
   // Mock handler for adding a linked record
   const handleAddRecord = (sectionId: string) => {
-    console.log(`Add new ${sectionId} record for ${note.title}`);
+    console.log(`Add new ${sectionId} record for ${note.title}`)
     // This would open the appropriate creation dialog
-  };
+  }
 
   // Mock handler for removing a linked record
   const handleUnlinkRecord = (sectionId: string, id: number) => {
-    console.log(`Unlink ${sectionId} record with ID ${id} from ${note.title}`);
+    console.log(`Unlink ${sectionId} record with ID ${id} from ${note.title}`)
     // This would handle removal of the relationship
-  };
+  }
 
   // Custom note input component
   const renderNoteInput = () => {
-    if (hideAddNotes) return null;
-    
-    return (
-      <TypableArea 
-        value={noteText} 
-        onChange={setNoteText} 
-        placeholder="Add notes..." 
-        showButtons={false} 
-      />
-    );
-  };
+    if (hideAddNotes) return null
+
+    return <TypableArea value={noteText} onChange={setNoteText} placeholder="Add notes..." showButtons={false} />
+  }
 
   // Activity content component
   const NoteActivityContent = () => {
-    return <UnifiedActivitySection activities={activities} />;
-  };
-  
+    return <UnifiedActivitySection activities={activities} />
+  }
+
   // Define all sections for the details panel
   const sections: DetailSection[] = [
     {
@@ -197,7 +180,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
         },
         {
           label: "Priority",
-          value: <Badge className={getPriorityColor(fieldValues.priority)}>{fieldValues.priority}</Badge>
+          value: <Badge className={getPriorityColor(fieldValues.priority)}>{fieldValues.priority}</Badge>,
         },
         {
           label: "Author",
@@ -245,7 +228,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       title: "Companies",
       icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.companies
+        items: relatedData.companies,
       },
     },
     {
@@ -253,7 +236,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       title: "People",
       icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.people
+        items: relatedData.people,
       },
     },
     {
@@ -261,7 +244,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       title: "Entities",
       icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.entities
+        items: relatedData.entities,
       },
     },
     {
@@ -269,7 +252,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       title: "Investments",
       icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.investments
+        items: relatedData.investments,
       },
     },
     {
@@ -277,10 +260,10 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
       title: "Opportunities",
       icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
-        items: relatedData.opportunities
+        items: relatedData.opportunities,
       },
     },
-  ];
+  ]
 
   return (
     <div className="flex flex-col flex-1">
@@ -361,7 +344,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
           additionalContent={renderNoteInput()}
         />
       ) : (
-        <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>
+        <div className={`${isFullScreen ? "px-6 py-6" : "p-6"}`}>
           <FileContent />
         </div>
       )}

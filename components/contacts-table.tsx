@@ -50,6 +50,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { MasterDrawer } from "@/components/master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 
 export const contactSchema = z.object({
   id: z.number(),
@@ -466,8 +467,6 @@ function getContactTabData(activeTab: string, contact: Contact) {
 }
 
 function ContactActivityContent({ contact }: { contact: Contact }) {
-  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
-
   const activities = [
     {
       id: 1,
@@ -480,9 +479,9 @@ function ContactActivityContent({ contact }: { contact: Contact }) {
       details: {
         type: "Video Call",
         duration: "45 minutes",
-        topics: ["Partnership opportunities", "Q1 planning", "Budget discussion"],
         outcome: "Positive discussion, follow-up scheduled",
-        nextSteps: "Send proposal by Friday, schedule technical review",
+        topics: ["Partnership opportunities", "Q1 planning", "Budget discussion"],
+        nextSteps: ["Send proposal by Friday", "Schedule technical review"],
       },
     },
     {
@@ -519,145 +518,7 @@ function ContactActivityContent({ contact }: { contact: Contact }) {
     },
   ]
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "meeting":
-        return <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-      case "email":
-        return <div className="h-2 w-2 rounded-full bg-green-500"></div>
-      case "role_change":
-        return <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-      default:
-        return <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-    }
-  }
-
-  const formatActivityText = (activity: any) => {
-    return (
-      <span>
-        <span className="font-medium">{activity.actor}</span>{" "}
-        <span className="text-muted-foreground">{activity.action}</span>{" "}
-        <span className="font-medium">{activity.target}</span>
-      </span>
-    )
-  }
-
-  const renderExpandedDetails = (activity: any) => {
-    switch (activity.type) {
-      case "meeting":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Meeting Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Duration:</span> <span>{activity.details.duration}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Topics Discussed</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.topics.join(", ")}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Outcome</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.outcome}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Next Steps</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.nextSteps}</p>
-            </div>
-          </div>
-        )
-      case "email":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Email Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Subject:</span> <span>{activity.details.subject}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Type:</span> <span>{activity.details.type}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Sentiment:</span> <span>{activity.details.sentiment}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Key Points</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.keyPoints.join(", ")}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Follow Up</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.followUp}</p>
-            </div>
-          </div>
-        )
-      case "role_change":
-        return (
-          <div className="mt-4 space-y-3">
-            <div>
-              <h5 className="text-sm font-medium mb-2">Role Change Details</h5>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Previous Role:</span>{" "}
-                  <span>{activity.details.previousRole}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">New Role:</span> <span>{activity.details.newRole}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Company:</span> <span>{activity.details.company}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Effective Date:</span>{" "}
-                  <span>{activity.details.effectiveDate}</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-sm font-medium mb-1">Impact</h5>
-              <p className="text-sm text-muted-foreground">{activity.details.impact}</p>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div key={activity.id}>
-          <button
-            onClick={() => setExpandedActivity(expandedActivity === activity.id ? null : activity.id)}
-            className="flex items-start gap-3 w-full text-left p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm">{formatActivityText(activity)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-            </div>
-            <ChevronDownIcon
-              className={`h-4 w-4 text-muted-foreground transition-transform ${
-                expandedActivity === activity.id ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {expandedActivity === activity.id && (
-            <div className="ml-6 pl-3 border-l-2 border-muted">{renderExpandedDetails(activity)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
+  return <UnifiedActivitySection activities={activities} />
 }
 
 function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Contact; isFullScreen?: boolean }) {

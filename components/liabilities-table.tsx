@@ -16,10 +16,6 @@ import {
 } from "@tanstack/react-table"
 import {
   ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
   ColumnsIcon,
   FilterIcon,
   MoreVerticalIcon,
@@ -54,7 +50,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuDraggableItem,
   DropdownMenuItem,
@@ -62,14 +57,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { MasterDrawer } from "@/components/master-drawer"
 import { AddLiabilityDialog } from "./add-liability-dialog"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
-import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 
 export const liabilitySchema = z.object({
   id: z.number(),
@@ -428,9 +422,9 @@ function LiabilityActivityContent({ liability }: { liability: Liability }) {
       details: {
         reviewType: "Annual Credit Review",
         outcome: "Approved for renewal",
-        recommendations: ["Consider refinancing at lower rate", "Maintain current payment schedule"],
-        nextReview: "2025-10-28",
         creditRating: "A-",
+        nextReview: "2025-10-28",
+        recommendations: ["Consider refinancing at lower rate", "Maintain current payment schedule"],
       },
     },
   ]
@@ -759,25 +753,25 @@ export function LiabilitiesTable() {
     const visibleColumns = table
       .getAllColumns()
       .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-      .map((column) => column.id);
-    
+      .map((column) => column.id)
+
     if (columnOrder.length === 0 && visibleColumns.length > 0) {
-      setColumnOrder(visibleColumns);
+      setColumnOrder(visibleColumns)
     }
-  }, [table.getAllColumns(), columnOrder]);
+  }, [table.getAllColumns(), columnOrder])
 
   // Handle drag end for column reordering
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
+    const { active, over } = event
+
     if (active && over && active.id !== over.id) {
       setColumnOrder((items) => {
-        const oldIndex = items.indexOf(active.id as string);
-        const newIndex = items.indexOf(over.id as string);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+        const oldIndex = items.indexOf(active.id as string)
+        const newIndex = items.indexOf(over.id as string)
+        return arrayMove(items, oldIndex, newIndex)
+      })
     }
-  };
+  }
 
   return (
     <div className="space-y-4">
@@ -821,16 +815,12 @@ export function LiabilitiesTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px]">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
                   {columnOrder.map((columnId) => {
-                    const column = table.getColumn(columnId);
-                    if (!column) return null;
-                    
+                    const column = table.getColumn(columnId)
+                    if (!column) return null
+
                     return (
                       <DropdownMenuDraggableItem
                         key={columnId}
@@ -841,7 +831,7 @@ export function LiabilitiesTable() {
                       >
                         {columnId}
                       </DropdownMenuDraggableItem>
-                    );
+                    )
                   })}
                 </SortableContext>
               </DndContext>
@@ -899,7 +889,7 @@ export function LiabilitiesTable() {
       <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredRowModel().rows.length} liability(s) total.
       </div>
-      
+
       <AddLiabilityDialog isOpen={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)} />
     </div>
   )
