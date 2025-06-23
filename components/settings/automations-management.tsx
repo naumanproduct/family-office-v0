@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -143,6 +144,9 @@ export function AutomationsManagement({
     action: "create_task",
     targetWorkflow: "",
   })
+
+  const [selectedAutomation, setSelectedAutomation] = useState<AutomationItem | null>(null)
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
 
   // Use either external or local dialog state
   const isCreateDialogOpen = isDialogOpen !== undefined ? isDialogOpen : localIsCreateDialogOpen
@@ -402,10 +406,16 @@ export function AutomationsManagement({
                 return (
                   <TableRow key={automation.id} className="hover:bg-muted/50">
                     <TableCell>
-                      <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => {
+                          setSelectedAutomation(automation)
+                          setIsDetailDialogOpen(true)
+                        }}
+                        className="flex items-center gap-3 text-left hover:text-primary transition-colors"
+                      >
                         <TriggerIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">{automation.name}</span>
-                      </div>
+                      </button>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-muted-foreground leading-relaxed">{automation.description}</span>
@@ -475,6 +485,153 @@ export function AutomationsManagement({
           </Table>
         </div>
       </CardContent>
+      {/* Automation Detail Dialog */}
+      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedAutomation && (
+                <>
+                  {React.createElement(getTriggerIcon(selectedAutomation.trigger), { className: "h-5 w-5" })}
+                  {selectedAutomation.name}
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              View and manage automation details, execution history, and configuration.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedAutomation && (
+            <div className="space-y-6">
+              {/* Status and Actions */}
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Badge variant={getStatusColor(selectedAutomation.status)} className="capitalize">
+                    {selectedAutomation.status}
+                  </Badge>
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium">{selectedAutomation.executionCount}</span> executions
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Last run: {formatLastExecuted(selectedAutomation.lastExecuted)}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => toggleAutomationStatus(selectedAutomation.id)}>
+                    {selectedAutomation.status === "active" ? (
+                      <>
+                        <Pause className="mr-2 h-4 w-4" />
+                        Pause
+                      </>
+                    ) : (
+                      <>
+                        <Play className="mr-2 h-4 w-4" />
+                        Activate
+                      </>
+                    )}
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </Button>
+                </div>
+              </div>
+
+              {/* Configuration */}
+              <div className="grid gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Description</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{selectedAutomation.description}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">Trigger Event</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      {React.createElement(getTriggerIcon(selectedAutomation.trigger), { className: "h-4 w-4" })}
+                      <span className="text-sm capitalize">{selectedAutomation.trigger.replace("_", " ")}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Action</Label>
+                    <p className="text-sm mt-1 capitalize">{selectedAutomation.action.replace("_", " ")}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Conditions</Label>
+                  <div className="mt-2 space-y-1">
+                    {selectedAutomation.conditions.map((condition, index) => (
+                      <div key={index} className="flex items-center gap-2 text-sm">
+                        <div className="w-2 h-2 bg-primary rounded-full" />
+                        <span>{condition}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {selectedAutomation.targetWorkflow && (
+                  <div>
+                    <Label className="text-sm font-medium">Target Workflow</Label>
+                    <p className="text-sm mt-1">{selectedAutomation.targetWorkflow}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Execution History */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Recent Executions</Label>
+                <div className="border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date & Time</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Trigger Source</TableHead>
+                        <TableHead>Result</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {/* Mock execution history */}
+                      <TableRow>
+                        <TableCell className="text-sm">Jan 20, 2024 10:30 AM</TableCell>
+                        <TableCell>
+                          <Badge variant="default" className="text-xs">
+                            Success
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">capital_call_q4_2023.pdf</TableCell>
+                        <TableCell className="text-sm">Task created: "Review Capital Call - Fund ABC"</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="text-sm">Jan 19, 2024 2:15 PM</TableCell>
+                        <TableCell>
+                          <Badge variant="default" className="text-xs">
+                            Success
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">capital_call_fund_xyz.pdf</TableCell>
+                        <TableCell className="text-sm">Task created: "Review Capital Call - Fund XYZ"</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="text-sm">Jan 18, 2024 9:45 AM</TableCell>
+                        <TableCell>
+                          <Badge variant="destructive" className="text-xs">
+                            Failed
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">document_upload.pdf</TableCell>
+                        <TableCell className="text-sm">Error: Unable to link to investment record</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
