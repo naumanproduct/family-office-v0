@@ -45,6 +45,7 @@ import { MasterDrawer } from "./master-drawer"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 
 interface Deal {
   id: string
@@ -208,11 +209,11 @@ function DealCard({
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
     { id: "contacts", label: "Contacts", count: 3, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 5, icon: MailIcon },
+    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 4, icon: FileTextIcon },
+    { id: "notes", label: "Notes", count: 2, icon: FileTextIcon },
     { id: "meetings", label: "Meetings", count: 2, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 7, icon: FolderIcon },
+    { id: "files", label: "Files", count: 2, icon: FolderIcon },
     { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
@@ -555,6 +556,151 @@ function DealCard({
     setSelectedMeeting?: (meeting: any) => void,
     setSelectedEmail?: (email: any) => void,
   ) => {
+    // Provide rich mock content only for TechFlow Solutions to showcase workflow container concept
+    if (deal.companyName === "TechFlow Solutions") {
+      // ------------------------------
+      // Mock data definitions
+      // ------------------------------
+      const tasks = [
+        {
+          id: 1,
+          title: "Review financials",
+          priority: "High",
+          status: "pending",
+          assignee: "You",
+          dueDate: "2024-07-01",
+          description: "Review TechFlow Solutions' financial statements and KPIs.",
+          relatedTo: { type: "Deal", name: "TechFlow Solutions" },
+        },
+        {
+          id: 2,
+          title: "Schedule meeting with founders",
+          priority: "Medium",
+          status: "pending",
+          assignee: "Sarah Chen",
+          dueDate: "2024-07-05",
+          description: "Arrange a meeting to discuss valuation and next steps.",
+          relatedTo: { type: "Deal", name: "TechFlow Solutions" },
+        },
+      ]
+
+      const notes = [
+        {
+          id: 1,
+          title: "Initial pitch notes",
+          author: "You",
+          date: "2024-06-15",
+          tags: ["pitch", "AI"],
+        },
+        {
+          id: 2,
+          title: "Competitor analysis summary",
+          author: "Analyst Team",
+          date: "2024-06-20",
+          tags: ["analysis"],
+        },
+      ]
+
+      const emails = [
+        {
+          id: 1,
+          subject: "Follow-up on financial model",
+          from: "emily@techflow.com",
+          date: "2024-06-21",
+          status: "Read",
+        },
+        {
+          id: 2,
+          subject: "Data room access details",
+          from: "investor_relations@techflow.com",
+          date: "2024-06-22",
+          status: "Unread",
+        },
+      ]
+
+      const meetings = [
+        {
+          id: 1,
+          title: "Product demo",
+          date: "2024-06-25",
+          time: "10:00 AM",
+          status: "Scheduled",
+          attendees: ["You", "Emily Zhang"],
+        },
+        {
+          id: 2,
+          title: "Financial deep-dive",
+          date: "2024-07-02",
+          time: "2:00 PM",
+          status: "Planned",
+          attendees: ["Finance Team", "Founders"],
+        },
+      ]
+
+      const files = [
+        {
+          id: 1,
+          name: "TechFlow Pitch Deck.pdf",
+          uploadedBy: "Emily Zhang",
+          uploadedDate: "2024-06-15",
+          size: "4.2 MB",
+        },
+        {
+          id: 2,
+          name: "Financial_Model.xlsx",
+          uploadedBy: "You",
+          uploadedDate: "2024-06-18",
+          size: "220 KB",
+        },
+      ]
+
+      const contacts = [
+        {
+          id: 1,
+          name: "Emily Zhang",
+          role: "Co-Founder & CEO",
+          email: "emily@techflow.com",
+          phone: "+1 (555) 123-4567",
+        },
+        {
+          id: 2,
+          name: "Jason Lee",
+          role: "Co-Founder & CTO",
+          email: "jason@techflow.com",
+          phone: "+1 (555) 987-6543",
+        },
+        {
+          id: 3,
+          name: "Sarah Chen",
+          role: "Deal Lead",
+          email: "sarah.chen@familyoffice.com",
+          phone: "+1 (555) 111-2222",
+        },
+      ]
+
+      const dataMap: Record<string, any[]> = {
+        tasks,
+        notes,
+        emails,
+        meetings,
+        files,
+        contacts,
+      }
+
+      return (
+        <TabContentRenderer
+          activeTab={activeTab}
+          viewMode={viewMode}
+          data={dataMap[activeTab] || []}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
+
+    // Default placeholder for other deals
     return (
       <div className="text-center py-8 text-muted-foreground">
         <p>No {activeTab} found for this opportunity</p>

@@ -48,6 +48,7 @@ import { TaskDetailsView } from "@/components/task-details-view"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { MasterDrawer } from "./master-drawer"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 
 interface CapitalCall {
   id: string
@@ -184,6 +185,28 @@ const initialCapitalCalls: CapitalCall[] = [
     previousCalls: "4",
     purpose: "Credit facility deployment and fees",
   },
+  {
+    id: "6",
+    fundName: "Growth Fund III",
+    callNumber: "Call #1",
+    callAmount: "$6M",
+    commitmentAmount: "$30M",
+    dueDate: "2024-07-15",
+    noticeDate: "2024-06-15",
+    investor: "Institutional Investor Epsilon",
+    stage: "new",
+    description: "Initial capital call for Growth Fund III to finance early investments",
+    fundManager: "Growth Equity Management",
+    email: "calls@growthfund.com",
+    phone: "+1 (555) 678-9012",
+    website: "growthfund.com",
+    fundType: "Growth Equity",
+    vintage: "2024",
+    totalFundSize: "$400M",
+    remainingCommitment: "$24M",
+    previousCalls: "0",
+    purpose: "Initial investments and fees",
+  },
 ]
 
 interface CapitalCallKanbanProps {
@@ -224,12 +247,12 @@ function CapitalCallCard({
   // Define tabs for the drawer
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 2, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 7, icon: CheckCircleIcon },
+    { id: "contacts", label: "Contacts", count: 3, icon: UsersIcon },
+    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
     { id: "notes", label: "Notes", count: 2, icon: FileTextIcon },
-    { id: "meetings", label: "Meetings", count: 1, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 4, icon: FolderIcon },
+    { id: "meetings", label: "Meetings", count: 2, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 2, icon: FolderIcon },
     { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
@@ -614,7 +637,85 @@ function CapitalCallCard({
   const renderTabContent = (
     activeTab: string,
     viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
   ) => {
+    if (capitalCall.fundName === "Growth Fund III") {
+      // ---------------- Mock data for Growth Fund III ----------------
+      const tasks = [
+        {
+          id: 1,
+          title: "Prepare investor notice",
+          priority: "High",
+          status: "pending",
+          assignee: "You",
+          dueDate: "2024-06-20",
+          description: "Draft and review the capital call notice for Growth Fund III.",
+          relatedTo: { type: "Capital Call", name: "Growth Fund III" },
+        },
+        {
+          id: 2,
+          title: "Update capital schedule",
+          priority: "Medium",
+          status: "pending",
+          assignee: "Finance Team",
+          dueDate: "2024-06-22",
+          description: "Reflect the new call in the fund's capital schedule.",
+          relatedTo: { type: "Capital Call", name: "Growth Fund III" },
+        },
+      ]
+
+      const notes = [
+        { id: 1, title: "Initial call rationale", author: "You", date: "2024-06-15", tags: ["call", "growth"] },
+        { id: 2, title: "Fee breakdown", author: "Controller", date: "2024-06-16", tags: ["fees"] },
+      ]
+
+      const emails = [
+        { id: 1, subject: "Capital call draft", from: "admin@growthfund.com", date: "2024-06-17", status: "Read" },
+        { id: 2, subject: "Questions on commitment", from: "investor@epsilon.com", date: "2024-06-18", status: "Unread" },
+      ]
+
+      const meetings = [
+        { id: 1, title: "Internal review meeting", date: "2024-06-19", time: "9:00 AM", status: "Scheduled", attendees: ["You", "Finance Team"] },
+        { id: 2, title: "Investor Q&A", date: "2024-06-23", time: "11:00 AM", status: "Planned", attendees: ["Investor Relations"] },
+      ]
+
+      const files = [
+        { id: 1, name: "GrowthFundIII_CallNotice.pdf", uploadedBy: "You", uploadedDate: "2024-06-17", size: "1.2 MB" },
+        { id: 2, name: "CapitalSchedule.xlsx", uploadedBy: "Finance Team", uploadedDate: "2024-06-18", size: "550 KB" },
+      ]
+
+      const contacts = [
+        { id: 1, name: "Laura Kim", role: "Investor Relations", email: "laura@growthfund.com", phone: "+1 (555) 321-6547" },
+        { id: 2, name: "Michael Chen", role: "Fund Manager", email: "mchen@growthfund.com", phone: "+1 (555) 987-1234" },
+        { id: 3, name: "James Wilson", role: "Investor", email: "jwilson@epsilon.com", phone: "+1 (555) 555-0011" },
+      ]
+
+      const dataMap: Record<string, any[]> = {
+        tasks,
+        notes,
+        emails,
+        meetings,
+        files,
+        contacts,
+      }
+
+      return (
+        <TabContentRenderer
+          activeTab={activeTab}
+          viewMode={viewMode}
+          data={dataMap[activeTab] || []}
+          onTaskClick={setSelectedTask}
+          onNoteClick={setSelectedNote}
+          onMeetingClick={setSelectedMeeting}
+          onEmailClick={setSelectedEmail}
+        />
+      )
+    }
+
+    // Default placeholder for other calls
     return (
       <div className="text-center py-8 text-muted-foreground">
         <p>No {activeTab} found for this capital call</p>
