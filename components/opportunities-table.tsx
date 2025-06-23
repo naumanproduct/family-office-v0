@@ -31,6 +31,13 @@ import {
   UsersIcon,
   LandmarkIcon,
   BarChartIcon,
+  FileTextIcon,
+  MailIcon,
+  CheckCircleIcon,
+  StickyNoteIcon,
+  CalendarIcon,
+  FolderIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 import { z } from "zod"
 import {
@@ -59,14 +66,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  MailIcon,
-  FileTextIcon,
-  CalendarIcon,
-  FolderIcon,
-  CheckCircleIcon,
-  TrendingUpIcon,
-} from "lucide-react"
 import { MasterDrawer } from "./master-drawer"
 import { AddOpportunityDialog } from "./add-opportunity-dialog"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
@@ -74,6 +73,7 @@ import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/uni
 import { Label } from "@/components/ui/label"
 import { UnifiedActivitySection, ActivityItem } from "./shared/unified-activity-section"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
 
 export const opportunitySchema = z.object({
   id: z.number(),
@@ -737,68 +737,31 @@ function OpportunityDetailsPanel({
     // This would handle removal of the relationship
   };
   
-  // Define all sections for the details panel
-  const sections: DetailSection[] = [
-    {
-      id: "information",
-      title: "Opportunity Information",
-      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
-      fields: [
-        { label: "Opportunity Name", value: opportunity.name },
-        { label: "Company", value: `${opportunity.company.name} (${opportunity.company.type})` },
-        { label: "Contact", value: `${opportunity.contact.name} - ${opportunity.contact.role}` },
-        { label: "Legal Entity", value: `${opportunity.legalEntity.name} (${opportunity.legalEntity.type})` },
-        { label: "Investment Amount", value: opportunity.amount },
-        { label: "Expected Close", value: opportunity.expectedClose },
-        { label: "Probability", value: `${opportunity.probability}%` },
-        { label: "Description", value: opportunity.description },
-        { label: "Stage", value: opportunity.stage },
-        { label: "Priority", value: opportunity.priority },
-        { label: "Status", value: opportunity.status },
-        { label: "Last Activity", value: opportunity.lastActivity },
-      ],
-    },
-    {
-      id: "companies",
-      title: "Companies",
-      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.companies
-      },
-    },
-    {
-      id: "people",
-      title: "People",
-      icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.people
-      },
-    },
-    {
-      id: "entities",
-      title: "Entities",
-      icon: <LandmarkIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.entities
-      },
-    },
-    {
-      id: "investments",
-      title: "Investments",
-      icon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.investments
-      },
-    },
-    {
-      id: "opportunities",
-      title: "Related Opportunities",
-      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.opportunities
-      },
-    },
-  ];
+  const infoFields = [
+    { label: "Opportunity Name", value: opportunity.name },
+    { label: "Company", value: `${opportunity.company.name} (${opportunity.company.type})` },
+    { label: "Contact", value: `${opportunity.contact.name} - ${opportunity.contact.role}` },
+    { label: "Legal Entity", value: `${opportunity.legalEntity.name} (${opportunity.legalEntity.type})` },
+    { label: "Investment Amount", value: opportunity.amount },
+    { label: "Expected Close", value: opportunity.expectedClose },
+    { label: "Probability", value: `${opportunity.probability}%` },
+    { label: "Description", value: opportunity.description },
+    { label: "Stage", value: opportunity.stage },
+    { label: "Priority", value: opportunity.priority },
+    { label: "Status", value: opportunity.status },
+    { label: "Last Activity", value: opportunity.lastActivity },
+  ]
+
+  const sections = buildStandardDetailSections({
+    infoTitle: "Opportunity Information",
+    infoIcon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+    infoFields,
+    companies: relatedData.companies,
+    people: relatedData.people,
+    entities: relatedData.entities,
+    investments: relatedData.investments,
+    opportunities: relatedData.opportunities,
+  })
 
   return (
     <UnifiedDetailsPanel

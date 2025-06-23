@@ -135,18 +135,10 @@ export function UnifiedDetailsPanel({
               >
                 {item.name}
               </div>
-              {item.type && (
-                <Badge variant="outline" className="text-xs">
-                  {item.type}
-                </Badge>
-              )}
+              {item.type && <span className="text-xs text-muted-foreground">{item.type}</span>}
               {item.role && <span className="text-xs text-muted-foreground">{item.role}</span>}
               {item.amount && <span className="text-xs text-muted-foreground">{item.amount}</span>}
-              {item.status && (
-                <Badge variant="outline" className="text-xs">
-                  {item.status}
-                </Badge>
-              )}
+              {item.status && <span className="text-xs text-muted-foreground">{item.status}</span>}
             </div>
 
             <div className="flex items-center gap-1">

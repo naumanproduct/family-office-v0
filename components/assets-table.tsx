@@ -40,6 +40,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AddAssetDialog } from "./add-asset-dialog"
+import { MasterDrawer } from "./master-drawer"
+import { FileTextIcon, MailIcon, CheckCircleIcon, StickyNoteIcon, CalendarIcon, FolderIcon, UsersIcon, BuildingIcon, LandmarkIcon, BarChartIcon, TrendingUpIcon } from "lucide-react"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
+import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
+import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -168,20 +174,85 @@ interface AssetsTableProps {
   onAssetClick: (asset: Asset) => void
 }
 
-function AssetNameCell({ asset, onAssetClick }: { asset: Asset; onAssetClick?: (asset: Asset) => void }) {
+function AssetNameCell({ asset }: { asset: Asset }) {
+  const tabs = [
+    { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 1, icon: StickyNoteIcon },
+    { id: "meetings", label: "Meetings", count: 1, icon: CalendarIcon },
+    { id: "files", label: "Files", count: 4, icon: FolderIcon },
+    { id: "team", label: "People", count: 2, icon: UsersIcon },
+  ]
+
+  const getAssetTabData = (activeTab: string) => {
+    switch (activeTab) {
+      case "tasks":
+        return [
+          { id: 1, title: "Quarterly valuation", priority: "High", status: "Pending", assignee: "You", dueDate: "Next week" },
+        ]
+      case "emails":
+        return [
+          { id: 1, subject: "Capital Call Notice", from: "fund@gp.com", date: "Today", status: "Unread", preview: "Please see attached capital call" },
+        ]
+      case "notes":
+        return [
+          { id: 1, title: "Catch-up call summary", author: "Analyst", date: "Yesterday", content: "Discussed KPIs…" },
+        ]
+      case "meetings":
+        return [
+          { id: 1, title: "Board Meeting", date: "Tomorrow", time: "10:00 AM", attendees: ["CFO"], status: "Scheduled" },
+        ]
+      case "files":
+        return [
+          { id: 1, name: "Subscription Agreement.pdf", uploadedBy: "Legal", uploadedDate: "Last month", size: "2 MB", type: "PDF" },
+        ]
+      case "team":
+        return [
+          { id: 1, name: "Sarah Johnson", role: "Portfolio Manager", email: "sarah@fund.com" },
+        ]
+      default:
+        return []
+    }
+  }
+
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    if (activeTab === "details") {
+      return <AssetDetailsPanel asset={asset} isFullScreen={false} />
+    }
+    const data = getAssetTabData(activeTab)
+    return (
+      <TabContentRenderer activeTab={activeTab} viewMode={viewMode} data={data} onTaskClick={setSelectedTask} onNoteClick={setSelectedNote} onMeetingClick={setSelectedMeeting} onEmailClick={setSelectedEmail} />
+    )
+  }
+
   return (
-    <Button
-      variant="link"
-      className="w-fit px-0 text-left text-foreground h-auto"
-      onClick={() => onAssetClick?.(asset)}
+    <MasterDrawer
+      trigger={
+        <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium">
+              {asset.name.charAt(0)}
+            </div>
+            <span className="font-medium">{asset.name}</span>
+          </div>
+        </Button>
+      }
+      title={asset.name}
+      recordType="Investment"
+      subtitle={asset.type}
+      tabs={tabs}
+      detailsPanel={(isFullScreen) => <AssetDetailsPanel asset={asset} isFullScreen={isFullScreen} />}
     >
-      <div className="flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium">
-          {asset.name.charAt(0)}
-        </div>
-        <span className="font-medium">{asset.name}</span>
-      </div>
-    </Button>
+      {renderTabContent}
+    </MasterDrawer>
   )
 }
 
@@ -200,7 +271,7 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
       {
         accessorKey: "name",
         header: "Name",
-        cell: ({ row }) => <AssetNameCell asset={row.original} onAssetClick={onAssetClick} />,
+        cell: ({ row }) => <AssetNameCell asset={row.original} />,
       },
       {
         accessorKey: "type",
@@ -429,5 +500,103 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
 
       <AddAssetDialog isOpen={isAddAssetDialogOpen} onClose={() => setIsAddAssetDialogOpen(false)} />
     </div>
+  )
+}
+
+// -------- Details Panel helpers --------
+function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
+  // Mock related data (examples)
+  const relatedData = {
+    entities: [
+      { id: 1, name: asset.entity, type: "Fund" },
+    ],
+    people: [
+      { id: 1, name: "Sarah Johnson", role: "Portfolio Manager" },
+      { id: 2, name: "Tom Becker", role: "Analyst" },
+    ],
+    opportunities: [
+      { id: 1, name: "Follow-on Investment", status: "Discussion" },
+    ],
+  }
+
+  // Mock activity content
+  const activities: ActivityItem[] = [
+    {
+      id: 1,
+      type: "valuation",
+      actor: "Analyst Team",
+      action: "updated valuation for",
+      target: asset.name,
+      timestamp: "2 days ago",
+      date: "2025-06-21",
+      details: {
+        previousValue: asset.currentValue,
+        newValue: "$19.0M",
+        reason: "Quarterly review",
+      },
+    },
+    {
+      id: 2,
+      type: "meeting",
+      actor: "Portfolio Manager",
+      action: "held board meeting for",
+      target: asset.name,
+      timestamp: "1 week ago",
+      date: "2025-06-15",
+      details: {
+        attendees: ["CFO", "CEO"],
+        topics: ["Performance", "Strategic initiatives"],
+        outcome: "Positive",
+      },
+    },
+  ]
+
+  // Handlers (stubbed)
+  const navigateToRecord = (recordType: string, id: number) => {
+    console.log(`Navigate to ${recordType} ${id}`)
+  }
+  const handleAddRecord = (sectionId: string) => {
+    console.log(`Add record to ${sectionId}`)
+  }
+  const handleUnlinkRecord = (sectionId: string, id: number) => {
+    console.log(`Unlink ${sectionId} ${id}`)
+  }
+
+  const infoFields = [
+    { label: "Name", value: asset.name },
+    { label: "Type", value: asset.type },
+    { label: "Category", value: asset.category },
+    { label: "Entity", value: asset.entity },
+    { label: "Acquisition Date", value: asset.acquisitionDate },
+    { label: "Current Value", value: asset.currentValue },
+    { label: "Original Cost", value: asset.originalCost },
+    { label: "Unrealized Gain", value: asset.unrealizedGain },
+    { label: "% Gain", value: `${asset.percentageGain}%` },
+    { label: "Last Valuation", value: asset.lastValuation },
+    { label: "Sector", value: asset.sector },
+    { label: "Geography", value: asset.geography },
+    { label: "Status", value: asset.status },
+  ]
+
+  const sections = buildStandardDetailSections({
+    infoTitle: "Asset Information",
+    infoIcon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
+    infoFields,
+    companies: [], // N/A for assets, but included for consistency
+    people: relatedData.people,
+    entities: relatedData.entities,
+    investments: [],
+    opportunities: relatedData.opportunities,
+  })
+
+  return (
+    <UnifiedDetailsPanel
+      sections={sections}
+      isFullScreen={isFullScreen}
+      onNavigateToRecord={navigateToRecord}
+      onAddRecord={handleAddRecord}
+      onUnlinkRecord={handleUnlinkRecord}
+      activityContent={<UnifiedActivitySection activities={activities} />}
+    />
   )
 }
