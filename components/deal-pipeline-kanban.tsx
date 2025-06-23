@@ -151,6 +151,7 @@ interface DealPipelineKanbanProps {
     attributes: Array<{ id: string; name: string; type: string }>
     stages: Array<{ id: string; name: string; color: string }>
   }
+  initialDeals?: Deal[]
 }
 
 // Default stages if no config provided
@@ -181,23 +182,21 @@ function DealCard({
   deal: Deal
   attributes?: Array<{ id: string; name: string; type: string }>
 }) {
-  // Map stage to opportunity stage
+  // Determine opportunity stage
   const opportunityStage =
-    deal.stage === "awareness"
-      ? "Initial Contact"
-      : deal.stage === "initial-contact"
-        ? "Proposal"
-        : deal.stage === "work-in-progress"
-          ? "Due Diligence"
-          : deal.stage === "term-sheet"
-            ? "Term Sheet"
-            : deal.stage === "due-diligence"
-              ? "Due Diligence"
-              : deal.stage === "invested"
-                ? "Closed Won"
-                : deal.stage === "passed"
-                  ? "Closed Lost"
-                  : "Initial Contact"
+    deal.stage === "lead"
+      ? "Lead"
+      : deal.stage === "discovery"
+      ? "Discovery"
+      : deal.stage === "proposal"
+      ? "Proposal"
+      : deal.stage === "negotiation"
+      ? "Negotiation"
+      : deal.stage === "closed-won"
+      ? "Closed Won"
+      : deal.stage === "closed-lost"
+      ? "Closed Lost"
+      : "Initial Contact"
 
   // Create opportunity title
   const opportunityTitle = `${deal.fundingRound} Investment - ${deal.companyName}`
@@ -217,24 +216,24 @@ function DealCard({
     { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
+  // Move these state hooks outside of the detailsPanel function
+  const [openSections, setOpenSections] = React.useState<{
+    details: boolean;
+    company: boolean;
+    contacts: boolean;
+    financials: boolean;
+  }>({
+    details: true, // Details expanded by default
+    company: false,
+    contacts: false,
+    financials: false,
+  });
+
+  // Add state for showing all values
+  const [showingAllValues, setShowingAllValues] = React.useState(false);
+
   // Create details panel function
   const detailsPanel = (isFullScreen = false) => {
-    // Add state for collapsible sections
-    const [openSections, setOpenSections] = React.useState<{
-      details: boolean;
-      company: boolean;
-      contacts: boolean;
-      financials: boolean;
-    }>({
-      details: true, // Details expanded by default
-      company: false,
-      contacts: false,
-      financials: false,
-    });
-
-    // Add state for showing all values
-    const [showingAllValues, setShowingAllValues] = React.useState(false);
-
     // Toggle function for collapsible sections
     const toggleSection = (section: 'details' | 'company' | 'contacts' | 'financials') => {
       setOpenSections(prev => ({
@@ -697,7 +696,14 @@ function SortableDealCard({
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...dndAttributes} {...listeners} className="touch-manipulation">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...dndAttributes} 
+      {...listeners} 
+      className="touch-manipulation"
+      suppressHydrationWarning
+    >
       <DealCard deal={deal} attributes={attributes} />
     </div>
   )
@@ -846,8 +852,8 @@ function AddColumnDialog({
   )
 }
 
-export function DealPipelineKanban({ workflowConfig }: DealPipelineKanbanProps) {
-  const [deals, setDeals] = React.useState(initialDeals)
+export function DealPipelineKanban({ workflowConfig, initialDeals: propDeals }: DealPipelineKanbanProps) {
+  const [deals, setDeals] = React.useState(propDeals || initialDeals)
   const [activeDeal, setActiveDeal] = React.useState<Deal | null>(null)
   const [stagesList, setStagesList] = React.useState(workflowConfig?.stages || defaultStages)
   const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)

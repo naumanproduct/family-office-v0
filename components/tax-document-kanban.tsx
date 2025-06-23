@@ -189,6 +189,7 @@ interface TaxDocumentKanbanProps {
     attributes: Array<{ id: string; name: string; type: string }>
     stages: Array<{ id: string; name: string; color: string }>
   }
+  initialDocuments?: TaxDocument[]
 }
 
 // Separate the card UI from the sortable wrapper
@@ -196,34 +197,33 @@ function TaxDocumentCard({ document }: { document: TaxDocument }) {
   // Define tabs for the drawer
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 2, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 1, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 2, icon: FileTextIcon },
-    { id: "files", label: "Files", count: document.documentURL ? 1 : 0, icon: FolderIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 3, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 5, icon: MailIcon },
+    { id: "files", label: "Files", count: 1, icon: FolderIcon },
     { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
+  // Move state hooks outside of detailsPanel
+  const [openSections, setOpenSections] = React.useState<{
+    details: boolean;
+    documentInfo: boolean;
+    entityInfo: boolean;
+    statusInfo: boolean;
+  }>({
+    details: true, // Details expanded by default
+    documentInfo: false,
+    entityInfo: false,
+    statusInfo: false,
+  });
+
+  // Add state for showing all values
+  const [showingAllValues, setShowingAllValues] = React.useState(false);
+
   // Create details panel function
   const detailsPanel = (isFullScreen = false) => {
-    // Add state for collapsible sections
-    const [openSections, setOpenSections] = React.useState<{
-      details: boolean;
-      document: boolean;
-      entity: boolean;
-      status: boolean;
-    }>({
-      details: true, // Details expanded by default
-      document: false,
-      entity: false,
-      status: false,
-    });
-
-    // Add state for showing all values
-    const [showingAllValues, setShowingAllValues] = React.useState(false);
-
     // Toggle function for collapsible sections
-    const toggleSection = (section: 'details' | 'document' | 'entity' | 'status') => {
+    const toggleSection = (section: 'details' | 'documentInfo' | 'entityInfo' | 'statusInfo') => {
       setOpenSections(prev => ({
         ...prev,
         [section]: !prev[section],
@@ -399,21 +399,21 @@ function TaxDocumentCard({ document }: { document: TaxDocument }) {
         count: null
       },
       {
-        id: 'document',
+        id: 'documentInfo',
         title: 'Document Information',
         icon: FileIcon,
         content: <ItemsSection items={relatedData.documentInfo} />,
         count: relatedData.documentInfo.length
       },
       {
-        id: 'entity',
+        id: 'entityInfo',
         title: 'Related Entities',
         icon: BuildingIcon,
         content: <ItemsSection items={relatedData.entityInfo} />,
         count: relatedData.entityInfo.length
       },
       {
-        id: 'status',
+        id: 'statusInfo',
         title: 'Status Information',
         icon: CalendarIcon,
         content: <ItemsSection items={relatedData.statusInfo} />,
@@ -466,7 +466,7 @@ function TaxDocumentCard({ document }: { document: TaxDocument }) {
                 
                 {/* Section Header */}
                 <button 
-                  onClick={() => toggleSection(section.id as 'details' | 'document' | 'entity' | 'status')}
+                  onClick={() => toggleSection(section.id as 'details' | 'documentInfo' | 'entityInfo' | 'statusInfo')}
                   className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
                 >
                   <div className="flex items-center">
@@ -622,7 +622,6 @@ function SortableTaxDocumentCard({ document }: { document: TaxDocument }) {
     isDragging,
   } = useSortable({
     id: document.id,
-    data: { type: "tax-document", document },
   })
 
   const style = {
@@ -633,7 +632,14 @@ function SortableTaxDocumentCard({ document }: { document: TaxDocument }) {
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners} 
+      className="touch-manipulation"
+      suppressHydrationWarning
+    >
       <TaxDocumentCard document={document} />
     </div>
   )
@@ -912,8 +918,8 @@ function AddColumnDialog({
   )
 }
 
-export function TaxDocumentKanban({ workflowConfig }: TaxDocumentKanbanProps) {
-  const [documents, setDocuments] = React.useState(initialTaxDocuments)
+export function TaxDocumentKanban({ workflowConfig, initialDocuments }: TaxDocumentKanbanProps) {
+  const [documents, setDocuments] = React.useState(initialDocuments || initialTaxDocuments)
   const [activeDocument, setActiveDocument] = React.useState<TaxDocument | null>(null)
   const [stagesList, setStagesList] = React.useState(workflowConfig?.stages || defaultStages)
   const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)

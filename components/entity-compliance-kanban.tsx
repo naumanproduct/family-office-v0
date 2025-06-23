@@ -211,40 +211,46 @@ interface EntityComplianceKanbanProps {
     attributes: Array<{ id: string; name: string; type: string }>
     stages: Array<{ id: string; name: string; color: string }>
   }
+  initialItems?: ComplianceItem[]
 }
 
 function ComplianceItemCard({ item }: { item: ComplianceItem }) {
+  // Check if item is high priority
+  const isHighPriority = item.priority === "High"
+  
+  // Check if item is overdue
+  const isOverdue = new Date(item.dueDate) < new Date() && item.stage !== "completed"
+
   // Define tabs for the drawer
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 2, icon: UserIcon },
-    { id: "emails", label: "Emails", count: 1, icon: MailIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: ClipboardCheckIcon },
-    { id: "notes", label: "Notes", count: 2, icon: FileTextIcon },
-    { id: "files", label: "Files", count: item.documents ? item.documents.length : 0, icon: FolderIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 3, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 4, icon: MailIcon },
+    { id: "files", label: "Files", count: item.documents?.length || 0, icon: FolderIcon },
     { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
+  // Move state hooks outside of detailsPanel
+  const [openSections, setOpenSections] = React.useState<{
+    details: boolean;
+    entity: boolean;
+    documents: boolean;
+    related: boolean;
+  }>({
+    details: true, // Details expanded by default
+    entity: false,
+    documents: false,
+    related: false,
+  });
+
+  // Add state for showing all values
+  const [showingAllValues, setShowingAllValues] = React.useState(false);
+
   // Create details panel function
   const detailsPanel = (isFullScreen = false) => {
-    // Add state for collapsible sections
-    const [openSections, setOpenSections] = React.useState<{
-      details: boolean;
-      filing: boolean;
-      entity: boolean;
-      status: boolean;
-    }>({
-      details: true, // Details expanded by default
-      filing: false,
-      entity: false,
-      status: false,
-    });
-
-    // Add state for showing all values
-    const [showingAllValues, setShowingAllValues] = React.useState(false);
-
     // Toggle function for collapsible sections
-    const toggleSection = (section: 'details' | 'filing' | 'entity' | 'status') => {
+    const toggleSection = (section: 'details' | 'entity' | 'documents' | 'related') => {
       setOpenSections(prev => ({
         ...prev,
         [section]: !prev[section],
@@ -659,7 +665,6 @@ function SortableComplianceItemCard({ item }: { item: ComplianceItem }) {
     isDragging,
   } = useSortable({
     id: item.id,
-    data: { type: "compliance-item", item },
   })
 
   const style = {
@@ -670,7 +675,14 @@ function SortableComplianceItemCard({ item }: { item: ComplianceItem }) {
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners} 
+      className="touch-manipulation"
+      suppressHydrationWarning
+    >
       <ComplianceItemCard item={item} />
     </div>
   )
@@ -960,8 +972,8 @@ function AddColumnDialog({
   )
 }
 
-export function EntityComplianceKanban({ workflowConfig }: EntityComplianceKanbanProps) {
-  const [items, setItems] = React.useState(initialComplianceItems)
+export function EntityComplianceKanban({ workflowConfig, initialItems }: EntityComplianceKanbanProps) {
+  const [items, setItems] = React.useState(initialItems || initialComplianceItems)
   const [activeItem, setActiveItem] = React.useState<ComplianceItem | null>(null)
   const [stagesList, setStagesList] = React.useState(workflowConfig?.stages || defaultStages)
   const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)

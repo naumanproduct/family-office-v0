@@ -29,6 +29,7 @@ import {
   UsersIcon,
   CheckCircleIcon,
   FolderIcon,
+  ChevronDown,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -80,73 +81,261 @@ interface OpportunityKanbanProps {
 }
 
 // Separate the card UI from the sortable wrapper
-function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
+function OpportunityCard({
+  opportunity,
+}: {
+  opportunity: Opportunity
+}) {
+  // Determine opportunity stage
+  const opportunityStage =
+    opportunity.stage === "lead"
+      ? "Lead"
+      : opportunity.stage === "discovery"
+      ? "Discovery"
+      : opportunity.stage === "proposal"
+      ? "Proposal"
+      : opportunity.stage === "negotiation"
+      ? "Negotiation"
+      : opportunity.stage === "closed-won"
+      ? "Closed Won"
+      : "Closed Lost"
+
+  // Define tabs for the drawer
+  const tabs = [
+    { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "notes", label: "Notes", count: 3, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 5, icon: MailIcon },
+    { id: "files", label: "Files", count: 1, icon: FolderIcon },
+    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+  ]
+
+  // Move state hooks outside of detailsPanel
+  const [openSections, setOpenSections] = React.useState<{
+    details: boolean;
+    company: boolean;
+    financials: boolean;
+    contacts: boolean;
+  }>({
+    details: true, // Details expanded by default
+    company: false,
+    financials: false,
+    contacts: false,
+  });
+
+  // Add state for showing all values
+  const [showingAllValues, setShowingAllValues] = React.useState(false);
+
+  // Create details panel function
+  const detailsPanel = (isFullScreen = false) => {
+    // Toggle function for collapsible sections
+    const toggleSection = (section: 'details' | 'company' | 'financials' | 'contacts') => {
+      setOpenSections(prev => ({
+        ...prev,
+        [section]: !prev[section],
+      }));
+    };
+
+    // Toggle showing all values
+    const toggleShowAll = () => {
+      setShowingAllValues(prev => !prev);
+    };
+
+    // Define sections for the accordion
+    const sections = [
+      {
+        id: 'details',
+        title: 'Opportunity Details',
+        icon: FileTextIcon,
+        content: (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Status</span>
+                <Badge variant={opportunity.stage === "closed-won" ? "default" : opportunity.stage === "closed-lost" ? "destructive" : "outline"}>
+                  {opportunityStage}
+                </Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Deal Value</span>
+                <span className="text-sm">${opportunity.amount.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Close Date</span>
+                <span className="text-sm">{new Date(opportunity.expectedClose).toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Probability</span>
+                <span className="text-sm">{opportunity.probability}%</span>
+              </div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: 'company',
+        title: 'Company Information',
+        icon: BuildingIcon,
+        content: (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Company</span>
+                <span className="text-sm">{opportunity.company.name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Industry</span>
+                <span className="text-sm">{opportunity.company.industry}</span>
+              </div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: 'financials',
+        title: 'Financial Details',
+        icon: DollarSignIcon,
+        content: (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Expected Revenue</span>
+                <span className="text-sm">${(opportunity.amount * opportunity.probability / 100).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Deal Size</span>
+                <Badge variant={opportunity.amount > 100000 ? "default" : "outline"}>
+                  {opportunity.amount > 100000 ? "Large" : "Small"}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: 'contacts',
+        title: 'Key Contacts',
+        icon: UsersIcon,
+        content: (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Primary Contact</span>
+                <span className="text-sm">{opportunity.contact.name}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Decision Maker</span>
+                <span className="text-sm">{opportunity.contact.role || "Not specified"}</span>
+              </div>
+            </div>
+          </div>
+        ),
+      },
+    ];
+
+    return (
+      <div className={`space-y-6 ${isFullScreen ? 'p-6' : 'p-4'}`}>
+        {/* Sections */}
+        <div className="space-y-4">
+          {sections.map((section) => {
+            const isOpen = openSections[section.id as keyof typeof openSections];
+            
+            return (
+              <div key={section.id} className="border rounded-lg overflow-hidden">
+                {/* Section Header */}
+                <button 
+                  onClick={() => toggleSection(section.id as 'details' | 'company' | 'financials' | 'contacts')}
+                  className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <section.icon className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{section.title}</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+                </button>
+                
+                {/* Section Content */}
+                {isOpen && (
+                  <div className="p-3 border-t">
+                    {section.content}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Show All Toggle */}
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleShowAll}
+            className="text-xs text-muted-foreground"
+          >
+            {showingAllValues ? "Show Less" : "Show All"}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">{opportunity.name}</h4>
-                <p className="text-xs text-muted-foreground">{opportunity.company.name}</p>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <MoreVerticalIcon className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+        <div className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
+          <div className="p-4">
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="font-medium truncate">{opportunity.name}</h3>
+              <Badge variant={opportunity.stage === "closed-won" ? "default" : opportunity.stage === "closed-lost" ? "destructive" : "outline"}>
+                {opportunityStage}
+              </Badge>
             </div>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-2">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs">
-                <DollarSignIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Amount:</span>
-                <span className="font-medium">{opportunity.amount}</span>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Company:</span>
+                <span className="font-medium text-foreground">{opportunity.company.name}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                <TrendingUpIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Probability:</span>
-                <span>{opportunity.probability}%</span>
+              <div className="flex justify-between">
+                <span>Value:</span>
+                <span className="font-medium text-foreground">${opportunity.amount.toLocaleString()}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                <UserIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Contact:</span>
-                <span>{opportunity.contact.name}</span>
+              <div className="flex justify-between">
+                <span>Probability:</span>
+                <span className="font-medium text-foreground">{opportunity.probability}%</span>
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Close:</span>
-                <span>{opportunity.expectedClose}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <BuildingIcon className="h-3 w-3 text-muted-foreground" />
-                <span className="text-muted-foreground">Entity:</span>
-                <span>{opportunity.legalEntity.name}</span>
+              <div className="flex justify-between">
+                <span>Close Date:</span>
+                <span className="font-medium text-foreground">
+                  {new Date(opportunity.expectedClose).toLocaleDateString()}
+                </span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
-        <OpportunityDrawerContent opportunity={opportunity} />
+      <SheetContent className="sm:max-w-md p-0 overflow-y-auto">
+        <MasterDrawer
+          title={opportunity.name}
+          subtitle={opportunity.company.name}
+          tabs={tabs}
+          detailsPanel={detailsPanel}
+        />
       </SheetContent>
     </Sheet>
-  )
+  );
 }
 
 function SortableOpportunityCard({ opportunity }: { opportunity: Opportunity }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: opportunity.id.toString(),
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: opportunity.id,
   })
 
   const style = {
@@ -157,7 +346,14 @@ function SortableOpportunityCard({ opportunity }: { opportunity: Opportunity }) 
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-manipulation">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners} 
+      className="touch-manipulation"
+      suppressHydrationWarning
+    >
       <OpportunityCard opportunity={opportunity} />
     </div>
   )

@@ -191,6 +191,7 @@ interface CapitalCallKanbanProps {
     attributes: Array<{ id: string; name: string; type: string }>
     stages: Array<{ id: string; name: string; color: string }>
   }
+  initialCalls?: CapitalCall[]
 }
 
 // Default stages if no config provided
@@ -217,6 +218,7 @@ function CapitalCallCard({
   capitalCall: CapitalCall
   attributes?: Array<{ id: string; name: string; type: string }>
 }) {
+  // Check if call is overdue
   const isOverdue = new Date(capitalCall.dueDate) < new Date() && capitalCall.stage !== "done"
 
   // Define tabs for the drawer
@@ -230,6 +232,22 @@ function CapitalCallCard({
     { id: "files", label: "Files", count: 4, icon: FolderIcon },
     { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
+
+  // Move state hooks outside of detailsPanel
+  const [openSections, setOpenSections] = React.useState<{
+    details: boolean;
+    fund: boolean;
+    contacts: boolean;
+    financials: boolean;
+  }>({
+    details: true, // Details expanded by default
+    fund: false,
+    contacts: false,
+    financials: false,
+  });
+
+  // Add state for showing all values
+  const [showingAllValues, setShowingAllValues] = React.useState(false);
 
   // Function to get the appropriate icon for each attribute type
   const getAttributeIcon = (type: string) => {
@@ -280,22 +298,6 @@ function CapitalCallCard({
 
   // Create details panel function
   const detailsPanel = (isFullScreen = false) => {
-    // Add state for collapsible sections
-    const [openSections, setOpenSections] = React.useState<{
-      details: boolean;
-      fund: boolean;
-      contacts: boolean;
-      financials: boolean;
-    }>({
-      details: true, // Details expanded by default
-      fund: false,
-      contacts: false,
-      financials: false,
-    });
-
-    // Add state for showing all values
-    const [showingAllValues, setShowingAllValues] = React.useState(false);
-
     // Toggle function for collapsible sections
     const toggleSection = (section: 'details' | 'fund' | 'contacts' | 'financials') => {
       setOpenSections(prev => ({
@@ -714,7 +716,14 @@ function SortableCapitalCallCard({
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...dndAttributes} {...listeners} className="touch-manipulation">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...dndAttributes} 
+      {...listeners} 
+      className="touch-manipulation"
+      suppressHydrationWarning
+    >
       <CapitalCallCard capitalCall={capitalCall} attributes={attributes} />
     </div>
   )
@@ -854,8 +863,8 @@ function AddColumnDialog({
 }
 
 // Main component export
-export function CapitalCallKanban({ workflowConfig }: CapitalCallKanbanProps) {
-  const [capitalCalls, setCapitalCalls] = React.useState(initialCapitalCalls)
+export function CapitalCallKanban({ workflowConfig, initialCalls }: CapitalCallKanbanProps) {
+  const [capitalCalls, setCapitalCalls] = React.useState(initialCalls || initialCapitalCalls)
   const [activeId, setActiveId] = React.useState<string | null>(null)
   const [addColumnDialogOpen, setAddColumnDialogOpen] = React.useState(false)
   

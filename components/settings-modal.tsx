@@ -31,7 +31,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
@@ -203,6 +203,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
       }
     }}>
       <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] p-0 gap-0 flex flex-col overflow-hidden">
+        <DialogTitle className="sr-only">Settings</DialogTitle>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center space-x-2">

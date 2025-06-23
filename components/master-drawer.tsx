@@ -6,7 +6,7 @@ import { ChevronLeftIcon, ExpandIcon, PlusIcon, XIcon, ChevronDownIcon } from "l
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { TaskDetailsView } from "./task-details-view"
 import { NoteDetailsView } from "./note-details-view"
 import { MeetingDetailsView } from "./meeting-details-view"
@@ -400,6 +400,7 @@ export function MasterDrawer({
               side="right"
               className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
             >
+              <SheetTitle className="sr-only">Task Details</SheetTitle>
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -436,6 +437,7 @@ export function MasterDrawer({
               side="right"
               className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
             >
+              <SheetTitle className="sr-only">Note Details</SheetTitle>
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -467,6 +469,7 @@ export function MasterDrawer({
               side="right"
               className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
             >
+              <SheetTitle className="sr-only">Meeting Details</SheetTitle>
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -498,6 +501,7 @@ export function MasterDrawer({
               side="right"
               className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
             >
+              <SheetTitle className="sr-only">Email Details</SheetTitle>
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -538,6 +542,7 @@ export function MasterDrawer({
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+        <SheetTitle className="sr-only">{recordType} Details</SheetTitle>
         {/* Header */}
         <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
           <div className="flex items-center gap-3">

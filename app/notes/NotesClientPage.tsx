@@ -9,7 +9,7 @@ import { NoteContent } from "@/components/shared/note-content"
 import { NoteDetailsView } from "@/components/note-details-view"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useMediaQuery } from "../../hooks/use-media-query"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeftIcon, ExpandIcon, XIcon, FileTextIcon, ActivityIcon, PlusIcon } from "lucide-react"
@@ -212,6 +212,7 @@ export default function NotesClientPage() {
       return (
         <Dialog open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
           <DialogContent className="max-w-full h-[95vh] p-0">
+            <DialogTitle className="sr-only">Note Details</DialogTitle>
             <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
               <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" onClick={() => setSelectedNote(null)}>
