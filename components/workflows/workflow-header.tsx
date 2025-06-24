@@ -70,6 +70,20 @@ interface WorkflowConfig {
   stages: WorkflowStage[]
 }
 
+interface AutomationRule {
+  name: string;
+  description: string;
+  trigger: string;
+  triggers: string[];
+  conditions: { field: string; value: string }[];
+  conditionsLogic: string;
+  actions: {
+    template: string;
+    type: string;
+  };
+  status: string;
+}
+
 interface WorkflowHeaderProps {
   workflowName: string
   workflowConfig: WorkflowConfig
@@ -405,17 +419,18 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   const [isAddRuleModalOpen, setIsAddRuleModalOpen] = useState(false)
   const [selectedRule, setSelectedRule] = useState<any>(null)
   const [isEditingRule, setIsEditingRule] = useState(false)
-  const [newRule, setNewRule] = useState({
+  const [newRule, setNewRule] = useState<AutomationRule>({
     name: "",
     description: "",
     trigger: "",
-    triggers: [] as string[],
-    conditionsLogic: "AND",
+    triggers: [],
     conditions: [{ field: "tag", value: "" }],
+    conditionsLogic: "AND",
     actions: {
       template: "",
+      type: "add_to_workflow"
     },
-    status: "enabled",
+    status: "enabled"
   })
 
   // Configure DND kit sensors for drag/drop
@@ -617,6 +632,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
       conditions: [{ field: "tag", value: "" }],
       actions: {
         template: "",
+        type: "add_to_workflow"
       },
       status: "enabled",
     })
@@ -643,7 +659,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
       triggers: rule.triggers || [],
       conditionsLogic: rule.conditionsLogic || "AND",
       conditions: rule.conditions || [],
-      actions: rule.actions || { template: "" },
+      actions: rule.actions || { template: "", type: "add_to_workflow" },
       status: rule.status || "enabled",
     });
     setIsAddRuleModalOpen(true);
@@ -1322,7 +1338,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         <Badge variant="outline">
                           {trigger === "file_upload" ? "File Upload" : 
                            trigger === "email_ingestion" ? "Email Ingestion" : 
-                           "Integration"}
+                           trigger}
                         </Badge>
                         {index < newRule.triggers.length - 1 && <span className="text-xs text-muted-foreground">OR</span>}
                       </div>
@@ -1407,7 +1423,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                             <div key={index} className="flex items-center justify-between bg-background rounded-md p-2 border">
                               <span>{trigger === "file_upload" ? "File Upload" : 
                                      trigger === "email_ingestion" ? "Email Ingestion" : 
-                                     "Integration"}</span>
+                                     trigger}</span>
                               <Button 
                                 variant="ghost" 
                                 size="icon"
@@ -1434,7 +1450,6 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         <SelectContent>
                           <SelectItem value="file_upload">File Upload</SelectItem>
                           <SelectItem value="email_ingestion">Email Ingestion</SelectItem>
-                          <SelectItem value="integration">Integration (Canoe, etc.)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1529,28 +1544,41 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                   <div className="border rounded-md divide-y">
                     <div className="p-4 flex items-center gap-2">
                       <Select 
-                        value="add_to_workflow" 
-                        disabled
-                        onValueChange={() => {}}
+                        value={newRule.actions?.type || "add_to_workflow"} 
+                        onValueChange={(value) => handleActionChange('type', value)}
                       >
-                        <SelectTrigger className="w-[180px] bg-muted">
+                        <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Action type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="add_to_workflow">Add to workflow</SelectItem>
+                          <SelectItem value="create_task_from_template">Create task from template</SelectItem>
                         </SelectContent>
                       </Select>
                       
                       <span className="text-muted-foreground">=</span>
                       
-                      <Select value={newRule.actions.template} onValueChange={(value) => handleActionChange('template', value)}>
+                      <Select 
+                        value={newRule.actions.template} 
+                        onValueChange={(value) => handleActionChange('template', value)}
+                      >
                         <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select a workflow" />
+                          <SelectValue placeholder={newRule.actions?.type === "create_task_from_template" ? "Select task template" : "Select a workflow"} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="template_1">Standard Capital Call</SelectItem>
-                          <SelectItem value="template_2">Urgent Capital Call</SelectItem>
-                          <SelectItem value="template_3">Distribution Notice</SelectItem>
+                          {newRule.actions?.type === "create_task_from_template" ? (
+                            <>
+                              <SelectItem value="task_template_1">Standard Task</SelectItem>
+                              <SelectItem value="task_template_2">Urgent Task</SelectItem>
+                              <SelectItem value="task_template_3">Review Task</SelectItem>
+                            </>
+                          ) : (
+                            <>
+                              <SelectItem value="template_1">Standard Capital Call</SelectItem>
+                              <SelectItem value="template_2">Urgent Capital Call</SelectItem>
+                              <SelectItem value="template_3">Distribution Notice</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                       

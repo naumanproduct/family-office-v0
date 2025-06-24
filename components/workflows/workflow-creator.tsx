@@ -207,22 +207,37 @@ interface WorkflowCreatorProps {
   existingWorkflow?: any
 }
 
+interface AutomationRule {
+  name: string;
+  description: string;
+  trigger: string;
+  triggers: string[];
+  conditions: { field: string; value: string }[];
+  conditionsLogic: string;
+  actions: {
+    template: string;
+    type: string;
+  };
+  status: string;
+}
+
 export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: WorkflowCreatorProps) {
   const [activeTab, setActiveTab] = useState("basic")
   const [isRuleModalOpen, setIsRuleModalOpen] = useState(false)
   const [selectedRule, setSelectedRule] = useState<any>(null)
   const [isEditingRule, setIsEditingRule] = useState(false)
-  const [newRule, setNewRule] = useState({
+  const [newRule, setNewRule] = useState<AutomationRule>({
     name: "",
     description: "",
     trigger: "",
-    triggers: [] as string[],
+    triggers: [],
+    conditions: [{ field: "tag", value: "" }],
     conditionsLogic: "AND",
-    conditions: [{ field: "tag", value: "Capital Call" }], // Initial condition
     actions: {
       template: "",
+      type: "add_to_workflow"
     },
-    status: "enabled",
+    status: "enabled"
   })
   const [workflow, setWorkflow] = useState(() => {
     if (existingWorkflow) {
@@ -431,6 +446,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
       conditions: [{ field: "tag", value: "" }],
       actions: {
         template: "",
+        type: "add_to_workflow"
       },
       status: "enabled",
     })
@@ -880,7 +896,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                         <Badge variant="outline">
                           {trigger === "file_upload" ? "File Upload" : 
                            trigger === "email_ingestion" ? "Email Ingestion" : 
-                           "Integration"}
+                           trigger}
                         </Badge>
                         {index < newRule.triggers.length - 1 && <span className="text-xs text-muted-foreground">OR</span>}
                       </div>
@@ -961,7 +977,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                             <div key={index} className="flex items-center justify-between bg-background rounded-md p-2 border">
                               <span>{trigger === "file_upload" ? "File Upload" : 
                                      trigger === "email_ingestion" ? "Email Ingestion" : 
-                                     "Integration"}</span>
+                                     trigger}</span>
                               <Button 
                                 variant="ghost" 
                                 size="icon"
@@ -991,7 +1007,6 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                         <SelectContent>
                           <SelectItem value="file_upload">File Upload</SelectItem>
                           <SelectItem value="email_ingestion">Email Ingestion</SelectItem>
-                          <SelectItem value="integration">Integration (Canoe, etc.)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1086,15 +1101,15 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                   <div className="border rounded-md divide-y">
                     <div className="p-4 flex items-center gap-2">
                       <Select 
-                        value="add_to_workflow" 
-                        disabled
-                        onValueChange={() => {}}
+                        value={newRule.actions?.type || "add_to_workflow"} 
+                        onValueChange={(value) => handleActionChange('type', value)}
                       >
-                        <SelectTrigger className="w-[180px] bg-muted">
+                        <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Action type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="add_to_workflow">Add to workflow</SelectItem>
+                          <SelectItem value="create_task_from_template">Create task from template</SelectItem>
                         </SelectContent>
                       </Select>
                       
@@ -1105,12 +1120,22 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                         onValueChange={(value) => handleActionChange('template', value)}
                       >
                         <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select a workflow" />
+                          <SelectValue placeholder={newRule.actions?.type === "create_task_from_template" ? "Select task template" : "Select a workflow"} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="template_1">Standard Capital Call</SelectItem>
-                          <SelectItem value="template_2">Urgent Capital Call</SelectItem>
-                          <SelectItem value="template_3">Distribution Notice</SelectItem>
+                          {newRule.actions?.type === "create_task_from_template" ? (
+                            <>
+                              <SelectItem value="task_template_1">Standard Task</SelectItem>
+                              <SelectItem value="task_template_2">Urgent Task</SelectItem>
+                              <SelectItem value="task_template_3">Review Task</SelectItem>
+                            </>
+                          ) : (
+                            <>
+                              <SelectItem value="template_1">Standard Capital Call</SelectItem>
+                              <SelectItem value="template_2">Urgent Capital Call</SelectItem>
+                              <SelectItem value="template_3">Distribution Notice</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                       
