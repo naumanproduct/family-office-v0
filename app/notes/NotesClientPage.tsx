@@ -12,11 +12,12 @@ import { useMediaQuery } from "../../hooks/use-media-query"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeftIcon, ExpandIcon, XIcon, FileTextIcon, ActivityIcon, PlusIcon } from "lucide-react"
+import { ChevronLeftIcon, ExpandIcon, XIcon, FileTextIcon, ActivityIcon, PlusIcon, CheckSquareIcon } from "lucide-react"
 import { createPortal } from "react-dom"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TypableArea } from "@/components/typable-area"
 import { FileContent } from "@/components/shared/file-content"
+import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
 
 export default function NotesClientPage() {
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
@@ -24,6 +25,46 @@ export default function NotesClientPage() {
   const isDesktop = useMediaQuery("(min-width: 768px)")
   const [noteText, setNoteText] = React.useState("")
   const [activeTab, setActiveTab] = React.useState("activity")
+  
+  // Mock data for tasks related to notes
+  const mockTasks = [
+    {
+      id: 1,
+      title: "Review note content for accuracy",
+      status: "In Progress",
+      priority: "High",
+      assignee: "John Smith",
+      dueDate: "2023-06-15",
+      description: "Verify all information in the note is accurate and up-to-date."
+    },
+    {
+      id: 2,
+      title: "Follow up on action items from note",
+      status: "To Do",
+      priority: "Medium",
+      assignee: "Sarah Johnson",
+      dueDate: "2023-06-20",
+      description: "Address all action items mentioned in the note."
+    },
+    {
+      id: 3,
+      title: "Share note with stakeholders",
+      status: "Completed",
+      priority: "Low",
+      assignee: "Michael Brown",
+      dueDate: "2023-06-10",
+      description: "Distribute note to all relevant team members."
+    },
+    {
+      id: 4,
+      title: "Update note with feedback",
+      status: "To Do",
+      priority: "Medium",
+      assignee: "John Smith",
+      dueDate: "2023-06-25",
+      description: "Incorporate feedback from stakeholders into the note."
+    }
+  ]
   
   // Use a drawer/sheet for the note details
   const NoteDetailDrawer = () => {
@@ -107,6 +148,18 @@ export default function NotesClientPage() {
                     {activeTab === "activity" && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
                   </button>
                   <button
+                    onClick={() => setActiveTab("tasks")}
+                    className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
+                      activeTab === "tasks"
+                        ? "border-b-2 border-primary text-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <CheckSquareIcon className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">Tasks</span>
+                    {activeTab === "tasks" && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                  </button>
+                  <button
                     onClick={() => setActiveTab("notes")}
                     className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
                       activeTab === "notes"
@@ -137,7 +190,9 @@ export default function NotesClientPage() {
               <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">
-                    {activeTab === "activity" ? "Activity" : activeTab === "notes" ? "Notes" : "Files"}
+                    {activeTab === "activity" ? "Activity" : 
+                     activeTab === "tasks" ? "Tasks" : 
+                     activeTab === "notes" ? "Notes" : "Files"}
                   </h3>
                   {activeTab === "activity" && (
                     <div className="flex items-center gap-2">
@@ -147,12 +202,24 @@ export default function NotesClientPage() {
                       </Button>
                     </div>
                   )}
+                  {activeTab === "tasks" && (
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4 mr-1" />
+                        Add task
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 
                 {activeTab === "activity" && (
                   <div className="space-y-4">
                     <p className="text-muted-foreground">No recent activity for this note.</p>
                   </div>
+                )}
+                
+                {activeTab === "tasks" && (
+                  <UnifiedTaskTable data={mockTasks} viewMode="table" />
                 )}
                 
                 {activeTab === "notes" && (

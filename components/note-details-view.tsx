@@ -28,6 +28,7 @@ import { FileContent } from "@/components/shared/file-content"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
 import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 import { generateNoteActivities } from "@/components/shared/activity-generators"
+import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
 
 interface NoteDetailsViewProps {
   note: any
@@ -56,6 +57,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", icon: FileTextIcon },
     { id: "files", label: "Files", icon: FileTextIcon },
   ]
 
@@ -85,6 +87,46 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
 
   // Mock activities for activity section
   const activities = generateNoteActivities()
+
+  // Mock data for tasks related to this note
+  const mockTasks = [
+    {
+      id: 1,
+      title: "Review note content for accuracy",
+      status: "In Progress",
+      priority: "High",
+      assignee: "John Smith",
+      dueDate: "2023-06-15",
+      description: "Verify all information in the note is accurate and up-to-date."
+    },
+    {
+      id: 2,
+      title: "Follow up on action items from note",
+      status: "To Do",
+      priority: "Medium",
+      assignee: "Sarah Johnson",
+      dueDate: "2023-06-20",
+      description: "Address all action items mentioned in the note."
+    },
+    {
+      id: 3,
+      title: "Share note with stakeholders",
+      status: "Completed",
+      priority: "Low",
+      assignee: "Michael Brown",
+      dueDate: "2023-06-10",
+      description: "Distribute note to all relevant team members."
+    },
+    {
+      id: 4,
+      title: "Update note with feedback",
+      status: "To Do",
+      priority: "Medium",
+      assignee: "John Smith",
+      dueDate: "2023-06-25",
+      description: "Incorporate feedback from stakeholders into the note."
+    }
+  ]
 
   const getPriorityColor = (priority: string | undefined | null) => {
     if (!priority) return "bg-gray-100 text-gray-800"
@@ -241,6 +283,16 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
     },
   ];
 
+  // Custom content for tabs other than details
+  const getTabContent = () => {
+    if (activeTab === "tasks") {
+      return <UnifiedTaskTable data={mockTasks} viewMode={isFullScreen ? "table" : "list"} isInDrawer={!isFullScreen} />;
+    } else if (activeTab === "files") {
+      return <FileContent />;
+    }
+    return null;
+  };
+
   return (
     <div className="flex flex-col flex-1">
       {/* Note Header - Only show when not in fullscreen mode */}
@@ -282,7 +334,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
         </div>
       )}
 
-      {/* Tabs - Only show when not in fullscreen mode */}
+      {/* Tabs - hide in fullscreen to avoid duplication */}
       {!isFullScreen && (
         <div className="border-b bg-background px-6 py-1">
           <div className="flex gap-6 overflow-x-auto">
@@ -321,7 +373,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
         />
       ) : (
         <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>
-          <FileContent />
+          {getTabContent()}
         </div>
       )}
     </div>
