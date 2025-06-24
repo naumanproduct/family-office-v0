@@ -1526,11 +1526,26 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                     
                     <div className="p-4 flex items-center gap-2">
                       <Select 
+                        value="source" 
+                        disabled
+                        onValueChange={() => {}}
+                      >
+                        <SelectTrigger className="w-[180px] bg-muted">
+                          <SelectValue placeholder="Source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="source">Source</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <span className="text-muted-foreground">=</span>
+                      
+                      <Select 
                         value={newRule.trigger} 
                         onValueChange={(value) => handleRuleChange('trigger', value)}
                       >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select source" />
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select source type" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="file_upload">File Upload</SelectItem>
@@ -1539,11 +1554,13 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                       </Select>
                       
                       <Button 
-                        variant="outline"
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-muted-foreground hover:text-foreground"
                         onClick={handleAddTrigger}
                         disabled={!newRule.trigger}
                       >
-                        Add
+                        <Plus className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
