@@ -295,7 +295,7 @@ export function TasksTable() {
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
             <Badge variant="outline" className="bg-background">
-              Task
+              {selectedSubtask ? "Subtask" : "Task"}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
@@ -547,6 +547,7 @@ export function TasksTable() {
           onTaskClick={setSelectedTask} 
           onStatusChange={updateTaskStatus}
           viewMode={viewMode}
+          isInDrawer={false}
         />
       </div>
 
@@ -564,7 +565,7 @@ export function TasksTable() {
                   <ChevronLeftIcon className="h-4 w-4" />
                 </Button>
                 <Badge variant="outline" className="bg-background">
-                  Task
+                  {selectedSubtask ? "Subtask" : "Task"}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">

@@ -162,13 +162,16 @@ export function MasterDrawer({
   }, [isFullScreen])
 
   const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table", isCurrentFullScreen = false) => {
+    // When in drawer mode, always use list view
+    const effectiveViewMode = isCurrentFullScreen ? viewMode : "list";
+    
     if (activeTab === "details") {
       return detailsPanel(isCurrentFullScreen)
     }
 
     // Handle task details view (only in non-fullscreen mode)
     if (activeTab === "tasks" && selectedTask && !isFullScreen) {
-      return <TaskDetailsView task={selectedTask} onBack={() => setSelectedTask(null)} recordName={title} />
+      return <TaskDetailsView task={selectedTask} onBack={() => setSelectedTask(null)} recordName={title} recordType={recordType} />
     }
 
     // Handle note details view (only in non-fullscreen mode)
@@ -187,7 +190,7 @@ export function MasterDrawer({
     }
 
     // For other tabs, return the children with the setSelectedTask and setSelectedNote callbacks
-    return children(activeTab, viewMode, setSelectedTask, setSelectedNote, setSelectedMeeting, setSelectedEmail)
+    return children(activeTab, effectiveViewMode, setSelectedTask, setSelectedNote, setSelectedMeeting, setSelectedEmail)
   }
 
   // Get the appropriate title and subtitle - only change for non-fullscreen mode
@@ -415,7 +418,15 @@ export function MasterDrawer({
                     <ChevronLeftIcon className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="bg-background">
-                    Task
+                    {selectedTask
+                      ? selectedTask.parentTask ? "Subtask" : "Task"
+                      : selectedNote
+                        ? "Note"
+                        : selectedMeeting
+                          ? "Meeting"
+                          : selectedEmail
+                            ? "Email"
+                            : recordType}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
@@ -430,6 +441,7 @@ export function MasterDrawer({
                   task={selectedTask}
                   onBack={handleDrawerBackClick}
                   recordName={title}
+                  recordType={recordType}
                   isInDrawer={true}
                 />
               </div>
@@ -452,7 +464,15 @@ export function MasterDrawer({
                     <ChevronLeftIcon className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="bg-background">
-                    Note
+                    {selectedTask
+                      ? selectedTask.parentTask ? "Subtask" : "Task"
+                      : selectedNote
+                        ? "Note"
+                        : selectedMeeting
+                          ? "Meeting"
+                          : selectedEmail
+                            ? "Email"
+                            : recordType}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
@@ -484,7 +504,15 @@ export function MasterDrawer({
                     <ChevronLeftIcon className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="bg-background">
-                    Meeting
+                    {selectedTask
+                      ? selectedTask.parentTask ? "Subtask" : "Task"
+                      : selectedNote
+                        ? "Note"
+                        : selectedMeeting
+                          ? "Meeting"
+                          : selectedEmail
+                            ? "Email"
+                            : recordType}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
@@ -516,7 +544,15 @@ export function MasterDrawer({
                     <ChevronLeftIcon className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="bg-background">
-                    Email
+                    {selectedTask
+                      ? selectedTask.parentTask ? "Subtask" : "Task"
+                      : selectedNote
+                        ? "Note"
+                        : selectedMeeting
+                          ? "Meeting"
+                          : selectedEmail
+                            ? "Email"
+                            : recordType}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
@@ -577,7 +613,7 @@ export function MasterDrawer({
             </Button>
             <Badge variant="outline" className="bg-background">
               {selectedTask
-                ? "Task"
+                ? selectedTask.parentTask ? "Subtask" : "Task"
                 : selectedNote
                   ? "Note"
                   : selectedMeeting
