@@ -1125,15 +1125,15 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                         <SelectContent>
                           {newRule.actions?.type === "create_task_from_template" ? (
                             <>
-                              <SelectItem value="task_template_1">Standard Task</SelectItem>
-                              <SelectItem value="task_template_2">Urgent Task</SelectItem>
-                              <SelectItem value="task_template_3">Review Task</SelectItem>
+                              <SelectItem value="capital_call_processing">Capital Call Processing</SelectItem>
+                              <SelectItem value="k1_processing">K-1 Processing</SelectItem>
+                              <SelectItem value="quarterly_report_processing">Quarterly Report Processing</SelectItem>
                             </>
                           ) : (
                             <>
-                              <SelectItem value="template_1">Standard Capital Call</SelectItem>
-                              <SelectItem value="template_2">Urgent Capital Call</SelectItem>
-                              <SelectItem value="template_3">Distribution Notice</SelectItem>
+                              <SelectItem value="deal_pipeline">Deal Pipeline</SelectItem>
+                              <SelectItem value="capital_calls">Capital Calls</SelectItem>
+                              <SelectItem value="distributions_tracking">Distributions Tracking</SelectItem>
                             </>
                           )}
                         </SelectContent>
