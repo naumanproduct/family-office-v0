@@ -13,6 +13,7 @@ import {
   FileTextIcon,
   GanttChartIcon,
   HelpCircleIcon,
+  HomeIcon,
   PlusCircleIcon,
   ScaleIcon,
   SearchIcon,
@@ -55,6 +56,11 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
+    {
+      title: "Home",
+      url: "/",
+      icon: HomeIcon,
+    },
     {
       title: "Investments",
       url: "/investments",
