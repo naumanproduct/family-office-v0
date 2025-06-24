@@ -1005,10 +1005,6 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" size="sm" onClick={handleAddTrigger}>
-                        <Plus className="mr-2 h-3 w-3" />
-                        Add Trigger
-                      </Button>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
@@ -1090,18 +1086,16 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                       </Button>
                     </div>
                     
-                    {newRule.triggers.length > 0 && (
-                      <div className="px-4 py-2 text-xs">
-                        <Button 
-                          variant="link" 
-                          className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
-                          onClick={handleAddTrigger}
-                          disabled={!newRule.trigger}
-                        >
-                          + Add Trigger
-                        </Button>
-                      </div>
-                    )}
+                    <div className="px-4 py-2 text-xs">
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
+                        onClick={handleAddTrigger}
+                        disabled={!newRule.trigger}
+                      >
+                        + Add Trigger
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -1125,12 +1119,6 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                           </SelectContent>
                         </Select>
                       </div>
-                      {newRule.conditions.length <= 1 && (
-                        <Button variant="outline" size="sm" onClick={handleAddCondition}>
-                          <Plus className="mr-2 h-3 w-3" />
-                          Add Condition
-                        </Button>
-                      )}
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
@@ -1176,17 +1164,15 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                       </div>
                     ))}
                     
-                    {newRule.conditions.length > 1 && (
-                      <div className="px-4 py-2 text-xs">
-                        <Button 
-                          variant="link" 
-                          className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
-                          onClick={handleAddCondition}
-                        >
-                          + Add Condition
-                        </Button>
-                      </div>
-                    )}
+                    <div className="px-4 py-2 text-xs">
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
+                        onClick={handleAddCondition}
+                      >
+                        + Add Condition
+                      </Button>
+                    </div>
                   </div>
                   {newRule.conditions.length > 1 && (
                     <div className="flex justify-end">
@@ -1199,12 +1185,6 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-md font-medium">What should happen?</h3>
-                    {newRule.actions.length <= 1 && (
-                      <Button variant="outline" size="sm" onClick={handleAddAction}>
-                        <Plus className="mr-2 h-3 w-3" />
-                        Add Action
-                      </Button>
-                    )}
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
                     Tell the system what to do — like create a task, start a workflow, or assign it to someone.
@@ -1264,17 +1244,15 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                       </div>
                     ))}
                     
-                    {newRule.actions.length > 1 && (
-                      <div className="px-4 py-2 text-xs">
-                        <Button 
-                          variant="link" 
-                          className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
-                          onClick={handleAddAction}
-                        >
-                          + Add Action
-                        </Button>
-                      </div>
-                    )}
+                    <div className="px-4 py-2 text-xs">
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
+                        onClick={handleAddAction}
+                      >
+                        + Add Action
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
