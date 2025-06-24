@@ -231,7 +231,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
     name: "",
     description: "",
     trigger: "",
-    triggers: [],
+    triggers: ["file_upload"], // Start with one trigger by default
     triggersLogic: "OR",
     conditions: [{ field: "tag", value: "" }],
     conditionsLogic: "AND",
@@ -467,7 +467,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
       name: "",
       description: "",
       trigger: "",
-      triggers: [],
+      triggers: ["file_upload"], // Start with one trigger by default
       triggersLogic: "OR",
       conditionsLogic: "AND",
       conditions: [{ field: "tag", value: "" }],
@@ -504,14 +504,8 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
     }))
   }
 
-  const handleAddTrigger = () => {
-    if (!newRule.trigger) return;
-    setNewRule(prev => ({
-      ...prev,
-      triggers: [...prev.triggers, prev.trigger],
-      trigger: ""
-    }));
-  }
+  // We're now adding triggers directly in the UI
+  // This function is kept for reference but no longer used
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -1011,91 +1005,75 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                     This is the event that kicks off the automation — like uploading a file or receiving an email.
                   </p>
                   
-                  <div className="border rounded-md divide-y">
-                    {(newRule.triggers || []).length > 0 && (
-                      <div className="p-4 bg-muted/50 border-b">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline">{newRule.triggersLogic}</Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {newRule.triggersLogic === "OR" 
-                              ? "Multiple triggers will activate this rule" 
-                              : "All triggers must occur to activate this rule"}
-                          </span>
-                        </div>
-                        <div className="space-y-2">
-                          {newRule.triggers.map((trigger, index) => (
-                            <div key={index} className="flex items-center justify-between bg-background rounded-md p-2 border">
-                              <span>{trigger === "file_upload" ? "File Upload" : 
-                                     trigger === "email_ingestion" ? "Email Ingestion" : 
-                                     trigger}</span>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => {
-                                  setNewRule(prev => ({
-                                    ...prev,
-                                    triggers: prev.triggers.filter((_, i) => i !== index)
-                                  }))
-                                }}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
+                  <div className="border rounded-md">
+                    {newRule.triggers.map((trigger, index) => (
+                      <div key={index} className="p-4 flex items-center gap-2">
+                        <Select 
+                          value="source" 
+                          disabled
+                          onValueChange={() => {}}
+                        >
+                          <SelectTrigger className="w-[180px] bg-muted">
+                            <SelectValue placeholder="Source" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="source">Source</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <span className="text-muted-foreground">=</span>
+                        
+                        <Select 
+                          value={trigger} 
+                          onValueChange={(value) => {
+                            setNewRule(prev => {
+                              const updatedTriggers = [...prev.triggers];
+                              updatedTriggers[index] = value;
+                              return {
+                                ...prev,
+                                triggers: updatedTriggers
+                              };
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Select source type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="file_upload">File Upload</SelectItem>
+                            <SelectItem value="email_ingestion">Email Ingestion</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-muted-foreground hover:text-foreground"
+                          onClick={() => {
+                            setNewRule(prev => ({
+                              ...prev,
+                              triggers: prev.triggers.filter((_, i) => i !== index)
+                            }))
+                          }}
+                          disabled={newRule.triggers.length <= 1}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
-                    )}
+                    ))}
                     
-                    <div className="p-4 flex items-center gap-2">
-                      <Select 
-                        value="source" 
-                        disabled
-                        onValueChange={() => {}}
-                      >
-                        <SelectTrigger className="w-[180px] bg-muted">
-                          <SelectValue placeholder="Source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="source">Source</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      
-                      <span className="text-muted-foreground">=</span>
-                      
-                      <Select 
-                        value={newRule.trigger} 
-                        onValueChange={(value) => handleRuleChange('trigger', value)}
-                      >
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select source type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="file_upload">File Upload</SelectItem>
-                          <SelectItem value="email_ingestion">Email Ingestion</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-muted-foreground hover:text-foreground"
-                        onClick={handleAddTrigger}
-                        disabled={!newRule.trigger}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    
-                    <div className="px-4 py-2 text-xs">
-                      <Button 
-                        variant="link" 
-                        className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
-                        onClick={handleAddTrigger}
-                        disabled={!newRule.trigger}
-                      >
-                        + Add Trigger
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="link" 
+                      className="p-2 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        setNewRule(prev => ({
+                          ...prev,
+                          triggers: [...prev.triggers, "file_upload"]
+                        }))
+                      }}
+                    >
+                      + Add Trigger
+                    </Button>
                   </div>
                 </div>
 
@@ -1125,7 +1103,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                     Add filters to make sure this only runs when it's relevant — like if the file name includes "Capital Call".
                   </p>
                   
-                  <div className="border rounded-md divide-y">
+                  <div className="border rounded-md">
                     {newRule.conditions.map((condition, index) => (
                       <div key={index} className="p-4 flex items-center gap-2">
                         <Select 
@@ -1164,21 +1142,15 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                       </div>
                     ))}
                     
-                    <div className="px-4 py-2 text-xs">
-                      <Button 
-                        variant="link" 
-                        className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
-                        onClick={handleAddCondition}
-                      >
-                        + Add Condition
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="link" 
+                      className="p-2 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
+                      onClick={handleAddCondition}
+                    >
+                      + Add Condition
+                    </Button>
                   </div>
-                  {newRule.conditions.length > 1 && (
-                    <div className="flex justify-end">
-                      <Badge variant="outline" className="text-xs">{newRule.conditionsLogic === "AND" ? "All" : "Any"} conditions must be true</Badge>
-                    </div>
-                  )}
+
                 </div>
 
                 {/* Actions */}
@@ -1190,7 +1162,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                     Tell the system what to do — like create a task, start a workflow, or assign it to someone.
                   </p>
                   
-                  <div className="border rounded-md divide-y">
+                  <div className="border rounded-md">
                     {newRule.actions.map((action, index) => (
                       <div key={index} className="p-4 flex items-center gap-2">
                         <Select 
@@ -1244,15 +1216,13 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                       </div>
                     ))}
                     
-                    <div className="px-4 py-2 text-xs">
-                      <Button 
-                        variant="link" 
-                        className="p-0 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
-                        onClick={handleAddAction}
-                      >
-                        + Add Action
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="link" 
+                      className="p-2 h-auto text-xs font-normal text-muted-foreground hover:text-foreground"
+                      onClick={handleAddAction}
+                    >
+                      + Add Action
+                    </Button>
                   </div>
                 </div>
               </div>
