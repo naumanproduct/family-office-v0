@@ -10,7 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowRight, Check, Plus, X, ChevronLeftIcon, FileTextIcon, LayoutIcon, ListIcon } from "lucide-react"
+import { ArrowRight, Check, Plus, X, ChevronLeftIcon, FileTextIcon, LayoutIcon, ListIcon, Settings2Icon, MoreHorizontalIcon } from "lucide-react"
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 // Define the object types that can be tracked in workflows
 const objectTypes = [
@@ -120,6 +122,84 @@ const defaultStages: Record<string, Array<{ id: string; name: string; color: str
   ],
 }
 
+// Define default automation rules by object type
+const defaultAutomationRules: Record<string, Array<any>> = {
+  task: [],
+  opportunity: [
+    {
+      name: "New Pitch Deck",
+      description: "Create a new opportunity when a pitch deck is uploaded",
+      trigger: "file_upload",
+      conditionSummary: "document_type = Pitch Deck",
+      actionSummary: "Create opportunity, link to company, add to pipeline",
+      conditions: [{ field: "document_type", value: "Pitch Deck" }],
+      actions: {
+        template: "template_1",
+        linkTo: "company",
+      },
+      status: "enabled",
+    }
+  ],
+  "capital-call": [
+    {
+      name: "Capital Call Email",
+      description: "Create a new capital call task when an email with 'Capital Call' in subject is received",
+      trigger: "email_ingestion",
+      conditionSummary: "subject contains 'Capital Call'",
+      actionSummary: "Create task, auto-classify, notify reviewer",
+      conditions: [{ field: "subject", value: "Capital Call" }],
+      actions: {
+        template: "template_1",
+        linkTo: "investment",
+      },
+      status: "enabled",
+    },
+    {
+      name: "Capital Call Document",
+      description: "Create a new capital call task when a capital call document is uploaded",
+      trigger: "file_upload", 
+      conditionSummary: "tag = Capital Call",
+      actionSummary: "Create task, link to investment, add to board",
+      conditions: [{ field: "tag", value: "Capital Call" }],
+      actions: {
+        template: "template_2",
+        linkTo: "investment",
+      },
+      status: "enabled",
+    }
+  ],
+  "distribution": [
+    {
+      name: "Distribution Notice",
+      description: "Create a new distribution task when a distribution notice is received",
+      trigger: "integration",
+      conditionSummary: "document_type = Distribution Notice",
+      actionSummary: "Create task, link to investment, tag as distribution",
+      conditions: [{ field: "document_type", value: "Distribution Notice" }],
+      actions: {
+        template: "template_3", 
+        linkTo: "investment",
+      },
+      status: "enabled",
+    },
+    {
+      name: "Distribution Email",
+      description: "Create a new distribution task when an email with 'Distribution' in subject is received",
+      trigger: "email_ingestion",
+      conditionSummary: "subject contains 'Distribution'",
+      actionSummary: "Create task, auto-classify as distribution, notify reviewer",
+      conditions: [{ field: "subject", value: "Distribution" }],
+      actions: {
+        template: "template_3",
+        linkTo: "investment",
+      },
+      status: "enabled",
+    }
+  ],
+  document: [],
+  entity: [],
+}
+
 interface WorkflowCreatorProps {
   isOpen: boolean
   onClose: () => void
@@ -129,6 +209,21 @@ interface WorkflowCreatorProps {
 
 export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: WorkflowCreatorProps) {
   const [activeTab, setActiveTab] = useState("basic")
+  const [isRuleModalOpen, setIsRuleModalOpen] = useState(false)
+  const [selectedRule, setSelectedRule] = useState<any>(null)
+  const [isEditingRule, setIsEditingRule] = useState(false)
+  const [newRule, setNewRule] = useState({
+    name: "",
+    description: "",
+    trigger: "",
+    triggers: [] as string[],
+    conditionsLogic: "AND",
+    conditions: [{ field: "tag", value: "Capital Call" }], // Initial condition
+    actions: {
+      template: "",
+    },
+    status: "enabled",
+  })
   const [workflow, setWorkflow] = useState(() => {
     if (existingWorkflow) {
       return {
@@ -137,6 +232,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
         objectType: existingWorkflow.objectType || "",
         attributes: existingWorkflow.attributes || [],
         stages: existingWorkflow.stages || [],
+        automationRules: existingWorkflow.automationRules || [],
       }
     }
     return {
@@ -145,6 +241,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
       objectType: "",
       attributes: [],
       stages: [],
+      automationRules: [],
     }
   })
 
@@ -156,6 +253,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
         objectType: existingWorkflow.objectType || "",
         attributes: existingWorkflow.attributes || [],
         stages: existingWorkflow.stages || [],
+        automationRules: existingWorkflow.automationRules || [],
       })
     }
   }, [existingWorkflow])
@@ -166,6 +264,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
       objectType: type,
       attributes: [],
       stages: defaultStages[type] || [],
+      automationRules: defaultAutomationRules[type] || [],
     })
   }
 
@@ -200,6 +299,176 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
   const canProceedToAttributes = workflow.name && workflow.objectType
   const canProceedToStages = canProceedToAttributes && workflow.attributes.length > 0
   const canSave = canProceedToStages && workflow.stages.length > 0
+
+  // Add these functions to handle automation rule form
+  const handleRuleChange = (field: string, value: string) => {
+    setNewRule(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleActionChange = (field: string, value: string) => {
+    setNewRule(prev => ({
+      ...prev,
+      actions: {
+        ...prev.actions,
+        [field]: value
+      }
+    }))
+  }
+
+  const handleAddCondition = () => {
+    setNewRule(prev => ({
+      ...prev,
+      conditions: [...prev.conditions, { field: "tag", value: "" }]
+    }))
+  }
+
+  const handleConditionChange = (index: number, field: "field" | "value", value: string) => {
+    setNewRule(prev => {
+      const updatedConditions = [...prev.conditions]
+      updatedConditions[index] = { 
+        ...updatedConditions[index], 
+        [field]: value 
+      }
+      return {
+        ...prev,
+        conditions: updatedConditions
+      }
+    })
+  }
+
+  const handleRemoveCondition = (index: number) => {
+    setNewRule(prev => ({
+      ...prev,
+      conditions: prev.conditions.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleRuleClick = (rule: any, index: number) => {
+    setSelectedRule({ ...rule, index });
+    setNewRule({
+      name: rule.name,
+      description: rule.description,
+      trigger: rule.triggers?.[0] || rule.trigger || "",
+      triggers: rule.triggers || [],
+      conditionsLogic: rule.conditionsLogic || "AND",
+      conditions: rule.conditions || [],
+      actions: rule.actions || { template: "" },
+      status: rule.status || "enabled",
+    });
+    setIsRuleModalOpen(true);
+    setIsEditingRule(false);
+  }
+
+  const handleEditRule = () => {
+    setIsEditingRule(true);
+  }
+
+  const handleCancelEdit = () => {
+    if (selectedRule) {
+      handleRuleClick(selectedRule, selectedRule.index);
+    } else {
+      setIsRuleModalOpen(false);
+    }
+  }
+
+  const handleSaveRule = () => {
+    // Format the rule for display in the table
+    const conditionSummary = newRule.conditions.map(c => `${c.field} = ${c.value}`).join(newRule.conditionsLogic === "AND" ? " AND " : " OR ");
+    
+    // Build a list of all triggers
+    const allTriggers = [...(newRule.triggers || [])];
+    if (newRule.trigger) allTriggers.push(newRule.trigger);
+    
+    const triggerSummary = allTriggers.length > 1 
+      ? `Multiple (${allTriggers.join(" OR ")})` 
+      : newRule.trigger;
+      
+    const actionSummary = `Add to workflow: ${newRule.actions.template || 'default'}`
+    
+    const formattedRule = {
+      name: newRule.name,
+      description: newRule.description,
+      trigger: triggerSummary,
+      conditionSummary,
+      actionSummary,
+      conditions: newRule.conditions,
+      conditionsLogic: newRule.conditionsLogic,
+      triggers: allTriggers,
+      actions: {
+        template: newRule.actions.template,
+      },
+      status: newRule.status
+    }
+
+    if (selectedRule) {
+      // Update existing rule
+      setWorkflow(prev => {
+        const updatedRules = [...prev.automationRules];
+        updatedRules[selectedRule.index] = formattedRule;
+        return {
+          ...prev,
+          automationRules: updatedRules
+        };
+      });
+    } else {
+      // Add new rule
+      setWorkflow(prev => ({
+        ...prev,
+        automationRules: [...prev.automationRules, formattedRule]
+      }))
+    }
+
+    // Reset the form and close the modal
+    setNewRule({
+      name: "",
+      description: "",
+      trigger: "",
+      triggers: [] as string[],
+      conditionsLogic: "AND",
+      conditions: [{ field: "tag", value: "" }],
+      actions: {
+        template: "",
+      },
+      status: "enabled",
+    })
+    setSelectedRule(null)
+    setIsEditingRule(false)
+    setIsRuleModalOpen(false)
+  }
+
+  // Add these functions to handle automation rule operations
+  const handleToggleRuleStatus = (index: number) => {
+    setWorkflow(prev => {
+      const updatedRules = [...prev.automationRules]
+      updatedRules[index] = {
+        ...updatedRules[index],
+        status: updatedRules[index].status === "enabled" ? "disabled" : "enabled"
+      }
+      return {
+        ...prev,
+        automationRules: updatedRules
+      }
+    })
+  }
+
+  const handleDeleteRule = (index: number) => {
+    setWorkflow(prev => ({
+      ...prev,
+      automationRules: prev.automationRules.filter((_: any, i: number) => i !== index)
+    }))
+  }
+
+  const handleAddTrigger = () => {
+    if (!newRule.trigger) return;
+    setNewRule(prev => ({
+      ...prev,
+      triggers: [...prev.triggers, prev.trigger],
+      trigger: ""
+    }));
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -237,7 +506,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
         <div className="flex-1 overflow-y-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
             <div className="border-b bg-background px-6">
-              <TabsList className="grid grid-cols-3 w-full">
+              <TabsList className="grid grid-cols-4 w-full">
                 <TabsTrigger value="basic">
                   <FileTextIcon className="h-4 w-4 mr-2" />
                   Basic Info
@@ -248,7 +517,11 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                 </TabsTrigger>
                 <TabsTrigger value="stages" disabled={!canProceedToStages}>
                   <ListIcon className="h-4 w-4 mr-2" />
-                  Workflow Stages
+                  Stages
+                </TabsTrigger>
+                <TabsTrigger value="automation" disabled={!canProceedToStages}>
+                  <Settings2Icon className="h-4 w-4 mr-2" />
+                  Automation
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -394,6 +667,99 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                 </div>
               </div>
             </TabsContent>
+
+            <TabsContent value="automation" className="p-6 flex-1 overflow-y-auto">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Automations for This Workflow</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Records can be automatically created and added to this workflow based on incoming files, emails, or integrations. Below are the rules that define how this automation works.
+                  </p>
+                </div>
+
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center gap-2">
+                    {/* You can add search/filter controls here if needed */}
+                  </div>
+                  <Button 
+                    size="sm"
+                    onClick={() => {
+                      setSelectedRule(null);
+                      setIsEditingRule(true);
+                      setIsRuleModalOpen(true);
+                    }}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Rule
+                  </Button>
+                </div>
+
+                <div className="border rounded-md">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableCell className="font-medium">Rule Name</TableCell>
+                        <TableCell className="font-medium">Description</TableCell>
+                        <TableCell className="font-medium">Status</TableCell>
+                        <TableCell className="w-[70px]"></TableCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(workflow.automationRules || []).length > 0 ? (
+                        (workflow.automationRules || []).map((rule: any, index: number) => (
+                          <TableRow 
+                            key={index} 
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => handleRuleClick(rule, index)}
+                          >
+                            <TableCell className="font-medium">{rule.name}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{rule.description}</TableCell>
+                            <TableCell>
+                              <Badge variant={rule.status === "enabled" ? "default" : "secondary"}>
+                                {rule.status === "enabled" ? "Enabled" : "Disabled"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreHorizontalIcon className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRuleClick(rule, index);
+                                    setIsEditingRule(true);
+                                  }}>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleRuleStatus(index);
+                                  }}>
+                                    {rule.status === "enabled" ? "Disable" : "Enable"}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-red-600" onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteRule(index);
+                                  }}>Delete</DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                            No automation rules yet. Add your first rule to automate this workflow.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
 
@@ -421,9 +787,22 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                   Next <ArrowRight className="h-4 w-4" />
                 </Button>
               </>
-            ) : (
+            ) : activeTab === "stages" ? (
               <>
                 <Button variant="outline" onClick={() => setActiveTab("attributes")}>
+                  Back
+                </Button>
+                <Button
+                  onClick={() => setActiveTab("automation")}
+                  disabled={!canProceedToStages}
+                  className="flex items-center gap-2"
+                >
+                  Next <ArrowRight className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setActiveTab("stages")}>
                   Back
                 </Button>
                 <Button onClick={handleSave} disabled={!canSave}>
@@ -434,6 +813,334 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
           </div>
         </div>
       </SheetContent>
+
+      {/* Add Automation Rule Dialog */}
+      <Sheet open={isRuleModalOpen} onOpenChange={setIsRuleModalOpen}>
+        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={() => setIsRuleModalOpen(false)}>
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="outline" className="bg-background">
+                Automation Rule
+              </Badge>
+            </div>
+            {selectedRule && !isEditingRule && (
+              <Button variant="outline" size="sm" onClick={handleEditRule}>
+                Edit Rule
+              </Button>
+            )}
+          </div>
+
+          <div className="border-b bg-background px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-white text-sm font-medium">
+                A
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">
+                  {selectedRule && !isEditingRule ? "View Automation Rule" : selectedRule ? "Edit Automation Rule" : "Add Automation Rule"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {selectedRule && !isEditingRule 
+                    ? "Review the automation rule configuration." 
+                    : "Create a rule to automatically generate records for this workflow when certain conditions are met."}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6">
+            {selectedRule && !isEditingRule ? (
+              // View Mode
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Rule Name</h3>
+                    <p className="mt-1 text-sm">{newRule.name}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
+                    <p className="mt-1 text-sm">{newRule.description}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                    <Badge variant={newRule.status === "enabled" ? "default" : "secondary"} className="mt-1">
+                      {newRule.status === "enabled" ? "Enabled" : "Disabled"}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">When should this run?</h3>
+                  <div className="space-y-2">
+                    {newRule.triggers.map((trigger, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          {trigger === "file_upload" ? "File Upload" : 
+                           trigger === "email_ingestion" ? "Email Ingestion" : 
+                           "Integration"}
+                        </Badge>
+                        {index < newRule.triggers.length - 1 && <span className="text-xs text-muted-foreground">OR</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">Only run if this is true</h3>
+                  <div className="space-y-2">
+                    {newRule.conditions.map((condition, index) => (
+                      <div key={index} className="text-sm">
+                        <span className="font-medium">{condition.field}</span>
+                        <span className="text-muted-foreground mx-2">=</span>
+                        <span>{condition.value}</span>
+                        {index < newRule.conditions.length - 1 && (
+                          <span className="text-muted-foreground ml-2">{newRule.conditionsLogic}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">What should happen?</h3>
+                  <div className="text-sm">
+                    <span className="font-medium">Add to workflow:</span>
+                    <span className="ml-2">{newRule.actions.template || 'Not specified'}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Edit/Create Mode
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Rule Name</h3>
+                    <Input 
+                      id="rule-name" 
+                      placeholder="E.g., New Capital Call Detection"
+                      value={newRule.name}
+                      onChange={(e) => handleRuleChange('name', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Description</h3>
+                    <Textarea 
+                      id="rule-description" 
+                      placeholder="Describe what this rule does..." 
+                      value={newRule.description}
+                      onChange={(e) => handleRuleChange('description', e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Trigger Type */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">When should this run?</h3>
+                    <Button variant="outline" size="sm" onClick={handleAddTrigger}>
+                      <Plus className="mr-2 h-3 w-3" />
+                      Add Trigger
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    This is the event that kicks off the automation — like uploading a file or receiving an email.
+                  </p>
+                  
+                  <div className="border rounded-md divide-y">
+                    {(newRule.triggers || []).length > 0 && (
+                      <div className="p-4 bg-muted/50 border-b">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline">OR</Badge>
+                          <span className="text-sm text-muted-foreground">Multiple triggers will activate this rule</span>
+                        </div>
+                        <div className="space-y-2">
+                          {newRule.triggers.map((trigger, index) => (
+                            <div key={index} className="flex items-center justify-between bg-background rounded-md p-2 border">
+                              <span>{trigger === "file_upload" ? "File Upload" : 
+                                     trigger === "email_ingestion" ? "Email Ingestion" : 
+                                     "Integration"}</span>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => {
+                                  setNewRule(prev => ({
+                                    ...prev,
+                                    triggers: prev.triggers.filter((_, i) => i !== index)
+                                  }))
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="p-4 flex items-center gap-2">
+                      <Select 
+                        value={newRule.trigger} 
+                        onValueChange={(value) => handleRuleChange('trigger', value)}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select trigger" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="file_upload">File Upload</SelectItem>
+                          <SelectItem value="email_ingestion">Email Ingestion</SelectItem>
+                          <SelectItem value="integration">Integration (Canoe, etc.)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Conditions */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">Only run if this is true</h3>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center space-x-2">
+                        <Label htmlFor="conditions-logic" className="text-xs">Logic:</Label>
+                        <Select 
+                          value={newRule.conditionsLogic} 
+                          onValueChange={(value) => setNewRule(prev => ({...prev, conditionsLogic: value}))}
+                        >
+                          <SelectTrigger id="conditions-logic" className="h-7 w-[80px] text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AND">AND</SelectItem>
+                            <SelectItem value="OR">OR</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={handleAddCondition}>
+                        <Plus className="mr-2 h-3 w-3" />
+                        Add Condition
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Add filters to make sure this only runs when it's relevant — like if the file name includes "Capital Call".
+                  </p>
+                  
+                  <div className="border rounded-md divide-y">
+                    {newRule.conditions.map((condition, index) => (
+                      <div key={index} className="p-4 flex items-center gap-2">
+                        <Select 
+                          value={condition.field} 
+                          onValueChange={(value) => handleConditionChange(index, "field", value)}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tag">Tag</SelectItem>
+                            <SelectItem value="filename">Filename contains</SelectItem>
+                            <SelectItem value="document_type">Document type</SelectItem>
+                            <SelectItem value="subject">Subject contains</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <span className="text-muted-foreground">=</span>
+                        
+                        <Input 
+                          className="flex-1" 
+                          placeholder="Value" 
+                          value={condition.value}
+                          onChange={(e) => handleConditionChange(index, "value", e.target.value)}
+                        />
+                        
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-muted-foreground hover:text-foreground"
+                          onClick={() => handleRemoveCondition(index)}
+                          disabled={newRule.conditions.length <= 1}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  {newRule.conditions.length > 1 && (
+                    <div className="flex justify-end">
+                      <Badge variant="outline" className="text-xs">{newRule.conditionsLogic === "AND" ? "All" : "Any"} conditions must be true</Badge>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">What should happen?</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Tell the system what to do — like create a task, start a workflow, or assign it to someone.
+                  </p>
+                  
+                  <div className="border rounded-md divide-y">
+                    <div className="p-4 flex items-center gap-2">
+                      <Select 
+                        value="add_to_workflow" 
+                        disabled
+                        onValueChange={() => {}}
+                      >
+                        <SelectTrigger className="w-[180px] bg-muted">
+                          <SelectValue placeholder="Action type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="add_to_workflow">Add to workflow</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <span className="text-muted-foreground">=</span>
+                      
+                      <Select 
+                        value={newRule.actions.template} 
+                        onValueChange={(value) => handleActionChange('template', value)}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select a workflow" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="template_1">Standard Capital Call</SelectItem>
+                          <SelectItem value="template_2">Urgent Capital Call</SelectItem>
+                          <SelectItem value="template_3">Distribution Notice</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={() => handleActionChange('template', '')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between border-t bg-muted px-6 py-4">
+            <Button variant="outline" onClick={handleCancelEdit}>
+              Cancel
+            </Button>
+            {(selectedRule && !isEditingRule) ? null : (
+              <Button onClick={handleSaveRule}>
+                Save Rule
+              </Button>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </Sheet>
   )
 }

@@ -8,6 +8,7 @@ import { WorkflowHeader } from "@/components/workflows/workflow-header"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
+import { AddWorkflowItemDrawer } from "@/components/workflows/add-workflow-item-drawer"
 
 export default function DealPipelinePage() {
   const [workflowConfig, setWorkflowConfig] = React.useState({
@@ -37,6 +38,19 @@ export default function DealPipelinePage() {
     console.log("Workflow updated:", config)
   }
 
+  const handleAddDealItem = (data: any) => {
+    console.log("New deal item added:", data)
+    // Here you would typically update your state or make an API call
+  }
+
+  // Custom fields for the Deal Pipeline workflow
+  const dealPipelineFields = [
+    { id: "stage", name: "Stage", type: "select" as const, options: workflowConfig.stages.map(s => s.name), required: true },
+    { id: "fundingRound", name: "Funding Round", type: "text" as const, required: true },
+    { id: "targetRaise", name: "Target Raise", type: "text" as const },
+    { id: "notes", name: "Notes", type: "textarea" as const },
+  ]
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
@@ -63,11 +77,18 @@ export default function DealPipelinePage() {
                     <h1 className="text-2xl font-semibold">Deal Pipeline</h1>
                     <p className="text-muted-foreground">Track investment opportunities through the deal process</p>
                   </div>
-                  <WorkflowHeader
-                    workflowName="Deal Pipeline"
-                    workflowConfig={workflowConfig}
-                    onSave={handleSaveWorkflow}
-                  />
+                  <div className="flex items-center gap-2">
+                    <AddWorkflowItemDrawer 
+                      workflowType="Deal" 
+                      onAddItem={handleAddDealItem}
+                      customFields={dealPipelineFields}
+                    />
+                    <WorkflowHeader
+                      workflowName="Deal Pipeline"
+                      workflowConfig={workflowConfig}
+                      onSave={handleSaveWorkflow}
+                    />
+                  </div>
                 </div>
                 <DealPipelineKanban workflowConfig={workflowConfig} />
               </div>

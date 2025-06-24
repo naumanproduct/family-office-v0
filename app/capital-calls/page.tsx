@@ -7,6 +7,7 @@ import { CapitalCallKanban } from "@/components/capital-call-kanban"
 import { WorkflowHeader } from "@/components/workflows/workflow-header"
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
+import { AddWorkflowItemDrawer } from "@/components/workflows/add-workflow-item-drawer"
 
 export default function CapitalCallsPage() {
   const [workflowConfig, setWorkflowConfig] = React.useState({
@@ -31,6 +32,21 @@ export default function CapitalCallsPage() {
     setWorkflowConfig(config)
     console.log("Workflow updated:", config)
   }
+
+  const handleAddCapitalCall = (data: any) => {
+    console.log("New capital call added:", data)
+    // Here you would typically update your state or make an API call
+  }
+
+  // Custom fields for the Capital Calls workflow
+  const capitalCallFields = [
+    { id: "stage", name: "Stage", type: "select" as const, options: workflowConfig.stages.map(s => s.name), required: true },
+    { id: "fundName", name: "Fund", type: "text" as const, required: true },
+    { id: "callNumber", name: "Call #", type: "text" as const, required: true },
+    { id: "callAmount", name: "Call Amount", type: "text" as const },
+    { id: "dueDate", name: "Due Date", type: "date" as const },
+    { id: "notes", name: "Notes", type: "textarea" as const },
+  ]
 
   return (
     <SidebarProvider>
@@ -58,7 +74,18 @@ export default function CapitalCallsPage() {
                     <h1 className="text-2xl font-semibold">Capital Calls</h1>
                     <p className="text-muted-foreground">Track and manage capital call notices across funds and investors</p>
                   </div>
-                  <WorkflowHeader workflowName="Capital Calls" workflowConfig={workflowConfig} onSave={handleSaveWorkflow} />
+                  <div className="flex items-center gap-2">
+                    <AddWorkflowItemDrawer 
+                      workflowType="Capital Call" 
+                      onAddItem={handleAddCapitalCall}
+                      customFields={capitalCallFields}
+                    />
+                    <WorkflowHeader 
+                      workflowName="Capital Calls" 
+                      workflowConfig={workflowConfig} 
+                      onSave={handleSaveWorkflow} 
+                    />
+                  </div>
                 </div>
                 <CapitalCallKanban workflowConfig={workflowConfig} />
               </div>

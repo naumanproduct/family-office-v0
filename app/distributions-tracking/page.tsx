@@ -7,6 +7,7 @@ import { DistributionsTrackingKanban } from "@/components/distributions-tracking
 import { WorkflowHeader } from "@/components/workflows/workflow-header"
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
+import { AddWorkflowItemDrawer } from "@/components/workflows/add-workflow-item-drawer"
 
 export default function DistributionsTrackingPage() {
   const [workflowConfig, setWorkflowConfig] = React.useState({
@@ -32,6 +33,21 @@ export default function DistributionsTrackingPage() {
     setWorkflowConfig(config)
     console.log("Workflow updated:", config)
   }
+
+  const handleAddDistribution = (data: any) => {
+    console.log("New distribution added:", data)
+    // Here you would typically update your state or make an API call
+  }
+
+  // Custom fields for the Distributions workflow
+  const distributionFields = [
+    { id: "stage", name: "Stage", type: "select" as const, options: workflowConfig.stages.map(s => s.name), required: true },
+    { id: "fundName", name: "Fund", type: "text" as const, required: true },
+    { id: "distributionNumber", name: "Distribution #", type: "text" as const, required: true },
+    { id: "distributionAmount", name: "Amount", type: "text" as const },
+    { id: "distributionDate", name: "Date", type: "date" as const },
+    { id: "notes", name: "Notes", type: "textarea" as const },
+  ]
 
   return (
     <SidebarProvider>
@@ -59,7 +75,18 @@ export default function DistributionsTrackingPage() {
                     <h1 className="text-2xl font-semibold">Distributions Tracking</h1>
                     <p className="text-muted-foreground">Monitor fund distributions and confirmations</p>
                   </div>
-                  <WorkflowHeader workflowName="Distributions Tracking" workflowConfig={workflowConfig} onSave={handleSaveWorkflow} />
+                  <div className="flex items-center gap-2">
+                    <AddWorkflowItemDrawer 
+                      workflowType="Distribution" 
+                      onAddItem={handleAddDistribution}
+                      customFields={distributionFields}
+                    />
+                    <WorkflowHeader 
+                      workflowName="Distributions Tracking" 
+                      workflowConfig={workflowConfig} 
+                      onSave={handleSaveWorkflow} 
+                    />
+                  </div>
                 </div>
                 <DistributionsTrackingKanban workflowConfig={workflowConfig} />
               </div>
