@@ -78,9 +78,9 @@ interface AutomationRule {
   conditions: { field: string; value: string }[];
   conditionsLogic: string;
   actions: {
-    template: string;
     type: string;
-  };
+    template: string;
+  }[];
   status: string;
 }
 
@@ -426,10 +426,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     triggers: [],
     conditions: [{ field: "tag", value: "" }],
     conditionsLogic: "AND",
-    actions: {
+    actions: [{
       template: "",
       type: "add_to_workflow"
-    },
+    }],
     status: "enabled"
   })
 
@@ -568,15 +568,39 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     }))
   }
 
-  const handleActionChange = (field: string, value: string) => {
+  const handleActionChange = (index: number, field: string, value: string) => {
+    setNewRule(prev => {
+      const updatedActions = [...prev.actions];
+      updatedActions[index] = { 
+        ...updatedActions[index], 
+        [field]: value 
+      };
+      return {
+        ...prev,
+        actions: updatedActions
+      };
+    });
+  };
+
+  const handleAddAction = () => {
     setNewRule(prev => ({
       ...prev,
-      actions: {
-        ...prev.actions,
-        [field]: value
-      }
-    }))
-  }
+      actions: [...prev.actions, { type: "add_to_workflow", template: "" }]
+    }));
+  };
+
+  const handleRemoveAction = (index: number) => {
+    setNewRule(prev => {
+      if (prev.actions.length <= 1) return prev;
+      
+      const updatedActions = [...prev.actions];
+      updatedActions.splice(index, 1);
+      return {
+        ...prev,
+        actions: updatedActions
+      };
+    });
+  };
 
   const handleAddCondition = () => {
     setNewRule(prev => ({
@@ -618,7 +642,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
       ? `Multiple (${allTriggers.join(" OR ")})` 
       : newRule.trigger;
       
-    const actionSummary = `Add to workflow: ${newRule.actions.template || 'default'}`
+    const actionSummary = `Add to workflow: ${newRule.actions.map(a => a.template || 'default').join(", ")}`
     
     // Additional implementation...
     
@@ -630,10 +654,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
       triggers: [] as string[],
       conditionsLogic: "AND",
       conditions: [{ field: "tag", value: "" }],
-      actions: {
+      actions: [{
         template: "",
         type: "add_to_workflow"
-      },
+      }],
       status: "enabled",
     })
     
@@ -659,7 +683,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
       triggers: rule.triggers || [],
       conditionsLogic: rule.conditionsLogic || "AND",
       conditions: rule.conditions || [],
-      actions: rule.actions || { template: "", type: "add_to_workflow" },
+      actions: rule.actions || [{
+        template: "",
+        type: "add_to_workflow"
+      }],
       status: rule.status || "enabled",
     });
     setIsAddRuleModalOpen(true);
@@ -1070,7 +1097,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                               triggers: ["file_upload"],
                               conditions: [{ field: "document_type", value: "Pitch Deck" }],
                               conditionsLogic: "AND",
-                              actions: { template: "Standard Opportunity" },
+                              actions: [{
+                                template: "Standard Opportunity",
+                                type: "add_to_workflow"
+                              }],
                               status: "enabled"
                             })}
                           >
@@ -1096,7 +1126,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                       triggers: ["file_upload"],
                                       conditions: [{ field: "document_type", value: "Pitch Deck" }],
                                       conditionsLogic: "AND",
-                                      actions: { template: "Standard Opportunity" },
+                                      actions: [{
+                                        template: "Standard Opportunity",
+                                        type: "add_to_workflow"
+                                      }],
                                       status: "enabled"
                                     });
                                     setIsEditingRule(true);
@@ -1119,7 +1152,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                 triggers: ["email_ingestion"],
                                 conditions: [{ field: "subject", value: "Capital Call" }],
                                 conditionsLogic: "AND",
-                                actions: { template: "Standard Capital Call" },
+                                actions: [{
+                                  template: "Standard Capital Call",
+                                  type: "add_to_workflow"
+                                }],
                                 status: "enabled"
                               })}
                             >
@@ -1145,7 +1181,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                         triggers: ["email_ingestion"],
                                         conditions: [{ field: "subject", value: "Capital Call" }],
                                         conditionsLogic: "AND",
-                                        actions: { template: "Standard Capital Call" },
+                                        actions: [{
+                                          template: "Standard Capital Call",
+                                          type: "add_to_workflow"
+                                        }],
                                         status: "enabled"
                                       });
                                       setIsEditingRule(true);
@@ -1166,7 +1205,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                 triggers: ["file_upload"],
                                 conditions: [{ field: "tag", value: "Capital Call" }],
                                 conditionsLogic: "AND",
-                                actions: { template: "Urgent Capital Call" },
+                                actions: [{
+                                  template: "Urgent Capital Call",
+                                  type: "add_to_workflow"
+                                }],
                                 status: "enabled"
                               })}
                             >
@@ -1192,7 +1234,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                         triggers: ["file_upload"],
                                         conditions: [{ field: "tag", value: "Capital Call" }],
                                         conditionsLogic: "AND",
-                                        actions: { template: "Urgent Capital Call" },
+                                        actions: [{
+                                          template: "Urgent Capital Call",
+                                          type: "add_to_workflow"
+                                        }],
                                         status: "enabled"
                                       });
                                       setIsEditingRule(true);
@@ -1216,7 +1261,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                 triggers: ["integration"],
                                 conditions: [{ field: "document_type", value: "Distribution Notice" }],
                                 conditionsLogic: "AND",
-                                actions: { template: "Distribution Notice" },
+                                actions: [{
+                                  template: "Distribution Notice",
+                                  type: "add_to_workflow"
+                                }],
                                 status: "disabled"
                               })}
                             >
@@ -1242,7 +1290,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                         triggers: ["integration"],
                                         conditions: [{ field: "document_type", value: "Distribution Notice" }],
                                         conditionsLogic: "AND",
-                                        actions: { template: "Distribution Notice" },
+                                        actions: [{
+                                          template: "Distribution Notice",
+                                          type: "add_to_workflow"
+                                        }],
                                         status: "disabled"
                                       });
                                       setIsEditingRule(true);
@@ -1364,9 +1415,15 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
                 <div className="border-t pt-6">
                   <h3 className="text-sm font-medium text-muted-foreground mb-3">What should happen?</h3>
-                  <div className="text-sm">
-                    <span className="font-medium">Add to workflow:</span>
-                    <span className="ml-2">{newRule.actions.template || 'Not specified'}</span>
+                  <div className="space-y-2">
+                    {newRule.actions.map((action, index) => (
+                      <div key={index} className="text-sm">
+                        <span className="font-medium">
+                          {action.type === "add_to_workflow" ? "Add to workflow" : "Create task from template"}:
+                        </span>
+                        <span className="ml-2">{action.template || 'Not specified'}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1536,61 +1593,68 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-md font-medium">What should happen?</h3>
+                    <Button variant="outline" size="sm" onClick={handleAddAction}>
+                      <Plus className="mr-2 h-3 w-3" />
+                      Add Action
+                    </Button>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
                     Tell the system what to do — like create a task, start a workflow, or assign it to someone.
                   </p>
                   
                   <div className="border rounded-md divide-y">
-                    <div className="p-4 flex items-center gap-2">
-                      <Select 
-                        value={newRule.actions?.type || "add_to_workflow"} 
-                        onValueChange={(value) => handleActionChange('type', value)}
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Action type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="add_to_workflow">Add to workflow</SelectItem>
-                          <SelectItem value="create_task_from_template">Create task from template</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      
-                      <span className="text-muted-foreground">=</span>
-                      
-                      <Select 
-                        value={newRule.actions.template} 
-                        onValueChange={(value) => handleActionChange('template', value)}
-                      >
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder={newRule.actions?.type === "create_task_from_template" ? "Select task template" : "Select a workflow"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {newRule.actions?.type === "create_task_from_template" ? (
-                            <>
-                              <SelectItem value="capital_call_processing">Capital Call Processing</SelectItem>
-                              <SelectItem value="k1_processing">K-1 Processing</SelectItem>
-                              <SelectItem value="quarterly_report_processing">Quarterly Report Processing</SelectItem>
-                            </>
-                          ) : (
-                            <>
-                              <SelectItem value="deal_pipeline">Deal Pipeline</SelectItem>
-                              <SelectItem value="capital_calls">Capital Calls</SelectItem>
-                              <SelectItem value="distributions_tracking">Distributions Tracking</SelectItem>
-                            </>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-muted-foreground hover:text-foreground"
-                        onClick={() => handleActionChange('template', '')}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    {newRule.actions.map((action, index) => (
+                      <div key={index} className="p-4 flex items-center gap-2">
+                        <Select 
+                          value={action.type} 
+                          onValueChange={(value) => handleActionChange(index, 'type', value)}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Action type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="add_to_workflow">Add to workflow</SelectItem>
+                            <SelectItem value="create_task_from_template">Create task from template</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <span className="text-muted-foreground">=</span>
+                        
+                        <Select 
+                          value={action.template} 
+                          onValueChange={(value) => handleActionChange(index, 'template', value)}
+                        >
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder={action.type === "create_task_from_template" ? "Select task template" : "Select a workflow"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {action.type === "create_task_from_template" ? (
+                              <>
+                                <SelectItem value="capital_call_processing">Capital Call Processing</SelectItem>
+                                <SelectItem value="k1_processing">K-1 Processing</SelectItem>
+                                <SelectItem value="quarterly_report_processing">Quarterly Report Processing</SelectItem>
+                              </>
+                            ) : (
+                              <>
+                                <SelectItem value="deal_pipeline">Deal Pipeline</SelectItem>
+                                <SelectItem value="capital_calls">Capital Calls</SelectItem>
+                                <SelectItem value="distributions_tracking">Distributions Tracking</SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-muted-foreground hover:text-foreground"
+                          onClick={() => handleRemoveAction(index)}
+                          disabled={newRule.actions.length <= 1}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
