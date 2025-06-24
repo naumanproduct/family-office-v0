@@ -212,6 +212,7 @@ interface AutomationRule {
   description: string;
   trigger: string;
   triggers: string[];
+  triggersLogic: string;
   conditions: { field: string; value: string }[];
   conditionsLogic: string;
   actions: {
@@ -231,6 +232,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
     description: "",
     trigger: "",
     triggers: [],
+    triggersLogic: "OR",
     conditions: [{ field: "tag", value: "" }],
     conditionsLogic: "AND",
     actions: [{
@@ -392,6 +394,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
       description: rule.description,
       trigger: rule.triggers?.[0] || rule.trigger || "",
       triggers: rule.triggers || [],
+      triggersLogic: rule.triggersLogic || "OR",
       conditionsLogic: rule.conditionsLogic || "AND",
       conditions: rule.conditions || [],
       actions: rule.actions || { template: "" },
@@ -436,6 +439,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
       conditions: newRule.conditions,
       conditionsLogic: newRule.conditionsLogic,
       triggers: allTriggers,
+      triggersLogic: newRule.triggersLogic,
       actions: newRule.actions,
       status: newRule.status
     }
@@ -463,7 +467,8 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
       name: "",
       description: "",
       trigger: "",
-      triggers: [] as string[],
+      triggers: [],
+      triggersLogic: "OR",
       conditionsLogic: "AND",
       conditions: [{ field: "tag", value: "" }],
       actions: [{
@@ -920,7 +925,7 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                            trigger === "email_ingestion" ? "Email Ingestion" : 
                            trigger}
                         </Badge>
-                        {index < newRule.triggers.length - 1 && <span className="text-xs text-muted-foreground">OR</span>}
+                        {index < newRule.triggers.length - 1 && <span className="text-xs text-muted-foreground">{newRule.triggersLogic}</span>}
                       </div>
                     ))}
                   </div>
@@ -984,10 +989,27 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-md font-medium">When should this run?</h3>
-                    <Button variant="outline" size="sm" onClick={handleAddTrigger}>
-                      <Plus className="mr-2 h-3 w-3" />
-                      Add Trigger
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center space-x-2">
+                        <Label htmlFor="triggers-logic" className="text-xs">Logic:</Label>
+                        <Select 
+                          value={newRule.triggersLogic} 
+                          onValueChange={(value) => setNewRule(prev => ({...prev, triggersLogic: value}))}
+                        >
+                          <SelectTrigger id="triggers-logic" className="h-7 w-[80px] text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AND">AND</SelectItem>
+                            <SelectItem value="OR">OR</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={handleAddTrigger}>
+                        <Plus className="mr-2 h-3 w-3" />
+                        Add Trigger
+                      </Button>
+                    </div>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
                     This is the event that kicks off the automation — like uploading a file or receiving an email.
@@ -997,8 +1019,12 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                     {(newRule.triggers || []).length > 0 && (
                       <div className="p-4 bg-muted/50 border-b">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline">OR</Badge>
-                          <span className="text-sm text-muted-foreground">Multiple triggers will activate this rule</span>
+                          <Badge variant="outline">{newRule.triggersLogic}</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {newRule.triggersLogic === "OR" 
+                              ? "Multiple triggers will activate this rule" 
+                              : "All triggers must occur to activate this rule"}
+                          </span>
                         </div>
                         <div className="space-y-2">
                           {newRule.triggers.map((trigger, index) => (
@@ -1030,13 +1056,21 @@ export function WorkflowCreator({ isOpen, onClose, onSave, existingWorkflow }: W
                         onValueChange={(value) => handleRuleChange('trigger', value)}
                       >
                         <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select trigger" />
+                          <SelectValue placeholder="Select source" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="file_upload">File Upload</SelectItem>
                           <SelectItem value="email_ingestion">Email Ingestion</SelectItem>
                         </SelectContent>
                       </Select>
+                      
+                      <Button 
+                        variant="outline"
+                        onClick={handleAddTrigger}
+                        disabled={!newRule.trigger}
+                      >
+                        Add
+                      </Button>
                     </div>
                   </div>
                 </div>
