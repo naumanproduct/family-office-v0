@@ -162,9 +162,6 @@ export function MasterDrawer({
   }, [isFullScreen])
 
   const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table", isCurrentFullScreen = false) => {
-    // When in drawer mode, always use list view
-    const effectiveViewMode = isCurrentFullScreen ? viewMode : "list";
-    
     if (activeTab === "details") {
       return detailsPanel(isCurrentFullScreen)
     }
@@ -190,7 +187,7 @@ export function MasterDrawer({
     }
 
     // For other tabs, return the children with the setSelectedTask and setSelectedNote callbacks
-    return children(activeTab, effectiveViewMode, setSelectedTask, setSelectedNote, setSelectedMeeting, setSelectedEmail)
+    return children(activeTab, viewMode, setSelectedTask, setSelectedNote, setSelectedMeeting, setSelectedEmail)
   }
 
   // Get the appropriate title and subtitle - only change for non-fullscreen mode

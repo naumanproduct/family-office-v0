@@ -34,6 +34,7 @@ export interface TaskTableProps {
   onTaskClick?: (task: Task) => void
   onStatusChange?: (taskId: number | string, newStatus: string) => void
   viewMode?: "table" | "card" | "list"
+  isInDrawer?: boolean
 }
 
 /**
@@ -45,6 +46,7 @@ export function UnifiedTaskTable({
   onTaskClick,
   onStatusChange,
   viewMode = "table",
+  isInDrawer = false,
 }: TaskTableProps) {
   // Function to handle task status toggle
   const handleTaskStatusToggle = (e: React.MouseEvent, task: Task) => {
