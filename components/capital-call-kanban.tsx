@@ -419,6 +419,7 @@ function CapitalCallCard({
         onNoteClick={setSelectedNote}
         onMeetingClick={setSelectedMeeting}
         onEmailClick={setSelectedEmail}
+        isFullScreen={false}
       />
     );
   }

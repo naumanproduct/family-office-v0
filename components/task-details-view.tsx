@@ -45,6 +45,7 @@ interface TaskDetailsViewProps {
   task: any
   onBack: () => void
   recordName: string
+  recordType?: string
   parentTask?: any
   onBackToParent?: () => void
   isInDrawer?: boolean
@@ -58,6 +59,7 @@ export function TaskDetailsView({
   task,
   onBack,
   recordName,
+  recordType,
   parentTask,
   onBackToParent,
   isInDrawer,
@@ -510,46 +512,51 @@ export function TaskDetailsView({
         },
       ],
     },
-    {
-      id: "companies",
-      title: "Companies",
-      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.companies
+    // Only include entity sections if this is NOT a subtask AND NOT a task belonging to an entity
+    // Entity types that should not show entity sections: Company, People/Person, Entities/Entity, Investment, Opportunities/Opportunity
+    // Workflow types that should not show entity sections: Capital Calls, Distributions, Diligence, Compliance Items, Tax Documents, Onboarding, Workflow
+    ...((!parentTask && !['Company', 'People', 'Person', 'Entities', 'Entity', 'Investment', 'Opportunities', 'Opportunity', 'Capital Calls', 'Distributions', 'Diligence', 'Compliance Items', 'Tax Documents', 'Onboarding', 'Workflow'].includes(recordType || '')) ? [
+      {
+        id: "companies",
+        title: "Companies",
+        icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.companies
+        },
       },
-    },
-    {
-      id: "people",
-      title: "People",
-      icon: <UserRoundIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.people
+      {
+        id: "people",
+        title: "People",
+        icon: <UserRoundIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.people
+        },
       },
-    },
-    {
-      id: "entities",
-      title: "Entities",
-      icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.entities
+      {
+        id: "entities",
+        title: "Entities",
+        icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.entities
+        },
       },
-    },
-    {
-      id: "investments",
-      title: "Investments",
-      icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.investments
+      {
+        id: "investments",
+        title: "Investments",
+        icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.investments
+        },
       },
-    },
-    {
-      id: "opportunities",
-      title: "Opportunities",
-      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.opportunities
+      {
+        id: "opportunities",
+        title: "Opportunities",
+        icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.opportunities
+        },
       },
-    },
+    ] : []),
   ];
 
   // If a subtask is selected, render the subtask view
@@ -557,8 +564,9 @@ export function TaskDetailsView({
     return (
       <TaskDetailsView
         task={selectedSubtask}
-        onBack={handleBackFromSubtask}
+        onBack={getBackHandler()}
         recordName={recordName}
+        recordType={recordType}
         parentTask={task}
         onBackToParent={handleBackFromSubtask}
         isInDrawer={isInDrawer}
@@ -586,12 +594,7 @@ export function TaskDetailsView({
       {!isFullScreen && (
         <div className="border-b bg-background px-6 py-2">
           <div className="flex items-center gap-3">
-            {/* Back Button - Show only when there's a parent task (for subtask navigation) but not in drawer */}
-            {parentTask && !isInDrawer && (
-              <Button variant="ghost" size="icon" onClick={getBackHandler()}>
-                <ChevronLeftIcon className="h-4 w-4" />
-              </Button>
-            )}
+            {/* Removed back button - navigation should be handled by drawer/sheet header */}
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <CheckSquareIcon className="h-4 w-4" />
             </div>
