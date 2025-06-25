@@ -14,7 +14,7 @@ import {
 import { MoreVerticalIcon } from "lucide-react"
 
 export interface RecordCardProps {
-  title: string
+  title: React.ReactNode
   titleStatus?: "completed" | "normal"
   primaryMetadata: React.ReactNode[]
   secondaryMetadata: {

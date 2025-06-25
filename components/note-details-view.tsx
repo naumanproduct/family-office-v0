@@ -328,7 +328,6 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
                   {noteTitle || "Untitled"}
                 </h2>
               )}
-              <p className="text-sm text-muted-foreground">Note • {note.id}</p>
             </div>
           </div>
         </div>

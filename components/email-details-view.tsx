@@ -65,7 +65,7 @@ function EmailContent({ emailItem }: { emailItem: any }) {
         <div className="flex-1">
           <div className="flex justify-between">
             <div>
-              <p className="font-medium">{emailItem.from}</p>
+              <p className="text-sm font-medium">{emailItem.from}</p>
               <p className="text-xs text-muted-foreground">
                 To: {Array.isArray(emailItem.to) ? emailItem.to.join(", ") : emailItem.to}
                 {emailItem.cc && emailItem.cc.length > 0 && ` • CC: ${emailItem.cc.join(", ")}`}
@@ -78,7 +78,7 @@ function EmailContent({ emailItem }: { emailItem: any }) {
 
       {/* Email body with proper formatting */}
       <div className="pl-11">
-        <div className="prose prose-sm max-w-none">
+        <div className="text-sm text-foreground">
           {emailItem.body.split("\n").map((paragraph: string, i: number) => (
             <p key={i} className="my-2">
               {paragraph}
@@ -305,9 +305,6 @@ Sarah`,
                 {emailSubject || "No Subject"}
               </h2>
             )}
-            <p className="text-sm text-muted-foreground">
-              Email from {fieldValues.from}
-            </p>
           </div>
         </div>
       </div>

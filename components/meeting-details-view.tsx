@@ -181,7 +181,6 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
                 {meetingTitle || "Untitled"}
               </h2>
             )}
-            <p className="text-sm text-muted-foreground">Meeting • {meeting.id}</p>
           </div>
         </div>
       </div>

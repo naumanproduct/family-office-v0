@@ -85,35 +85,83 @@ export function TaskDetailsView({
   const tasksContext = useTasks();
 
   const [subtasks, setSubtasks] = React.useState(
-    task.subtasks || [
-      {
-        id: "SUBTASK-1",
-        title: "Review financial statements",
-        description: "Analyze the company's financial performance over the last 3 years",
-        status: "Completed",
-        priority: "High",
-        assignee: "John Smith",
-        dueDate: "2023-05-18",
-      },
-      {
-        id: "SUBTASK-2",
-        title: "Analyze market conditions",
-        description: "Research industry trends and competitive landscape",
-        status: "In Progress",
-        priority: "Medium",
-        assignee: "Sarah Johnson",
-        dueDate: "2023-05-20",
-      },
-      {
-        id: "SUBTASK-3",
-        title: "Prepare investment memo",
-        description: "Draft comprehensive investment recommendation",
-        status: "To Do",
-        priority: "High",
-        assignee: "Michael Brown",
-        dueDate: "2023-05-22",
-      },
-    ],
+    task.subtasks || (
+      task.title?.includes("Update capital schedule") ? [
+        {
+          id: "SUBTASK-1",
+          title: "Calculate pro-rata allocation for each LP",
+          description: "Determine each limited partner's share based on their commitment percentage",
+          status: "To Do",
+          priority: "High",
+          assignee: "Finance Team",
+          dueDate: "2023-05-18",
+        },
+        {
+          id: "SUBTASK-2", 
+          title: "Update LP capital accounts in the system",
+          description: "Record the capital call amounts in each LP's account ledger",
+          status: "To Do",
+          priority: "High",
+          assignee: "Fund Administrator",
+          dueDate: "2023-05-19",
+        },
+        {
+          id: "SUBTASK-3",
+          title: "Generate capital call notices for LPs",
+          description: "Create formal call notices with payment instructions and wire details",
+          status: "To Do",
+          priority: "Medium",
+          assignee: "Investor Relations",
+          dueDate: "2023-05-20",
+        },
+        {
+          id: "SUBTASK-4",
+          title: "Update fund commitment tracker",
+          description: "Reflect new called capital amounts and remaining uncalled commitments",
+          status: "To Do",
+          priority: "Medium",
+          assignee: "Finance Team",
+          dueDate: "2023-05-21",
+        },
+        {
+          id: "SUBTASK-5",
+          title: "Reconcile capital schedule with fund accounting",
+          description: "Ensure capital schedule matches the fund's accounting records",
+          status: "To Do",
+          priority: "High",
+          assignee: "Fund Controller",
+          dueDate: "2023-05-22",
+        },
+      ] : [
+        {
+          id: "SUBTASK-1",
+          title: "Review financial statements",
+          description: "Analyze the company's financial performance over the last 3 years",
+          status: "Completed",
+          priority: "High",
+          assignee: "John Smith",
+          dueDate: "2023-05-18",
+        },
+        {
+          id: "SUBTASK-2",
+          title: "Analyze market conditions",
+          description: "Research industry trends and competitive landscape",
+          status: "In Progress",
+          priority: "Medium",
+          assignee: "Sarah Johnson",
+          dueDate: "2023-05-20",
+        },
+        {
+          id: "SUBTASK-3",
+          title: "Prepare investment memo",
+          description: "Draft comprehensive investment recommendation",
+          status: "To Do",
+          priority: "High",
+          assignee: "Michael Brown",
+          dueDate: "2023-05-22",
+        },
+      ]
+    ),
   )
   const [newSubtaskTitle, setNewSubtaskTitle] = React.useState("")
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false)
@@ -451,11 +499,6 @@ export function TaskDetailsView({
 
     return (
       <div className="space-y-4 mt-8">
-        {/* Comment Section Heading */}
-        <div className="mb-2">
-          <h4 className="text-sm font-medium">Add a comment about this task</h4>
-        </div>
-        
         {/* Comment Input */}
         <TypableArea
           value={commentText}
@@ -624,9 +667,6 @@ export function TaskDetailsView({
                   {taskTitle || "Untitled"}
                 </h2>
               )}
-              <p className="text-sm text-muted-foreground">
-                {parentTask ? `Subtask of ${parentTask.title}` : `Task in ${recordName}`}
-              </p>
             </div>
           </div>
         </div>

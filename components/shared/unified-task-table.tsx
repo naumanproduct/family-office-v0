@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreVerticalIcon } from "lucide-react"
+import { MoreVerticalIcon, Zap } from "lucide-react"
 import { RecordCard } from "./record-card"
 import { RecordListItem } from "./record-list-item"
 
@@ -135,7 +135,14 @@ function TableView({
                 </div>
               </TableCell>
               <TableCell className={`font-medium text-sm ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>
-                {item.title}
+                {item.title.includes("Update capital schedule") ? (
+                  <span className="flex items-center gap-1">
+                    {item.title}
+                    <Zap className="h-3 w-3 text-yellow-500" />
+                  </span>
+                ) : (
+                  item.title
+                )}
               </TableCell>
               <TableCell className="text-sm">{item.dueDate}</TableCell>
               <TableCell>
@@ -242,7 +249,16 @@ function CardView({
         return (
           <RecordCard
             key={item.id}
-            title={item.title}
+            title={
+              item.title.includes("Update capital schedule") ? (
+                <span className="flex items-center gap-1">
+                  {item.title}
+                  <Zap className="h-3 w-3 text-yellow-500" />
+                </span>
+              ) : (
+                item.title
+              )
+            }
             titleStatus={item.status.toLowerCase() === "completed" ? "completed" : "normal"}
             primaryMetadata={primaryMetadata}
             secondaryMetadata={{
@@ -316,7 +332,16 @@ function ListView({
         return (
           <RecordListItem
             key={item.id}
-            title={item.title}
+            title={
+              item.title.includes("Update capital schedule") ? (
+                <span className="flex items-center gap-1">
+                  {item.title}
+                  <Zap className="h-3 w-3 text-yellow-500" />
+                </span>
+              ) : (
+                item.title
+              )
+            }
             titleStatus={item.status.toLowerCase() === "completed" ? "completed" : "normal"}
             primaryMetadata={primaryMetadata}
             secondaryMetadata={{

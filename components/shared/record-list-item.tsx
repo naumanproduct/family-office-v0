@@ -12,7 +12,7 @@ import {
 import { MoreVerticalIcon } from "lucide-react"
 
 export interface RecordListItemProps {
-  title: string
+  title: React.ReactNode
   titleStatus?: "completed" | "normal"
   primaryMetadata: React.ReactNode[]
   secondaryMetadata: {
@@ -92,19 +92,20 @@ export function RecordListItem({
             )}
           </div>
           
-          {/* Primary metadata row (badges, status indicators) */}
-          {primaryMetadata.length > 0 && (
-            <div className="flex items-center gap-2 mt-1">
-              {primaryMetadata.map((item, index) => (
-                <React.Fragment key={index}>{item}</React.Fragment>
-              ))}
-            </div>
-          )}
-          
           {/* Secondary metadata row (assignee, dates, etc.) */}
-          <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
-            <div>{secondaryMetadata.left}</div>
-            <div>{secondaryMetadata.right}</div>
+          <div className="flex justify-between items-center mt-2">
+            <div className="flex items-center gap-2">
+              <div className="text-xs text-muted-foreground">{secondaryMetadata.left}</div>
+              {/* Badges moved to bottom row */}
+              {primaryMetadata.length > 0 && (
+                <div className="flex items-center gap-1">
+                  {primaryMetadata.map((item, index) => (
+                    <React.Fragment key={index}>{item}</React.Fragment>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="text-xs text-muted-foreground">{secondaryMetadata.right}</div>
           </div>
         </div>
       </div>
