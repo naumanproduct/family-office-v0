@@ -21,6 +21,7 @@ import {
   CalendarIcon,
   UserIcon,
   FileTextIcon,
+  FileIcon,
 } from "lucide-react"
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -193,13 +194,12 @@ function DistributionCard({
   // Drawer tabs identical to Deal Pipeline
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 3, icon: UserIcon },
-    { id: "emails", label: "Emails", count: 2, icon: CalendarIcon },
-    { id: "tasks", label: "Tasks", count: 2, icon: FileTextIcon },
-    { id: "notes", label: "Notes", count: 2, icon: FileTextIcon },
-    { id: "meetings", label: "Meetings", count: 2, icon: CalendarIcon },
+    { id: "notes", label: "Notes", count: 2, icon: FileIcon },
     { id: "files", label: "Files", count: 2, icon: FileTextIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 2, icon: CalendarIcon },
+    { id: "meetings", label: "Meetings", count: 2, icon: CalendarIcon },
+    { id: "contacts", label: "Contacts", count: 3, icon: UserIcon },
   ]
 
   // Children renderer with mock data for Growth Fund II as showcase

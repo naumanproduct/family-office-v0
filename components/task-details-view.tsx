@@ -7,6 +7,7 @@ import {
   UserIcon,
   AlertTriangleIcon,
   FileTextIcon,
+  FileIcon,
   CheckSquareIcon,
   PlusIcon,
   CircleIcon,
@@ -33,13 +34,15 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { TypableArea } from "@/components/typable-area"
+import { Textarea } from "@/components/ui/textarea"
 
 import { NoteContent } from "@/components/shared/note-content"
 import { FileContent } from "@/components/shared/file-content"
 import { useTasks } from "./tasks-table"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 import { generateTaskActivities } from "@/components/shared/activity-generators"
+import { AIOutputSection } from "@/components/shared/ai-output-section"
 
 interface TaskDetailsViewProps {
   task: any
@@ -169,7 +172,7 @@ export function TaskDetailsView({
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
-    { id: "notes", label: "Notes", icon: FileTextIcon },
+    { id: "notes", label: "Notes", icon: FileIcon },
     { id: "files", label: "Files", icon: FileTextIcon },
   ]
 
@@ -213,7 +216,8 @@ export function TaskDetailsView({
 
   const handleCommentSubmit = (comment: string) => {
     console.log("Adding comment:", comment)
-    // Handle comment submission here
+    // In a real app, this would add the comment to the database
+    // For now, we'll just log it
   }
 
   const handleAddSubtask = () => {
@@ -488,41 +492,252 @@ export function TaskDetailsView({
   // Custom comment section rendering (for activity)
   const renderCommentSection = () => {
     const activities = generateTaskActivities()
+    
+    // Generate mock comments
+    const comments: ActivityItem[] = [
+      {
+        id: 101,
+        type: "comment",
+        actor: "Sarah Johnson",
+        action: "commented",
+        target: "",
+        content: "I've reviewed the capital call calculations and they look correct. Ready to proceed with LP notifications.",
+        timestamp: "2 hours ago",
+        date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: 102,
+        type: "comment",
+        actor: "Michael Chen",
+        action: "commented",
+        target: "",
+        content: "Please make sure to use the updated wire instructions for this call. Treasury updated them last week.",
+        timestamp: "5 hours ago",
+        date: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: 103,
+        type: "comment",
+        actor: "You",
+        action: "commented",
+        target: "",
+        content: "Noted. I'll double-check with Treasury before sending out the notices.",
+        timestamp: "4 hours ago",
+        date: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      },
+    ]
 
     if (isInDrawer) {
       return (
         <div className="mt-4">
-          <UnifiedActivitySection activities={activities} />
+          <UnifiedActivitySection 
+            activities={activities} 
+            comments={comments}
+            showHeader={true}
+            onCommentSubmit={handleCommentSubmit}
+          />
         </div>
       );
     }
 
     return (
       <div className="space-y-4 mt-8">
-        {/* Comment Input */}
-        <TypableArea
-          value={commentText}
-          onChange={setCommentText}
-          placeholder="Add a comment about this task..."
-          onSubmit={handleCommentSubmit}
-          showButtons={true}
-          submitLabel="Add comment"
+        {/* Activity Section with Header and integrated comment input */}
+        <UnifiedActivitySection 
+          activities={activities} 
+          comments={comments}
+          showHeader={true}
+          onCommentSubmit={handleCommentSubmit}
         />
-        
-        {/* Activity Section Heading */}
-        <div className="mt-8 mb-2">
-          <h4 className="text-sm font-medium">Activity</h4>
-        </div>
-        
-        {/* Comments List */}
-        <div className="mt-4">
-          <UnifiedActivitySection activities={activities} />
-        </div>
       </div>
     );
   };
 
-  // Define all sections for the details panel 
+  // Generate contextual AI output based on subtask title
+  const generateAIOutput = (taskTitle: string) => {
+    if (taskTitle.includes("Calculate pro-rata allocation")) {
+      return {
+        title: "LP Allocation Calculations",
+        type: "calculation" as const,
+        explanation: "AI calculated each limited partner's share of the $10M capital call based on their commitment percentages in the fund agreement.",
+        content: (
+          <div className="space-y-3">
+            <p className="font-medium">Pro-rata allocation for Call #1 ($10,000,000):</p>
+            <div className="space-y-2 font-mono text-xs">
+              <div className="grid grid-cols-3 gap-4 pb-2 border-b">
+                <span className="font-semibold">LP Name</span>
+                <span className="font-semibold text-right">Commitment %</span>
+                <span className="font-semibold text-right">Call Amount</span>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <span>Apex Capital Partners</span>
+                <span className="text-right">25.0%</span>
+                <span className="text-right">$2,500,000</span>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <span>Summit Ventures LLC</span>
+                <span className="text-right">20.0%</span>
+                <span className="text-right">$2,000,000</span>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <span>Ridge Family Office</span>
+                <span className="text-right">15.0%</span>
+                <span className="text-right">$1,500,000</span>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <span>Meridian Holdings</span>
+                <span className="text-right">40.0%</span>
+                <span className="text-right">$4,000,000</span>
+              </div>
+              <div className="grid grid-cols-3 gap-4 pt-2 border-t font-semibold">
+                <span>Total</span>
+                <span className="text-right">100.0%</span>
+                <span className="text-right">$10,000,000</span>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    } else if (taskTitle.includes("Update LP capital accounts")) {
+      return {
+        title: "Capital Account Updates",
+        type: "data" as const,
+        explanation: "AI generated capital account transaction entries for each LP, pre-formatted with the required fields for your accounting system.",
+        content: (
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div className="border-b pb-3">
+                <p className="font-medium">Account: Apex Capital Partners</p>
+                <p className="text-sm text-muted-foreground">Transaction Type: Capital Call</p>
+                <p className="text-sm text-muted-foreground">Call Number: #1</p>
+                <p className="text-sm text-muted-foreground">Amount: $2,500,000</p>
+                <p className="text-sm text-muted-foreground">Effective Date: {new Date().toLocaleDateString()}</p>
+                <p className="text-sm text-muted-foreground">Reference: CC-GF3-001</p>
+              </div>
+              <div className="border-b pb-3">
+                <p className="font-medium">Account: Summit Ventures LLC</p>
+                <p className="text-sm text-muted-foreground">Transaction Type: Capital Call</p>
+                <p className="text-sm text-muted-foreground">Call Number: #1</p>
+                <p className="text-sm text-muted-foreground">Amount: $2,000,000</p>
+                <p className="text-sm text-muted-foreground">Effective Date: {new Date().toLocaleDateString()}</p>
+                <p className="text-sm text-muted-foreground">Reference: CC-GF3-001</p>
+              </div>
+              <p className="text-sm text-muted-foreground italic">[Continue for all LPs...]</p>
+            </div>
+          </div>
+        )
+      }
+    } else if (taskTitle.includes("Generate capital call notices")) {
+      return {
+        title: "Draft Capital Call Notice",
+        type: "email" as const,
+        explanation: "AI drafted a formal capital call notice email template with payment instructions, ready to personalize and send to each limited partner.",
+        content: (
+          <div className="space-y-4">
+            <div className="border-b pb-2">
+              <p className="font-medium">Subject: Growth Fund III - Capital Call Notice #1</p>
+            </div>
+            <div className="space-y-3">
+              <p>Dear [LP Name],</p>
+              <p>This letter serves as formal notice of Capital Call #1 for Growth Fund III, L.P.</p>
+              
+              <div>
+                <p className="font-medium mb-2">CAPITAL CALL DETAILS:</p>
+                <div className="pl-4 space-y-1">
+                  <p className="text-sm">Fund: Growth Fund III, L.P.</p>
+                  <p className="text-sm">Call Number: 1</p>
+                  <p className="text-sm">Your Pro-Rata Share: [Amount]</p>
+                  <p className="text-sm">Due Date: [Due Date]</p>
+                  <p className="text-sm">Purpose: Initial portfolio investments and fund expenses</p>
+                </div>
+              </div>
+              
+              <div>
+                <p className="font-medium mb-2">PAYMENT INSTRUCTIONS:</p>
+                <div className="pl-4 space-y-1">
+                  <p className="text-sm">Please wire your capital contribution to:</p>
+                  <p className="text-sm">Bank: First National Bank</p>
+                  <p className="text-sm">ABA: 123456789</p>
+                  <p className="text-sm">Account: 987654321</p>
+                  <p className="text-sm">Reference: GF3-CC1-[LP ID]</p>
+                </div>
+              </div>
+              
+              <p>Please confirm receipt of this notice and your wire transfer by responding to this email.</p>
+              <p>If you have any questions, please contact Investor Relations at ir@growthfund.com.</p>
+              
+              <div className="pt-2">
+                <p>Sincerely,</p>
+                <p>Growth Fund III GP, LLC</p>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    } else if (taskTitle.includes("Update fund commitment tracker")) {
+      return {
+        title: "Commitment Tracker Summary",
+        type: "data" as const,
+        explanation: "AI compiled a summary of total fund commitments, showing how much has been called versus remaining uncalled capital.",
+        content: (
+          <div className="space-y-3">
+            <div>
+              <p className="font-medium">Fund: Growth Fund III</p>
+              <p className="text-sm">Total Commitments: $100,000,000</p>
+              <p className="text-sm">Called to Date: $10,000,000 (10%)</p>
+              <p className="text-sm">Remaining Uncalled: $90,000,000 (90%)</p>
+            </div>
+            
+            <div className="border-t pt-3">
+              <p className="font-medium mb-2">Call History:</p>
+              <p className="text-sm pl-2">• Call #1: $10,000,000 (Current)</p>
+            </div>
+            
+            <div className="border-t pt-3">
+              <p className="text-sm">Next Anticipated Call: Q2 2024</p>
+              <p className="text-sm">Estimated Amount: $15,000,000</p>
+            </div>
+          </div>
+        )
+      }
+    } else if (taskTitle.includes("Reconcile capital schedule")) {
+      return {
+        title: "Reconciliation Summary",
+        type: "calculation" as const,
+        explanation: "AI performed a line-by-line reconciliation between your capital schedule and accounting records to verify all LP amounts match.",
+        content: (
+          <div className="space-y-3">
+            <div>
+              <p className="font-medium mb-2">Capital Schedule Reconciliation:</p>
+              <div className="space-y-1">
+                <p className="text-sm">✓ Total Called per Schedule: $10,000,000</p>
+                <p className="text-sm">✓ Total per Accounting Records: $10,000,000</p>
+                <p className="text-sm">✓ Variance: $0</p>
+              </div>
+            </div>
+            
+            <div className="border-t pt-3">
+              <p className="font-medium mb-2">LP-by-LP Reconciliation:</p>
+              <div className="space-y-1">
+                <p className="text-sm">✓ Apex Capital: Schedule $2,500,000 = Accounting $2,500,000</p>
+                <p className="text-sm">✓ Summit Ventures: Schedule $2,000,000 = Accounting $2,000,000</p>
+                <p className="text-sm">✓ Ridge Family: Schedule $1,500,000 = Accounting $1,500,000</p>
+                <p className="text-sm">✓ Meridian: Schedule $4,000,000 = Accounting $4,000,000</p>
+              </div>
+            </div>
+            
+            <div className="border-t pt-3">
+              <p className="font-medium text-green-600">Status: RECONCILED</p>
+            </div>
+          </div>
+        )
+      }
+    }
+    
+    return null
+  }
+
+  // Define all sections for the details panel
   const sections: DetailSection[] = [
     {
       id: "details",
@@ -624,9 +839,9 @@ export function TaskDetailsView({
   // Custom content for tabs other than details
   const getTabContent = () => {
     if (activeTab === "notes") {
-      return <NoteContent />;
+      return <NoteContent taskTitle={task.title || taskTitle} />;
     } else if (activeTab === "files") {
-      return <FileContent />;
+      return <FileContent taskTitle={task.title || taskTitle} />;
     }
     return null;
   };
@@ -712,7 +927,24 @@ export function TaskDetailsView({
               {renderCommentSection()}
             </>
           }
-          additionalContent={null}
+          additionalContent={(() => {
+            // Only show AI output for subtasks (tasks that have a parent)
+            if (parentTask && task.title) {
+              const aiOutput = generateAIOutput(task.title)
+              if (aiOutput) {
+                return (
+                  <AIOutputSection
+                    title={aiOutput.title}
+                    content={aiOutput.content}
+                    type={aiOutput.type}
+                    explanation={aiOutput.explanation}
+                    className="mt-6"
+                  />
+                )
+              }
+            }
+            return null
+          })()}
         />
       ) : (
         <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>

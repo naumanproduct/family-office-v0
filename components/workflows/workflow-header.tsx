@@ -515,7 +515,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
-    { id: "activity", label: "Activity", icon: CalendarIcon },
+
     { id: "attributes", label: "Card Attributes", icon: LayoutIcon },
     { id: "stages", label: "Stages", icon: ListIcon },
   ]

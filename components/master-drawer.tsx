@@ -320,15 +320,15 @@ export function MasterDrawer({
               {/* Tabs */}
               <div className="border-b bg-background px-6">
                 <div className="flex relative overflow-x-auto">
-                  {fullScreenVisibleTabs.map((tab) => (
+                  {fullScreenVisibleTabs.map((tab, index) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
+                      className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 min-w-0 ${
                         activeTab === tab.id
                           ? "border-b-2 border-primary text-primary"
                           : "text-muted-foreground hover:text-foreground"
-                      }`}
+                      } ${index === 0 ? 'pl-0' : ''}`}
                     >
                       {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
                       <span className="truncate">{tab.label}</span>
@@ -341,10 +341,10 @@ export function MasterDrawer({
                     </button>
                   ))}
                   {fullScreenHiddenTabs.length > 0 && (
-                    <div className="relative">
+                    <div className="relative ml-2">
                       <DropdownMenu open={isMoreDropdownOpen} onOpenChange={setIsMoreDropdownOpen}>
                         <DropdownMenuTrigger asChild>
-                          <button className="relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                          <button className="relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-2 text-muted-foreground hover:text-foreground">
                             More
                             <ChevronDownIcon className="h-4 w-4" />
                           </button>
@@ -651,15 +651,15 @@ export function MasterDrawer({
           {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && (
             <div className="border-b bg-background px-6">
               <div className="flex relative overflow-x-auto">
-                {visibleTabs.map((tab) => (
+                {visibleTabs.map((tab, index) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 px-2 text-sm font-medium flex items-center gap-1 min-w-0 ${
+                    className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 min-w-0 ${
                       activeTab === tab.id
                         ? "border-b-2 border-primary text-primary"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    } ${index === 0 ? 'pl-0' : ''}`}
                   >
                     {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
                     <span className="truncate">{tab.label}</span>
@@ -672,10 +672,10 @@ export function MasterDrawer({
                   </button>
                 ))}
                 {hiddenTabs.length > 0 && (
-                  <div className="relative">
+                  <div className="relative ml-2">
                     <DropdownMenu open={isMoreDropdownOpen} onOpenChange={setIsMoreDropdownOpen}>
                       <DropdownMenuTrigger asChild>
-                        <button className="relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                        <button className="relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-2 text-muted-foreground hover:text-foreground">
                           More
                           <ChevronDownIcon className="h-4 w-4" />
                         </button>

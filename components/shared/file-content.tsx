@@ -43,6 +43,320 @@ import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { Label } from "@/components/ui/label"
 import { DocumentViewer } from "@/components/document-viewer"
 
+// Function to get context-specific files based on task title
+export function getContextualFiles(taskTitle?: string) {
+  // Main task: Update capital schedule – Call #4
+  if (!taskTitle || taskTitle.includes("Update capital schedule – Call #4")) {
+    return [
+      {
+        id: "DOC-4001",
+        title: "Growth Fund III - Limited Partnership Agreement",
+        name: "GF3-LPA-Final-Executed.pdf",
+        fileName: "GF3-LPA-Final-Executed.pdf",
+        fileType: "PDF",
+        type: "pdf",
+        fileSize: "8.2 MB",
+        size: "8.2 MB",
+        uploadedAt: "2023-01-15T10:30:00Z",
+        uploadedBy: "Legal Department",
+        uploadedDate: "9 months ago",
+        category: "Legal",
+        tags: ["lpa", "fund documents", "commitments"],
+        relatedTo: { type: "Fund", name: "Growth Fund III" },
+        status: "Final",
+        description: "Executed limited partnership agreement with all LP commitments and capital call provisions."
+      },
+      {
+        id: "DOC-4002",
+        title: "Capital Call History - Calls #1-3",
+        name: "GF3-Capital-Call-History.xlsx",
+        fileName: "GF3-Capital-Call-History.xlsx",
+        fileType: "XLSX",
+        type: "xlsx",
+        fileSize: "1.8 MB",
+        size: "1.8 MB",
+        uploadedAt: "2023-10-15T09:15:00Z",
+        uploadedBy: "Michael Chen",
+        uploadedDate: "7 days ago",
+        category: "Financial",
+        tags: ["capital calls", "history", "tracking"],
+        relatedTo: { type: "Fund", name: "Growth Fund III" },
+        status: "Current",
+        description: "Complete history of capital calls #1-3 with LP responses and payment tracking."
+      },
+      {
+        id: "DOC-4003",
+        title: "TechVantage Solutions - Investment Memo",
+        name: "TechVantage-Investment-Memo-Final.pdf",
+        fileName: "TechVantage-Investment-Memo-Final.pdf",
+        fileType: "PDF",
+        type: "pdf",
+        fileSize: "3.4 MB",
+        size: "3.4 MB",
+        uploadedAt: "2023-10-10T14:20:00Z",
+        uploadedBy: "Investment Committee",
+        uploadedDate: "12 days ago",
+        category: "Investment",
+        tags: ["investment memo", "techvantage", "acquisition"],
+        relatedTo: { type: "Company", name: "TechVantage Solutions" },
+        status: "Approved",
+        description: "IC-approved investment memorandum for TechVantage acquisition requiring $15M capital call."
+      },
+    ];
+  }
+  
+  // Subtask 1: Calculate pro-rata allocation
+  else if (taskTitle.includes("Calculate pro-rata allocation")) {
+    return [
+      {
+        id: "DOC-4101",
+        title: "LP Commitment Schedule - Current",
+        name: "LP-Commitment-Schedule-Q4-2023.xlsx",
+        fileName: "LP-Commitment-Schedule-Q4-2023.xlsx",
+        fileType: "XLSX",
+        type: "xlsx",
+        fileSize: "856 KB",
+        size: "856 KB",
+        uploadedAt: "2023-10-19T10:00:00Z",
+        uploadedBy: "Michael Chen",
+        uploadedDate: "3 days ago",
+        category: "Financial",
+        tags: ["lp commitments", "allocation", "percentages"],
+        relatedTo: { type: "Fund", name: "Growth Fund III" },
+        status: "Current",
+        description: "Updated LP commitment percentages after Q3 secondary transaction."
+      },
+      {
+        id: "DOC-4102",
+        title: "Pro-Rata Calculation Template",
+        name: "Capital-Call-ProRata-Template.xlsx",
+        fileName: "Capital-Call-ProRata-Template.xlsx",
+        fileType: "XLSX",
+        type: "xlsx",
+        fileSize: "245 KB",
+        size: "245 KB",
+        uploadedAt: "2023-06-01T11:30:00Z",
+        uploadedBy: "Finance Team",
+        uploadedDate: "4 months ago",
+        category: "Template",
+        tags: ["template", "calculations", "pro-rata"],
+        relatedTo: { type: "Process", name: "Capital Call Process" },
+        status: "Active",
+        description: "Standard template for calculating LP pro-rata allocations."
+      }
+    ];
+  }
+  
+  // Subtask 2: Update LP capital accounts
+  else if (taskTitle.includes("Update LP capital accounts")) {
+    return [
+      {
+        id: "DOC-4201",
+        title: "LP Portal Update Guide",
+        name: "LP-Portal-Capital-Account-Guide.pdf",
+        fileName: "LP-Portal-Capital-Account-Guide.pdf",
+        fileType: "PDF",
+        type: "pdf",
+        fileSize: "1.2 MB",
+        size: "1.2 MB",
+        uploadedAt: "2023-09-15T08:45:00Z",
+        uploadedBy: "IT Department",
+        uploadedDate: "1 month ago",
+        category: "Documentation",
+        tags: ["guide", "lp portal", "capital accounts"],
+        relatedTo: { type: "System", name: "LP Portal" },
+        status: "Current",
+        description: "Step-by-step guide for updating capital accounts in the LP portal system."
+      },
+      {
+        id: "DOC-4202",
+        title: "Capital Account Reconciliation - Call #3",
+        name: "Call3-Capital-Account-Recon.xlsx",
+        fileName: "Call3-Capital-Account-Recon.xlsx",
+        fileType: "XLSX",
+        type: "xlsx",
+        fileSize: "1.5 MB",
+        size: "1.5 MB",
+        uploadedAt: "2023-08-20T16:00:00Z",
+        uploadedBy: "Jessica Martinez",
+        uploadedDate: "2 months ago",
+        category: "Financial",
+        tags: ["reconciliation", "capital accounts", "call #3"],
+        relatedTo: { type: "Fund", name: "Growth Fund III" },
+        status: "Completed",
+        description: "Previous capital account reconciliation for reference."
+      }
+    ];
+  }
+  
+  // Subtask 3: Generate capital call notices
+  else if (taskTitle.includes("Generate capital call notices")) {
+    return [
+      {
+        id: "DOC-4301",
+        title: "Capital Call Notice Template v2.1",
+        name: "Capital-Call-Notice-Template-v2.1.docx",
+        fileName: "Capital-Call-Notice-Template-v2.1.docx",
+        fileType: "DOCX",
+        type: "docx",
+        fileSize: "125 KB",
+        size: "125 KB",
+        uploadedAt: "2023-09-25T14:30:00Z",
+        uploadedBy: "Legal Department",
+        uploadedDate: "4 weeks ago",
+        category: "Template",
+        tags: ["template", "capital call notice", "legal approved"],
+        relatedTo: { type: "Process", name: "Capital Call Process" },
+        status: "Approved",
+        description: "Latest legal-approved capital call notice template with digital signature fields."
+      },
+      {
+        id: "DOC-4302",
+        title: "LP Communication Preferences",
+        name: "LP-Communication-Preferences.xlsx",
+        fileName: "LP-Communication-Preferences.xlsx",
+        fileType: "XLSX",
+        type: "xlsx",
+        fileSize: "89 KB",
+        size: "89 KB",
+        uploadedAt: "2023-10-20T09:00:00Z",
+        uploadedBy: "Investor Relations",
+        uploadedDate: "2 days ago",
+        category: "Contact Info",
+        tags: ["lp contacts", "preferences", "communication"],
+        relatedTo: { type: "Process", name: "LP Communication" },
+        status: "Current",
+        description: "Updated LP contact preferences and special instructions for capital call notices."
+      },
+      {
+        id: "DOC-4303",
+        title: "Wire Instructions - Fund III",
+        name: "GF3-Wire-Instructions-Current.pdf",
+        fileName: "GF3-Wire-Instructions-Current.pdf",
+        fileType: "PDF",
+        type: "pdf",
+        fileSize: "245 KB",
+        size: "245 KB",
+        uploadedAt: "2023-10-01T10:15:00Z",
+        uploadedBy: "Treasury Department",
+        uploadedDate: "3 weeks ago",
+        category: "Banking",
+        tags: ["wire instructions", "banking", "capital calls"],
+        relatedTo: { type: "Fund", name: "Growth Fund III" },
+        status: "Active",
+        description: "Current wire instructions for LP capital contributions."
+      }
+    ];
+  }
+  
+  // Subtask 4: Update fund commitment tracker
+  else if (taskTitle.includes("Update fund commitment tracker")) {
+    return [
+      {
+        id: "DOC-4401",
+        title: "Fund Commitment Tracker v3.4",
+        name: "GF3-Commitment-Tracker-v3.4.xlsx",
+        fileName: "GF3-Commitment-Tracker-v3.4.xlsx",
+        fileType: "XLSX",
+        type: "xlsx",
+        fileSize: "2.8 MB",
+        size: "2.8 MB",
+        uploadedAt: "2023-10-15T11:00:00Z",
+        uploadedBy: "Michael Chen",
+        uploadedDate: "1 week ago",
+        category: "Financial",
+        tags: ["tracker", "commitments", "master file"],
+        relatedTo: { type: "Fund", name: "Growth Fund III" },
+        status: "Current",
+        description: "Master commitment tracker - must be updated after each capital call."
+      },
+      {
+        id: "DOC-4402",
+        title: "IC Reporting Template - 75% Threshold",
+        name: "IC-Reporting-Template-75pct.pptx",
+        fileName: "IC-Reporting-Template-75pct.pptx",
+        fileType: "PPTX",
+        type: "pptx",
+        fileSize: "1.1 MB",
+        size: "1.1 MB",
+        uploadedAt: "2023-10-18T15:30:00Z",
+        uploadedBy: "Thomas Wong",
+        uploadedDate: "4 days ago",
+        category: "Reporting",
+        tags: ["ic reporting", "template", "75% threshold"],
+        relatedTo: { type: "Process", name: "IC Reporting" },
+        status: "Ready",
+        description: "Template for quarterly IC reporting once 75% capital threshold is reached."
+      }
+    ];
+  }
+  
+  // Subtask 5: Reconcile capital schedule
+  else if (taskTitle.includes("Reconcile capital schedule")) {
+    return [
+      {
+        id: "DOC-4501",
+        title: "Reconciliation Checklist & Procedures",
+        name: "Capital-Schedule-Recon-Procedures.pdf",
+        fileName: "Capital-Schedule-Recon-Procedures.pdf",
+        fileType: "PDF",
+        type: "pdf",
+        fileSize: "890 KB",
+        size: "890 KB",
+        uploadedAt: "2023-09-01T12:00:00Z",
+        uploadedBy: "Fund Accounting",
+        uploadedDate: "7 weeks ago",
+        category: "Procedures",
+        tags: ["reconciliation", "procedures", "checklist"],
+        relatedTo: { type: "Process", name: "Capital Reconciliation" },
+        status: "Current",
+        description: "Standard operating procedures for capital schedule reconciliation."
+      },
+      {
+        id: "DOC-4502",
+        title: "Call #3 Reconciliation Report",
+        name: "Call3-Recon-Report-Final.pdf",
+        fileName: "Call3-Recon-Report-Final.pdf",
+        fileType: "PDF",
+        type: "pdf",
+        fileSize: "1.6 MB",
+        size: "1.6 MB",
+        uploadedAt: "2023-08-25T17:00:00Z",
+        uploadedBy: "Jessica Martinez",
+        uploadedDate: "2 months ago",
+        category: "Reports",
+        tags: ["reconciliation", "report", "call #3"],
+        relatedTo: { type: "Fund", name: "Growth Fund III" },
+        status: "Completed",
+        description: "Final reconciliation report from Call #3 showing FX adjustment issue."
+      },
+      {
+        id: "DOC-4503",
+        title: "Fund Accounting Export - Current",
+        name: "Fund-Accounting-Export-Oct22.csv",
+        fileName: "Fund-Accounting-Export-Oct22.csv",
+        fileType: "CSV",
+        type: "csv",
+        fileSize: "342 KB",
+        size: "342 KB",
+        uploadedAt: "2023-10-22T08:00:00Z",
+        uploadedBy: "Fund Accounting System",
+        uploadedDate: "Today",
+        category: "Data Export",
+        tags: ["accounting data", "export", "reconciliation"],
+        relatedTo: { type: "System", name: "Fund Accounting" },
+        status: "Fresh",
+        description: "Latest accounting system export for reconciliation purposes."
+      }
+    ];
+  }
+  
+  // Default case - return general files
+  else {
+    return defaultFiles;
+  }
+}
+
 // Default mock data, can be overridden by passing data prop
 const defaultFiles = [
   {
@@ -104,6 +418,7 @@ export type FileContentProps = {
   viewMode?: "table" | "card" | "list" // Optional - defaults to table
   onFileSelect?: (file: any) => void // Optional - callback when a file is selected
   title?: string // Optional - section title
+  taskTitle?: string // Optional - used to contextually filter files
 }
 
 // File details panel component for use in the drawer
@@ -245,14 +560,17 @@ function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScr
 }
 
 export function FileContent({ 
-  data = defaultFiles, 
+  data, 
   viewMode: initialViewMode = "table", 
   onFileSelect,
-  title = "Files" 
+  title = "Files",
+  taskTitle
 }: FileContentProps) {
   const [viewMode, setViewMode] = useState(initialViewMode)
   const [isAddFileSheetOpen, setIsAddFileSheetOpen] = useState(false)
-  const [fileData, setFileData] = useState(data)
+  // Use contextual files if no data is provided
+  const initialData = data || getContextualFiles(taskTitle);
+  const [fileData, setFileData] = useState(initialData)
   const [selectedFile, setSelectedFile] = useState<any>(null)
   const [isDocumentViewerOpen, setIsDocumentViewerOpen] = useState(false)
 
@@ -260,7 +578,7 @@ export function FileContent({
   const fileTabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 0, icon: ClockIcon },
-    { id: "notes", label: "Notes", count: 0, icon: MessageSquareIcon },
+    { id: "notes", label: "Notes", count: 0, icon: FileIcon },
     { id: "emails", label: "Emails", count: 0, icon: MailIcon },
   ]
 

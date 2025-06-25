@@ -8,9 +8,9 @@ import { LiabilitiesTable } from "./liabilities-table"
 import { MasterDrawer } from "./master-drawer"
 import {
   FileTextIcon,
+  FileIcon,
   CheckSquareIcon,
-  StickyNoteIcon,
-  PaperclipIcon,
+  FolderIcon,
   DollarSignIcon,
   BarChartIcon,
 } from "lucide-react"
@@ -84,8 +84,8 @@ export function InvestmentsView() {
             { id: "details", label: "Details", count: null, icon: FileTextIcon },
             { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
             { id: "tasks", label: "Tasks", count: 3, icon: CheckSquareIcon },
-            { id: "notes", label: "Notes", count: 5, icon: StickyNoteIcon },
-            { id: "files", label: "Files", count: 8, icon: PaperclipIcon },
+            { id: "notes", label: "Notes", count: 5, icon: FileIcon },
+            { id: "files", label: "Files", count: 8, icon: FileTextIcon },
           ]}
           detailsPanel={(isFullScreen) => (
             (() => {

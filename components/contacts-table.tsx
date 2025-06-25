@@ -25,6 +25,7 @@ import {
   SortAscIcon,
   SortDescIcon,
   FileTextIcon,
+  FileIcon,
   MailIcon,
   CalendarIcon,
   FolderIcon,
@@ -278,11 +279,11 @@ const formatNumber = (num: number) => {
 function ContactNameCell({ contact }: { contact: Contact }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
+    { id: "files", label: "Files", count: 5, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: ClockIcon },
-    { id: "notes", label: "Notes", count: 1, icon: MessageSquareIcon },
-    { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
     { id: "emails", label: "Emails", count: 3, icon: MailIcon },
-    { id: "files", label: "Files", count: 5, icon: FolderIcon },
+    { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
   ]
 
   const renderTabContent = (

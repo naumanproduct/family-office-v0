@@ -32,6 +32,7 @@ import {
   LandmarkIcon,
   BarChartIcon,
   FileTextIcon,
+  FileIcon,
   MailIcon,
   CheckCircleIcon,
   StickyNoteIcon,
@@ -544,11 +545,11 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
 function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
+    { id: "files", label: "Files", count: 5, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 5, icon: FolderIcon },
     { id: "team", label: "People", count: 6, icon: UsersIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]

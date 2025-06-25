@@ -28,6 +28,7 @@ import {
   SortAscIcon,
   SortDescIcon,
   FileTextIcon,
+  FileIcon,
   MailIcon,
   FolderIcon,
   UsersIcon,
@@ -191,12 +192,12 @@ const getStatusColor = (status: string) => {
 function LiabilityNameCell({ liability }: { liability: Liability }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
+    { id: "files", label: "Files", count: 1, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: ClockIcon },
-    { id: "notes", label: "Notes", count: 1, icon: MessageSquareIcon },
-    { id: "meetings", label: "Meetings", count: 1, icon: UsersIcon },
     { id: "emails", label: "Emails", count: 1, icon: MailIcon },
-    { id: "files", label: "Files", count: 1, icon: FolderIcon },
+    { id: "meetings", label: "Meetings", count: 1, icon: UsersIcon },
+    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 

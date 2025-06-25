@@ -207,19 +207,19 @@ export function UnifiedDetailsPanel({
           );
         })}
 
+        {/* Additional Content (AI Assistance) */}
+        {additionalContent && (
+          <div className="mt-8">
+            {additionalContent}
+          </div>
+        )}
+
         {/* Activity Section - Only in Drawer View */}
         {!isFullScreen && activityContent && (
           <div className="mt-8">
             <div className="space-y-2">
               {activityContent}
             </div>
-          </div>
-        )}
-
-        {/* Additional Content */}
-        {additionalContent && (
-          <div className="mt-8">
-            {additionalContent}
           </div>
         )}
       </div>

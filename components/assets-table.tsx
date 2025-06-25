@@ -41,7 +41,8 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AddAssetDialog } from "./add-asset-dialog"
 import { MasterDrawer } from "./master-drawer"
-import { FileTextIcon, MailIcon, CheckCircleIcon, StickyNoteIcon, CalendarIcon, FolderIcon, UsersIcon, BuildingIcon, LandmarkIcon, BarChartIcon, TrendingUpIcon } from "lucide-react"
+import { FileTextIcon,
+  FileIcon, MailIcon, CheckCircleIcon, StickyNoteIcon, CalendarIcon, FolderIcon, UsersIcon, BuildingIcon, LandmarkIcon, BarChartIcon, TrendingUpIcon } from "lucide-react"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
@@ -177,11 +178,11 @@ interface AssetsTableProps {
 function AssetNameCell({ asset }: { asset: Asset }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
+    { id: "files", label: "Files", count: 4, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 1, icon: StickyNoteIcon },
+    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
     { id: "meetings", label: "Meetings", count: 1, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 4, icon: FolderIcon },
     { id: "team", label: "People", count: 2, icon: UsersIcon },
   ]
 

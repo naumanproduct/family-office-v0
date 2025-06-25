@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Card, CardContent } from "@/components/ui/card"
-import { MoreVerticalIcon, PlusIcon } from "lucide-react"
+import { MoreVerticalIcon, PlusIcon, MailIcon, FileTextIcon, FileIcon, CalendarIcon, FolderIcon } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { UnifiedTaskTable } from "./unified-task-table"
 import { RecordCard } from "./record-card"
@@ -149,6 +149,7 @@ function TableView({
           <TableRow>
             {activeTab === "emails" && (
               <>
+                <TableHead className="w-12"></TableHead>
                 <TableHead>Subject</TableHead>
                 <TableHead>From</TableHead>
                 <TableHead>Date</TableHead>
@@ -158,6 +159,7 @@ function TableView({
             )}
             {activeTab === "notes" && (
               <>
+                <TableHead className="w-12"></TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Author</TableHead>
                 <TableHead>Date</TableHead>
@@ -166,6 +168,7 @@ function TableView({
             )}
             {activeTab === "meetings" && (
               <>
+                <TableHead className="w-12"></TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Date & Time</TableHead>
                 <TableHead>Status</TableHead>
@@ -175,6 +178,7 @@ function TableView({
             )}
             {activeTab === "files" && (
               <>
+                <TableHead className="w-12"></TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Uploaded By</TableHead>
                 <TableHead>Date</TableHead>
@@ -217,6 +221,9 @@ function TableView({
             >
               {activeTab === "emails" && (
                 <>
+                  <TableCell className="w-12">
+                    <MailIcon className="h-4 w-4 text-muted-foreground" />
+                  </TableCell>
                   <TableCell className="font-medium text-sm">{item.subject}</TableCell>
                   <TableCell className="text-sm">{item.from}</TableCell>
                   <TableCell className="text-sm">{item.date}</TableCell>
@@ -243,6 +250,9 @@ function TableView({
               )}
               {activeTab === "notes" && (
                 <>
+                  <TableCell className="w-12">
+                    <FileIcon className="h-4 w-4 text-muted-foreground" />
+                  </TableCell>
                   <TableCell className="font-medium text-sm">{item.title}</TableCell>
                   <TableCell className="text-sm">{item.author}</TableCell>
                   <TableCell className="text-sm">{item.date}</TableCell>
@@ -265,6 +275,9 @@ function TableView({
               )}
               {activeTab === "meetings" && (
                 <>
+                  <TableCell className="w-12">
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  </TableCell>
                   <TableCell className="font-medium text-sm">{item.title}</TableCell>
                   <TableCell className="text-sm">{item.date} {item.time && `• ${item.time}`}</TableCell>
                   <TableCell>
@@ -290,6 +303,9 @@ function TableView({
               )}
               {activeTab === "files" && (
                 <>
+                  <TableCell className="w-12">
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                  </TableCell>
                   <TableCell className="font-medium text-sm">{item.name}</TableCell>
                   <TableCell className="text-sm">{item.uploadedBy}</TableCell>
                   <TableCell className="text-sm">{item.uploadedDate}</TableCell>
@@ -398,6 +414,7 @@ function CardView({
               }}
               onClick={() => onNoteClick?.(item)}
               actions={commonActions}
+              leadingElement={<FileIcon className="h-4 w-4 text-muted-foreground" />}
             />
           );
         }
@@ -423,6 +440,7 @@ function CardView({
                 { label: "Forward", onClick: () => {} },
                 { label: "Delete", onClick: () => {}, variant: "destructive" as const },
               ]}
+              leadingElement={<MailIcon className="h-4 w-4 text-muted-foreground" />}
             />
           );
         }
@@ -445,6 +463,7 @@ function CardView({
               }}
               onClick={() => onMeetingClick?.(item)}
               actions={commonActions}
+              leadingElement={<CalendarIcon className="h-4 w-4 text-muted-foreground" />}
             />
           );
         }
@@ -469,6 +488,7 @@ function CardView({
                 { label: "Download", onClick: () => {} },
                 { label: "Delete", onClick: () => {}, variant: "destructive" as const },
               ]}
+              leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
             />
           );
         }
@@ -568,6 +588,7 @@ function ListView({
               }}
               onClick={() => onNoteClick?.(item)}
               actions={commonActions}
+              leadingElement={<FileIcon className="h-4 w-4 text-muted-foreground" />}
             />
           );
         }
@@ -593,6 +614,7 @@ function ListView({
                 { label: "Forward", onClick: () => {} },
                 { label: "Delete", onClick: () => {}, variant: "destructive" as const },
               ]}
+              leadingElement={<MailIcon className="h-4 w-4 text-muted-foreground" />}
             />
           );
         }
@@ -615,6 +637,7 @@ function ListView({
               }}
               onClick={() => onMeetingClick?.(item)}
               actions={commonActions}
+              leadingElement={<CalendarIcon className="h-4 w-4 text-muted-foreground" />}
             />
           );
         }
@@ -639,6 +662,7 @@ function ListView({
                 { label: "Download", onClick: () => {} },
                 { label: "Delete", onClick: () => {}, variant: "destructive" as const },
               ]}
+              leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
             />
           );
         }

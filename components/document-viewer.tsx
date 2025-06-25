@@ -67,7 +67,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
   const tabs = React.useMemo(() => [
     { id: "details", label: "Details", count: null, icon: FileIcon },
     { id: "tasks", label: "Tasks", count: 0, icon: ClockIcon },
-    { id: "notes", label: "Notes", count: 0, icon: MessageSquareIcon },
+    { id: "notes", label: "Notes", count: 0, icon: FileIcon },
   ], []);
   
   // Tab pagination state

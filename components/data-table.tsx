@@ -48,6 +48,7 @@ import {
   BriefcaseIcon,
   BuildingIcon,
   FileTextIcon,
+  FileIcon,
   MailIcon,
   UserCircleIcon,
   ExpandIcon,
@@ -417,31 +418,32 @@ export function DataTable<TData, TValue>({
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
   const isMobile = useIsMobile()
   const [isFullScreen, setIsFullScreen] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState(isFullScreen ? "activity" : "details")
+  const [activeTab, setActiveTab] = React.useState("details")
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
-
-  React.useEffect(() => {
-    if (isFullScreen && activeTab !== "activity") {
-      setActiveTab("activity")
-    } else if (!isFullScreen && activeTab === "activity") {
-      setActiveTab("details")
-    }
-  }, [isFullScreen])
 
   const tabs = [
     ...(!isFullScreen ? [{ id: "details", label: "Details", count: null, icon: FileTextIcon }] : []),
-    ...(isFullScreen ? [{ id: "activity", label: "Activity", count: null, icon: CalendarIcon }] : []),
-    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
+    { id: "files", label: "Files", count: 5, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 1, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 5, icon: FolderIcon },
     { id: "team", label: "Team", count: 6, icon: UsersIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
+  React.useEffect(() => {
+    if (isFullScreen && activeTab === "details") {
+      // Switch to first available tab when going fullscreen
+      const firstTab = tabs.find(tab => tab.id !== "details");
+      if (firstTab) {
+        setActiveTab(firstTab.id);
+      }
+    }
+  }, [isFullScreen, tabs])
+
   const ViewModeSelector = () => {
-    if (activeTab === "activity" || activeTab === "details") return null
+    if (activeTab === "details") return null
 
     return (
       <div className="flex items-center gap-1 rounded-lg border p-1">

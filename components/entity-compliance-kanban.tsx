@@ -29,6 +29,7 @@ import {
   GlobeIcon,
   ClipboardCheckIcon,
   FileTextIcon,
+  FileIcon,
   ScaleIcon,
   ClockIcon,
   AlertCircleIcon,
@@ -224,11 +225,10 @@ function ComplianceItemCard({ item }: { item: ComplianceItem }) {
   // Define tabs for the drawer
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "notes", label: "Notes", count: 3, icon: FileIcon },
+    { id: "files", label: "Files", count: item.documents?.length || 0, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 3, icon: FileTextIcon },
     { id: "emails", label: "Emails", count: 4, icon: MailIcon },
-    { id: "files", label: "Files", count: item.documents?.length || 0, icon: FolderIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
   // Move state hooks outside of detailsPanel

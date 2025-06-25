@@ -141,7 +141,7 @@ function DiligenceCard({ item, attributes = defaultAttributes }: { item: Diligen
       subtitle={`${item.phase} • ${item.owner}`}
       tabs={[
         { id: "details", label: "Details", count: null, icon: FileTextIcon },
-        { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+  
       ]}
       detailsPanel={detailsPanel}
     >

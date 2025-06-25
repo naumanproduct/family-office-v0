@@ -101,7 +101,7 @@ function OnboardingCard({ rec }: { rec: OnboardingRecord }) {
       subtitle={`${rec.custodian} • ${rec.fundingStatus}`}
       tabs={[
         { id: "details", label: "Details", count: null, icon: FileTextIcon },
-        { id: "activity", label: "Activity", count: null, icon: FileTextIcon },
+  
       ]}
       detailsPanel={detailsPanel}
     >

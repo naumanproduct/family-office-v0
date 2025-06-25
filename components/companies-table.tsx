@@ -60,7 +60,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { MailIcon, BuildingIcon, FileTextIcon, UsersIcon, ClockIcon, MessageSquareIcon } from "lucide-react"
+import { MailIcon, BuildingIcon, FileTextIcon,
+  FileIcon, UsersIcon, ClockIcon, MessageSquareIcon, FolderIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
 // Import the AddCompanyDialog at the top of the file
@@ -368,11 +369,11 @@ const formatNumber = (num: number) => {
 function CompanyNameCell({ company }: { company: Company }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: ClockIcon },
-    { id: "notes", label: "Notes", count: 1, icon: MessageSquareIcon },
-    { id: "meetings", label: "Meetings", count: 1, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
     { id: "files", label: "Files", count: 1, icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", count: 3, icon: ClockIcon },
+    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "meetings", label: "Meetings", count: 1, icon: UsersIcon },
     { id: "team", label: "Team", count: 1, icon: UsersIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]

@@ -26,6 +26,7 @@ import {
   UserIcon,
   TrendingUpIcon,
   FileTextIcon,
+  FileIcon,
   UsersIcon,
   CheckCircleIcon,
   FolderIcon,
@@ -48,6 +49,7 @@ import { opportunitiesData, type Opportunity } from "./opportunities-table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper";
+import { MasterDrawer } from "@/components/master-drawer"
 
 // Default stages if no config provided
 const defaultStages = [
@@ -104,11 +106,10 @@ function OpportunityCard({
   // Define tabs for the drawer
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "notes", label: "Notes", count: 3, icon: FileIcon },
+    { id: "files", label: "Files", count: 1, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 3, icon: FileTextIcon },
     { id: "emails", label: "Emails", count: 5, icon: MailIcon },
-    { id: "files", label: "Files", count: 1, icon: FolderIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
   ]
 
   // Move state hooks outside of detailsPanel
@@ -128,10 +129,10 @@ function OpportunityCard({
   const [showingAllValues, setShowingAllValues] = React.useState(false);
 
   // Create details panel function
-  const detailsPanel = () => buildWorkflowDetailsPanel({
-                infoTitle: "Workflow Information",
-                infoFields: [],
-              });
+  const detailsPanel = buildWorkflowDetailsPanel({
+    infoTitle: "Workflow Information",
+    infoFields: [],
+  });
 
   return (
     <Sheet>
@@ -168,12 +169,7 @@ function OpportunityCard({
         </div>
       </SheetTrigger>
       <SheetContent className="sm:max-w-md p-0 overflow-y-auto">
-        <MasterDrawer
-          title={opportunity.name}
-          subtitle={opportunity.company.name}
-          tabs={tabs}
-          detailsPanel={detailsPanel}
-        />
+        <OpportunityDrawerContent opportunity={opportunity} />
       </SheetContent>
     </Sheet>
   );
@@ -217,13 +213,12 @@ function OpportunityDrawerContent({ opportunity }: { opportunity: Opportunity })
 
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 3, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 8, icon: MailIcon },
+    { id: "notes", label: "Notes", count: 12, icon: FileIcon },
+    { id: "files", label: "Files", count: 7, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 5, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 12, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 8, icon: MailIcon },
     { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 7, icon: FolderIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+    { id: "contacts", label: "Contacts", count: 3, icon: UsersIcon },
   ]
 
   return (

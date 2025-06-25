@@ -24,6 +24,7 @@ import {
   CalendarIcon,
   UserIcon,
   FileTextIcon,
+  FileIcon,
   AlertCircleIcon,
   ChevronDownIcon,
   CheckCircleIcon,
@@ -246,13 +247,12 @@ function CapitalCallCard({
   // Define tabs for the drawer
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "contacts", label: "Contacts", count: 3, icon: UsersIcon },
-    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "notes", label: "Notes", count: 2, icon: FileIcon },
+    { id: "files", label: "Files", count: 2, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
-    { id: "notes", label: "Notes", count: 2, icon: FileTextIcon },
+    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
     { id: "meetings", label: "Meetings", count: 2, icon: CalendarIcon },
-    { id: "files", label: "Files", count: 2, icon: FolderIcon },
-    { id: "activity", label: "Activity", count: null, icon: CalendarIcon },
+    { id: "contacts", label: "Contacts", count: 3, icon: UsersIcon },
   ]
 
   // Move state hooks outside of detailsPanel
