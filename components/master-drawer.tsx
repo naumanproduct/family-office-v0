@@ -705,30 +705,36 @@ export function MasterDrawer({
           )}
 
           {/* Tab Content */}
-          <div className={selectedTask || selectedNote || selectedEmail || selectedMeeting ? "flex-1" : "p-6"}>
-            {!selectedTask && !selectedNote && !selectedEmail && !selectedMeeting && (
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold">
-                  {[...visibleTabs, ...hiddenTabs].find((tab) => tab.id === activeTab)?.label}
-                </h3>
-                <div className="flex items-center gap-2">
-                  {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
-                  {activeTab !== "activity" && activeTab !== "details" && (
-                    <Button variant="outline" size="sm">
-                      <PlusIcon className="h-4 w-4" />
-                      Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
-                    </Button>
-                  )}
-                  {activeTab === "activity" && (
-                    <Button variant="outline" size="sm">
-                      <PlusIcon className="h-4 w-4" />
-                      Add meeting
-                    </Button>
-                  )}
+          <div className={selectedTask || selectedNote || selectedEmail || selectedMeeting ? "flex-1" : ""}>
+            {!selectedTask && !selectedNote && !selectedEmail && !selectedMeeting && activeTab !== "details" && (
+              <div className="p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">
+                    {[...visibleTabs, ...hiddenTabs].find((tab) => tab.id === activeTab)?.label}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
+                    {activeTab !== "activity" && activeTab !== "details" && (
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
+                      </Button>
+                    )}
+                    {activeTab === "activity" && (
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add meeting
+                      </Button>
+                    )}
+                  </div>
                 </div>
+                {renderTabContent(activeTab, viewMode, false)}
               </div>
             )}
-            {renderTabContent(activeTab, viewMode, false)}
+            {!selectedTask && !selectedNote && !selectedEmail && !selectedMeeting && activeTab === "details" && (
+              renderTabContent(activeTab, viewMode, false)
+            )}
+            {(selectedTask || selectedNote || selectedEmail || selectedMeeting) && renderTabContent(activeTab, viewMode, false)}
           </div>
         </div>
       </SheetContent>
