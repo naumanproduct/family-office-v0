@@ -40,9 +40,12 @@ import { NoteContent } from "@/components/shared/note-content"
 import { FileContent } from "@/components/shared/file-content"
 import { useTasks } from "./tasks-table"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
+import { getContextualNotes } from "@/components/shared/note-content"
+import { getContextualFiles } from "@/components/shared/file-content"
 import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 import { generateTaskActivities } from "@/components/shared/activity-generators"
 import { AIOutputSection } from "@/components/shared/ai-output-section"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 
 interface TaskDetailsViewProps {
   task: any
@@ -839,9 +842,44 @@ export function TaskDetailsView({
   // Custom content for tabs other than details
   const getTabContent = () => {
     if (activeTab === "notes") {
-      return <NoteContent taskTitle={task.title || taskTitle} />;
+      // Get contextual notes
+      const notes = getContextualNotes(task.title || taskTitle);
+      
+      // Transform notes to match TabContentRenderer format
+      const transformedNotes = notes.map(note => ({
+        ...note,
+        author: note.author || "Unknown",
+        date: note.date || note.lastModified || (note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : "Unknown"),
+      }));
+      
+      return (
+        <TabContentRenderer
+          activeTab="notes"
+          viewMode="list"
+          data={transformedNotes}
+          onNoteClick={(note) => console.log("Note clicked:", note)}
+        />
+      );
     } else if (activeTab === "files") {
-      return <FileContent taskTitle={task.title || taskTitle} />;
+      // Get contextual files
+      const files = getContextualFiles(task.title || taskTitle);
+      
+      // Transform files to match TabContentRenderer format
+      const transformedFiles = files.map(file => ({
+        ...file,
+        name: file.name || file.fileName || file.title,
+        uploadedBy: file.uploadedBy || "Unknown",
+        uploadedDate: file.uploadedDate || (file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Unknown"),
+        size: file.size || file.fileSize || "Unknown",
+      }));
+      
+      return (
+        <TabContentRenderer
+          activeTab="files"
+          viewMode="list"
+          data={transformedFiles}
+        />
+      );
     }
     return null;
   };
