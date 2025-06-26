@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export interface ActivityItem {
   id: number
@@ -68,44 +69,68 @@ export function UnifiedActivitySection({
     })
   }, [activities, comments, activityFilter])
 
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(' ')
+    if (parts.length === 1) {
+      // For single word names like "You", just use first two letters
+      return parts[0].substring(0, 2).toUpperCase()
+    }
+    // For multi-word names, use first letter of first and last word
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+  }
+
   const formatActivityText = (activity: ActivityItem) => {
     // Special formatting for comments
     if (activity.type === "comment") {
       return (
-        <div className="space-y-1">
-          <span className="text-sm">
-            <span className="font-medium text-foreground">{activity.actor}</span>{" "}
-            <span className="text-muted-foreground">commented</span>
-          </span>
-          {activity.content && (
-            <div className="text-sm text-muted-foreground pl-0 mt-1">
-              "{activity.content}"
-            </div>
-          )}
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8 flex-shrink-0">
+            <AvatarFallback className="text-xs">
+              {getInitials(activity.actor)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="space-y-1 flex-1">
+            <span className="text-sm">
+              <span className="font-medium text-foreground">{activity.actor}</span>{" "}
+              <span className="text-muted-foreground">commented</span>
+            </span>
+            {activity.content && (
+              <div className="text-sm text-muted-foreground pl-0 mt-1">
+                "{activity.content}"
+              </div>
+            )}
+          </div>
         </div>
       )
     }
 
     // Default formatting for other activities
     return (
-      <span className="text-sm">
-        <span className="font-medium text-foreground">{activity.actor}</span>{" "}
-        <span className="text-muted-foreground">
-          {activity.action}{" "}
-          {activity.objectType && <>{activity.objectType}: </>}
+      <div className="flex items-center gap-3">
+        <Avatar className="h-8 w-8 flex-shrink-0">
+          <AvatarFallback className="text-xs">
+            {getInitials(activity.actor)}
+          </AvatarFallback>
+        </Avatar>
+        <span className="text-sm flex-1">
+          <span className="font-medium text-foreground">{activity.actor}</span>{" "}
+          <span className="text-muted-foreground">
+            {activity.action}{" "}
+            {activity.objectType && <>{activity.objectType}: </>}
+          </span>
+          {activity.url ? (
+            <a
+              href={activity.url}
+              className="font-medium underline text-foreground hover:opacity-80"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {activity.target}
+            </a>
+          ) : (
+            <span className="font-medium text-foreground">{activity.target}</span>
+          )}
         </span>
-        {activity.url ? (
-          <a
-            href={activity.url}
-            className="font-medium underline text-foreground hover:opacity-80"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {activity.target}
-          </a>
-        ) : (
-          <span className="font-medium text-foreground">{activity.target}</span>
-        )}
-      </span>
+      </div>
     )
   }
 
@@ -216,7 +241,7 @@ export function UnifiedActivitySection({
           </div>
         ) : (
           displayedActivities.map((activity) => (
-            <div key={`${activity.type}-${activity.id}`} className="flex items-start justify-between py-1 px-3">
+            <div key={`${activity.type}-${activity.id}`} className="flex items-center justify-between py-1 px-3">
               <div className="flex-1">{formatActivityText(activity)}</div>
               <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
                 {activity.timestamp}

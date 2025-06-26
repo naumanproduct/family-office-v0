@@ -14,6 +14,7 @@ import {
   LayoutGridIcon,
   ListIcon,
   TableIcon,
+  FileIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -31,6 +32,8 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
+import { RecordListItem } from "@/components/shared/record-list-item"
+import { RecordCard } from "@/components/shared/record-card"
 
 // Function to get context-specific notes based on task title
 export function getContextualNotes(taskTitle?: string) {
@@ -387,208 +390,104 @@ export function NoteContent({
       </div>
 
       {viewMode === "table" && (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last Modified</TableHead>
-                  <TableHead>Author</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
+        <div className="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12"></TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Author</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {notes.map((note) => (
+                <TableRow 
+                  key={note.id} 
+                  className="cursor-pointer hover:bg-muted/50" 
+                  onClick={() => handleNoteSelect(note)}
+                >
+                  <TableCell className="w-12">
+                    <FileIcon className="h-4 w-4 text-muted-foreground" />
+                  </TableCell>
+                  <TableCell className="font-medium text-sm">{note.title}</TableCell>
+                  <TableCell className="text-sm">{note.author}</TableCell>
+                  <TableCell className="text-sm">{note.date || new Date(note.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                          <DotsHorizontalIcon className="h-4 w-4" />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleNoteSelect(note);
+                        }}>
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {notes.map((note) => (
-                  <TableRow 
-                    key={note.id} 
-                    className="cursor-pointer hover:bg-muted/50" 
-                    onClick={() => handleNoteSelect(note)}
-                  >
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{note.title}</div>
-                        <div className="text-sm text-muted-foreground line-clamp-1">{note.content}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>{note.date || new Date(note.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {note.lastModified || 
-                        (note.updatedAt && new Date(note.updatedAt).toLocaleDateString())}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <UserIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>{note.author}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {note.tags?.slice(0, 2).map((tag: string) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {note.tags?.length > 2 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{note.tags.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                            <DotsHorizontalIcon className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            handleNoteSelect(note);
-                          }}>
-                            View
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>Share</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       {viewMode === "list" && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="space-y-4">
-              {notes.map((note) => (
-                <div 
-                  key={note.id} 
-                  className="flex items-center justify-between border-b pb-4 cursor-pointer hover:bg-muted/50 rounded-md p-2"
-                  onClick={() => handleNoteSelect(note)}
-                >
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <h4 className="font-medium">{note.title}</h4>
-                      <div className="text-xs text-muted-foreground">
-                        {note.date || new Date(note.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{note.content}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-wrap gap-1">
-                        {note.tags?.map((tag: string, index: number) => index < 3 && (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {note.tags?.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{note.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <UserIcon className="h-3 w-3 text-muted-foreground" />
-                          <span>{note.author}</span>
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                              <DotsHorizontalIcon className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              handleNoteSelect(note);
-                            }}>
-                              View
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Share</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="divide-y">
+          {notes.map((note) => (
+            <RecordListItem
+              key={note.id}
+              title={note.title}
+              primaryMetadata={note.tags ? note.tags.map((tag: string) => (
+                <Badge key={tag} variant="outline">{tag}</Badge>
+              )) : []}
+              secondaryMetadata={{
+                left: note.author || "",
+                right: note.date || new Date(note.createdAt).toLocaleDateString()
+              }}
+              onClick={() => handleNoteSelect(note)}
+              actions={[
+                { label: "View", onClick: () => handleNoteSelect(note) },
+                { label: "Edit", onClick: () => {} },
+                { label: "Delete", onClick: () => {}, variant: "destructive" as const },
+              ]}
+              leadingElement={<FileIcon className="h-4 w-4 text-muted-foreground" />}
+            />
+          ))}
+        </div>
       )}
 
       {viewMode === "card" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {notes.map((note) => (
-            <Card key={note.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleNoteSelect(note)}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-base">{note.title}</h4>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1 mb-3">{note.content}</p>
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {note.tags?.map((tag: string, index: number) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>{note.date || new Date(note.createdAt).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <UserIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>{note.author}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                        <DotsHorizontalIcon className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation();
-                        handleNoteSelect(note);
-                      }}>
-                        View
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Share</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardContent>
-            </Card>
+            <RecordCard
+              key={note.id}
+              title={note.title}
+              primaryMetadata={note.tags ? note.tags.map((tag: string) => (
+                <Badge key={tag} variant="outline">{tag}</Badge>
+              )) : []}
+              secondaryMetadata={{
+                left: note.author || "",
+                right: note.date || new Date(note.createdAt).toLocaleDateString()
+              }}
+              onClick={() => handleNoteSelect(note)}
+              actions={[
+                { label: "View", onClick: () => handleNoteSelect(note) },
+                { label: "Edit", onClick: () => {} },
+                { label: "Delete", onClick: () => {}, variant: "destructive" as const },
+              ]}
+              leadingElement={<FileIcon className="h-4 w-4 text-muted-foreground" />}
+            />
           ))}
         </div>
       )}

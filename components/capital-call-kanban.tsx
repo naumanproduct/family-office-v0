@@ -339,7 +339,7 @@ function CapitalCallCard({
     ],
     people: [
       { id: 1, name: "Alex Johnson", role: "Investor Relations" },
-      { id: 2, name: "Jamie Lee", role: "Portfolio Manager" },
+      { id: 2, name: "Jamie Lee", role: "Investment Director" },
     ],
     opportunities: [
       { id: 1, name: `${capitalCall.fundName} – Follow-on Round`, type: "Opportunity" },
@@ -377,7 +377,7 @@ function CapitalCallCard({
         title: `Update capital schedule – ${capitalCall.callNumber}`,
         priority: "Medium",
         status: "pending",
-        assignee: "Finance Team",
+        assignee: "Michael Chen",
         dueDate: capitalCall.dueDate,
         description: "Reflect the new call in the fund's capital schedule.",
         relatedTo: { type: "Capital Call", name: capitalCall.fundName },
@@ -395,7 +395,7 @@ function CapitalCallCard({
     ];
 
     const meetings = [
-      { id: 1, title: "Internal review", date: capitalCall.noticeDate, time: "9:00 AM", status: "Scheduled", attendees: ["You", "Finance Team"] },
+      { id: 1, title: "Internal review", date: capitalCall.noticeDate, time: "9:00 AM", status: "Scheduled", attendees: ["You", "Michael Chen"] },
       { id: 2, title: "Investor Q&A", date: capitalCall.dueDate, time: "11:00 AM", status: "Planned", attendees: ["Investor Relations"] },
     ];
 
@@ -405,7 +405,7 @@ function CapitalCallCard({
 
     const contacts = [
       { id: 1, name: "Alex Johnson", role: "Investor Relations", email: "alex@fund.com", phone: "+1 (555) 123-0000" },
-      { id: 2, name: "Jamie Lee", role: "Fund Manager", email: "jamie@fund.com", phone: "+1 (555) 123-1111" },
+      { id: 2, name: "Jamie Lee", role: "Investment Director", email: "jamie@fund.com", phone: "+1 (555) 123-1111" },
     ];
 
     const dataMap: Record<string, any[]> = { tasks, notes, emails, meetings, files, contacts };

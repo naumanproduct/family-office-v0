@@ -161,7 +161,7 @@ export function InvestmentsView() {
                 title: "Update IRR model",
                 priority: "Medium",
                 status: "pending",
-                assignee: "Analyst Team",
+                assignee: "Sarah Johnson",
                 dueDate: "2024-08-20",
                 description: "Incorporate latest actuals into return model.",
               },

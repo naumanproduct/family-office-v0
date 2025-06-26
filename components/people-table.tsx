@@ -490,18 +490,14 @@ function ContactNameCell({ contact }: { contact: Contact }) {
         <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
-              <AvatarImage
-                src={contact.avatar || "/placeholder.svg"}
-                alt={`${contact.firstName} ${contact.lastName}`}
-              />
               <AvatarFallback>
                 {contact.firstName.charAt(0)}
                 {contact.lastName.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <span className="font-medium">
+            <div className="font-medium">
               {contact.firstName} {contact.lastName}
-            </span>
+            </div>
           </div>
         </Button>
       }
@@ -796,7 +792,7 @@ function getContactTabData(activeTab: string, contact: Contact) {
           id: 1,
           name: "Investment_Agreement.pdf",
           size: "2.4 MB",
-          uploadedBy: "Legal Team",
+          uploadedBy: "Jessica Martinez",
           uploadedDate: "2 days ago",
           type: "pdf",
           description: "Original investment agreement and terms.",
@@ -807,7 +803,7 @@ function getContactTabData(activeTab: string, contact: Contact) {
         {
           id: 1,
           name: "Sarah Johnson",
-          role: "Portfolio Manager",
+          role: "Investment Director",
           email: "sarah.johnson@company.com",
           phone: "+1 (555) 123-4567",
           department: "Investments",

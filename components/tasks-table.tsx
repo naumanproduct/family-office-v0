@@ -84,7 +84,7 @@ const tasksData = [
     title: "Legal Document Review",
     priority: "Medium",
     status: "pending",
-    assignee: "Legal Team",
+    assignee: "Jessica Martinez",
     dueDate: "Next week",
     description: "Review partnership agreement for Global Ventures",
     relatedTo: { type: "Entity", name: "Global Ventures LLC" },

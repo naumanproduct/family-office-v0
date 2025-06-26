@@ -417,7 +417,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
           title: "Due Diligence Review",
           date: "2024-02-15",
           time: "2:00 PM",
-          attendees: ["Legal Team", "Investment Team"],
+          attendees: ["Jessica Martinez", "Sarah Johnson"],
           status: "Scheduled",
         },
         {
@@ -477,7 +477,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
           size: "5.8 MB",
           type: "Archive",
           uploadedDate: "2024-02-05",
-          uploadedBy: "Legal Team",
+          uploadedBy: "Jessica Martinez",
         },
       ]
     case "team":
@@ -499,7 +499,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
         {
           id: 3,
           name: "Mike Wilson",
-          role: "Portfolio Manager",
+          role: "Investment Director",
           email: "mike.wilson@company.com",
           phone: "+1 (555) 345-6789",
         },

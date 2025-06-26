@@ -347,7 +347,7 @@ function getLiabilityTabData(activeTab: string, liability: Liability) {
           id: 1,
           name: "Loan_Agreement.pdf",
           size: "3.2 MB",
-          uploadedBy: "Legal Team",
+          uploadedBy: "Jessica Martinez",
           uploadedDate: "1 week ago",
           type: "pdf",
           description: "Original loan agreement and terms.",
@@ -388,7 +388,7 @@ function LiabilityActivityContent({ liability }: { liability: Liability }) {
     {
       id: 1,
       type: "payment",
-      actor: "Finance Team",
+      actor: "Robert Kim",
       action: "processed payment for",
       target: liability.name,
       timestamp: "1 week ago",

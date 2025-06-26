@@ -42,6 +42,8 @@ import { MasterDrawer } from "@/components/master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { Label } from "@/components/ui/label"
 import { DocumentViewer } from "@/components/document-viewer"
+import { RecordListItem } from "@/components/shared/record-list-item"
+import { RecordCard } from "@/components/shared/record-card"
 
 // Function to get context-specific files based on task title
 export function getContextualFiles(taskTitle?: string) {
@@ -136,7 +138,7 @@ export function getContextualFiles(taskTitle?: string) {
         fileSize: "245 KB",
         size: "245 KB",
         uploadedAt: "2023-06-01T11:30:00Z",
-        uploadedBy: "Finance Team",
+        uploadedBy: "Robert Kim",
         uploadedDate: "4 months ago",
         category: "Template",
         tags: ["template", "calculations", "pro-rata"],
@@ -160,7 +162,7 @@ export function getContextualFiles(taskTitle?: string) {
         fileSize: "1.2 MB",
         size: "1.2 MB",
         uploadedAt: "2023-09-15T08:45:00Z",
-        uploadedBy: "IT Department",
+        uploadedBy: "David Park",
         uploadedDate: "1 month ago",
         category: "Documentation",
         tags: ["guide", "lp portal", "capital accounts"],
@@ -727,176 +729,110 @@ export function FileContent({
       </div>
 
       {viewMode === "table" && (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>File</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Uploaded</TableHead>
-                  <TableHead>Uploaded By</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fileData.map((file) => (
-                  <TableRow key={file.id}>
-                    <TableCell>
-                      <div 
-                        className="flex items-center gap-3 cursor-pointer"
-                        onClick={() => handleFileSelect(file)}
-                      >
-                        {getFileIcon(file.fileType || file.type)}
-                        <div>
-                          <div className="font-medium">{file.title || file.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {file.fileName || file.name} • {file.fileSize || file.size}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{file.fileSize || file.size}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">
-                        {(file.fileType || file.type || "FILE").toUpperCase()}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</TableCell>
-                    <TableCell>{file.uploadedBy}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <DotsHorizontalIcon className="h-4 w-4" />
-                            <span className="sr-only">Open menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <DownloadIcon className="mr-2 h-4 w-4" />
-                            Download
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleFileSelect(file)}>
-                            View
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>Share</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {viewMode === "list" && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="space-y-4">
+        <div className="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12"></TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Uploaded By</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Size</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {fileData.map((file) => (
-                <div key={file.id} className="flex items-center justify-between border-b pb-4 rounded-md p-2">
-                  <div 
-                    className="flex items-center gap-3 cursor-pointer"
-                    onClick={() => handleFileSelect(file)}
-                  >
-                    {getFileIcon(file.fileType || file.type)}
-                    <div>
-                      <div className="font-medium">{file.title || file.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {file.fileName || file.name} • {file.fileSize || file.size}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Uploaded {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()} by {file.uploadedBy}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {(file.fileType || file.type || "FILE").toUpperCase()}
-                    </Badge>
+                <TableRow 
+                  key={file.id} 
+                  className="cursor-pointer hover:bg-muted/50" 
+                  onClick={() => handleFileSelect(file)}
+                >
+                  <TableCell className="w-12">
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                  </TableCell>
+                  <TableCell className="font-medium text-sm">{file.name || file.title}</TableCell>
+                  <TableCell className="text-sm">{file.uploadedBy}</TableCell>
+                  <TableCell className="text-sm">{file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-sm">{file.fileSize || file.size}</TableCell>
+                  <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
                           <DotsHorizontalIcon className="h-4 w-4" />
                           <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <DownloadIcon className="mr-2 h-4 w-4" />
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleFileSelect(file)}>
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleFileSelect(file);
+                        }}>
                           View
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Share</DropdownMenuItem>
+                        <DropdownMenuItem>Download</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
-                </div>
+                  </TableCell>
+                </TableRow>
               ))}
-            </div>
-          </CardContent>
-        </Card>
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {viewMode === "list" && (
+        <div className="divide-y">
+          {fileData.map((file) => (
+            <RecordListItem
+              key={file.id}
+              title={file.name || file.title}
+              primaryMetadata={[
+                <Badge key="size" variant="outline">
+                  {file.size || file.fileSize}
+                </Badge>
+              ]}
+              secondaryMetadata={{
+                left: file.uploadedBy,
+                right: file.uploadedDate || file.date
+              }}
+              onClick={() => handleFileSelect(file)}
+              actions={[
+                { label: "View", onClick: () => handleFileSelect(file) },
+                { label: "Download", onClick: () => {} },
+                { label: "Delete", onClick: () => {}, variant: "destructive" as const },
+              ]}
+              leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
+            />
+          ))}
+        </div>
       )}
 
       {viewMode === "card" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {fileData.map((file) => (
-            <Card key={file.id}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div 
-                    className="flex-1 cursor-pointer"
-                    onClick={() => handleFileSelect(file)}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      {getFileIcon(file.fileType || file.type)}
-                      <h4 className="font-medium text-base">{file.title || file.name}</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {file.fileName || file.name} • {file.fileSize || file.size}
-                    </p>
-                    <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground">
-                      <p>Uploaded: {file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</p>
-                      <p>By: {file.uploadedBy}</p>
-                      {file.description && <p className="line-clamp-2">{file.description}</p>}
-                    </div>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <DotsHorizontalIcon className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <DownloadIcon className="mr-2 h-4 w-4" />
-                        Download
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleFileSelect(file)}>
-                        View
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Share</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardContent>
-            </Card>
+            <RecordCard
+              key={file.id}
+              title={file.name || file.title}
+              primaryMetadata={[
+                <Badge key="size" variant="outline">
+                  {file.size || file.fileSize}
+                </Badge>
+              ]}
+              secondaryMetadata={{
+                left: file.uploadedBy,
+                right: file.uploadedDate || file.date
+              }}
+              onClick={() => handleFileSelect(file)}
+              actions={[
+                { label: "View", onClick: () => handleFileSelect(file) },
+                { label: "Download", onClick: () => {} },
+                { label: "Delete", onClick: () => {}, variant: "destructive" as const },
+              ]}
+              leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
+            />
           ))}
         </div>
       )}

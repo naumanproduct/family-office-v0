@@ -26,13 +26,167 @@ import {
   FileTextIcon,
   ClipboardCheckIcon,
   UploadIcon,
-  BarChartIcon
+  BarChartIcon,
+  ActivityIcon,
+  TrendingUpIcon,
+  ChevronDownIcon,
 } from "lucide-react"
-import { ActivityItem } from "@/components/shared/unified-activity-section"
-import { HomeActivityFeed } from "@/components/home-activity-feed"
+import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 import Link from "next/link"
 
+// Generate global activity data
+const generateGlobalActivities = (): ActivityItem[] => {
+  const now = new Date()
+  const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString()
+  const daysAgo = (days: number) => new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString()
+  
+  return [
+    {
+      id: 1,
+      type: "task_create",
+      objectType: "task",
+      actor: "You",
+      action: "created a new",
+      target: "Review Q1 Fund Statement",
+      url: "/tasks/1",
+      timestamp: "2 hours ago",
+      date: hoursAgo(2),
+    },
+    {
+      id: 2,
+      type: "investment_update",
+      objectType: "investment",
+      actor: "Jessica Liu",
+      action: "updated performance data for",
+      target: "Blackstone Real Estate Income Trust",
+      url: "/investments/2",
+      timestamp: "3 hours ago",
+      date: hoursAgo(3),
+    },
+    {
+      id: 3,
+      type: "file_upload",
+      objectType: "file",
+      actor: "Michael Chen",
+      action: "uploaded",
+      target: "March 2024 Capital Call Notice.pdf",
+      url: "/documents/3",
+      timestamp: "5 hours ago",
+      date: hoursAgo(5),
+    },
+    {
+      id: 4,
+      type: "note_create",
+      objectType: "note",
+      actor: "Sarah Johnson",
+      action: "created a",
+      target: "Due Diligence Summary - TechFlow",
+      url: "/notes/4",
+      timestamp: "6 hours ago",
+      date: hoursAgo(6),
+    },
+    {
+      id: 5,
+      type: "meeting_schedule",
+      objectType: "meeting",
+      actor: "Emily Watson",
+      action: "scheduled a",
+      target: "Investment Committee Review",
+      url: "/meetings/5",
+      timestamp: "8 hours ago",
+      date: hoursAgo(8),
+    },
+    {
+      id: 6,
+      type: "entity_update",
+      objectType: "entity",
+      actor: "Jessica Martinez",
+      action: "updated ownership structure for",
+      target: "Family Trust LLC",
+      url: "/entities/6",
+      timestamp: "1 day ago",
+      date: daysAgo(1),
+    },
+    {
+      id: 7,
+      type: "opportunity_move",
+      objectType: "opportunity",
+      actor: "Thomas Wong",
+      action: "moved to due diligence",
+      target: "Databricks Series H",
+      url: "/opportunities/7",
+      timestamp: "1 day ago",
+      date: daysAgo(1),
+    },
+    {
+      id: 8,
+      type: "task_complete",
+      objectType: "task",
+      actor: "Robert Kim",
+      action: "completed",
+      target: "Reconcile Q4 Capital Accounts",
+      url: "/tasks/8",
+      timestamp: "2 days ago",
+      date: daysAgo(2),
+    },
+    {
+      id: 9,
+      type: "company_add",
+      objectType: "company",
+      actor: "David Park",
+      action: "added new portfolio",
+      target: "NeoBank Technologies",
+      url: "/companies/9",
+      timestamp: "2 days ago",
+      date: daysAgo(2),
+    },
+    {
+      id: 10,
+      type: "email_send",
+      objectType: "email",
+      actor: "You",
+      action: "sent",
+      target: "LP Quarterly Update - Q1 2024",
+      url: "/emails/10",
+      timestamp: "3 days ago",
+      date: daysAgo(3),
+    },
+  ]
+}
+
+// Mock comments for global feed
+const generateGlobalComments = (): ActivityItem[] => {
+  const now = new Date()
+  const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 60 * 60 * 1000).toISOString()
+  
+  return [
+    {
+      id: 101,
+      type: "comment",
+      actor: "Sarah Johnson",
+      action: "commented",
+      target: "",
+      content: "Great progress on the Q1 reporting. The fund performance looks strong across all portfolios.",
+      timestamp: "4 hours ago",
+      date: hoursAgo(4),
+    },
+    {
+      id: 102,
+      type: "comment",
+      actor: "Michael Chen",
+      action: "commented",
+      target: "",
+      content: "FYI - The capital call notices need to go out by end of week. I've updated the wire instructions.",
+      timestamp: "7 hours ago",
+      date: hoursAgo(7),
+    },
+  ]
+}
+
 export default function Home() {
+  const [globalActivities] = React.useState(generateGlobalActivities())
+  const [globalComments] = React.useState(generateGlobalComments())
+  
   // Get time of day for personalized greeting
   const getTimeBasedGreeting = () => {
     const hour = new Date().getHours()
@@ -41,102 +195,155 @@ export default function Home() {
     return "Good evening"
   }
 
+  const handleCommentSubmit = (comment: string) => {
+    console.log("New comment added:", comment)
+    // In a real app, this would add the comment to the global feed
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex-1 space-y-4 p-4 md:p-6 pt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight">{getTimeBasedGreeting()}, Gordon</h1>
-              <p className="text-muted-foreground text-sm mt-0.5">Here's what's happening across your family office</p>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-8" asChild>
-                <Link href="/tasks">
-                  <PlusIcon className="h-3.5 w-3.5 mr-1" />
-                  <span>New Task</span>
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8" asChild>
-                <Link href="/notes">
-                  <FileTextIcon className="h-3.5 w-3.5 mr-1" />
-                  <span>New Note</span>
-                </Link>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8" asChild>
-                <Link href="/documents">
-                  <UploadIcon className="h-3.5 w-3.5 mr-1" />
-                  <span>Upload</span>
-                </Link>
-              </Button>
-            </div>
-          </div>
-          
-          {/* Activity Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-            <Card className="bg-card">
-              <CardContent className="p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-0.5">New Tasks</p>
-                  <p className="text-2xl font-semibold">12</p>
-                </div>
-                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                  <ClipboardCheckIcon className="h-4 w-4 text-primary" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card">
-              <CardContent className="p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-0.5">Documents Added</p>
-                  <p className="text-2xl font-semibold">8</p>
-                </div>
-                <div className="h-9 w-9 rounded-full bg-blue-500/10 flex items-center justify-center">
-                  <FileTextIcon className="h-4 w-4 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card">
-              <CardContent className="p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-0.5">Meetings Scheduled</p>
-                  <p className="text-2xl font-semibold">3</p>
-                </div>
-                <div className="h-9 w-9 rounded-full bg-green-500/10 flex items-center justify-center">
-                  <UsersIcon className="h-4 w-4 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card">
-              <CardContent className="p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-0.5">Notes Created</p>
-                  <p className="text-2xl font-semibold">15</p>
-                </div>
-                <div className="h-9 w-9 rounded-full bg-amber-500/10 flex items-center justify-center">
-                  <FileTextIcon className="h-4 w-4 text-amber-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between py-2 px-4 space-y-0">
-                <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
-                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                  <RefreshCwIcon className="h-3.5 w-3.5 mr-1" />
-                  Refresh
+        <div className="flex-1">
+          {/* Main content with centered layout */}
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            {/* Header section */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight">{getTimeBasedGreeting()}, Gordon</h1>
+                <p className="text-muted-foreground mt-1">Here's what's happening across your family office</p>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/tasks">
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    New Task
+                  </Link>
                 </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/notes">
+                    <FileTextIcon className="h-4 w-4 mr-2" />
+                    New Note
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/documents">
+                    <UploadIcon className="h-4 w-4 mr-2" />
+                    Upload
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            
+            {/* Activity Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground">Tasks Today</p>
+                      <p className="text-2xl font-bold mt-1">12</p>
+                      <p className="text-xs text-muted-foreground mt-1">+3 from yesterday</p>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <ClipboardCheckIcon className="h-6 w-6 text-primary" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground">New Documents</p>
+                      <p className="text-2xl font-bold mt-1">8</p>
+                      <p className="text-xs text-muted-foreground mt-1">This week</p>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                      <FileTextIcon className="h-6 w-6 text-blue-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground">Active Deals</p>
+                      <p className="text-2xl font-bold mt-1">5</p>
+                      <p className="text-xs text-muted-foreground mt-1">2 in due diligence</p>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                      <TrendingUpIcon className="h-6 w-6 text-green-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-muted-foreground">Team Activity</p>
+                      <p className="text-2xl font-bold mt-1">32</p>
+                      <p className="text-xs text-muted-foreground mt-1">Actions today</p>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                      <ActivityIcon className="h-6 w-6 text-amber-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Global Activity Feed */}
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ActivityIcon className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle className="text-lg">Global Activity</CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <FilterIcon className="h-4 w-4 mr-2" />
+                          Filter
+                          <ChevronDownIcon className="h-4 w-4 ml-2" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[200px]">
+                        <DropdownMenuLabel>Filter by type</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuCheckboxItem checked>All Activities</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem>Tasks</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem>Documents</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem>Investments</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem>Meetings</DropdownMenuCheckboxItem>
+                        <DropdownMenuCheckboxItem>Notes</DropdownMenuCheckboxItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button variant="ghost" size="sm">
+                      <RefreshCwIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="px-4 py-3">
-                <HomeActivityFeed />
+              <CardContent className="p-0">
+                {/* Using UnifiedActivitySection for consistency with drawers */}
+                <div className="py-4">
+                  <UnifiedActivitySection 
+                    activities={globalActivities}
+                    comments={globalComments}
+                    showHeader={true}
+                    onCommentSubmit={handleCommentSubmit}
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>

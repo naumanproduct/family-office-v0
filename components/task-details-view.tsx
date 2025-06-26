@@ -99,7 +99,7 @@ export function TaskDetailsView({
           description: "Determine each limited partner's share based on their commitment percentage",
           status: "To Do",
           priority: "High",
-          assignee: "Finance Team",
+          assignee: "Michael Chen",
           dueDate: "2023-05-18",
         },
         {
@@ -108,7 +108,7 @@ export function TaskDetailsView({
           description: "Record the capital call amounts in each LP's account ledger",
           status: "To Do",
           priority: "High",
-          assignee: "Fund Administrator",
+          assignee: "Robert Kim",
           dueDate: "2023-05-19",
         },
         {
@@ -117,7 +117,7 @@ export function TaskDetailsView({
           description: "Create formal call notices with payment instructions and wire details",
           status: "To Do",
           priority: "Medium",
-          assignee: "Investor Relations",
+          assignee: "Emily Watson",
           dueDate: "2023-05-20",
         },
         {
@@ -126,7 +126,7 @@ export function TaskDetailsView({
           description: "Reflect new called capital amounts and remaining uncalled commitments",
           status: "To Do",
           priority: "Medium",
-          assignee: "Finance Team",
+          assignee: "Michael Chen",
           dueDate: "2023-05-21",
         },
         {
@@ -135,7 +135,7 @@ export function TaskDetailsView({
           description: "Ensure capital schedule matches the fund's accounting records",
           status: "To Do",
           priority: "High",
-          assignee: "Fund Controller",
+          assignee: "Robert Kim",
           dueDate: "2023-05-22",
         },
       ] : [

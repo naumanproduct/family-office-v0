@@ -348,7 +348,7 @@ function DealCard({
         {
           id: 2,
           title: "Competitor analysis summary",
-          author: "Analyst Team",
+          author: "Sarah Johnson",
           date: "2024-06-20",
           tags: ["analysis"],
         },
@@ -386,7 +386,7 @@ function DealCard({
           date: "2024-07-02",
           time: "2:00 PM",
           status: "Planned",
-          attendees: ["Finance Team", "Founders"],
+          attendees: ["Michael Chen", "Founders"],
         },
       ]
 
