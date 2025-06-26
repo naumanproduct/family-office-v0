@@ -12,13 +12,15 @@ import {
   PlusIcon,
   CircleIcon,
   ClockIcon,
-  DotIcon as DotsHorizontalIcon,
+  MoreVerticalIcon,
   ChevronLeftIcon,
   UserRoundIcon,
   BuildingIcon,
   LayoutIcon,
   DollarSignIcon,
   TrendingUpIcon,
+  Zap,
+  Sparkles,
 } from "lucide-react"
 
 import {
@@ -340,7 +342,7 @@ export function TaskDetailsView({
         {subtasks.map((subtask: any) => (
           <div
             key={subtask.id}
-            className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
+            className="group rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div
@@ -373,9 +375,10 @@ export function TaskDetailsView({
                 </Button>
                 <div className="flex-1">
                   <div
-                    className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
+                    className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""} flex items-center gap-2`}
                   >
                     {subtask.title}
+                    {task.hasAIAssistance && <Sparkles className="h-3 w-3 text-purple-500" />}
                   </div>
                   <div className="flex items-center gap-4 mt-1">
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -409,10 +412,10 @@ export function TaskDetailsView({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <DotsHorizontalIcon className="h-3 w-3" />
+                    <MoreVerticalIcon className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -914,10 +917,11 @@ export function TaskDetailsView({
                 />
               ) : (
                 <h2
-                  className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
+                  className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1 flex items-center gap-2"
                   onClick={() => setIsEditingTitle(true)}
                 >
                   {taskTitle || "Untitled"}
+                  {task.isWorkflowTask && <Zap className="h-4 w-4 text-yellow-500" />}
                 </h2>
               )}
             </div>

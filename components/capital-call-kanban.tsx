@@ -31,6 +31,8 @@ import {
   UsersIcon,
   FolderIcon,
   BuildingIcon,
+  Zap,
+  Sparkles,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -371,6 +373,8 @@ function CapitalCallCard({
         dueDate: capitalCall.dueDate,
         description: `Draft and review the capital call notice for ${capitalCall.fundName}.`,
         relatedTo: { type: "Capital Call", name: capitalCall.fundName },
+        isWorkflowTask: true,
+        hasAIAssistance: true,
       },
       {
         id: 2,
@@ -381,6 +385,8 @@ function CapitalCallCard({
         dueDate: capitalCall.dueDate,
         description: "Reflect the new call in the fund's capital schedule.",
         relatedTo: { type: "Capital Call", name: capitalCall.fundName },
+        isWorkflowTask: true,
+        hasAIAssistance: true,
       },
     ];
 

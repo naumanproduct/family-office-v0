@@ -2,7 +2,7 @@
 import {
   CalendarIcon,
   ChevronDownIcon,
-  DotIcon as DotsHorizontalIcon,
+  MoreVerticalIcon,
   SearchIcon,
   SortAscIcon,
   TagIcon,
@@ -11,6 +11,8 @@ import {
   FileTextIcon,
   DownloadIcon,
   FileIcon,
+  ChevronLeftIcon,
+  ExpandIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -188,7 +190,7 @@ export function DocumentsTable() {
             </TableHeader>
             <TableBody>
               {documents.map((document) => (
-                <TableRow key={document.id}>
+                <TableRow key={document.id} className="group">
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {getFileIcon(document.fileType)}
@@ -251,8 +253,8 @@ export function DocumentsTable() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <DotsHorizontalIcon className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreVerticalIcon className="h-4 w-4" />
                           <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>

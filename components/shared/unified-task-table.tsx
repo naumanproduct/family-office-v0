@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreVerticalIcon, Zap } from "lucide-react"
+import { MoreVerticalIcon, Zap, Sparkles } from "lucide-react"
 import { RecordCard } from "./record-card"
 import { RecordListItem } from "./record-list-item"
 
@@ -27,6 +27,8 @@ export type Task = {
   dueDate: string
   description?: string
   relatedTo?: { type: string; name: string }
+  isWorkflowTask?: boolean
+  hasAIAssistance?: boolean
 }
 
 export interface TaskTableProps {
@@ -122,23 +124,18 @@ function TableView({
           {data.map((item) => (
             <TableRow 
               key={item.id} 
-              className="cursor-pointer hover:bg-muted/50"
+              className={`group ${onTaskClick ? 'cursor-pointer hover:bg-muted/50' : ''}`} 
               onClick={() => onTaskClick?.(item)}
             >
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <div className="group relative flex items-center justify-center">
-                  <Checkbox 
-                    className="h-4 w-4 rounded-full border-2 group-hover:border-primary/70 transition-colors"
-                    checked={item.status.toLowerCase() === "completed"} 
-                    onCheckedChange={() => handleTaskStatusToggle(window.event as unknown as React.MouseEvent, item)}
-                  />
-                </div>
+              <TableCell className="w-12" onClick={(e) => e.stopPropagation()}>
+                <Checkbox />
               </TableCell>
               <TableCell className={`font-medium text-sm ${item.status.toLowerCase() === "completed" ? "line-through text-muted-foreground" : ""}`}>
-                {item.title.includes("Update capital schedule") ? (
+                {item.title.includes("Update capital schedule") || item.isWorkflowTask ? (
                   <span className="flex items-center gap-1">
                     {item.title}
                     <Zap className="h-3 w-3 text-yellow-500" />
+                    {item.hasAIAssistance && <Sparkles className="h-3 w-3 text-purple-500" />}
                   </span>
                 ) : (
                   item.title
@@ -163,7 +160,12 @@ function TableView({
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" 
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <MoreVerticalIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -250,10 +252,11 @@ function CardView({
           <RecordCard
             key={item.id}
             title={
-              item.title.includes("Update capital schedule") ? (
+              item.title.includes("Update capital schedule") || item.isWorkflowTask ? (
                 <span className="flex items-center gap-1">
                   {item.title}
                   <Zap className="h-3 w-3 text-yellow-500" />
+                  {item.hasAIAssistance && <Sparkles className="h-3 w-3 text-purple-500" />}
                 </span>
               ) : (
                 item.title
@@ -333,10 +336,11 @@ function ListView({
           <RecordListItem
             key={item.id}
             title={
-              item.title.includes("Update capital schedule") ? (
+              item.title.includes("Update capital schedule") || item.isWorkflowTask ? (
                 <span className="flex items-center gap-1">
                   {item.title}
                   <Zap className="h-3 w-3 text-yellow-500" />
+                  {item.hasAIAssistance && <Sparkles className="h-3 w-3 text-purple-500" />}
                 </span>
               ) : (
                 item.title

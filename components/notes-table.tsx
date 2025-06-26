@@ -1,13 +1,26 @@
 "use client"
 import {
+  FileIcon,
+  PlusIcon,
+  MoreVerticalIcon,
   CalendarIcon,
   ChevronDownIcon,
-  DotIcon as DotsHorizontalIcon,
   SearchIcon,
   SortAscIcon,
-  TagIcon,
   UserIcon,
+  TagIcon,
+  ChevronLeftIcon,
+  ExpandIcon,
+  FileTextIcon,
+  MailIcon,
+  FolderIcon,
+  CheckCircleIcon,
+  UsersIcon,
   BuildingIcon,
+  UserRoundIcon,
+  LayoutIcon,
+  DollarSignIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -157,7 +170,7 @@ export function NotesTable({ onNoteSelect }: { onNoteSelect?: (note: any) => voi
               {notes.map((note) => (
                 <TableRow
                   key={note.id}
-                  className="cursor-pointer hover:bg-muted/50"
+                  className="group cursor-pointer hover:bg-muted/50"
                   onClick={() => onNoteSelect?.(note)}
                 >
                   <TableCell>
@@ -209,8 +222,8 @@ export function NotesTable({ onNoteSelect }: { onNoteSelect?: (note: any) => voi
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <DotsHorizontalIcon className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreVerticalIcon className="h-4 w-4" />
                           <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>

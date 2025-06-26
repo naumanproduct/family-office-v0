@@ -45,7 +45,7 @@ export function RecordCard({
 }: RecordCardProps) {
   return (
     <Card
-      className={`cursor-pointer hover:bg-muted/50 h-full`}
+      className={`group cursor-pointer hover:bg-muted/50 h-full`}
       onClick={onClick}
     >
       <CardContent className="p-4">
@@ -71,7 +71,7 @@ export function RecordCard({
               {actions.length > 0 && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                       <MoreVerticalIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>

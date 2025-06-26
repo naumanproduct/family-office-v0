@@ -3,7 +3,7 @@ import { useState } from "react"
 import {
   CalendarIcon,
   ChevronDownIcon,
-  DotIcon as DotsHorizontalIcon,
+  MoreVerticalIcon,
   SearchIcon,
   SortAscIcon,
   TagIcon,
@@ -447,7 +447,7 @@ export function NoteContent({
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                            <DotsHorizontalIcon className="h-4 w-4" />
+                            <MoreVerticalIcon className="h-4 w-4" />
                             <span className="sr-only">Open menu</span>
                           </Button>
                         </DropdownMenuTrigger>
@@ -512,7 +512,7 @@ export function NoteContent({
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                              <DotsHorizontalIcon className="h-4 w-4" />
+                              <MoreVerticalIcon className="h-4 w-4" />
                               <span className="sr-only">Open menu</span>
                             </Button>
                           </DropdownMenuTrigger>
@@ -569,7 +569,7 @@ export function NoteContent({
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                        <DotsHorizontalIcon className="h-4 w-4" />
+                        <MoreVerticalIcon className="h-4 w-4" />
                         <span className="sr-only">Open menu</span>
                       </Button>
                     </DropdownMenuTrigger>
