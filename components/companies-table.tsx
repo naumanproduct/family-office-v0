@@ -601,7 +601,7 @@ function getCompanyTabData(activeTab: string, company: Company) {
           id: 1,
           name: "Investment_Agreement.pdf",
           size: "2.4 MB",
-          uploadedBy: "Legal Team",
+          uploadedBy: "Jessica Martinez",
           uploadedDate: "2 days ago",
           type: "pdf",
           description: "Original investment agreement and terms.",
@@ -612,7 +612,7 @@ function getCompanyTabData(activeTab: string, company: Company) {
         {
           id: 1,
           name: "Sarah Johnson",
-          role: "Portfolio Manager",
+          role: "Investment Director",
           email: "sarah.johnson@company.com",
           phone: "+1 (555) 123-4567",
           department: "Investments",

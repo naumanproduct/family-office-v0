@@ -210,7 +210,7 @@ function AssetNameCell({ asset }: { asset: Asset }) {
         ]
       case "team":
         return [
-          { id: 1, name: "Sarah Johnson", role: "Portfolio Manager", email: "sarah@fund.com" },
+          { id: 1, name: "Sarah Johnson", role: "Investment Director", email: "sarah@fund.com" },
         ]
       default:
         return []
@@ -512,7 +512,7 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
       { id: 1, name: asset.entity, type: "Fund" },
     ],
     people: [
-      { id: 1, name: "Sarah Johnson", role: "Portfolio Manager" },
+      { id: 1, name: "Sarah Johnson", role: "Investment Director" },
       { id: 2, name: "Tom Becker", role: "Analyst" },
     ],
     opportunities: [
@@ -525,7 +525,7 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
     {
       id: 1,
       type: "valuation",
-      actor: "Analyst Team",
+      actor: "Michael Chen",
       action: "updated valuation",
       target: "Current Value",
       objectType: "field",
@@ -536,7 +536,7 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
     {
       id: 2,
       type: "meeting",
-      actor: "Portfolio Manager",
+      actor: "Thomas Wong",
       action: "held board meeting",
       target: "Q2 Performance Review",
       objectType: "meeting",

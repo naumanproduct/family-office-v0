@@ -39,11 +39,14 @@ const statusOptions = [
 
 const assigneeOptions = [
   { value: "you", label: "You" },
-  { value: "john-smith", label: "John Smith" },
+  { value: "michael-chen", label: "Michael Chen" },
   { value: "sarah-johnson", label: "Sarah Johnson" },
-  { value: "michael-brown", label: "Michael Brown" },
-  { value: "legal-team", label: "Legal Team" },
-  { value: "compliance-team", label: "Compliance Team" },
+  { value: "jessica-martinez", label: "Jessica Martinez" },
+  { value: "david-park", label: "David Park" },
+  { value: "emily-watson", label: "Emily Watson" },
+  { value: "thomas-wong", label: "Thomas Wong" },
+  { value: "robert-kim", label: "Robert Kim" },
+  { value: "lisa-zhang", label: "Lisa Zhang" },
 ]
 
 const entityOptions = [

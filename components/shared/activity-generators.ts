@@ -166,7 +166,7 @@ export function generateEntityActivities() : ActivityItem[] {
       id: 1,
       type: "report_file",
       objectType: "file",
-      actor: "Legal Team",
+      actor: "Jessica Martinez",
       action: "filed annual report",
       target: "2024 Annual Report.pdf",
       url: "/files/6101",
@@ -176,7 +176,7 @@ export function generateEntityActivities() : ActivityItem[] {
     {
       id: 2,
       type: "ownership_update",
-      actor: "Corporate Secretary",
+      actor: "Emily Watson",
       action: "updated ownership structure",
       objectType: "chart",
       target: "Ownership Chart v2",

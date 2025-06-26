@@ -40,7 +40,7 @@ interface DiligenceItem {
 }
 
 const initialItems: DiligenceItem[] = [
-  { id: "1", dealName: "TechFlow Series A", phase: "Financial", owner: "Analyst Team", dueDate: "2024-06-30", percentComplete: 40, stage: "not-started" },
+  { id: "1", dealName: "TechFlow Series A", phase: "Financial", owner: "David Park", dueDate: "2024-06-30", percentComplete: 40, stage: "not-started" },
   { id: "2", dealName: "GreenEnergy Seed", phase: "Legal", owner: "External Counsel", dueDate: "2024-07-05", percentComplete: 20, stage: "in-progress" },
   { id: "3", dealName: "FinanceAI Series A", phase: "Technical", owner: "CTO Office", dueDate: "2024-07-10", percentComplete: 70, stage: "pending-approval" },
   { id: "4", dealName: "HealthTech Series B", phase: "Commercial", owner: "Partner", dueDate: "2024-06-20", percentComplete: 100, stage: "completed" },
