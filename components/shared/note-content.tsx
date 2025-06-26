@@ -35,6 +35,18 @@ import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { RecordListItem } from "@/components/shared/record-list-item"
 import { RecordCard } from "@/components/shared/record-card"
 
+// Define the Note type without priority
+type Note = {
+  id: string
+  title: string
+  topic: string
+  createdAt: string
+  updatedAt: string
+  date: string
+  lastModified: string
+  author: string
+}
+
 // Function to get context-specific notes based on task title
 export function getContextualNotes(taskTitle?: string) {
   // Main task: Update capital schedule – Call #4
@@ -43,41 +55,32 @@ export function getContextualNotes(taskTitle?: string) {
       {
         id: "NOTE-4001",
         title: "Capital Call #4 Fund Parameters",
-        content: "Call #4 is for $15M to fund the acquisition of TechVantage Solutions. This represents 15% of total commitments. Fund has $65M called to date (65%), with $35M remaining uncalled capital (35%).",
+        topic: "Call #4 is for $15M to fund the acquisition of TechVantage Solutions. This represents 15% of total commitments. Fund has $65M called to date (65%), with $35M remaining uncalled capital (35%).",
         createdAt: "2023-10-18T09:30:00Z",
         updatedAt: "2023-10-18T14:45:00Z",
         date: "4 days ago",
         lastModified: "4 days ago",
         author: "Michael Chen",
-        priority: "High",
-        tags: ["capital call", "fund management", "call #4"],
-        relatedTo: { type: "Fund", name: "Growth Fund III" },
       },
       {
         id: "NOTE-4002",
         title: "TechVantage Acquisition Terms",
-        content: "TechVantage Solutions acquisition - $28M total consideration with $15M from this capital call and $13M from existing fund reserves. Deal expected to close on November 15th pending final regulatory approvals.",
+        topic: "TechVantage Solutions acquisition - $28M total consideration with $15M from this capital call and $13M from existing fund reserves. Deal expected to close on November 15th pending final regulatory approvals.",
         createdAt: "2023-10-17T11:20:00Z",
         updatedAt: "2023-10-17T15:10:00Z",
         date: "5 days ago",
         lastModified: "5 days ago",
         author: "Sarah Johnson",
-        priority: "Medium",
-        tags: ["acquisition", "techvantage", "investment"],
-        relatedTo: { type: "Company", name: "TechVantage Solutions" },
       },
       {
         id: "NOTE-4003",
         title: "Capital Call #4 Timeline",
-        content: "Capital Call #4 schedule: Capital call notices to be issued by Oct 25th, payment due by Nov 10th (15 day period), with company acquisition closing scheduled for Nov 15th.",
+        topic: "Capital Call #4 schedule: Capital call notices to be issued by Oct 25th, payment due by Nov 10th (15 day period), with company acquisition closing scheduled for Nov 15th.",
         createdAt: "2023-10-16T14:15:00Z",
         updatedAt: "2023-10-16T16:20:00Z",
         date: "6 days ago",
         lastModified: "6 days ago",
         author: "Emily Watson",
-        priority: "High",
-        tags: ["timeline", "capital call", "call #4"],
-        relatedTo: { type: "Fund", name: "Growth Fund III" },
       },
     ];
   }
@@ -88,28 +91,22 @@ export function getContextualNotes(taskTitle?: string) {
       {
         id: "NOTE-4101",
         title: "LP Commitment Percentages",
-        content: "Current LP commitment breakdown: Apex Capital Partners (25%), Summit Ventures LLC (20%), Ridge Family Office (15%), Meridian Holdings (40%). Updated after Ridge's secondary sale of 5% to Meridian last quarter.",
+        topic: "Current LP commitment breakdown: Apex Capital Partners (25%), Summit Ventures LLC (20%), Ridge Family Office (15%), Meridian Holdings (40%). Updated after Ridge's secondary sale of 5% to Meridian last quarter.",
         createdAt: "2023-10-19T10:30:00Z",
         updatedAt: "2023-10-19T14:45:00Z",
         date: "3 days ago",
         lastModified: "3 days ago",
         author: "Michael Chen",
-        priority: "High",
-        tags: ["LP allocation", "commitments", "pro-rata"],
-        relatedTo: { type: "Fund", name: "Growth Fund III" },
       },
       {
         id: "NOTE-4102",
         title: "Call #4 Calculation Notes",
-        content: "For Call #4 ($15M), calculated amounts are: Apex Capital ($3.75M), Summit Ventures ($3M), Ridge Family ($2.25M), Meridian Holdings ($6M). Confirmed with accounting department on October 19.",
+        topic: "For Call #4 ($15M), calculated amounts are: Apex Capital ($3.75M), Summit Ventures ($3M), Ridge Family ($2.25M), Meridian Holdings ($6M). Confirmed with accounting department on October 19.",
         createdAt: "2023-10-19T13:15:00Z",
         updatedAt: "2023-10-19T16:20:00Z",
         date: "3 days ago",
         lastModified: "3 days ago",
         author: "David Park",
-        priority: "Medium",
-        tags: ["calculations", "call #4", "allocation"],
-        relatedTo: { type: "Fund", name: "Growth Fund III" },
       }
     ];
   }
@@ -120,28 +117,22 @@ export function getContextualNotes(taskTitle?: string) {
       {
         id: "NOTE-4201",
         title: "Capital Account Update Process",
-        content: "Remember to update both committed capital percentage and the called capital tracking in the LP portal. System requires update to fund data first, then individual LP records.",
+        topic: "Remember to update both committed capital percentage and the called capital tracking in the LP portal. System requires update to fund data first, then individual LP records.",
         createdAt: "2023-10-20T09:45:00Z",
         updatedAt: "2023-10-20T11:30:00Z",
         date: "2 days ago",
         lastModified: "2 days ago",
         author: "Jessica Martinez",
-        priority: "Medium",
-        tags: ["capital accounts", "system", "process"],
-        relatedTo: { type: "System", name: "LP Portal" },
       },
       {
         id: "NOTE-4202",
         title: "Historical Capital Account Data",
-        content: "Call #1: $10M (10%), Call #2: $25M (25%), Call #3: $30M (30%), Current Call #4: $15M (15%). Total called after this call will be $80M (80%).",
+        topic: "Call #1: $10M (10%), Call #2: $25M (25%), Call #3: $30M (30%), Current Call #4: $15M (15%). Total called after this call will be $80M (80%).",
         createdAt: "2023-10-20T14:20:00Z",
         updatedAt: "2023-10-20T16:40:00Z",
         date: "2 days ago",
         lastModified: "2 days ago",
         author: "Michael Chen",
-        priority: "High",
-        tags: ["historical data", "capital calls", "tracking"],
-        relatedTo: { type: "Fund", name: "Growth Fund III" },
       }
     ];
   }
@@ -152,28 +143,22 @@ export function getContextualNotes(taskTitle?: string) {
       {
         id: "NOTE-4301",
         title: "Call Notice Template Updates",
-        content: "Using updated capital call template approved by legal in September. New template includes expanded wire instructions section and digital signature capability.",
+        topic: "Using updated capital call template approved by legal in September. New template includes expanded wire instructions section and digital signature capability.",
         createdAt: "2023-10-21T08:15:00Z",
         updatedAt: "2023-10-21T10:20:00Z",
         date: "Yesterday",
         lastModified: "Yesterday",
         author: "Emily Watson",
-        priority: "Medium",
-        tags: ["template", "call notices", "legal"],
-        relatedTo: { type: "Document", name: "Capital Call Template" },
       },
       {
         id: "NOTE-4302",
         title: "LP Special Instructions",
-        content: "Remember Meridian Holdings requires 2 business days advance notice before formal call notice. Ridge Family Office needs notice copied to their new administrative email: admin@ridgefamily.com",
+        topic: "Remember Meridian Holdings requires 2 business days advance notice before formal call notice. Ridge Family Office needs notice copied to their new administrative email: admin@ridgefamily.com",
         createdAt: "2023-10-21T13:40:00Z",
         updatedAt: "2023-10-21T15:10:00Z",
         date: "Yesterday",
         lastModified: "Yesterday",
         author: "Sarah Johnson",
-        priority: "High",
-        tags: ["LP instructions", "process", "call notices"],
-        relatedTo: { type: "Process", name: "LP Communication Protocol" },
       }
     ];
   }
@@ -184,28 +169,22 @@ export function getContextualNotes(taskTitle?: string) {
       {
         id: "NOTE-4401",
         title: "Fund Tracker Spreadsheet Location",
-        content: "Latest version of commitment tracker is in the shared drive: Finance/Fund III/Capital Calls/Tracker_v3.4.xlsx - Make sure to back up before updating.",
+        topic: "Latest version of commitment tracker is in the shared drive: Finance/Fund III/Capital Calls/Tracker_v3.4.xlsx - Make sure to back up before updating.",
         createdAt: "2023-10-22T09:10:00Z",
         updatedAt: "2023-10-22T09:30:00Z",
         date: "Today",
         lastModified: "Today",
         author: "Michael Chen",
-        priority: "Medium",
-        tags: ["tracker", "spreadsheet", "commitments"],
-        relatedTo: { type: "Document", name: "Fund Commitment Tracker" },
       },
       {
         id: "NOTE-4402",
         title: "New Reporting Requirements",
-        content: "After Call #4, we'll exceed 75% called capital threshold, triggering quarterly reporting requirements to Investment Committee on uncalled capital plans.",
+        topic: "After Call #4, we'll exceed 75% called capital threshold, triggering quarterly reporting requirements to Investment Committee on uncalled capital plans.",
         createdAt: "2023-10-22T11:45:00Z",
         updatedAt: "2023-10-22T14:15:00Z",
         date: "Today",
         lastModified: "Today",
         author: "Thomas Wong",
-        priority: "High",
-        tags: ["reporting", "investment committee", "requirements"],
-        relatedTo: { type: "Process", name: "IC Reporting" },
       }
     ];
   }
@@ -216,28 +195,22 @@ export function getContextualNotes(taskTitle?: string) {
       {
         id: "NOTE-4501",
         title: "Previous Reconciliation Issues",
-        content: "Last reconciliation for Call #3 found a $50K discrepancy in Apex Capital's account. Issue was due to FX conversion rate difference. Confirm with accounting on any similar watch items for Call #4.",
+        topic: "Last reconciliation for Call #3 found a $50K discrepancy in Apex Capital's account. Issue was due to FX conversion rate difference. Confirm with accounting on any similar watch items for Call #4.",
         createdAt: "2023-10-22T15:30:00Z",
         updatedAt: "2023-10-22T17:20:00Z",
         date: "Today",
         lastModified: "Today",
         author: "Jessica Martinez",
-        priority: "High",
-        tags: ["reconciliation", "previous issues", "accounting"],
-        relatedTo: { type: "Process", name: "Capital Reconciliation" },
       },
       {
         id: "NOTE-4502",
         title: "Reconciliation Checklist",
-        content: "Steps for reconciliation: 1) Compare LP management system data vs. accounting system, 2) Verify total called amounts match fund admin records, 3) Check individual LP records match capital accounts, 4) Confirm percentages align with LP agreements, 5) Document and resolve any discrepancies.",
+        topic: "Steps for reconciliation: 1) Compare LP management system data vs. accounting system, 2) Verify total called amounts match fund admin records, 3) Check individual LP records match capital accounts, 4) Confirm percentages align with LP agreements, 5) Document and resolve any discrepancies.",
         createdAt: "2023-10-22T16:15:00Z",
         updatedAt: "2023-10-22T16:45:00Z",
         date: "Today",
         lastModified: "Today",
         author: "David Park",
-        priority: "Medium",
-        tags: ["process", "checklist", "reconciliation"],
-        relatedTo: { type: "Process", name: "Capital Reconciliation" },
       }
     ];
   }
@@ -249,34 +222,37 @@ export function getContextualNotes(taskTitle?: string) {
 }
 
 // Default mock data, can be overridden by passing data prop
-const defaultNotes = [
+const defaultNotes: Note[] = [
   {
-    id: "NOTE-1234",
-    title: "Investment Thesis for Acme Corp",
-    content: "Acme Corp shows strong potential for growth in the renewable energy sector...",
-    createdAt: "2023-05-15T10:30:00Z",
-    updatedAt: "2023-05-15T14:45:00Z",
+    id: "NOTE-1001",
+    title: "Investment Committee Meeting Notes",
+    topic: "Discussed the new venture capital opportunity with TechFlow Inc. The committee agreed to proceed with due diligence. Key concerns include market competition and burn rate.",
+    createdAt: "2023-10-20T10:30:00Z",
+    updatedAt: "2023-10-20T14:45:00Z",
     date: "2 days ago",
-    lastModified: "12 hours ago",
-    author: "John Smith",
-    priority: "High",
-    tags: ["investment", "research"],
-    relatedTo: { type: "Company", name: "Acme Corp" },
+    lastModified: "2 days ago",
+    author: "Sarah Johnson",
   },
   {
-    id: "NOTE-1235",
-    title: "Legal Review of Merger Documents",
-    content: "The merger documents for XYZ Holdings require additional scrutiny in section 5.3...",
-    createdAt: "2023-05-14T09:15:00Z",
-    updatedAt: "2023-05-14T16:20:00Z",
+    id: "NOTE-1002",
+    title: "Tax Planning Strategy 2024",
+    topic: "Review of tax optimization strategies for the family office. Considering establishing a new trust structure for international investments.",
+    createdAt: "2023-10-19T09:15:00Z",
+    updatedAt: "2023-10-19T16:20:00Z",
     date: "3 days ago",
     lastModified: "3 days ago",
-    author: "Sarah Johnson",
-    priority: "Medium",
-    tags: ["legal", "merger"],
-    relatedTo: { type: "Entity", name: "XYZ Holdings" },
+    author: "Michael Chen",
   },
-  // More notes can be added here
+  {
+    id: "NOTE-1003",
+    title: "Portfolio Rebalancing Analysis",
+    topic: "Q3 portfolio performance exceeded expectations. Recommend increasing allocation to emerging markets by 5% and reducing fixed income exposure.",
+    createdAt: "2023-10-18T13:45:00Z",
+    updatedAt: "2023-10-18T15:30:00Z",
+    date: "4 days ago",
+    lastModified: "4 days ago",
+    author: "You",
+  },
 ]
 
 export type NoteContentProps = {
@@ -312,15 +288,12 @@ export function NoteContent({
     const newNote = {
       id: `NOTE-${Math.floor(1000 + Math.random() * 9000)}`,
       title: "New Note",
-      content: "Click to edit this note...",
+      topic: "Click to edit this note...",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       date: "Just now",
       lastModified: "Just now",
       author: "You",
-      priority: "Medium",
-      tags: ["new"],
-      relatedTo: { type: "", name: "" },
     };
     
     // Add the new note to the beginning of the array
@@ -353,32 +326,6 @@ export function NoteContent({
               <DropdownMenuCheckboxItem>Date (oldest first)</DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem>Title (A-Z)</DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem>Title (Z-A)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Priority (High-Low)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Priority (Low-High)</DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8">
-                <TagIcon className="mr-2 h-3.5 w-3.5" />
-                Filter
-                <ChevronDownIcon className="ml-2 h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs">Priority</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem>High</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Medium</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Low</DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs">Tags</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem>Investment</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Legal</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Research</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Meeting</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Financial</DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />
@@ -448,9 +395,7 @@ export function NoteContent({
             <RecordListItem
               key={note.id}
               title={note.title}
-              primaryMetadata={note.tags ? note.tags.map((tag: string) => (
-                <Badge key={tag} variant="outline">{tag}</Badge>
-              )) : []}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: note.author || "",
                 right: note.date || new Date(note.createdAt).toLocaleDateString()
@@ -473,9 +418,7 @@ export function NoteContent({
             <RecordCard
               key={note.id}
               title={note.title}
-              primaryMetadata={note.tags ? note.tags.map((tag: string) => (
-                <Badge key={tag} variant="outline">{tag}</Badge>
-              )) : []}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: note.author || "",
                 right: note.date || new Date(note.createdAt).toLocaleDateString()

@@ -75,10 +75,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { AddEntityDialog } from "./add-entity-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { MasterDetailsPanel } from "./shared/master-details-panel"
-import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
+import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { generateEntityActivities } from "@/components/shared/activity-generators"
+import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
 
 export const entitySchema = z.object({
   id: z.number(),
@@ -658,21 +659,31 @@ function EntityActivityContent() {
 function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; isFullScreen?: boolean }) {
   // Mock data for related items
   const relatedData = {
-    investments: [
-      { id: 1, name: "Tech Investments LP", type: "Investment Vehicle" },
-      { id: 2, name: "Growth Fund Series A", type: "Fund Investment" },
+    companies: [
+      { id: 1, name: "Portfolio Holdings Inc", type: "Portfolio Company" },
+      { id: 2, name: "Tech Ventures LLC", type: "Operating Company" },
     ],
     people: [
       { id: 1, name: entity.managerController, role: "Manager" },
       { id: 2, name: "Jane Smith", role: "Director" },
     ],
-    companies: [
-      { id: 1, name: "Portfolio Holdings Inc", type: "Portfolio Company" },
-      { id: 2, name: "Tech Ventures LLC", type: "Operating Company" },
-    ],
     entities: entity.parentEntity 
-      ? [{ id: 1, name: entity.parentEntity, type: "Parent Entity" }] 
-      : [],
+      ? [
+          { id: 1, name: entity.parentEntity, type: "Parent Entity" },
+          { id: 2, name: "Investment Holdings LLC", type: "Subsidiary" },
+        ] 
+      : [
+          { id: 1, name: "Investment Holdings LLC", type: "Subsidiary" },
+          { id: 2, name: "Operations Entity Corp", type: "Related Entity" },
+        ],
+    investments: [
+      { id: 1, name: "Tech Investments LP", type: "Investment Vehicle" },
+      { id: 2, name: "Growth Fund Series A", type: "Fund Investment" },
+    ],
+    opportunities: [
+      { id: 1, name: "New Fund Formation", status: "Planning" },
+      { id: 2, name: "Strategic Partnership", status: "Evaluating" },
+    ],
   };
 
   // Basic fields for main section
@@ -732,7 +743,20 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
       value: entity.notes,
     },
   ];
-  
+
+  // Use standard section builder
+  const sections = buildStandardDetailSections({
+    infoTitle: "Entity Information",
+    infoIcon: <LandmarkIcon className="h-4 w-4 text-muted-foreground" />,
+    infoFields: isFullScreen || basicFields.length <= 7 ? extendedFields : basicFields,
+    companies: relatedData.companies,
+    people: relatedData.people,
+    entities: relatedData.entities,
+    investments: relatedData.investments,
+    opportunities: relatedData.opportunities,
+    hideWhenEmpty: false,
+  });
+
   // Navigation handler for related records
   const navigateToRecord = (recordType: string, id: number) => {
     console.log(`Navigate to ${recordType} record with ID: ${id}`);
@@ -750,64 +774,6 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
     console.log(`Unlink ${sectionId} record with ID ${id} from ${entity.entityName}`);
     // This would handle removal of the relationship
   };
-
-  // Define all sections for the details panel
-  const sections: DetailSection[] = [
-    {
-      id: "Details",
-      title: "Entity Information",
-      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
-      fields: isFullScreen || basicFields.length <= 7 ? extendedFields : basicFields,
-    },
-    {
-      id: "Compliance",
-      title: "Compliance Information",
-      icon: <ClipboardIcon className="h-4 w-4 text-muted-foreground" />,
-      fields: [
-        { 
-          label: "Upcoming Deadlines", 
-          value: entity.upcomingDeadlines.length > 0
-            ? entity.upcomingDeadlines.join(", ")
-            : "No upcoming deadlines"
-        },
-        { label: "Jurisdiction", value: entity.jurisdiction }
-      ],
-      hideWhenEmpty: entity.upcomingDeadlines.length === 0,
-    },
-    {
-      id: "People",
-      title: "Key People",
-      icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.people
-      },
-    },
-    {
-      id: "Companies",
-      title: "Related Companies",
-      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.companies
-      },
-    },
-    {
-      id: "Entities",
-      title: "Related Entities",
-      icon: <LandmarkIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.entities
-      },
-      hideWhenEmpty: relatedData.entities.length === 0,
-    },
-    {
-      id: "Investments",
-      title: "Investments",
-      icon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.investments
-      },
-    },
-  ];
 
   return (
     <UnifiedDetailsPanel
@@ -937,7 +903,7 @@ const columns: ColumnDef<Entity>[] = [
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+          <Button variant="ghost" className="flex h-8 w-8 p-0 data-[state=open]:bg-muted opacity-0 group-hover:opacity-100 transition-opacity">
             <MoreVerticalIcon className="h-4 w-4" />
             <span className="sr-only">Open menu</span>
           </Button>
@@ -1108,7 +1074,7 @@ export function EntitiesTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="h-12 cursor-pointer hover:bg-muted/50"
+                  className="group h-12 cursor-pointer hover:bg-muted/50"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-2">

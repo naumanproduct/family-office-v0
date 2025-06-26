@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -122,7 +121,7 @@ function TableView({
           {data.map((item) => (
             <TableRow 
               key={item.id} 
-              className="cursor-pointer hover:bg-muted/50"
+              className="group cursor-pointer hover:bg-muted/50"
               onClick={() => onTaskClick?.(item)}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
@@ -146,24 +145,27 @@ function TableView({
               </TableCell>
               <TableCell className="text-sm">{item.dueDate}</TableCell>
               <TableCell>
-                <Badge
-                  variant={
-                    item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
-                  }
-                >
+                <span className={`text-sm ${
+                  item.priority === "High" ? "text-red-600" : 
+                  item.priority === "Medium" ? "text-yellow-600" : 
+                  "text-green-600"
+                }`}>
                   {item.priority}
-                </Badge>
+                </span>
               </TableCell>
               <TableCell className="text-sm">{item.assignee}</TableCell>
               <TableCell>
-                <Badge variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
+                <span className={`text-sm ${
+                  item.status.toLowerCase() === "completed" ? "text-green-600" : 
+                  "text-muted-foreground"
+                }`}>
                   {item.status}
-                </Badge>
+                </span>
               </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                       <MoreVerticalIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -227,24 +229,19 @@ function CardView({
           { label: "Delete", onClick: () => {}, variant: "destructive" as const },
         ];
         
-        // Create primary metadata (badges)
-        const primaryMetadata = [
-          <Badge
-            key="priority"
-            variant={
-              item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
-            }
-            className="mr-1"
-          >
-            {item.priority}
-          </Badge>,
-          <Badge 
-            key="status"
-            variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}
-          >
-            {item.status}
-          </Badge>
-        ];
+        // Define secondary metadata (plain text info)
+        const secondaryMetadata = {
+          left: (
+            <div className="flex items-center gap-2">
+              <span>{item.assignee}</span>
+              <span className="text-muted-foreground">•</span>
+              <span>{item.status}</span>
+              <span className="text-muted-foreground">•</span>
+              <span>{item.priority}</span>
+            </div>
+          ),
+          right: item.dueDate
+        };
         
         return (
           <RecordCard
@@ -260,11 +257,8 @@ function CardView({
               )
             }
             titleStatus={item.status.toLowerCase() === "completed" ? "completed" : "normal"}
-            primaryMetadata={primaryMetadata}
-            secondaryMetadata={{
-              left: item.assignee,
-              right: item.dueDate
-            }}
+            primaryMetadata={[]}
+            secondaryMetadata={secondaryMetadata}
             onClick={() => onTaskClick?.(item)}
             actions={taskActions}
             leadingElement={taskCheckbox}
@@ -310,24 +304,19 @@ function ListView({
           { label: "Delete", onClick: () => {}, variant: "destructive" as const },
         ];
         
-        // Create primary metadata (badges)
-        const primaryMetadata = [
-          <Badge
-            key="priority"
-            variant={
-              item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"
-            }
-            className="mr-1"
-          >
-            {item.priority}
-          </Badge>,
-          <Badge 
-            key="status"
-            variant={item.status.toLowerCase() === "completed" ? "secondary" : "outline"}
-          >
-            {item.status}
-          </Badge>
-        ];
+        // Define secondary metadata (plain text info)
+        const secondaryMetadata = {
+          left: (
+            <div className="flex items-center gap-2">
+              <span>{item.assignee}</span>
+              <span className="text-muted-foreground">•</span>
+              <span>{item.status}</span>
+              <span className="text-muted-foreground">•</span>
+              <span>{item.priority}</span>
+            </div>
+          ),
+          right: item.dueDate
+        };
         
         return (
           <RecordListItem
@@ -343,11 +332,8 @@ function ListView({
               )
             }
             titleStatus={item.status.toLowerCase() === "completed" ? "completed" : "normal"}
-            primaryMetadata={primaryMetadata}
-            secondaryMetadata={{
-              left: item.assignee,
-              right: item.dueDate
-            }}
+            primaryMetadata={[]}
+            secondaryMetadata={secondaryMetadata}
             onClick={() => onTaskClick?.(item)}
             actions={taskActions}
             leadingElement={taskCheckbox}

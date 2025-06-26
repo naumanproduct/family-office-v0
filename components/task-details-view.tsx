@@ -13,12 +13,15 @@ import {
   CircleIcon,
   ClockIcon,
   ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
   UserRoundIcon,
   BuildingIcon,
   LayoutIcon,
   DollarSignIcon,
   TrendingUpIcon,
   MoreVerticalIcon,
+  Sparkles,
 } from "lucide-react"
 
 import {
@@ -173,6 +176,19 @@ export function TaskDetailsView({
   const [newSubtaskTitle, setNewSubtaskTitle] = React.useState("")
   const [isAddingSubtask, setIsAddingSubtask] = React.useState(false)
   const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
+
+  // State for which sections are open
+  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+    subtasks: true,
+  })
+
+  // Toggle section open/closed
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }))
+  }
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
@@ -352,177 +368,180 @@ export function TaskDetailsView({
   const renderSubtasksSection = () => {
     if (parentTask || hideSubtasks) return null;
 
+    // Helper function to check if a subtask has AI workflow
+    const hasAIWorkflow = (title: string) => {
+      return title.includes("Calculate pro-rata allocation") ||
+             title.includes("Update LP capital accounts") ||
+             title.includes("Generate capital call notices") ||
+             title.includes("Update fund commitment tracker") ||
+             title.includes("Reconcile capital schedule");
+    };
+
     return (
-      <div className="space-y-2 mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-sm font-medium">Subtasks ({subtasks.length})</h4>
-          <Button variant="outline" size="sm" onClick={() => setIsAddingSubtask(true)} className="h-8">
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Add Subtask
-          </Button>
-        </div>
-
-        {subtasks.map((subtask: any) => (
-          <div
-            key={subtask.id}
-            className="group rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
+      <div className="mb-8">
+        <div className="rounded-lg border border-muted overflow-hidden">
+          <button
+            onClick={() => toggleSection('subtasks')}
+            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors group/section"
           >
-            <div className="flex items-start">
-              {/* Leading checkbox */}
-              <div className="mt-0.5 mr-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-5 w-5 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
-                    // Update the local state
-                    handleSubtaskStatusChange(subtask.id, newStatus)
-                    
-                    // If this is a task in the global context (has numeric ID), update global state too
-                    if (tasksContext && !isNaN(Number(subtask.id))) {
-                      tasksContext.updateTaskStatus(Number(subtask.id), newStatus);
-                    }
-                  }}
-                >
-                  {subtask.status === "Completed" ? (
-                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                  ) : subtask.status === "In Progress" ? (
-                    <ClockIcon className="h-4 w-4 text-blue-500" />
-                  ) : (
-                    <CircleIcon className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-              </div>
-
-              <div className="flex-1">
-                {/* Title row with actions */}
-                <div className="flex items-start justify-between">
+            {openSections.subtasks ? (
+              <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
+            )}
+            <CheckSquareIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Subtasks ({subtasks.length})</span>
+            <div className="flex-1" />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAddingSubtask(true);
+              }} 
+              className="h-8 opacity-0 group-hover/section:opacity-100 transition-opacity"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Subtask
+            </Button>
+          </button>
+          
+          {openSections.subtasks && (
+            <div className="px-4 pb-4 pt-1">
+              <div className="space-y-2">
+                {subtasks.map((subtask: any) => (
                   <div
-                    className={`font-medium text-sm cursor-pointer ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
-                    onClick={() => handleSubtaskClick(subtask)}
+                    key={subtask.id}
+                    className="group rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
                   >
-                    {subtask.title}
-                  </div>
-                  
-                  {/* More menu - only visible on hover */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreVerticalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>
-                        Open Details
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
-                        Mark as To Do
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "In Progress")}>
-                        Mark as In Progress
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "Completed")}>
-                        Mark as Completed
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => handleDeleteSubtask(subtask.id)}
-                        className="text-destructive"
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                
-                {/* Secondary metadata row */}
-                <div className="flex justify-between items-center mt-2">
-                  {/* Left side: assignee and badges */}
-                  <div className="flex items-center gap-2">
-                    <div className="text-xs text-muted-foreground">
-                      {subtask.assignee}
+                    <div className="flex items-start">
+                      {/* Leading checkbox */}
+                      <div className="mt-0.5 mr-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-5 w-5 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
+                            // Update the local state
+                            handleSubtaskStatusChange(subtask.id, newStatus)
+                            
+                            // If this is a task in the global context (has numeric ID), update global state too
+                            if (tasksContext && !isNaN(Number(subtask.id))) {
+                              tasksContext.updateTaskStatus(Number(subtask.id), newStatus);
+                            }
+                          }}
+                        >
+                          {subtask.status === "Completed" ? (
+                            <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                          ) : subtask.status === "In Progress" ? (
+                            <ClockIcon className="h-4 w-4 text-blue-500" />
+                          ) : (
+                            <CircleIcon className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="flex-1">
+                        {/* Title row with actions */}
+                        <div className="flex items-start justify-between">
+                          <div
+                            className={`font-medium text-sm cursor-pointer flex items-center gap-2 ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
+                            onClick={() => handleSubtaskClick(subtask)}
+                          >
+                            {subtask.title}
+                            {hasAIWorkflow(subtask.title) && (
+                              <Sparkles className="h-3.5 w-3.5 text-primary" />
+                            )}
+                          </div>
+                          
+                          {/* More menu - only visible on hover */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreVerticalIcon className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>
+                                Open Details
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
+                                Mark as To Do
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "In Progress")}>
+                                Mark as In Progress
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "Completed")}>
+                                Mark as Completed
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteSubtask(subtask.id)}
+                                className="text-destructive"
+                              >
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        
+                        {/* Secondary metadata row */}
+                        <div className="flex justify-between items-center mt-2">
+                          {/* Left side: assignee, status and priority as text */}
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span>{subtask.assignee}</span>
+                            <span>•</span>
+                            <span>{subtask.status}</span>
+                            <span>•</span>
+                            <span>{subtask.priority}</span>
+                          </div>
+                          
+                          {/* Right side: due date */}
+                          <div className="text-xs text-muted-foreground">
+                            {formatRelativeTime(subtask.dueDate)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <Badge
-                      variant={
-                        subtask.status === "Completed"
-                          ? "default"
-                          : subtask.status === "In Progress"
-                            ? "secondary"
-                            : "outline"
-                      }
-                      className="text-xs"
-                    >
-                      {subtask.status}
-                    </Badge>
-                    <Badge className={`text-xs ${getPriorityColor(subtask.priority)}`}>
-                      {subtask.priority}
-                    </Badge>
                   </div>
-                  
-                  {/* Right side: due date */}
-                  <div className="text-xs text-muted-foreground">
-                    {formatRelativeTime(subtask.dueDate)}
+                ))}
+
+                {/* Add New Subtask */}
+                {isAddingSubtask && (
+                  <div className="rounded-lg border border-muted bg-muted/10 p-3">
+                    <div className="flex items-center gap-2">
+                      <CircleIcon className="h-4 w-4 text-muted-foreground" />
+                      <Input
+                        value={newSubtaskTitle}
+                        onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                        placeholder="Enter subtask title..."
+                        className="flex-1 h-8"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleAddSubtask()
+                          }
+                          if (e.key === "Escape") {
+                            setIsAddingSubtask(false)
+                            setNewSubtaskTitle("")
+                          }
+                        }}
+                        autoFocus
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
-          </div>
-        ))}
-
-        {/* Add New Subtask */}
-        {isAddingSubtask && (
-          <div className="rounded-lg border border-muted bg-muted/10 p-3">
-            <div className="flex items-center gap-2">
-              <CircleIcon className="h-4 w-4 text-muted-foreground" />
-              <Input
-                value={newSubtaskTitle}
-                onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                placeholder="Enter subtask title..."
-                className="flex-1 h-8"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddSubtask()
-                  }
-                  if (e.key === "Escape") {
-                    setIsAddingSubtask(false)
-                    setNewSubtaskTitle("")
-                  }
-                }}
-                autoFocus
-              />
-              <Button size="sm" onClick={handleAddSubtask} className="h-8">
-                Add
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setIsAddingSubtask(false)
-                  setNewSubtaskTitle("")
-                }}
-                className="h-8"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {subtasks.length === 0 && !isAddingSubtask && (
-          <div className="text-center py-6 text-muted-foreground">
-            <CheckSquareIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No subtasks yet</p>
-            <p className="text-xs">Break down this task into smaller steps</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     );
   };
@@ -788,11 +807,18 @@ export function TaskDetailsView({
         },
         {
           label: "Priority",
-          value: <Badge className={getPriorityColor(fieldValues.priority)}>{fieldValues.priority}</Badge>
+          value: <span className={`text-sm ${
+            fieldValues.priority.toLowerCase() === "high" ? "text-red-600" : 
+            fieldValues.priority.toLowerCase() === "medium" ? "text-yellow-600" : 
+            "text-green-600"
+          }`}>{fieldValues.priority}</span>
         },
         {
           label: "Status",
-          value: <Badge className={getStatusColor(fieldValues.status)}>{fieldValues.status}</Badge>
+          value: <span className={`text-sm ${
+            fieldValues.status.toLowerCase() === "completed" ? "text-green-600" : 
+            "text-muted-foreground"
+          }`}>{fieldValues.status}</span>
         },
         {
           label: "Assignee",

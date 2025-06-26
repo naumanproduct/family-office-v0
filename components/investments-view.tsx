@@ -111,6 +111,55 @@ export function InvestmentsView() {
                 },
               ]
 
+              const people = [
+                {
+                  id: 1,
+                  name: "Sarah Johnson",
+                  role: "Lead Partner",
+                },
+                {
+                  id: 2,
+                  name: "Michael Chen",
+                  role: "Investment Manager",
+                },
+              ]
+
+              const entities = [
+                {
+                  id: 1,
+                  name: selectedInvestment.entity || "Family Office Master Fund LP",
+                  type: "Investment Entity",
+                },
+              ]
+
+              const investments = [
+                {
+                  id: 1,
+                  name: "Co-investment Fund II",
+                  amount: "$5M",
+                  status: "Active",
+                },
+                {
+                  id: 2,
+                  name: "Follow-on Investment",
+                  amount: "$2.5M",
+                  status: "Planned",
+                },
+              ]
+
+              const opportunities = [
+                {
+                  id: 1,
+                  name: "Series D Extension",
+                  status: "Under Review",
+                },
+                {
+                  id: 2,
+                  name: "Secondary Sale Opportunity",
+                  status: "Initial Discussion",
+                },
+              ]
+
               // Optional: simple activity feed (can be expanded later)
               const activities = generateInvestmentActivities()
 
@@ -119,6 +168,11 @@ export function InvestmentsView() {
                 infoIcon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
                 infoFields,
                 companies,
+                people,
+                entities,
+                investments,
+                opportunities,
+                hideWhenEmpty: false,
               })
 
               // Stubs – hook up navigation later if needed

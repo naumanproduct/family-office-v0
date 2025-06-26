@@ -97,7 +97,6 @@ export const opportunitySchema = z.object({
   probability: z.number(),
   expectedClose: z.string(),
   lastActivity: z.string(),
-  priority: z.string(),
   status: z.string(),
   description: z.string(),
   fundingRound: z.string(),
@@ -129,7 +128,6 @@ export const opportunitiesData: Opportunity[] = [
     probability: 75,
     expectedClose: "2024-08-15",
     lastActivity: "2 days ago",
-    priority: "High",
     status: "Active",
     description: "Growth stage investment in enterprise software company",
     fundingRound: "Series C",
@@ -157,7 +155,6 @@ export const opportunitiesData: Opportunity[] = [
     probability: 60,
     expectedClose: "2024-07-30",
     lastActivity: "1 week ago",
-    priority: "Medium",
     status: "Active",
     description: "Early stage investment in digital health platform",
     fundingRound: "Seed",
@@ -185,7 +182,6 @@ export const opportunitiesData: Opportunity[] = [
     probability: 30,
     expectedClose: "2024-10-15",
     lastActivity: "3 days ago",
-    priority: "High",
     status: "Active",
     description: "Growth capital for payment processing expansion",
     fundingRound: "Series B",
@@ -213,7 +209,6 @@ export const opportunitiesData: Opportunity[] = [
     probability: 100,
     expectedClose: "2024-06-01",
     lastActivity: "1 month ago",
-    priority: "High",
     status: "Closed",
     description: "Strategic acquisition of AI/ML technology company",
     fundingRound: "Acquisition",
@@ -241,7 +236,6 @@ export const opportunitiesData: Opportunity[] = [
     probability: 45,
     expectedClose: "2024-09-30",
     lastActivity: "5 days ago",
-    priority: "Medium",
     status: "Active",
     description: "Commercial real estate development fund",
     fundingRound: "Fund Investment",
@@ -265,19 +259,6 @@ const getStageColor = (stage: string) => {
       return "bg-green-100 text-green-800"
     case "Closed Lost":
       return "bg-red-100 text-red-800"
-    default:
-      return "bg-gray-100 text-gray-800"
-  }
-}
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "High":
-      return "bg-red-100 text-red-800"
-    case "Medium":
-      return "bg-yellow-100 text-yellow-800"
-    case "Low":
-      return "bg-green-100 text-green-800"
     default:
       return "bg-gray-100 text-gray-800"
   }
@@ -699,7 +680,6 @@ function OpportunityDetailsPanel({
     { label: "Probability", value: `${opportunity.probability}%` },
     { label: "Description", value: opportunity.description },
     { label: "Stage", value: opportunity.stage },
-    { label: "Priority", value: opportunity.priority },
     { label: "Status", value: opportunity.status },
     { label: "Last Activity", value: opportunity.lastActivity },
   ]
@@ -792,13 +772,6 @@ const columns: ColumnDef<Opportunity>[] = [
     accessorKey: "expectedClose",
     header: "Expected Close",
     cell: ({ row }) => <span className="text-sm">{row.original.expectedClose}</span>,
-  },
-  {
-    accessorKey: "priority",
-    header: "Priority",
-    cell: ({ row }) => (
-      <Badge className={`text-xs ${getPriorityColor(row.original.priority)}`}>{row.original.priority}</Badge>
-    ),
   },
   {
     accessorKey: "status",

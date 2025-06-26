@@ -438,7 +438,7 @@ function CapitalCallCard({
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600">
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
                     <MoreVerticalIcon className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>

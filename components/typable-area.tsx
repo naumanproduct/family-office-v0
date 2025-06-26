@@ -20,35 +20,87 @@ export function TypableArea({
   submitLabel = "Add comment",
 }: TypableAreaProps) {
   const [isFocused, setIsFocused] = React.useState(false)
+  const [isExpanded, setIsExpanded] = React.useState(false)
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+  const [shouldShowExpandButton, setShouldShowExpandButton] = React.useState(false)
+
+  // Auto-resize textarea based on content
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      // Reset height to auto to get the correct scrollHeight
+      textareaRef.current.style.height = 'auto'
+      
+      const scrollHeight = textareaRef.current.scrollHeight
+      const maxHeight = 240 // Approximately 10 rows of text
+      
+      // Check if content exceeds max height
+      setShouldShowExpandButton(scrollHeight > maxHeight)
+      
+      // Set height based on expanded state
+      if (isExpanded || isFocused || scrollHeight <= maxHeight) {
+        textareaRef.current.style.height = `${scrollHeight}px`
+      } else {
+        textareaRef.current.style.height = `${maxHeight}px`
+      }
+    }
+  }, [value, isExpanded, isFocused])
 
   const handleSubmit = () => {
     if (onSubmit && value.trim()) {
       onSubmit(value)
       onChange("")
       setIsFocused(false)
+      setIsExpanded(false)
     }
   }
 
   const handleCancel = () => {
     onChange("")
     setIsFocused(false)
+    setIsExpanded(false)
+  }
+
+  const handleToggleExpand = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsExpanded(!isExpanded)
   }
 
   return (
     <div className="space-y-3">
-      <div className="min-h-[100px] p-3 rounded-lg bg-background">
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => {
-            if (!value.trim() && !showButtons) {
-              setIsFocused(false)
-            }
-          }}
-          placeholder={placeholder}
-          className="w-full h-full bg-transparent border-none outline-none resize-none placeholder:text-gray-400 text-sm"
-        />
+      <div className="relative">
+        <div className="min-h-[100px] p-3 rounded-lg bg-background">
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              if (!value.trim() && !showButtons) {
+                setIsFocused(false)
+              }
+            }}
+            placeholder={placeholder}
+            className={`w-full bg-transparent border-none outline-none resize-none placeholder:text-gray-400 text-sm ${
+              !isExpanded && !isFocused && shouldShowExpandButton ? 'overflow-hidden' : 'overflow-hidden'
+            }`}
+            style={{ minHeight: '76px' }} // Approximately 3 lines of text
+          />
+          
+          {/* Gradient overlay when truncated */}
+          {!isExpanded && !isFocused && shouldShowExpandButton && (
+            <div className="absolute bottom-3 left-3 right-3 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+          )}
+        </div>
+        
+        {/* Show all/Show less button */}
+        {shouldShowExpandButton && !isFocused && (
+          <button
+            onClick={handleToggleExpand}
+            className="mt-2 text-sm text-blue-600 hover:text-blue-700 hover:underline focus:outline-none"
+          >
+            {isExpanded ? 'Show less' : 'Show all'}
+          </button>
+        )}
       </div>
 
       {showButtons && isFocused && (

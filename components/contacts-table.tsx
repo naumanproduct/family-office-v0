@@ -416,13 +416,13 @@ function getContactTabData(activeTab: string, contact: Contact) {
           id: 1,
           title: "Initial Contact Notes",
           date: "2 weeks ago",
-          content: `First meeting with ${contact.firstName}. Discussed potential collaboration opportunities.`,
+          topic: `First meeting with ${contact.firstName}. Discussed potential collaboration opportunities.`,
         },
         {
           id: 2,
           title: "Background Information",
           date: "1 month ago",
-          content: `${contact.firstName} previously worked at InnovateTech for 5 years before joining ${contact.company}.`,
+          topic: `${contact.firstName} previously worked at InnovateTech for 5 years before joining ${contact.company}.`,
         },
       ]
     case "meetings":

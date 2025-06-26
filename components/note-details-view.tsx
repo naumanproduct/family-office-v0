@@ -2,30 +2,19 @@
 
 import * as React from "react"
 import {
-  CalendarIcon,
-  UserIcon,
-  AlertTriangleIcon,
   FileTextIcon,
   StickyNoteIcon,
-  InfoIcon,
-  TagIcon,
-  BuildingIcon,
-  UsersIcon,
-  LayoutIcon,
-  DollarSignIcon,
-  TrendingUpIcon,
   ChevronDownIcon,
-  PlusIcon
+  ChevronRightIcon,
+  PlusIcon,
+  EditIcon
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
 import { FileContent } from "@/components/shared/file-content"
-import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
 import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 import { generateNoteActivities } from "@/components/shared/activity-generators"
 import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
@@ -43,47 +32,31 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
   const [activeTab, setActiveTab] = React.useState("details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
-    content: note?.content || "",
-    priority: note?.priority || "Normal",
-    author: note?.author || "",
+    title: note?.title || "Untitled Note",
+    topic: note?.content || "",
+    author: note?.author || "Unknown Author",
     createdAt: note?.createdAt || new Date().toISOString(),
     updatedAt: note?.updatedAt || new Date().toISOString(),
-    tags: note?.tags || [],
-    relatedTo: note?.relatedTo || { type: "", name: "" },
   })
 
   const [noteText, setNoteText] = React.useState("")
   const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
 
-  const tabs = [
-    { id: "details", label: "Details", icon: FileTextIcon },
-    { id: "tasks", label: "Tasks", icon: FileTextIcon },
-    { id: "files", label: "Files", icon: FileTextIcon },
-  ]
+  // State for which sections are open
+  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+    details: true,
+    addNotes: true,
+  })
 
-  // Mock data for related entities
-  const relatedData = {
-    companies: [
-      { id: 1, name: "Acme Corp", type: "Portfolio Company" },
-      { id: 2, name: "TechFlow Inc.", type: "Investment Target" },
-    ],
-    people: [
-      { id: 1, name: "Sarah Johnson", role: "CEO" },
-      { id: 2, name: "Michael Chen", role: "Investment Manager" },
-    ],
-    entities: [
-      { id: 1, name: "Family Trust #1231", type: "Family Trust" },
-      { id: 2, name: "Offshore Holdings LLC", type: "Holding Company" },
-    ],
-    investments: [
-      { id: 1, name: "Series B Round", amount: "$5M" },
-      { id: 2, name: "Real Estate Venture", amount: "$3.2M" },
-    ],
-    opportunities: [
-      { id: 1, name: "Green Energy Fund", status: "In Discussion" },
-      { id: 2, name: "Tech Startup Acquisition", status: "Due Diligence" },
-    ],
-  };
+  // Toggle section open/closed
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }))
+  }
+
+  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
 
   // Mock activities for activity section
   const activities = generateNoteActivities()
@@ -128,160 +101,15 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
     }
   ]
 
-  const getPriorityColor = (priority: string | undefined | null) => {
-    if (!priority) return "bg-gray-100 text-gray-800"
-
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "bg-red-100 text-red-800"
-      case "medium":
-        return "bg-yellow-100 text-yellow-800"
-      case "low":
-        return "bg-green-100 text-green-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const handleFieldEdit = (field: string, value: string) => {
+  const handleFieldEdit = (field: string, value: any) => {
     setFieldValues((prev) => ({ ...prev, [field]: value }))
     setEditingField(null)
   }
-
-  // Mock navigation handler for related records
-  const navigateToRecord = (recordType: string, id: number) => {
-    console.log(`Navigate to ${recordType} record with ID: ${id}`);
-    // This would be implemented to navigate to the record
-  };
-
-  // Mock handler for adding a linked record
-  const handleAddRecord = (sectionId: string) => {
-    console.log(`Add new ${sectionId} record for ${note.title}`);
-    // This would open the appropriate creation dialog
-  };
-
-  // Mock handler for removing a linked record
-  const handleUnlinkRecord = (sectionId: string, id: number) => {
-    console.log(`Unlink ${sectionId} record with ID ${id} from ${note.title}`);
-    // This would handle removal of the relationship
-  };
-
-  // Custom note input component
-  const renderNoteInput = () => {
-    if (hideAddNotes) return null;
-    
-    return (
-      <TypableArea 
-        value={noteText} 
-        onChange={setNoteText} 
-        placeholder="Add notes..." 
-        showButtons={false} 
-      />
-    );
-  };
 
   // Activity content component
   const NoteActivityContent = () => {
     return <UnifiedActivitySection activities={activities} />;
   };
-  
-  // Define all sections for the details panel
-  const sections: DetailSection[] = [
-    {
-      id: "details",
-      title: "Note Details",
-      icon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-      fields: [
-        {
-          label: "Content",
-          value: fieldValues.content,
-        },
-        {
-          label: "Priority",
-          value: <Badge className={getPriorityColor(fieldValues.priority)}>{fieldValues.priority}</Badge>
-        },
-        {
-          label: "Author",
-          value: fieldValues.author,
-        },
-        {
-          label: "Created",
-          value: new Date(fieldValues.createdAt).toLocaleDateString(),
-        },
-        {
-          label: "Updated",
-          value: new Date(fieldValues.updatedAt).toLocaleDateString(),
-        },
-        {
-          label: "Tags",
-          value: (
-            <div className="flex flex-wrap gap-1">
-              {Array.isArray(fieldValues.tags) ? (
-                fieldValues.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))
-              ) : (
-                <Badge variant="secondary" className="text-xs">
-                  {fieldValues.tags}
-                </Badge>
-              )}
-            </div>
-          ),
-        },
-        {
-          label: "Related to",
-          value: (
-            <div className="flex items-center gap-2">
-              <span className="text-sm">{fieldValues.relatedTo?.type || "N/A"}</span>
-              <span className="text-sm font-medium">{fieldValues.relatedTo?.name || "N/A"}</span>
-            </div>
-          ),
-        },
-      ],
-    },
-    {
-      id: "companies",
-      title: "Companies",
-      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.companies
-      },
-    },
-    {
-      id: "people",
-      title: "People",
-      icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.people
-      },
-    },
-    {
-      id: "entities",
-      title: "Entities",
-      icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.entities
-      },
-    },
-    {
-      id: "investments",
-      title: "Investments",
-      icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.investments
-      },
-    },
-    {
-      id: "opportunities",
-      title: "Opportunities",
-      icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: relatedData.opportunities
-      },
-    },
-  ];
 
   // Custom content for tabs other than details
   const getTabContent = () => {
@@ -361,15 +189,106 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
 
       {/* Tab Content */}
       {activeTab === "details" ? (
-        <UnifiedDetailsPanel
-          sections={sections}
-          isFullScreen={isFullScreen}
-          onNavigateToRecord={navigateToRecord}
-          onAddRecord={handleAddRecord}
-          onUnlinkRecord={handleUnlinkRecord}
-          activityContent={<NoteActivityContent />}
-          additionalContent={renderNoteInput()}
-        />
+        <div className="flex flex-col flex-1">
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-6 pt-2 pb-6">
+              <div className="space-y-5">
+                {/* Note Details Card */}
+                <div className="rounded-lg border border-muted overflow-hidden">
+                  {/* Note Details Section */}
+                  <div className="group">
+                    <button 
+                      onClick={() => toggleSection('details')}
+                      className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${openSections.details ? 'bg-muted/20' : ''}`}
+                    >
+                      <div className="flex items-center">
+                        {openSections.details ? (
+                          <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
+                        ) : (
+                          <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
+                        )}
+                        <div className="flex items-center gap-2">
+                          <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">Note Details</span>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Section Content */}
+                    {openSections.details && (
+                      <div className="px-3 pb-3 pt-2">
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Topic</Label>
+                            <p className="text-sm flex-1">{fieldValues.topic}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Author</Label>
+                            <p className="text-sm flex-1">{fieldValues.author}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Created</Label>
+                            <p className="text-sm flex-1">{new Date(fieldValues.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Updated</Label>
+                            <p className="text-sm flex-1">{new Date(fieldValues.updatedAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Add Notes Card - Separate */}
+                {!hideAddNotes && (
+                  <div className="rounded-lg border border-muted overflow-hidden">
+                    <div className="group">
+                      <button 
+                        onClick={() => toggleSection('addNotes')}
+                        className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${openSections.addNotes ? 'bg-muted/20' : ''}`}
+                      >
+                        <div className="flex items-center">
+                          {openSections.addNotes ? (
+                            <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
+                          ) : (
+                            <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
+                          )}
+                          <div className="flex items-center gap-2">
+                            <EditIcon className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium text-sm">Notes</span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Section Content */}
+                      {openSections.addNotes && (
+                        <div className="px-5 pb-3 pt-2">
+                          <TypableArea 
+                            value={noteText} 
+                            onChange={setNoteText} 
+                            placeholder="Start typing to add your thoughts..." 
+                            showButtons={false} 
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Activity Section - Fixed at bottom */}
+          {!isFullScreen && (
+            <div className="border-t bg-background">
+              <div className="px-6 py-4">
+                <NoteActivityContent />
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
         <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>
           {getTabContent()}

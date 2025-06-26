@@ -769,8 +769,7 @@ function getContactTabData(activeTab: string, contact: Contact) {
           title: "Investment thesis review",
           date: "3 days ago",
           author: "Emily Davis",
-          content: `Strong performance in ${contact.company} sector. Key growth drivers remain intact.`,
-          tags: ["Investment", "Review"],
+          topic: `Strong performance in ${contact.company} sector. Key growth drivers remain intact.`,
         },
       ]
     case "meetings":

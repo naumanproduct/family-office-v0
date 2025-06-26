@@ -210,11 +210,12 @@ export default function Home() {
         </header>
         <div className="flex-1">
           {/* Main content with centered layout */}
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
             {/* Header section */}
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-12">
               <div>
-                <h1 className="text-3xl font-semibold tracking-tight">{getTimeBasedGreeting()}, Gordon</h1>
+                <h1 className="text-3xl font-semibold tracking-tight text-foreground">{getTimeBasedGreeting()}, Gordon</h1>
+                <p className="text-muted-foreground mt-1">Here's your family office overview</p>
               </div>
               
               <DropdownMenu>
@@ -222,7 +223,7 @@ export default function Home() {
                   <Button className="bg-black hover:bg-black/90 text-white">
                     <PlusIcon className="h-4 w-4 mr-2" />
                     New
-                    <ChevronDownIcon className="h-4 w-4 ml-2" />
+                    <ChevronDownIcon className="h-4 w-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
@@ -249,13 +250,13 @@ export default function Home() {
             </div>
             
             {/* Activity Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-              <Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-14">
+              <Card className="shadow-none bg-gradient-to-t from-primary/5 to-card">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between space-x-4">
                     <div className="flex-1">
                       <p className="text-sm font-medium text-muted-foreground">Tasks Today</p>
-                      <p className="text-2xl font-bold mt-1">12</p>
+                      <p className="text-2xl font-bold mt-1.5">12</p>
                       <p className="text-xs text-muted-foreground mt-1">+3 from yesterday</p>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -265,12 +266,12 @@ export default function Home() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="shadow-none bg-gradient-to-t from-primary/5 to-card">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between space-x-4">
                     <div className="flex-1">
                       <p className="text-sm font-medium text-muted-foreground">New Documents</p>
-                      <p className="text-2xl font-bold mt-1">8</p>
+                      <p className="text-2xl font-bold mt-1.5">8</p>
                       <p className="text-xs text-muted-foreground mt-1">This week</p>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
@@ -280,12 +281,12 @@ export default function Home() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="shadow-none bg-gradient-to-t from-primary/5 to-card">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between space-x-4">
                     <div className="flex-1">
                       <p className="text-sm font-medium text-muted-foreground">Active Deals</p>
-                      <p className="text-2xl font-bold mt-1">5</p>
+                      <p className="text-2xl font-bold mt-1.5">5</p>
                       <p className="text-xs text-muted-foreground mt-1">2 in due diligence</p>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
@@ -295,12 +296,12 @@ export default function Home() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="shadow-none bg-gradient-to-t from-primary/5 to-card">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between space-x-4">
                     <div className="flex-1">
                       <p className="text-sm font-medium text-muted-foreground">Team Activity</p>
-                      <p className="text-2xl font-bold mt-1">32</p>
+                      <p className="text-2xl font-bold mt-1.5">32</p>
                       <p className="text-xs text-muted-foreground mt-1">Actions today</p>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
@@ -312,10 +313,10 @@ export default function Home() {
             </div>
             
             {/* Activity Feed Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <ActivityIcon className="h-5 w-5 text-muted-foreground" />
-                <h2 className="text-lg font-medium text-muted-foreground">Here's what's happening across your family office</h2>
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight mb-1">Activity</h2>
+                <p className="text-sm text-muted-foreground">Recent updates from your team</p>
               </div>
               
               {/* Using UnifiedActivitySection for consistency with drawers */}

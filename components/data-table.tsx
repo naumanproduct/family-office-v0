@@ -1433,16 +1433,16 @@ function TableView({ data, activeTab }: { data: any[]; activeTab: string }) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={task.priority === "High" ? "text-orange-600" : "text-blue-600"}>
+                  <span className={`text-sm ${task.priority === "High" ? "text-red-600" : "text-yellow-600"}`}>
                     {task.priority}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell>{task.assignee}</TableCell>
                 <TableCell>{task.dueDate}</TableCell>
                 <TableCell>
-                  <Badge variant={task.status.toLowerCase() === "completed" ? "secondary" : "outline"}>
+                  <span className={`text-sm ${task.status.toLowerCase() === "completed" ? "text-green-600" : "text-muted-foreground"}`}>
                     {task.status.toLowerCase() === "completed" ? "Completed" : "Pending"}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -1722,33 +1722,35 @@ function ListView({ data, activeTab }: { data: any[]; activeTab: string }) {
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">{item.date || item.dueDate || item.uploadedDate}</p>
                   {item.status && (
-                    <Badge
-                      variant="outline"
+                    <span
                       className={`text-xs mt-1 ${
                         item.status === "Unread"
                           ? "text-blue-600"
                           : item.status === "completed"
-                            ? ""
-                            : item.priority === "High"
-                              ? "text-orange-600"
-                              : ""
+                            ? "text-green-600"
+                            : "text-muted-foreground"
                       }`}
                     >
                       {item.status === "completed" ? "Completed" : item.status}
-                    </Badge>
+                    </span>
                   )}
                   {item.priority && item.status !== "completed" && (
-                    <Badge
-                      variant="outline"
-                      className={`text-xs mt-1 ${item.priority === "High" ? "text-orange-600" : "text-blue-600"}`}
-                    >
-                      {item.priority}
-                    </Badge>
+                    <>
+                      <span className="text-xs text-muted-foreground mx-1">•</span>
+                      <span
+                        className={`text-xs ${item.priority === "High" ? "text-red-600" : "text-yellow-600"}`}
+                      >
+                        {item.priority}
+                      </span>
+                    </>
                   )}
                   {item.size && (
-                    <Badge variant="outline" className="text-xs mt-1">
-                      {item.size}
-                    </Badge>
+                    <>
+                      <span className="text-xs text-muted-foreground mx-1">•</span>
+                      <span className="text-xs text-muted-foreground">
+                        {item.size}
+                      </span>
+                    </>
                   )}
                 </div>
               </div>

@@ -10,6 +10,12 @@ import {
   VideoIcon,
   InfoIcon,
   UsersIcon,
+  RepeatIcon,
+  BellIcon,
+  EyeIcon,
+  CalendarCheckIcon,
+  ChevronRight,
+  ChevronDown,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -27,22 +33,37 @@ interface MeetingDetailsViewProps {
 export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps) {
   const [meetingTitle, setMeetingTitle] = React.useState(meeting.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState("details")
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
-    agenda: meeting?.agenda || "",
+    description: meeting?.description || meeting?.agenda || "",
     location: meeting?.location || "",
     startTime: meeting?.startTime || "",
     endTime: meeting?.endTime || "",
     attendees: meeting?.attendees || [],
     organizer: meeting?.organizer || "",
-    meetingType: meeting?.meetingType || "In-person",
+    meetingType: meeting?.meetingType || "Video call",
     status: meeting?.status || "Scheduled",
+    recurring: meeting?.recurring || "Does not repeat",
+    reminder: meeting?.reminder || "15 minutes before",
+    visibility: meeting?.visibility || "Private",
+    showAs: meeting?.showAs || "Busy",
   })
 
   const [meetingNotes, setMeetingNotes] = React.useState("")
+  
+  // State for which sections are open
+  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+    details: true,
+    notes: false,
+  })
 
-  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
+  // Toggle section open/closed
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }))
+  }
 
   const getStatusColor = (status: string | undefined | null) => {
     if (!status) return "bg-gray-100 text-gray-800"
@@ -81,7 +102,7 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
         <div className="mt-1">{icon}</div>
         <div className="flex-1">
           <div className="flex items-start gap-4">
-            <Label className="text-xs text-muted-foreground mt-1">{label}</Label>
+            <Label className="text-xs text-muted-foreground mt-1 w-24">{label}</Label>
             {isEditing ? (
               isTextarea ? (
                 <Textarea
@@ -115,7 +136,7 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
               )
             ) : (
               <div
-                className="cursor-pointer hover:bg-muted/50 px-2 py-1 rounded text-sm"
+                className="cursor-pointer hover:bg-muted/50 px-2 py-1 rounded text-sm flex-1"
                 onClick={() => setEditingField(field)}
               >
                 {isBadge ? (
@@ -185,43 +206,31 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
         </div>
       </div>
 
-      {/* Tabs - Same styling as task tabs */}
-      <div className="border-b bg-background px-6 py-1">
-        <div className="flex gap-6 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {activeTab === tab.id && (
-                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className="p-6 space-y-6">
-        {activeTab === "details" && (
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium">Meeting Details</h4>
-
-            <div className="rounded-lg border border-muted bg-muted/10 p-4">
-              <div className="space-y-4">
+      {/* Content with expandable sections */}
+      <div className="p-6 space-y-4 overflow-y-auto">
+        {/* Meeting Details Section */}
+        <div className="rounded-lg border border-muted overflow-hidden">
+          <button
+            onClick={() => toggleSection('details')}
+            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+          >
+            {openSections.details ? (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            )}
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Meeting Information</span>
+          </button>
+          
+          {openSections.details && (
+            <div className="px-4 pb-4 pt-1">
+              <div className="space-y-3">
                 {renderEditableField(
-                  "agenda",
-                  fieldValues.agenda,
+                  "description",
+                  fieldValues.description,
                   <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Agenda",
+                  "Description",
                   false,
                   true,
                 )}
@@ -275,22 +284,65 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
                   "Status",
                   true,
                 )}
+
+                {renderEditableField(
+                  "recurring",
+                  fieldValues.recurring,
+                  <RepeatIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Recurring",
+                )}
+
+                {renderEditableField(
+                  "reminder",
+                  fieldValues.reminder,
+                  <BellIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Reminder",
+                )}
+
+                {renderEditableField(
+                  "visibility",
+                  fieldValues.visibility,
+                  <EyeIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Visibility",
+                )}
+
+                {renderEditableField(
+                  "showAs",
+                  fieldValues.showAs,
+                  <CalendarCheckIcon className="h-4 w-4 text-muted-foreground" />,
+                  "Show As",
+                )}
               </div>
             </div>
+          )}
+        </div>
 
-            <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-              Show all values
-            </Button>
-
-            {/* Typable Area */}
-            <TypableArea
-              value={meetingNotes}
-              onChange={setMeetingNotes}
-              placeholder="Add meeting notes..."
-              showButtons={false}
-            />
-          </div>
-        )}
+        {/* Meeting Notes Section */}
+        <div className="rounded-lg border border-muted overflow-hidden">
+          <button
+            onClick={() => toggleSection('notes')}
+            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+          >
+            {openSections.notes ? (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            )}
+            <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Meeting Notes</span>
+          </button>
+          
+          {openSections.notes && (
+            <div className="px-4 pb-4 pt-1">
+              <TypableArea
+                value={meetingNotes}
+                onChange={setMeetingNotes}
+                placeholder="Add meeting notes..."
+                showButtons={false}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -146,78 +146,93 @@ export function UnifiedDetailsPanel({
     );
   };
 
+  // Filter out empty sections if hideWhenEmpty is true
+  const visibleSections = sections.filter(section => {
+    if (!section.hideWhenEmpty) return true;
+    
+    const hasFields = section.fields && section.fields.length > 0;
+    const hasItems = section.sectionData?.items && section.sectionData.items.length > 0;
+    
+    return hasFields || hasItems;
+  });
+
   return (
     <div className="px-6 pt-2 pb-6">
       <div className="space-y-5">
-        {sections.map(section => {
-          // Skip empty sections if hideWhenEmpty is true
-          if (section.hideWhenEmpty && 
-              (!section.fields || section.fields.length === 0) && 
-              (!section.sectionData || !section.sectionData.items || section.sectionData.items.length === 0)) {
-            return null;
-          }
+        {/* Master Card for all sections */}
+        {visibleSections.length > 0 && (
+          <div className="rounded-lg border border-muted overflow-hidden">
+            {visibleSections.map((section, index) => {
+              const isOpen = openSections[section.id] || false;
 
-          const isOpen = openSections[section.id] || false;
-
-          return (
-            <div key={section.id} className="rounded-lg border border-muted p-3 group">
-              {/* Section Header */}
-              <div className="flex items-center justify-between">
-                <div 
-                  className="flex items-center cursor-pointer" 
-                  onClick={() => toggleSection(section.id)}
-                >
-                  {isOpen ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground mr-2" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground mr-2" /> 
+              return (
+                <React.Fragment key={section.id}>
+                  {/* Divider between sections (except for the first one) */}
+                  {index > 0 && (
+                    <div className="h-px bg-muted mx-3" />
                   )}
-                  <div className="flex items-center gap-2">
-                    {section.icon}
-                    <span className="font-medium text-sm">{section.title}</span>
-                  </div>
-                </div>
-                
-                {/* Add button - visible on hover */}
-                {section.sectionData && isOpen && (
-                  <Button 
-                    variant="ghost" 
-                    className="h-auto p-0 text-xs text-muted-foreground hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddRecord && onAddRecord(section.id);
-                    }}
-                  >
-                    + Add
-                  </Button>
-                )}
-              </div>
-
-              {/* Section Content */}
-              {isOpen && (
-                <div className="mt-3">
-                  {section.fields && section.fields.length > 0 && 
-                    renderFields(section.id, section.fields, section.fields.length > 7)}
                   
-                  {section.sectionData && section.sectionData.items && 
-                    renderItemsSection(section.id, section.sectionData.items)}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                  {/* Section Header */}
+                  <div className="group">
+                    <button 
+                      onClick={() => toggleSection(section.id)}
+                      className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+                    >
+                      <div className="flex items-center">
+                        {isOpen ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground mr-2" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground mr-2" /> 
+                        )}
+                        <div className="flex items-center gap-2">
+                          {section.icon}
+                          <span className="font-medium text-sm">{section.title}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Add button - visible on hover */}
+                      {section.sectionData && isOpen && (
+                        <Button 
+                          variant="ghost" 
+                          className="h-auto p-0 text-xs text-muted-foreground hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAddRecord && onAddRecord(section.id);
+                          }}
+                        >
+                          + Add
+                        </Button>
+                      )}
+                    </button>
 
-        {/* Additional Content (AI Assistance) */}
+                    {/* Section Content */}
+                    {isOpen && (
+                      <div className="px-3 pb-3 pt-2 group/section">
+                        {section.fields && section.fields.length > 0 && 
+                          renderFields(section.id, section.fields, section.fields.length > 7)}
+                        
+                        {section.sectionData && section.sectionData.items && 
+                          renderItemsSection(section.id, section.sectionData.items)}
+                      </div>
+                    )}
+                  </div>
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Additional Content (AI Assistance) - Remains as separate card */}
         {additionalContent && (
-          <div className="mt-8">
+          <div>
             {additionalContent}
           </div>
         )}
 
         {/* Activity Section - Only in Drawer View */}
         {!isFullScreen && activityContent && (
-          <div className="mt-8">
-            <div className="space-y-2">
+          <div className="mt-8 -mx-6 border-t bg-background">
+            <div className="px-6 py-4">
               {activityContent}
             </div>
           </div>

@@ -578,8 +578,7 @@ function getCompanyTabData(activeTab: string, company: Company) {
           title: "Investment thesis review",
           date: "3 days ago",
           author: "Sarah Johnson",
-          content: `Strong performance in ${company.industry} sector. Key growth drivers remain intact.`,
-          tags: ["Investment", "Review"],
+          topic: `Strong performance in ${company.industry} sector. Key growth drivers remain intact.`,
         },
       ]
     case "meetings":
@@ -1057,7 +1056,7 @@ const columns: ColumnDef<Company>[] = [
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+          <Button variant="ghost" className="flex h-8 w-8 p-0 data-[state=open]:bg-muted opacity-0 group-hover:opacity-100 transition-opacity">
             <MoreVerticalIcon className="h-4 w-4" />
             <span className="sr-only">Open menu</span>
           </Button>
@@ -1227,7 +1226,7 @@ export function CompaniesTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="h-12 cursor-pointer hover:bg-muted/50"
+                  className="group h-12 cursor-pointer hover:bg-muted/50"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-2">

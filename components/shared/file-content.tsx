@@ -737,7 +737,6 @@ export function FileContent({
                 <TableHead>Name</TableHead>
                 <TableHead>Uploaded By</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Size</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -754,7 +753,6 @@ export function FileContent({
                   <TableCell className="font-medium text-sm">{file.name || file.title}</TableCell>
                   <TableCell className="text-sm">{file.uploadedBy}</TableCell>
                   <TableCell className="text-sm">{file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-sm">{file.fileSize || file.size}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -789,11 +787,7 @@ export function FileContent({
             <RecordListItem
               key={file.id}
               title={file.name || file.title}
-              primaryMetadata={[
-                <Badge key="size" variant="outline">
-                  {file.size || file.fileSize}
-                </Badge>
-              ]}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: file.uploadedBy,
                 right: file.uploadedDate || file.date
@@ -816,11 +810,7 @@ export function FileContent({
             <RecordCard
               key={file.id}
               title={file.name || file.title}
-              primaryMetadata={[
-                <Badge key="size" variant="outline">
-                  {file.size || file.fileSize}
-                </Badge>
-              ]}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: file.uploadedBy,
                 right: file.uploadedDate || file.date

@@ -459,15 +459,15 @@ export function TasksTable() {
                                 <CalendarIcon className="h-3 w-3" />
                                 {new Date(st.dueDate).toLocaleDateString()}
                               </div>
-                              <Badge className="text-xs" variant="secondary">
+                              <span className="text-xs text-muted-foreground">
                                 {st.priority}
-                              </Badge>
+                              </span>
                             </div>
                           </div>
                         </div>
-                        <Badge variant="secondary" className="text-xs">
+                        <span className="text-xs text-muted-foreground">
                           {st.status}
-                        </Badge>
+                        </span>
                       </div>
                     </div>
                   ))}

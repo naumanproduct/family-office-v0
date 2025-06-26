@@ -153,7 +153,6 @@ function TableView({
                 <TableHead>Subject</TableHead>
                 <TableHead>From</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead className="w-12"></TableHead>
               </>
             )}
@@ -169,9 +168,8 @@ function TableView({
             {activeTab === "meetings" && (
               <>
                 <TableHead className="w-12"></TableHead>
-                <TableHead>Title</TableHead>
+                <TableHead>Meeting</TableHead>
                 <TableHead>Date & Time</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Attendees</TableHead>
                 <TableHead className="w-12"></TableHead>
               </>
@@ -179,10 +177,9 @@ function TableView({
             {activeTab === "files" && (
               <>
                 <TableHead className="w-12"></TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead>File Name</TableHead>
                 <TableHead>Uploaded By</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Size</TableHead>
                 <TableHead className="w-12"></TableHead>
               </>
             )}
@@ -199,7 +196,7 @@ function TableView({
           {data.map((item) => (
             <TableRow
               key={item.id}
-              className={`${
+              className={`group ${
                 (activeTab === "tasks" && onTaskClick) ||
                 (activeTab === "notes" && onNoteClick) ||
                 (activeTab === "meetings" && onMeetingClick) ||
@@ -228,12 +225,9 @@ function TableView({
                   <TableCell className="text-sm">{item.from}</TableCell>
                   <TableCell className="text-sm">{item.date}</TableCell>
                   <TableCell>
-                    <Badge variant={item.status === "Unread" ? "default" : "outline"}>{item.status}</Badge>
-                  </TableCell>
-                  <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                           <MoreVerticalIcon className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -259,7 +253,7 @@ function TableView({
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                           <MoreVerticalIcon className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -280,14 +274,11 @@ function TableView({
                   </TableCell>
                   <TableCell className="font-medium text-sm">{item.title}</TableCell>
                   <TableCell className="text-sm">{item.date} {item.time && `• ${item.time}`}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{item.status}</Badge>
-                  </TableCell>
                   <TableCell className="text-sm">{typeof item.attendees === 'number' ? `${item.attendees} people` : item.attendees?.join(', ') || '-'}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                           <MoreVerticalIcon className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -309,11 +300,10 @@ function TableView({
                   <TableCell className="font-medium text-sm">{item.name}</TableCell>
                   <TableCell className="text-sm">{item.uploadedBy}</TableCell>
                   <TableCell className="text-sm">{item.uploadedDate}</TableCell>
-                  <TableCell className="text-sm">{item.size}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                           <MoreVerticalIcon className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -335,7 +325,7 @@ function TableView({
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                           <MoreVerticalIcon className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -424,11 +414,7 @@ function CardView({
             <RecordCard
               key={item.id}
               title={item.subject}
-              primaryMetadata={[
-                <Badge key="status" variant={item.status === "Unread" ? "default" : "outline"}>
-                      {item.status}
-                    </Badge>
-              ]}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: item.from,
                 right: item.date
@@ -450,11 +436,7 @@ function CardView({
             <RecordCard
               key={item.id}
               title={item.title}
-              primaryMetadata={[
-                <Badge key="status" variant="outline">
-                            {item.status}
-                          </Badge>
-              ]}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: typeof item.attendees === 'number' 
                   ? `${item.attendees} people` 
@@ -473,11 +455,7 @@ function CardView({
             <RecordCard
               key={item.id}
               title={item.name}
-              primaryMetadata={[
-                <Badge key="size" variant="outline">
-                            {item.size}
-                          </Badge>
-              ]}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: item.uploadedBy,
                 right: item.uploadedDate
@@ -598,11 +576,7 @@ function ListView({
             <RecordListItem
               key={item.id}
               title={item.subject}
-              primaryMetadata={[
-                <Badge key="status" variant={item.status === "Unread" ? "default" : "outline"}>
-                  {item.status}
-                </Badge>
-              ]}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: item.from,
                 right: item.date
@@ -624,11 +598,7 @@ function ListView({
             <RecordListItem
               key={item.id}
               title={item.title}
-              primaryMetadata={[
-                <Badge key="status" variant="outline">
-                    {item.status}
-                  </Badge>
-              ]}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: typeof item.attendees === 'number' 
                   ? `${item.attendees} people` 
@@ -647,11 +617,7 @@ function ListView({
             <RecordListItem
               key={item.id}
               title={item.name}
-              primaryMetadata={[
-                <Badge key="size" variant="outline">
-                  {item.size}
-                </Badge>
-              ]}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: item.uploadedBy,
                 right: item.uploadedDate

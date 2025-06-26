@@ -95,8 +95,10 @@ export function UnifiedActivitySection({
               <span className="text-muted-foreground">commented</span>
             </div>
             {activity.content && (
-              <div className="text-sm text-muted-foreground bg-muted/50 rounded-md p-2 mt-1">
-                {activity.content}
+              <div className="text-sm text-muted-foreground">
+                <span className="inline-block bg-muted/50 rounded-md px-2 py-1 mt-1">
+                  "{activity.content}"
+                </span>
               </div>
             )}
           </div>

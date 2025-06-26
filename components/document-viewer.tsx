@@ -595,11 +595,13 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
 
         {/* Activity Section - Only in Drawer View */}
         {!isFullScreen && (
-          <div className="mt-8">
-            <div className="mb-4">
-              <h4 className="text-sm font-medium">Activity</h4>
+          <div className="mt-8 -mx-6 border-t bg-background">
+            <div className="px-6 py-4">
+              <div className="mb-4">
+                <h4 className="text-sm font-medium">Activity</h4>
+              </div>
+              <FileActivityContent file={file} activities={activities} />
             </div>
-            <FileActivityContent file={file} activities={activities} />
           </div>
         )}
       </div>
@@ -679,7 +681,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
                     <h2 className="text-lg font-semibold">{file ? (file.title || file.name || "Untitled") : "Untitled"}</h2>
                     {file && file.fileType && (
                       <p className="text-sm text-muted-foreground">
-                        {(file.fileType || file.type || "FILE").toUpperCase()} • {file.fileSize || file.size || "Unknown size"}
+                        {(file.fileType || file.type || "FILE").toUpperCase()}
                       </p>
                     )}
                   </div>
@@ -796,7 +798,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
                   <h2 className="text-lg font-semibold">{file ? (file.title || file.name || "Untitled") : "Untitled"}</h2>
                   {file && file.fileType && (
                     <p className="text-sm text-muted-foreground">
-                      {(file.fileType || file.type || "FILE").toUpperCase()} • {file.fileSize || file.size || "Unknown size"}
+                      {(file.fileType || file.type || "FILE").toUpperCase()}
                     </p>
                   )}
                 </div>
