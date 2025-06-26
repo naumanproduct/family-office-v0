@@ -58,6 +58,8 @@ export function MasterDrawer({
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
   const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
+  const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
+  const [parentTaskForSubtask, setParentTaskForSubtask] = React.useState<any>(null)
 
   // Exclude specific tab ids across all drawers
   const excludedTabIds = ["contacts", "people", "team", "company"]
@@ -166,9 +168,43 @@ export function MasterDrawer({
       return detailsPanel(isCurrentFullScreen)
     }
 
+    // Handle subtask details view (highest priority)
+    if (activeTab === "tasks" && selectedSubtask && parentTaskForSubtask && !isFullScreen) {
+      return (
+        <TaskDetailsView 
+          task={selectedSubtask} 
+          onBack={() => {
+            setSelectedSubtask(null)
+            // Don't clear parentTaskForSubtask here, we'll use it to show parent
+          }}
+          recordName={title} 
+          recordType={recordType}
+          parentTask={parentTaskForSubtask}
+          onBackToParent={() => {
+            setSelectedSubtask(null)
+            setSelectedTask(parentTaskForSubtask)
+            setParentTaskForSubtask(null)
+          }}
+          isInDrawer={true}
+        />
+      )
+    }
+
     // Handle task details view (only in non-fullscreen mode)
     if (activeTab === "tasks" && selectedTask && !isFullScreen) {
-      return <TaskDetailsView task={selectedTask} onBack={() => setSelectedTask(null)} recordName={title} recordType={recordType} />
+      return (
+        <TaskDetailsView 
+          task={selectedTask} 
+          onBack={() => setSelectedTask(null)} 
+          recordName={title} 
+          recordType={recordType}
+          isInDrawer={true}
+          onSubtaskClick={(subtask) => {
+            setSelectedSubtask(subtask)
+            setParentTaskForSubtask(selectedTask)
+          }}
+        />
+      )
     }
 
     // Handle note details view (only in non-fullscreen mode)
@@ -202,7 +238,13 @@ export function MasterDrawer({
     }
 
     // In non-fullscreen mode, show selected item info
-    if (selectedTask) {
+    if (selectedSubtask) {
+      return {
+        title: selectedSubtask.title || "Subtask Details",
+        subtitle: selectedSubtask.description ? selectedSubtask.description.substring(0, 60) + "..." : null,
+        firstLetter: "S",
+      }
+    } else if (selectedTask) {
       return {
         title: selectedTask.title || "Task Details",
         subtitle: selectedTask.description ? selectedTask.description.substring(0, 60) + "..." : null,
@@ -237,7 +279,12 @@ export function MasterDrawer({
 
   // Handle back navigation in the drawer
   const handleDrawerBackClick = () => {
-    if (selectedTask) {
+    if (selectedSubtask) {
+      // If viewing a subtask, go back to parent task
+      setSelectedSubtask(null)
+      setSelectedTask(parentTaskForSubtask)
+      setParentTaskForSubtask(null)
+    } else if (selectedTask) {
       setSelectedTask(null)
     } else if (selectedNote) {
       setSelectedNote(null)
@@ -267,6 +314,8 @@ export function MasterDrawer({
                   setSelectedNote(null)
                   setSelectedMeeting(null)
                   setSelectedEmail(null)
+                  setSelectedSubtask(null)
+                  setParentTaskForSubtask(null)
                 }}
               >
                 <ChevronLeftIcon className="h-4 w-4" />
@@ -289,6 +338,8 @@ export function MasterDrawer({
                   setSelectedNote(null)
                   setSelectedMeeting(null)
                   setSelectedEmail(null)
+                  setSelectedSubtask(null)
+                  setParentTaskForSubtask(null)
                 }}
               >
                 <XIcon className="h-4 w-4" />
@@ -581,7 +632,19 @@ export function MasterDrawer({
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+      <SheetContent 
+        side="right" 
+        className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden"
+        onInteractOutside={() => {
+          // Clear all selection states when closing
+          setSelectedTask(null)
+          setSelectedNote(null)
+          setSelectedMeeting(null)
+          setSelectedEmail(null)
+          setSelectedSubtask(null)
+          setParentTaskForSubtask(null)
+        }}
+      >
         <SheetTitle className="sr-only">{recordType} Details</SheetTitle>
         {/* Header */}
         <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
@@ -590,7 +653,12 @@ export function MasterDrawer({
               variant="ghost"
               size="icon"
               onClick={() => {
-                if (selectedTask) {
+                if (selectedSubtask) {
+                  // Go back to parent task
+                  setSelectedSubtask(null)
+                  setSelectedTask(parentTaskForSubtask)
+                  setParentTaskForSubtask(null)
+                } else if (selectedTask) {
                   setSelectedTask(null)
                 } else if (selectedNote) {
                   setSelectedNote(null)
@@ -609,15 +677,17 @@ export function MasterDrawer({
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
             <Badge variant="outline" className="bg-background">
-              {selectedTask
-                ? selectedTask.parentTask ? "Subtask" : "Task"
-                : selectedNote
-                  ? "Note"
-                  : selectedMeeting
-                    ? "Meeting"
-                    : selectedEmail
-                      ? "Email"
-                      : recordType}
+              {selectedSubtask
+                ? "Subtask"
+                : selectedTask
+                  ? selectedTask.parentTask ? "Subtask" : "Task"
+                  : selectedNote
+                    ? "Note"
+                    : selectedMeeting
+                      ? "Meeting"
+                      : selectedEmail
+                        ? "Email"
+                        : recordType}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
@@ -633,7 +703,7 @@ export function MasterDrawer({
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
           {/* Record Header */}
-          {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && (
+          {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && !selectedSubtask && (
             <div className="border-b bg-background px-6 py-2">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">

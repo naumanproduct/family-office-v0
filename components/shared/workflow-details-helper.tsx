@@ -3,6 +3,7 @@ import { buildStandardDetailSections, StandardSectionArgs } from "./detail-secti
 import { UnifiedDetailsPanel } from "./unified-details-panel"
 import { FileTextIcon } from "lucide-react"
 import { UnifiedActivitySection, ActivityItem } from "./unified-activity-section"
+import { AIAssistantSection } from "./ai-output-section"
 
 /**
  * Convenience wrapper used by multiple Kanban components.
@@ -21,7 +22,17 @@ export function buildWorkflowDetailsPanel({
   opportunities = [],
   hideWhenEmpty = false,
   activities = [],
-}: Omit<StandardSectionArgs, "infoIcon"> & { infoIcon?: ReactNode; activities?: ActivityItem[] }) {
+  aiOutputs = [],
+}: Omit<StandardSectionArgs, "infoIcon"> & { 
+  infoIcon?: ReactNode
+  activities?: ActivityItem[]
+  aiOutputs?: Array<{
+    title: string
+    content: string | React.ReactNode
+    type?: "email" | "data" | "calculation" | "summary"
+    explanation?: string
+  }>
+}) {
   const sections = buildStandardDetailSections({
     infoTitle,
     infoIcon,
@@ -40,6 +51,7 @@ export function buildWorkflowDetailsPanel({
       sections={sections}
       isFullScreen={!!isFullScreen}
       activityContent={activities.length > 0 ? <UnifiedActivitySection activities={activities} /> : undefined}
+      additionalContent={aiOutputs.length > 0 ? <AIAssistantSection outputs={aiOutputs} /> : undefined}
     />
   )
 } 

@@ -12,13 +12,13 @@ import {
   PlusIcon,
   CircleIcon,
   ClockIcon,
-  DotIcon as DotsHorizontalIcon,
   ChevronLeftIcon,
   UserRoundIcon,
   BuildingIcon,
   LayoutIcon,
   DollarSignIcon,
   TrendingUpIcon,
+  MoreVerticalIcon,
 } from "lucide-react"
 
 import {
@@ -44,8 +44,9 @@ import { getContextualNotes } from "@/components/shared/note-content"
 import { getContextualFiles } from "@/components/shared/file-content"
 import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 import { generateTaskActivities } from "@/components/shared/activity-generators"
-import { AIOutputSection } from "@/components/shared/ai-output-section"
+import { AIAssistantSection } from "@/components/shared/ai-output-section"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 
 interface TaskDetailsViewProps {
   task: any
@@ -179,8 +180,13 @@ export function TaskDetailsView({
     { id: "files", label: "Files", icon: FileTextIcon },
   ]
 
+  // Add state for view modes
+  const [notesViewMode, setNotesViewMode] = React.useState<"card" | "list" | "table">("list")
+  const [filesViewMode, setFilesViewMode] = React.useState<"card" | "list" | "table">("list")
+
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
+      case "critical":
       case "high":
         return "bg-red-100 text-red-800"
       case "medium":
@@ -204,6 +210,25 @@ export function TaskDetailsView({
         return "bg-gray-100 text-gray-800"
       default:
         return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  // Helper function to format date as relative time
+  const formatRelativeTime = (date: string | Date) => {
+    const now = new Date();
+    const then = new Date(date);
+    const diffInMs = now.getTime() - then.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) {
+      return "Just now";
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+    } else if (diffInDays < 30) {
+      return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+    } else {
+      return then.toLocaleDateString();
     }
   }
 
@@ -340,17 +365,15 @@ export function TaskDetailsView({
         {subtasks.map((subtask: any) => (
           <div
             key={subtask.id}
-            className="rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
+            className="group rounded-lg border border-muted bg-muted/10 p-3 hover:bg-muted/20 transition-colors"
           >
-            <div className="flex items-center justify-between">
-              <div
-                className="flex items-center gap-3 flex-1 cursor-pointer"
-                onClick={() => handleSubtaskClick(subtask)}
-              >
+            <div className="flex items-start">
+              {/* Leading checkbox */}
+              <div className="mt-0.5 mr-3">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0"
+                  className="h-5 w-5 p-0"
                   onClick={(e) => {
                     e.stopPropagation()
                     const newStatus = subtask.status === "Completed" ? "To Do" : "Completed"
@@ -371,20 +394,61 @@ export function TaskDetailsView({
                     <CircleIcon className="h-4 w-4 text-muted-foreground" />
                   )}
                 </Button>
-                <div className="flex-1">
+              </div>
+
+              <div className="flex-1">
+                {/* Title row with actions */}
+                <div className="flex items-start justify-between">
                   <div
-                    className={`text-sm font-medium ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
+                    className={`font-medium text-sm cursor-pointer ${subtask.status === "Completed" ? "line-through text-muted-foreground" : ""}`}
+                    onClick={() => handleSubtaskClick(subtask)}
                   >
                     {subtask.title}
                   </div>
-                  <div className="flex items-center gap-4 mt-1">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <UserIcon className="h-3 w-3" />
+                  
+                  {/* More menu - only visible on hover */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVerticalIcon className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>
+                        Open Details
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
+                        Mark as To Do
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "In Progress")}>
+                        Mark as In Progress
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "Completed")}>
+                        Mark as Completed
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleDeleteSubtask(subtask.id)}
+                        className="text-destructive"
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                {/* Secondary metadata row */}
+                <div className="flex justify-between items-center mt-2">
+                  {/* Left side: assignee and badges */}
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs text-muted-foreground">
                       {subtask.assignee}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <CalendarIcon className="h-3 w-3" />
-                      {new Date(subtask.dueDate).toLocaleDateString()}
                     </div>
                     <Badge
                       variant={
@@ -402,42 +466,13 @@ export function TaskDetailsView({
                       {subtask.priority}
                     </Badge>
                   </div>
+                  
+                  {/* Right side: due date */}
+                  <div className="text-xs text-muted-foreground">
+                    {formatRelativeTime(subtask.dueDate)}
+                  </div>
                 </div>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <DotsHorizontalIcon className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleSubtaskClick(subtask)}>
-                    Open Details
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "To Do")}>
-                    Mark as To Do
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "In Progress")}>
-                    Mark as In Progress
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSubtaskStatusChange(subtask.id, "Completed")}>
-                    Mark as Completed
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => handleDeleteSubtask(subtask.id)}
-                    className="text-destructive"
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
         ))}
@@ -853,12 +888,24 @@ export function TaskDetailsView({
       }));
       
       return (
-        <TabContentRenderer
-          activeTab="notes"
-          viewMode="list"
-          data={transformedNotes}
-          onNoteClick={(note) => console.log("Note clicked:", note)}
-        />
+        <>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Notes</h3>
+            <div className="flex items-center gap-2">
+              <ViewModeSelector viewMode={notesViewMode} onViewModeChange={setNotesViewMode} />
+              <Button variant="outline" size="sm" onClick={() => console.log("Add note")}>
+                <PlusIcon className="h-4 w-4" />
+                Add note
+              </Button>
+            </div>
+          </div>
+          <TabContentRenderer
+            activeTab="notes"
+            viewMode={notesViewMode}
+            data={transformedNotes}
+            onNoteClick={(note) => console.log("Note clicked:", note)}
+          />
+        </>
       );
     } else if (activeTab === "files") {
       // Get contextual files
@@ -874,11 +921,23 @@ export function TaskDetailsView({
       }));
       
       return (
-        <TabContentRenderer
-          activeTab="files"
-          viewMode="list"
-          data={transformedFiles}
-        />
+        <>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Files</h3>
+            <div className="flex items-center gap-2">
+              <ViewModeSelector viewMode={filesViewMode} onViewModeChange={setFilesViewMode} />
+              <Button variant="outline" size="sm" onClick={() => console.log("Add file")}>
+                <PlusIcon className="h-4 w-4" />
+                Add file
+              </Button>
+            </div>
+          </div>
+          <TabContentRenderer
+            activeTab="files"
+            viewMode={filesViewMode}
+            data={transformedFiles}
+          />
+        </>
       );
     }
     return null;
@@ -971,12 +1030,8 @@ export function TaskDetailsView({
               const aiOutput = generateAIOutput(task.title)
               if (aiOutput) {
                 return (
-                  <AIOutputSection
-                    title={aiOutput.title}
-                    content={aiOutput.content}
-                    type={aiOutput.type}
-                    explanation={aiOutput.explanation}
-                    className="mt-6"
+                  <AIAssistantSection
+                    outputs={[aiOutput]}
                   />
                 )
               }
