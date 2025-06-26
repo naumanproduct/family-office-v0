@@ -1,7 +1,7 @@
 "use client"
 
-import type * as React from "react"
-import { useState } from "react"
+import * as React from "react"
+import { useState, useEffect } from "react"
 import {
   ArrowUpCircleIcon,
   Building2Icon,
@@ -21,6 +21,11 @@ import {
   TargetIcon,
   TrendingUpIcon,
   UsersIcon,
+  CalendarIcon,
+  BarChartIcon,
+  ReceiptIcon,
+  WalletIcon,
+  RocketIcon,
 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
@@ -51,9 +56,9 @@ import { SettingsModal } from "./settings-modal"
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Gordon Gekko",
+    email: "gordon@gekko.com",
+    avatar: "/avatars/gekko.jpg",
   },
   navMain: [
     {
@@ -126,6 +131,31 @@ const data = {
           url: "/distributions-tracking",
           icon: ArrowUpCircleIcon,
         },
+        {
+          title: "Meeting Preparation",
+          url: "/meeting-preparation",
+          icon: CalendarIcon,
+        },
+        {
+          title: "Quarterly Monitoring",
+          url: "/quarterly-monitoring",
+          icon: BarChartIcon,
+        },
+        {
+          title: "K-1 Review & Tax Docs",
+          url: "/k1-review",
+          icon: ReceiptIcon,
+        },
+        {
+          title: "Cash Forecasting",
+          url: "/cash-forecasting",
+          icon: WalletIcon,
+        },
+        {
+          title: "Investment Onboarding",
+          url: "/investment-onboarding",
+          icon: RocketIcon,
+        },
       ],
     },
   ],
@@ -155,6 +185,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  
+  // Always start with the same value on server and client to avoid hydration mismatch
+  const [selectedEntity, setSelectedEntity] = useState("Gekko Family Office")
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Update from localStorage after hydration
+  useEffect(() => {
+    setIsHydrated(true)
+    const savedEntity = localStorage.getItem("selectedEntity")
+    if (savedEntity) {
+      setSelectedEntity(savedEntity)
+    }
+  }, [])
 
   const handleNavAction = (item: any) => {
     if (item.url) {
@@ -162,6 +205,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     } else if (item.action === "settings") {
       setIsSettingsModalOpen(true)
     }
+  }
+
+  const handleEntitySelect = (entityName: string) => {
+    setSelectedEntity(entityName)
+    // Save to localStorage to persist across page navigations
+    localStorage.setItem("selectedEntity", entityName)
+    handleNavigation("/entities")
   }
 
   return (
@@ -176,11 +226,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <ArrowUpCircleIcon className="size-4" />
+                    <Building2Icon className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Acme Inc.</span>
-                    <span className="truncate text-xs">Enterprise</span>
+                    <span className="truncate font-semibold">{selectedEntity}</span>
+                    <span className="truncate text-xs">Gekko Family Office</span>
                   </div>
                   <ChevronsUpDownIcon className="ml-auto" />
                 </SidebarMenuButton>
@@ -191,20 +241,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 side="bottom"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Entity</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => handleNavigation("/investments")}>
-                  <div className="flex size-6 items-center justify-center rounded-sm border">
-                    <ArrowUpCircleIcon className="size-4 shrink-0" />
-                  </div>
-                  Acme Inc.
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Gekko Family Office</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleEntitySelect("Gekko 2020 Dynasty Trust")}>
+                  Gekko 2020 Dynasty Trust
                   <DropdownMenuShortcut>⌘1</DropdownMenuShortcut>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigation("/investments")}>
-                  <div className="flex size-6 items-center justify-center rounded-sm border">
-                    <Building2Icon className="size-4 shrink-0" />
-                  </div>
-                  Acme Holdings
+                <DropdownMenuItem onClick={() => handleEntitySelect("Gekko Holdings LLC")}>
+                  Gekko Holdings LLC
                   <DropdownMenuShortcut>⌘2</DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleEntitySelect("Gekko Family Office LLC")}>
+                  Gekko Family Office LLC
+                  <DropdownMenuShortcut>⌘3</DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleEntitySelect("Gekko SPV I, LLC")}>
+                  Gekko SPV I, LLC
+                  <DropdownMenuShortcut>⌘4</DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleEntitySelect("Gekko Foundation")}>
+                  Gekko Foundation
+                  <DropdownMenuShortcut>⌘5</DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleEntitySelect("Gekko Global Holdings Ltd. (Cayman)")}>
+                  Gekko Global Holdings Ltd. (Cayman)
+                  <DropdownMenuShortcut>⌘6</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-muted-foreground">

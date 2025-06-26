@@ -1,34 +1,25 @@
 "use client"
 
 import * as React from "react"
-import { SiteHeader } from "@/components/site-header"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
-  SearchIcon,
-  FilterIcon,
-  UsersIcon,
-  RefreshCwIcon,
   PlusIcon,
   FileTextIcon,
   ClipboardCheckIcon,
   UploadIcon,
-  BarChartIcon,
-  ActivityIcon,
   TrendingUpIcon,
+  ActivityIcon,
   ChevronDownIcon,
 } from "lucide-react"
 import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
@@ -202,43 +193,63 @@ export default function Home() {
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+        <header className="flex h-12 shrink-0 items-center border-b">
+          <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Home</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
         <div className="flex-1">
           {/* Main content with centered layout */}
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8">
             {/* Header section */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-10">
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight">{getTimeBasedGreeting()}, Gordon</h1>
-                <p className="text-muted-foreground mt-1">Here's what's happening across your family office</p>
               </div>
               
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/tasks">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-black hover:bg-black/90 text-white">
                     <PlusIcon className="h-4 w-4 mr-2" />
-                    New Task
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/notes">
-                    <FileTextIcon className="h-4 w-4 mr-2" />
-                    New Note
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/documents">
-                    <UploadIcon className="h-4 w-4 mr-2" />
-                    Upload
-                  </Link>
-                </Button>
-              </div>
+                    New
+                    <ChevronDownIcon className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/tasks" className="flex items-center">
+                      <ClipboardCheckIcon className="h-4 w-4 mr-2" />
+                      New Task
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/notes" className="flex items-center">
+                      <FileTextIcon className="h-4 w-4 mr-2" />
+                      New Note
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/documents" className="flex items-center">
+                      <UploadIcon className="h-4 w-4 mr-2" />
+                      Upload
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             
             {/* Activity Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between space-x-4">
@@ -300,52 +311,21 @@ export default function Home() {
               </Card>
             </div>
             
-            {/* Global Activity Feed */}
-            <Card>
-              <CardHeader className="border-b">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ActivityIcon className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle className="text-lg">Global Activity</CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <FilterIcon className="h-4 w-4 mr-2" />
-                          Filter
-                          <ChevronDownIcon className="h-4 w-4 ml-2" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[200px]">
-                        <DropdownMenuLabel>Filter by type</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuCheckboxItem checked>All Activities</DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem>Tasks</DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem>Documents</DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem>Investments</DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem>Meetings</DropdownMenuCheckboxItem>
-                        <DropdownMenuCheckboxItem>Notes</DropdownMenuCheckboxItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <Button variant="ghost" size="sm">
-                      <RefreshCwIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {/* Using UnifiedActivitySection for consistency with drawers */}
-                <div className="py-4">
-                  <UnifiedActivitySection 
-                    activities={globalActivities}
-                    comments={globalComments}
-                    showHeader={true}
-                    onCommentSubmit={handleCommentSubmit}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            {/* Activity Feed Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <ActivityIcon className="h-5 w-5 text-muted-foreground" />
+                <h2 className="text-lg font-medium text-muted-foreground">Here's what's happening across your family office</h2>
+              </div>
+              
+              {/* Using UnifiedActivitySection for consistency with drawers */}
+              <UnifiedActivitySection 
+                activities={globalActivities}
+                comments={globalComments}
+                showHeader={true}
+                onCommentSubmit={handleCommentSubmit}
+              />
+            </div>
           </div>
         </div>
       </SidebarInset>

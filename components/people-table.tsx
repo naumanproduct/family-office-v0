@@ -949,33 +949,32 @@ export function PeopleTable() {
       columnFilters,
       columnVisibility,
       globalFilter,
+      columnOrder,
     },
+    onColumnOrderChange: setColumnOrder,
   })
 
   // Initialize column order from table columns
   React.useEffect(() => {
-    const visibleColumns = table
-      .getAllColumns()
-      .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-      .map((column) => column.id);
+    const allColumns = table.getAllColumns().map((column) => column.id)
     
-    if (columnOrder.length === 0 && visibleColumns.length > 0) {
-      setColumnOrder(visibleColumns);
+    if (columnOrder.length === 0 && allColumns.length > 0) {
+      setColumnOrder(allColumns)
     }
-  }, [table.getAllColumns(), columnOrder]);
+  }, [])
 
   // Handle drag end for column reordering
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+    const { active, over } = event
     
     if (active && over && active.id !== over.id) {
       setColumnOrder((items) => {
-        const oldIndex = items.indexOf(active.id as string);
-        const newIndex = items.indexOf(over.id as string);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+        const oldIndex = items.indexOf(active.id as string)
+        const newIndex = items.indexOf(over.id as string)
+        return arrayMove(items, oldIndex, newIndex)
+      })
     }
-  };
+  }
 
   return (
     <div className="space-y-4">
