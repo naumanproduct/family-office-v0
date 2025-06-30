@@ -89,7 +89,7 @@ export function TaskDetailsView({
     priority: task.priority || "High",
     status: task.status || "In Progress",
     assignee: task.assignee || "John Smith",
-    dueDate: task.dueDate || "2023-05-25",
+    dueDate: task.dueDate || "",
   })
 
   // Get the tasks context for updating task status

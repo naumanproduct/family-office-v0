@@ -75,7 +75,16 @@ export function EditableField({
 
     switch (type) {
       case "date":
-        return value ? format(new Date(value), "PPP") : placeholder || "Select date"
+        if (!value) return placeholder || "Select date"
+        try {
+          const date = new Date(value)
+          if (isNaN(date.getTime())) {
+            return placeholder || "Select date"
+          }
+          return format(date, "PPP")
+        } catch (error) {
+          return placeholder || "Select date"
+        }
       case "select":
       case "combobox":
         const option = options.find(opt => opt.value === value)
@@ -137,13 +146,27 @@ export function EditableField({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {localValue ? format(new Date(localValue), "PPP") : <span>{placeholder || "Pick a date"}</span>}
+                {localValue ? (
+                  (() => {
+                    try {
+                      const date = new Date(localValue)
+                      if (isNaN(date.getTime())) {
+                        return <span>{placeholder || "Pick a date"}</span>
+                      }
+                      return format(date, "PPP")
+                    } catch (error) {
+                      return <span>{placeholder || "Pick a date"}</span>
+                    }
+                  })()
+                ) : (
+                  <span>{placeholder || "Pick a date"}</span>
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={localValue ? new Date(localValue) : undefined}
+                selected={localValue && !isNaN(new Date(localValue).getTime()) ? new Date(localValue) : undefined}
                 onSelect={(date) => {
                   setLocalValue(date?.toISOString())
                   onChange(date?.toISOString())
