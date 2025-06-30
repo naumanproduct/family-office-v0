@@ -50,6 +50,7 @@ import { generateTaskActivities } from "@/components/shared/activity-generators"
 import { AIAssistantSection } from "@/components/shared/ai-output-section"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
 
 interface TaskDetailsViewProps {
   task: any
@@ -199,6 +200,22 @@ export function TaskDetailsView({
   // Add state for view modes
   const [notesViewMode, setNotesViewMode] = React.useState<"card" | "list" | "table">("list")
   const [filesViewMode, setFilesViewMode] = React.useState<"card" | "list" | "table">("list")
+
+  // Priority options for combobox
+  const priorityOptions: ComboboxOption[] = [
+    { value: "high", label: "High" },
+    { value: "medium", label: "Medium" },
+    { value: "low", label: "Low" },
+  ]
+
+  // Status options for combobox
+  const statusOptions: ComboboxOption[] = [
+    { value: "pending", label: "Pending" },
+    { value: "in-progress", label: "In Progress" },
+    { value: "review", label: "Review" },
+    { value: "completed", label: "Completed" },
+    { value: "cancelled", label: "Cancelled" },
+  ]
 
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
@@ -807,18 +824,38 @@ export function TaskDetailsView({
         },
         {
           label: "Priority",
-          value: <span className={`text-sm ${
-            fieldValues.priority.toLowerCase() === "high" ? "text-red-600" : 
-            fieldValues.priority.toLowerCase() === "medium" ? "text-yellow-600" : 
-            "text-green-600"
-          }`}>{fieldValues.priority}</span>
+          value: (
+            <Combobox
+              options={priorityOptions}
+              value={fieldValues.priority.toLowerCase()}
+              onValueChange={(value) => {
+                setFieldValues(prev => ({ ...prev, priority: value.charAt(0).toUpperCase() + value.slice(1) }))
+                handleFieldEdit("priority", value)
+              }}
+              placeholder="Select priority"
+              searchPlaceholder="Search priority..."
+              className="h-8 w-[180px]"
+            />
+          )
         },
         {
           label: "Status",
-          value: <span className={`text-sm ${
-            fieldValues.status.toLowerCase() === "completed" ? "text-green-600" : 
-            "text-muted-foreground"
-          }`}>{fieldValues.status}</span>
+          value: (
+            <Combobox
+              options={statusOptions}
+              value={fieldValues.status.toLowerCase().replace(" ", "-")}
+              onValueChange={(value) => {
+                const displayValue = value.split("-").map(word => 
+                  word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(" ")
+                setFieldValues(prev => ({ ...prev, status: displayValue }))
+                handleFieldEdit("status", value)
+              }}
+              placeholder="Select status"
+              searchPlaceholder="Search status..."
+              className="h-8 w-[180px]"
+            />
+          )
         },
         {
           label: "Assignee",

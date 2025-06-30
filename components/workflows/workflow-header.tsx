@@ -616,8 +616,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8" title="Configure Workflow">
+        <Button variant="ghost" size="sm" className="h-8 gap-2" title="Configure Workflow">
           <Settings2Icon className="h-4 w-4" />
+          <span>Configure</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className={`flex w-full flex-col p-0 [&>button]:hidden overflow-hidden ${selectedAutomation && isEditingAutomation ? '!max-w-[calc(100%-2rem)] sm:!max-w-[calc(100%-2rem)] lg:!max-w-[calc(100%-2rem)]' : 'max-w-[30vw] sm:max-w-[30vw]'}`}>
