@@ -53,7 +53,7 @@ import {
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
-import { Badge } from "@/components/ui/badge"
+
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -204,6 +204,11 @@ export const contactSchema = z.object({
   bio: z.string(),
   avatar: z.string().optional(),
   status: z.string(),
+  type: z.string().optional(),
+  associatedEntities: z.array(z.string()).optional(),
+  relatedInvestments: z.array(z.string()).optional(),
+  internalOwner: z.string().optional(),
+  introducedBy: z.string().optional(),
 })
 
 type Contact = z.infer<typeof contactSchema>
@@ -211,161 +216,270 @@ type Contact = z.infer<typeof contactSchema>
 const contactsData: Contact[] = [
   {
     id: 1,
-    firstName: "Sarah",
-    lastName: "Johnson",
-    email: "sarah.johnson@craftventures.com",
+    firstName: "Stephen",
+    lastName: "Schwarzman",
+    email: "stephen.schwarzman@blackstone.com",
     phone: "+1 (555) 123-4567",
-    jobTitle: "CEO",
-    company: "Craft Ventures",
+    jobTitle: "Chairman & CEO",
+    company: "Blackstone",
     companyId: 1,
-    location: "San Francisco, CA",
+    location: "New York, NY",
     tags: ["Investor", "Decision Maker", "VIP"],
     lastInteraction: "2 days ago",
     connectionStrength: "Very strong",
-    linkedin: "sarahjohnson",
-    twitter: "@sarahjohnson",
-    twitterFollowers: 15600,
-    bio: "Sarah is the CEO of Craft Ventures with over 15 years of experience in venture capital...",
+    linkedin: "stephen-schwarzman",
+    twitter: "@StephenSchwarzman",
+    twitterFollowers: 156000,
+    bio: "Chairman, CEO and Co-Founder of Blackstone, one of the world's leading investment firms...",
     avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
+    type: "GP",
+    associatedEntities: ["Blackstone Inc.", "Blackstone Real Estate Fund IX"],
+    relatedInvestments: ["BX Real Estate Fund IX", "BX Growth Equity Fund II"],
+    internalOwner: "John Smith",
+    introducedBy: "Direct Relationship",
   },
   {
     id: 2,
-    firstName: "Michael",
-    lastName: "Chen",
-    email: "michael.chen@falconx.io",
+    firstName: "Ken",
+    lastName: "Griffin",
+    email: "ken.griffin@citadel.com",
     phone: "+1 (555) 234-5678",
-    jobTitle: "CTO",
-    company: "FalconX",
+    jobTitle: "Founder & CEO",
+    company: "Citadel",
     companyId: 2,
-    location: "San Mateo, CA",
-    tags: ["Technical", "Engineering"],
+    location: "Chicago, IL",
+    tags: ["Hedge Fund", "Decision Maker"],
     lastInteraction: "1 week ago",
     connectionStrength: "Strong",
-    linkedin: "michaelchen",
-    twitter: "@mchen",
-    twitterFollowers: 8700,
-    bio: "Michael leads the technical team at FalconX, focusing on blockchain infrastructure...",
+    linkedin: "kengriffin",
+    twitter: "@kengriffin",
+    twitterFollowers: 87000,
+    bio: "Founder and CEO of Citadel, a leading global financial institution...",
     avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
+    type: "GP",
+    associatedEntities: ["Citadel LLC", "Citadel Securities"],
+    relatedInvestments: ["Tech Growth Co-investment", "Healthcare Opportunities"],
+    internalOwner: "Emily Johnson",
+    introducedBy: "Industry Network",
   },
   {
     id: 3,
-    firstName: "Lisa",
-    lastName: "Wang",
-    email: "lisa.wang@google.com",
+    firstName: "Mary",
+    lastName: "Erdoes",
+    email: "mary.erdoes@jpmorgan.com",
     phone: "+1 (555) 345-6789",
-    jobTitle: "VP of Product",
-    company: "Google",
+    jobTitle: "CEO Asset & Wealth Management",
+    company: "JPMorgan Chase",
     companyId: 3,
-    location: "Mountain View, CA",
-    tags: ["Product", "Decision Maker"],
+    location: "New York, NY",
+    tags: ["Banking", "Private Wealth"],
     lastInteraction: "3 days ago",
     connectionStrength: "Very strong",
-    linkedin: "lisawang",
-    twitter: "@lwang",
-    twitterFollowers: 12400,
-    bio: "Lisa oversees product strategy and development at Google's cloud division...",
+    linkedin: "mary-erdoes",
+    twitter: "@MaryErdoes",
+    twitterFollowers: 24000,
+    bio: "CEO of J.P. Morgan Asset & Wealth Management, overseeing $4 trillion in assets...",
     avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
+    type: "Banker",
+    associatedEntities: ["JP Morgan Private Bank", "JP Morgan Asset Management"],
+    relatedInvestments: [],
+    internalOwner: "Robert Chen",
+    introducedBy: "Direct Relationship",
   },
   {
     id: 4,
-    firstName: "David",
-    lastName: "Kim",
-    email: "david.kim@amplitude.com",
+    firstName: "Debanjan",
+    lastName: "Saha",
+    email: "debanjan.saha@datarobot.com",
     phone: "+1 (555) 456-7890",
-    jobTitle: "Head of Sales",
-    company: "Amplitude",
+    jobTitle: "CEO",
+    company: "DataRobot",
     companyId: 4,
-    location: "San Francisco, CA",
-    tags: ["Sales", "Business Development"],
-    lastInteraction: "1 month ago",
-    connectionStrength: "Medium",
-    linkedin: "davidkim",
-    bio: "David leads the enterprise sales team at Amplitude, focusing on Fortune 500 clients...",
+    location: "Boston, MA",
+    tags: ["Portfolio Company", "CEO"],
+    lastInteraction: "5 days ago",
+    connectionStrength: "Strong",
+    linkedin: "debanjansaha",
+    bio: "CEO of DataRobot, leading the company's AI platform strategy...",
     avatar: "/placeholder.svg?height=40&width=40",
-    status: "Prospect",
+    status: "Active",
+    type: "Portfolio Company Executive",
+    associatedEntities: ["DataRobot Inc."],
+    relatedInvestments: ["Series F - DataRobot", "Series G - DataRobot"],
+    internalOwner: "Sarah Wilson",
+    introducedBy: "Tiger Global",
   },
   {
     id: 5,
-    firstName: "Emma",
-    lastName: "Garcia",
-    email: "emma.garcia@stripe.com",
+    firstName: "Henry",
+    lastName: "Kravis",
+    email: "henry.kravis@kkr.com",
     phone: "+1 (555) 567-8901",
-    jobTitle: "CFO",
-    company: "Stripe",
+    jobTitle: "Co-Chairman & Co-CEO",
+    company: "KKR",
     companyId: 5,
-    location: "San Francisco, CA",
-    tags: ["Finance", "Decision Maker"],
+    location: "New York, NY",
+    tags: ["Private Equity", "Decision Maker"],
     lastInteraction: "2 weeks ago",
     connectionStrength: "Strong",
-    linkedin: "emmagarcia",
-    twitter: "@egarcia",
-    twitterFollowers: 5600,
-    bio: "Emma oversees all financial operations at Stripe, with a background in investment banking...",
+    linkedin: "henry-kravis",
+    twitter: "@HenryKravis",
+    twitterFollowers: 45600,
+    bio: "Co-founder and Co-Executive Chairman of KKR, pioneer in private equity...",
     avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
+    type: "GP",
+    associatedEntities: ["KKR & Co.", "KKR Americas Fund XII"],
+    relatedInvestments: ["Americas Fund XII", "Infrastructure Fund III"],
+    internalOwner: "John Smith",
+    introducedBy: "Industry Network",
   },
   {
     id: 6,
-    firstName: "James",
-    lastName: "Wilson",
-    email: "james.wilson@notion.so",
+    firstName: "Craig",
+    lastName: "Jacoby",
+    email: "craig.jacoby@cooley.com",
     phone: "+1 (555) 678-9012",
-    jobTitle: "Head of Marketing",
-    company: "Notion",
+    jobTitle: "Partner - Fund Formation",
+    company: "Cooley LLP",
     companyId: 6,
-    location: "San Francisco, CA",
-    tags: ["Marketing", "Content"],
+    location: "Palo Alto, CA",
+    tags: ["Legal", "Fund Formation"],
     lastInteraction: "5 days ago",
     connectionStrength: "Very strong",
-    linkedin: "jameswilson",
-    twitter: "@jwilson",
-    twitterFollowers: 9800,
-    bio: "James leads Notion's global marketing strategy, focusing on community-driven growth...",
+    linkedin: "craig-jacoby",
+    twitter: "@CooleyLLP",
+    twitterFollowers: 2800,
+    bio: "Leading fund formation partner at Cooley, specializing in venture capital and private equity...",
     avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
+    type: "Advisor",
+    associatedEntities: ["Cooley LLP"],
+    relatedInvestments: [],
+    internalOwner: "Emily Johnson",
+    introducedBy: "Direct Referral",
   },
   {
     id: 7,
-    firstName: "Sophia",
-    lastName: "Martinez",
-    email: "sophia.martinez@figma.com",
+    firstName: "Brian",
+    lastName: "Chesky",
+    email: "brian.chesky@airbnb.com",
     phone: "+1 (555) 789-0123",
-    jobTitle: "Design Director",
-    company: "Figma",
+    jobTitle: "Co-founder & CEO",
+    company: "Airbnb",
     companyId: 7,
     location: "San Francisco, CA",
-    tags: ["Design", "Creative"],
+    tags: ["Portfolio Company", "CEO"],
     lastInteraction: "3 weeks ago",
     connectionStrength: "Medium",
-    linkedin: "sophiamartinez",
-    twitter: "@smartinez",
-    twitterFollowers: 14300,
-    bio: "Sophia oversees the design team at Figma, with expertise in product and interface design...",
+    linkedin: "brianchesky",
+    twitter: "@bchesky",
+    twitterFollowers: 543000,
+    bio: "Co-founder and CEO of Airbnb, transforming the travel and hospitality industry...",
     avatar: "/placeholder.svg?height=40&width=40",
-    status: "Inactive",
+    status: "Active",
+    type: "Portfolio Company Executive",
+    associatedEntities: ["Airbnb Inc."],
+    relatedInvestments: ["Series B - Airbnb", "IPO Allocation"],
+    internalOwner: "Robert Chen",
+    introducedBy: "Sequoia Capital",
   },
   {
     id: 8,
-    firstName: "Alex",
-    lastName: "Thompson",
-    email: "alex.thompson@airtable.com",
+    firstName: "Carol",
+    lastName: "Sawdye",
+    email: "carol.sawdye@pwc.com",
     phone: "+1 (555) 890-1234",
-    jobTitle: "Product Manager",
-    company: "Airtable",
+    jobTitle: "Vice Chairman & CFO",
+    company: "PwC",
     companyId: 8,
-    location: "San Francisco, CA",
-    tags: ["Product", "Technical"],
+    location: "New York, NY",
+    tags: ["Accounting", "Tax"],
     lastInteraction: "1 week ago",
     connectionStrength: "Strong",
-    linkedin: "alexthompson",
-    twitter: "@athompson",
+    linkedin: "carol-sawdye",
+    twitter: "@PwC",
     twitterFollowers: 7200,
-    bio: "Alex leads product development for Airtable's enterprise solutions...",
+    bio: "Vice Chairman and CFO of PwC US, overseeing financial operations and strategy...",
     avatar: "/placeholder.svg?height=40&width=40",
     status: "Active",
+    type: "Vendor",
+    associatedEntities: ["PwC US", "PwC Private Company Services"],
+    relatedInvestments: [],
+    internalOwner: "Sarah Wilson",
+    introducedBy: "Direct Relationship",
+  },
+  {
+    id: 9,
+    firstName: "John",
+    lastName: "Smith",
+    email: "john.smith@familyoffice.com",
+    phone: "+1 (555) 111-2222",
+    jobTitle: "Chief Investment Officer",
+    company: "Family Office",
+    companyId: undefined,
+    location: "New York, NY",
+    tags: ["Internal", "Investment Team"],
+    lastInteraction: "Today",
+    connectionStrength: "Internal",
+    linkedin: "johnsmith-cio",
+    bio: "CIO of the family office, responsible for overall investment strategy and portfolio management...",
+    avatar: "/placeholder.svg?height=40&width=40",
+    status: "Active",
+    type: "Internal",
+    associatedEntities: ["Family Office Management LLC"],
+    relatedInvestments: ["All Active Investments"],
+    internalOwner: "Self",
+    introducedBy: "Founding Team",
+  },
+  {
+    id: 10,
+    firstName: "Emily",
+    lastName: "Johnson",
+    email: "emily.johnson@familyoffice.com",
+    phone: "+1 (555) 222-3333",
+    jobTitle: "Managing Director",
+    company: "Family Office",
+    companyId: undefined,
+    location: "New York, NY",
+    tags: ["Internal", "Investment Team"],
+    lastInteraction: "Today",
+    connectionStrength: "Internal",
+    linkedin: "emilyjohnson-md",
+    bio: "Managing Director focusing on private equity investments and GP relationships...",
+    avatar: "/placeholder.svg?height=40&width=40",
+    status: "Active",
+    type: "Internal",
+    associatedEntities: ["Family Office Management LLC"],
+    relatedInvestments: ["Blackstone Funds", "KKR Funds", "Citadel Co-investments"],
+    internalOwner: "Self",
+    introducedBy: "Founding Team",
+  },
+  {
+    id: 11,
+    firstName: "Sarah",
+    lastName: "Wilson",
+    email: "sarah.wilson@familyoffice.com",
+    phone: "+1 (555) 333-4444",
+    jobTitle: "Director - Portfolio Management",
+    company: "Family Office",
+    companyId: undefined,
+    location: "New York, NY",
+    tags: ["Internal", "Portfolio Team"],
+    lastInteraction: "Today",
+    connectionStrength: "Internal",
+    linkedin: "sarahwilson-portfolio",
+    bio: "Director of Portfolio Management, overseeing portfolio company monitoring and value creation...",
+    avatar: "/placeholder.svg?height=40&width=40",
+    status: "Active",
+    type: "Internal",
+    associatedEntities: ["Family Office Management LLC"],
+    relatedInvestments: ["DataRobot", "Airbnb", "Portfolio Companies"],
+    internalOwner: "Self",
+    introducedBy: "Founding Team",
   },
 ]
 
@@ -379,6 +493,8 @@ const getConnectionStrengthColor = (strength: string) => {
       return "bg-yellow-100 text-yellow-800"
     case "Weak":
       return "bg-red-100 text-red-800"
+    case "Internal":
+      return "bg-purple-100 text-purple-800"
     default:
       return "bg-gray-100 text-gray-800"
   }
@@ -833,6 +949,49 @@ const columns: ColumnDef<Contact>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => <span className="text-sm">{row.original.type || "-"}</span>,
+  },
+  {
+    accessorKey: "jobTitle",
+    header: "Job Title",
+    cell: ({ row }) => <span className="text-sm">{row.original.jobTitle}</span>,
+  },
+  {
+    accessorKey: "company",
+    header: "Company",
+    cell: ({ row }) => <span className="text-sm font-medium">{row.original.company}</span>,
+  },
+  {
+    accessorKey: "associatedEntities",
+    header: "Associated Entities",
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {row.original.associatedEntities && row.original.associatedEntities.length > 0
+          ? row.original.associatedEntities.slice(0, 2).join(", ")
+          : "-"}
+        {row.original.associatedEntities && row.original.associatedEntities.length > 2 && (
+          <span className="text-muted-foreground"> +{row.original.associatedEntities.length - 2}</span>
+        )}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "relatedInvestments",
+    header: "Related Investments",
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {row.original.relatedInvestments && row.original.relatedInvestments.length > 0
+          ? row.original.relatedInvestments.slice(0, 2).join(", ")
+          : "-"}
+        {row.original.relatedInvestments && row.original.relatedInvestments.length > 2 && (
+          <span className="text-muted-foreground"> +{row.original.relatedInvestments.length - 2}</span>
+        )}
+      </div>
+    ),
+  },
+  {
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => (
@@ -847,14 +1006,22 @@ const columns: ColumnDef<Contact>[] = [
     cell: ({ row }) => <span className="text-sm">{row.original.phone}</span>,
   },
   {
-    accessorKey: "jobTitle",
-    header: "Job Title",
-    cell: ({ row }) => <span className="text-sm">{row.original.jobTitle}</span>,
-  },
-  {
-    accessorKey: "company",
-    header: "Company",
-    cell: ({ row }) => <span className="text-sm font-medium">{row.original.company}</span>,
+    accessorKey: "linkedin",
+    header: "LinkedIn",
+    cell: ({ row }) => (
+      row.original.linkedin ? (
+        <a
+          href={`https://linkedin.com/in/${row.original.linkedin}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          {row.original.linkedin}
+        </a>
+      ) : (
+        <span className="text-sm">-</span>
+      )
+    ),
   },
   {
     accessorKey: "location",
@@ -862,22 +1029,14 @@ const columns: ColumnDef<Contact>[] = [
     cell: ({ row }) => <span className="text-sm">{row.original.location}</span>,
   },
   {
-    accessorKey: "tags",
-    header: "Tags",
-    cell: ({ row }) => (
-      <div className="flex flex-wrap gap-1 max-w-[200px]">
-        {row.original.tags.slice(0, 2).map((tag) => (
-          <Badge key={tag} variant="outline" className="text-xs px-1 py-0">
-            {tag}
-          </Badge>
-        ))}
-        {row.original.tags.length > 2 && (
-          <Badge variant="outline" className="text-xs px-1 py-0">
-            +{row.original.tags.length - 2}
-          </Badge>
-        )}
-      </div>
-    ),
+    accessorKey: "internalOwner",
+    header: "Internal Owner",
+    cell: ({ row }) => <span className="text-sm">{row.original.internalOwner || "-"}</span>,
+  },
+  {
+    accessorKey: "introducedBy",
+    header: "Introduced By",
+    cell: ({ row }) => <span className="text-sm">{row.original.introducedBy || "-"}</span>,
   },
   {
     accessorKey: "lastInteraction",
@@ -887,18 +1046,12 @@ const columns: ColumnDef<Contact>[] = [
   {
     accessorKey: "connectionStrength",
     header: "Connection",
-    cell: ({ row }) => (
-      <Badge className={`text-xs ${getConnectionStrengthColor(row.original.connectionStrength)}`}>
-        {row.original.connectionStrength}
-      </Badge>
-    ),
+    cell: ({ row }) => <span className="text-sm">{row.original.connectionStrength}</span>,
   },
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
-      <Badge className={`text-xs ${getStatusColor(row.original.status)}`}>{row.original.status}</Badge>
-    ),
+    cell: ({ row }) => <span className="text-sm">{row.original.status}</span>,
   },
   {
     id: "actions",

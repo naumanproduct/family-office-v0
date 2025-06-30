@@ -46,7 +46,7 @@ import {
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
 
-import { Badge } from "@/components/ui/badge"
+
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -94,6 +94,13 @@ export const companySchema = z.object({
   fundingRaised: z.string(),
   investmentScore: z.string(),
   status: z.string(),
+  type: z.string().optional(),
+  internalOwner: z.string().optional(),
+  associatedPeople: z.array(z.string()).optional(),
+  associatedEntities: z.array(z.string()).optional(),
+  introducedBy: z.string().optional(),
+  associatedInvestments: z.array(z.string()).optional(),
+  currentOpportunities: z.array(z.string()).optional(),
   workflows: z.array(
     z.object({
       id: z.string(),
@@ -114,214 +121,359 @@ type Company = z.infer<typeof companySchema>
 export const companiesData: Company[] = [
   {
     id: 1,
-    name: "Craft Ventures",
-    categories: ["B2B", "Enterprise", "Information Technology"],
-    industry: "Venture Capital",
-    stage: "Growth",
-    employees: "50-100",
-    revenue: "$10M-$50M",
-    funding: "Series C",
+    name: "Blackstone",
+    categories: ["Private Equity", "Alternative Assets"],
+    industry: "Private Equity",
+    stage: "Established",
+    employees: "1000-5000",
+    revenue: "$1B+",
+    funding: "Public",
     lastInteraction: "2 days ago",
     connectionStrength: "Very strong",
-    website: "craft.co",
-    linkedin: "craft-ventures",
-    twitter: "@craftventures",
-    twitterFollowers: 24289,
-    location: "San Francisco, CA",
-    description: "Craft is a tech startup focused on building tools for modern teams...",
-    estimatedArr: "$10M-$50M",
-    fundingRaised: "$20,200,000.00",
+    website: "blackstone.com",
+    linkedin: "blackstone",
+    twitter: "@blackstone",
+    twitterFollowers: 124289,
+    location: "New York, NY",
+    description: "Global leader in alternative investments with $1 trillion in AUM...",
+    estimatedArr: "$1B+",
+    fundingRaised: "N/A",
     investmentScore: "A+",
     status: "Active",
+    type: "GP",
+    internalOwner: "John Smith",
+    associatedPeople: ["Stephen Schwarzman", "Jonathan Gray", "Joseph Baratta"],
+    associatedEntities: ["Blackstone Real Estate Fund IX", "Blackstone Growth", "Blackstone Credit"],
+    introducedBy: "Direct Relationship",
+    associatedInvestments: ["BX Real Estate Fund IX", "BX Growth Equity Fund II", "BX Tactical Opportunities"],
+    currentOpportunities: ["Co-investment in European Logistics", "Secondary Transaction"],
     workflows: [
       {
-        id: "deal-1",
-        name: "Deal Pipeline",
-        stage: "Work in Progress",
-        stageColor: "bg-yellow-100",
-        targetRaise: "$5M",
-        fundingRound: "Series C",
-        nextMeeting: "2024-06-15",
-      },
-      {
-        id: "tax-1",
-        name: "Tax Document Collection",
-        stage: "Documents Requested",
+        id: "capital-1",
+        name: "Capital Call Processing",
+        stage: "Documents Received",
         stageColor: "bg-blue-100",
-        dueDate: "2024-07-30",
+        dueDate: "2024-07-15",
         assignee: "Sarah Chen",
       },
     ],
   },
   {
     id: 2,
-    name: "FalconX",
-    categories: ["B2B", "Enterprise", "Financial Services"],
-    industry: "Cryptocurrency",
-    stage: "Late Stage",
-    employees: "200-500",
-    revenue: "$50M-$100M",
-    funding: "Series D",
+    name: "Citadel",
+    categories: ["Hedge Fund", "Market Making"],
+    industry: "Hedge Fund",
+    stage: "Established",
+    employees: "1000-5000",
+    revenue: "$10B+",
+    funding: "Private",
     lastInteraction: "1 week ago",
     connectionStrength: "Strong",
-    website: "falconx.io",
-    linkedin: "falconx",
-    twitter: "@falconx_io",
-    twitterFollowers: 4667,
-    location: "San Mateo, CA",
-    description: "FalconX is a leading institutional digital asset platform...",
-    estimatedArr: "$50M-$100M",
-    fundingRaised: "$477,000,000.00",
-    investmentScore: "A",
+    website: "citadel.com",
+    linkedin: "citadel-llc",
+    twitter: "@citadel",
+    twitterFollowers: 54667,
+    location: "Chicago, IL",
+    description: "Leading global hedge fund and market maker with $50B+ AUM...",
+    estimatedArr: "$10B+",
+    fundingRaised: "N/A",
+    investmentScore: "A+",
     status: "Active",
-    workflows: [
-      {
-        id: "deal-2",
-        name: "Deal Pipeline",
-        stage: "Term Sheet",
-        stageColor: "bg-purple-100",
-        targetRaise: "$15M",
-        fundingRound: "Series D",
-        nextMeeting: "2024-06-10",
-      },
-    ],
+    type: "Co-Investor",
+    internalOwner: "Emily Johnson",
+    associatedPeople: ["Ken Griffin", "Peng Zhao", "Gerald Beeson"],
+    associatedEntities: ["Citadel Securities", "Citadel Wellington", "Citadel Kensington"],
+    introducedBy: "Industry Network",
+    associatedInvestments: ["Tech Growth Co-investment", "Healthcare Opportunities Fund"],
+    currentOpportunities: ["Joint Venture in Asia", "Co-investment in FinTech"],
+    workflows: [],
   },
   {
     id: 3,
-    name: "Google",
-    categories: ["B2C", "Enterprise", "Information Technology"],
-    industry: "Technology",
+    name: "JPMorgan Chase",
+    categories: ["Investment Banking", "Private Banking"],
+    industry: "Financial Services",
     stage: "Public",
     employees: "100,000+",
     revenue: "$100B+",
     funding: "Public",
     lastInteraction: "3 days ago",
     connectionStrength: "Very strong",
-    website: "google.com",
-    linkedin: "google",
-    twitter: "@google",
-    twitterFollowers: 28946065,
-    location: "Mountain View, CA",
-    description: "Google specializes in Internet-related services and products...",
+    website: "jpmorganchase.com",
+    linkedin: "jpmorgan-chase",
+    twitter: "@jpmorgan",
+    twitterFollowers: 946065,
+    location: "New York, NY",
+    description: "Leading global financial services firm...",
     estimatedArr: "$100B+",
     fundingRaised: "N/A",
     investmentScore: "A+",
-    status: "Partner",
+    status: "Active",
+    type: "Vendor",
+    internalOwner: "Robert Chen",
+    associatedPeople: ["Jamie Dimon", "Mary Erdoes", "Marc Badrichani"],
+    associatedEntities: ["JP Morgan Private Bank", "JP Morgan Securities"],
+    introducedBy: "Direct Relationship",
+    associatedInvestments: [],
+    currentOpportunities: ["Private Credit Facility", "M&A Advisory"],
     workflows: [],
   },
   {
     id: 4,
-    name: "Amplitude",
-    categories: ["B2B", "SaaS", "Analytics"],
+    name: "DataRobot",
+    categories: ["AI/ML", "Enterprise Software"],
     industry: "Software",
-    stage: "Public",
+    stage: "Late Stage",
     employees: "500-1000",
     revenue: "$100M-$500M",
-    funding: "Public",
-    lastInteraction: "1 month ago",
-    connectionStrength: "Medium",
-    website: "amplitude.com",
-    linkedin: "amplitude-analytics",
-    twitter: "@amplitude_hq",
+    funding: "Series G",
+    lastInteraction: "5 days ago",
+    connectionStrength: "Strong",
+    website: "datarobot.com",
+    linkedin: "datarobot",
+    twitter: "@datarobot",
     twitterFollowers: 20787,
-    location: "San Francisco, CA",
-    description: "Amplitude is a digital analytics platform...",
+    location: "Boston, MA",
+    description: "AI platform for enterprise machine learning...",
     estimatedArr: "$100M-$250M",
-    fundingRaised: "N/A",
-    investmentScore: "B+",
-    status: "Prospect",
-    workflows: [],
+    fundingRaised: "$750,000,000",
+    investmentScore: "A-",
+    status: "Active",
+    type: "Portfolio Company",
+    internalOwner: "Sarah Wilson",
+    associatedPeople: ["Debanjan Saha", "Jeremy Achin"],
+    associatedEntities: ["DataRobot Holdings"],
+    introducedBy: "Tiger Global",
+    associatedInvestments: ["Series F - Lead", "Series G - Follow-on"],
+    currentOpportunities: ["Bridge Round", "Strategic Exit"],
+    workflows: [
+      {
+        id: "monitoring-1",
+        name: "Quarterly Monitoring",
+        stage: "In Progress",
+        stageColor: "bg-yellow-100",
+        dueDate: "2024-07-30",
+        assignee: "Mike Chen",
+      },
+    ],
   },
   {
     id: 5,
-    name: "Stripe",
-    categories: ["B2B", "FinTech", "Payments"],
-    industry: "Financial Services",
-    stage: "Late Stage",
+    name: "KKR",
+    categories: ["Private Equity", "Credit", "Infrastructure"],
+    industry: "Private Equity",
+    stage: "Public",
     employees: "1000-5000",
     revenue: "$1B+",
-    funding: "Series H",
+    funding: "Public",
     lastInteraction: "2 weeks ago",
     connectionStrength: "Strong",
-    website: "stripe.com",
-    linkedin: "stripe",
-    twitter: "@stripe",
+    website: "kkr.com",
+    linkedin: "kkr",
+    twitter: "@kkr",
     twitterFollowers: 156789,
-    location: "San Francisco, CA",
-    description: "Stripe is a technology company that builds economic infrastructure...",
+    location: "New York, NY",
+    description: "Global investment firm managing multiple alternative asset classes...",
     estimatedArr: "$1B+",
-    fundingRaised: "$2,200,000,000.00",
+    fundingRaised: "N/A",
     investmentScore: "A+",
     status: "Active",
+    type: "GP",
+    internalOwner: "John Smith",
+    associatedPeople: ["Henry Kravis", "Scott Nuttall", "Joseph Bae"],
+    associatedEntities: ["KKR Americas Fund XII", "KKR Infrastructure Fund"],
+    introducedBy: "Industry Network",
+    associatedInvestments: ["Americas Fund XII", "Asia Fund IV", "Infrastructure Fund III"],
+    currentOpportunities: ["European Buyout Co-investment", "Credit Opportunities"],
     workflows: [],
   },
   {
     id: 6,
-    name: "Notion",
-    categories: ["B2B", "Productivity", "SaaS"],
-    industry: "Software",
-    stage: "Growth",
-    employees: "200-500",
-    revenue: "$50M-$100M",
-    funding: "Series C",
+    name: "Cooley LLP",
+    categories: ["Legal Services", "Professional Services"],
+    industry: "Legal",
+    stage: "Established",
+    employees: "1000-5000",
+    revenue: "$1B+",
+    funding: "Private",
     lastInteraction: "5 days ago",
     connectionStrength: "Very strong",
-    website: "notion.so",
-    linkedin: "notion-hq",
-    twitter: "@notionhq",
+    website: "cooley.com",
+    linkedin: "cooley-llp",
+    twitter: "@cooleyLLP",
     twitterFollowers: 89234,
-    location: "San Francisco, CA",
-    description: "Notion is an all-in-one workspace for notes, tasks, wikis, and databases...",
-    estimatedArr: "$50M-$100M",
-    fundingRaised: "$343,000,000.00",
-    investmentScore: "A",
+    location: "Palo Alto, CA",
+    description: "Leading law firm for technology companies and venture capital...",
+    estimatedArr: "$1B+",
+    fundingRaised: "N/A",
+    investmentScore: "N/A",
     status: "Active",
+    type: "Vendor",
+    internalOwner: "Emily Johnson",
+    associatedPeople: ["Joe Conroy", "Craig Jacoby", "Eric Jensen"],
+    associatedEntities: ["Cooley LLP"],
+    introducedBy: "Direct Referral",
+    associatedInvestments: [],
+    currentOpportunities: ["Fund Formation", "M&A Advisory"],
     workflows: [],
   },
   {
     id: 7,
-    name: "Figma",
-    categories: ["B2B", "Design", "SaaS"],
-    industry: "Software",
-    stage: "Acquired",
-    employees: "500-1000",
-    revenue: "$100M-$500M",
-    funding: "Acquired",
+    name: "Airbnb",
+    categories: ["Travel", "Marketplace", "Consumer"],
+    industry: "Technology",
+    stage: "Public",
+    employees: "5000-10000",
+    revenue: "$5B+",
+    funding: "Public",
     lastInteraction: "3 weeks ago",
     connectionStrength: "Medium",
-    website: "figma.com",
-    linkedin: "figma",
-    twitter: "@figma",
-    twitterFollowers: 234567,
+    website: "airbnb.com",
+    linkedin: "airbnb",
+    twitter: "@airbnb",
+    twitterFollowers: 5234567,
     location: "San Francisco, CA",
-    description: "Figma is a collaborative interface design tool...",
-    estimatedArr: "$200M-$400M",
-    fundingRaised: "$333,000,000.00",
-    investmentScore: "A+",
-    status: "Inactive",
+    description: "Global travel marketplace and hospitality service...",
+    estimatedArr: "$5B+",
+    fundingRaised: "N/A",
+    investmentScore: "A",
+    status: "Active",
+    type: "Portfolio Company",
+    internalOwner: "Robert Chen",
+    associatedPeople: ["Brian Chesky", "Nathan Blecharczyk", "Joe Gebbia"],
+    associatedEntities: ["Airbnb Inc."],
+    introducedBy: "Sequoia Capital",
+    associatedInvestments: ["Series B - Early Investment", "IPO Allocation"],
+    currentOpportunities: [],
     workflows: [],
   },
   {
     id: 8,
-    name: "Airtable",
-    categories: ["B2B", "Database", "No-Code"],
-    industry: "Software",
-    stage: "Growth",
-    employees: "500-1000",
-    revenue: "$100M-$200M",
-    funding: "Series F",
+    name: "PwC",
+    categories: ["Accounting", "Tax", "Professional Services"],
+    industry: "Professional Services",
+    stage: "Established",
+    employees: "100,000+",
+    revenue: "$50B+",
+    funding: "Private",
     lastInteraction: "1 week ago",
     connectionStrength: "Strong",
-    website: "airtable.com",
-    linkedin: "airtable",
-    twitter: "@airtable",
-    twitterFollowers: 45678,
-    location: "San Francisco, CA",
-    description: "Airtable is a cloud collaboration service...",
-    estimatedArr: "$100M-$200M",
-    fundingRaised: "$735,000,000.00",
-    investmentScore: "A-",
+    website: "pwc.com",
+    linkedin: "pwc",
+    twitter: "@pwc",
+    twitterFollowers: 445678,
+    location: "New York, NY",
+    description: "Global professional services network - audit, tax, and advisory...",
+    estimatedArr: "$50B+",
+    fundingRaised: "N/A",
+    investmentScore: "N/A",
     status: "Active",
+    type: "Vendor",
+    internalOwner: "Sarah Wilson",
+    associatedPeople: ["Tim Ryan", "Carol Sawdye", "Mohamed Kande"],
+    associatedEntities: ["PwC US", "PwC Private Company Services"],
+    introducedBy: "Direct Relationship",
+    associatedInvestments: [],
+    currentOpportunities: ["Tax Planning", "Fund Audit Services"],
+    workflows: [
+      {
+        id: "audit-1",
+        name: "Annual Audit",
+        stage: "Planning",
+        stageColor: "bg-blue-100",
+        dueDate: "2024-12-31",
+        assignee: "Finance Team",
+      },
+    ],
+  },
+  {
+    id: 9,
+    name: "Apollo Global Management",
+    categories: ["Private Equity", "Credit"],
+    industry: "Private Equity",
+    stage: "Public",
+    employees: "1000-5000",
+    revenue: "$500M-$1B",
+    funding: "Public",
+    lastInteraction: "1 month ago",
+    connectionStrength: "Medium",
+    website: "apollo.com",
+    linkedin: "apollo-global-management",
+    twitter: "@apolloglobal",
+    twitterFollowers: 23456,
+    location: "New York, NY",
+    description: "Leading global alternative investment manager...",
+    estimatedArr: "$500M-$1B",
+    fundingRaised: "N/A",
+    investmentScore: "A",
+    status: "Active",
+    type: "GP",
+    internalOwner: "John Smith",
+    associatedPeople: ["Marc Rowan", "Scott Kleinman"],
+    associatedEntities: ["Apollo Fund IX", "Apollo Credit Fund"],
+    introducedBy: "LP Annual Meeting",
+    associatedInvestments: ["Apollo Fund IX", "Strategic Credit Opportunities"],
+    currentOpportunities: ["New Credit Fund", "Real Estate Co-investment"],
+    workflows: [],
+  },
+  {
+    id: 10,
+    name: "Goldman Sachs",
+    categories: ["Investment Banking", "Asset Management"],
+    industry: "Financial Services",
+    stage: "Public",
+    employees: "10000+",
+    revenue: "$50B+",
+    funding: "Public",
+    lastInteraction: "2 weeks ago",
+    connectionStrength: "Strong",
+    website: "goldmansachs.com",
+    linkedin: "goldman-sachs",
+    twitter: "@goldmansachs",
+    twitterFollowers: 876543,
+    location: "New York, NY",
+    description: "Leading global investment banking and financial services company...",
+    estimatedArr: "$50B+",
+    fundingRaised: "N/A",
+    investmentScore: "A+",
+    status: "Active",
+    type: "Vendor",
+    internalOwner: "Robert Chen",
+    associatedPeople: ["David Solomon", "John Waldron"],
+    associatedEntities: ["Goldman Sachs Private Wealth", "GS Asset Management"],
+    introducedBy: "Direct Relationship",
+    associatedInvestments: [],
+    currentOpportunities: ["Structured Products", "Private Banking Services"],
+    workflows: [],
+  },
+  {
+    id: 11,
+    name: "SpaceX",
+    categories: ["Aerospace", "Technology"],
+    industry: "Aerospace",
+    stage: "Late Stage",
+    employees: "10000+",
+    revenue: "$2B+",
+    funding: "Series N",
+    lastInteraction: "3 weeks ago",
+    connectionStrength: "Medium",
+    website: "spacex.com",
+    linkedin: "spacex",
+    twitter: "@spacex",
+    twitterFollowers: 32100000,
+    location: "Hawthorne, CA",
+    description: "Revolutionary space exploration and satellite technology company...",
+    estimatedArr: "$2B+",
+    fundingRaised: "$10,000,000,000",
+    investmentScore: "A+",
+    status: "Active",
+    type: "Portfolio Company",
+    internalOwner: "Emily Johnson",
+    associatedPeople: ["Elon Musk", "Gwynne Shotwell"],
+    associatedEntities: ["SpaceX Holdings"],
+    introducedBy: "Founders Fund",
+    associatedInvestments: ["Series J - Secondary", "Series N - Primary"],
+    currentOpportunities: ["Starlink Spin-off", "Next Funding Round"],
     workflows: [],
   },
 ]
@@ -639,11 +791,11 @@ function CompanyTabContent({ company }: { company: Company }) {
                 {company.industry} • {company.location}
               </CardDescription>
               <div className="mt-3 flex items-center gap-4">
-                <Badge variant="outline">{company.stage}</Badge>
+                <span className="text-sm">{company.stage}</span>
                 {company.status && (
-                  <Badge variant="outline" className={getStatusColor(company.status)}>
+                  <span className="text-sm">
                     {company.status}
-                  </Badge>
+                  </span>
                 )}
                 <span className="text-sm text-muted-foreground">Est. {company.employees} employees</span>
               </div>
@@ -929,22 +1081,9 @@ const columns: ColumnDef<Company>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "categories",
-    header: "Categories",
-    cell: ({ row }) => (
-      <div className="flex flex-wrap gap-1 max-w-[200px]">
-        {row.original.categories.slice(0, 3).map((category) => (
-          <Badge key={category} variant="outline" className="text-xs px-1 py-0">
-            {category}
-          </Badge>
-        ))}
-        {row.original.categories.length > 3 && (
-          <Badge variant="outline" className="text-xs px-1 py-0">
-            +{row.original.categories.length - 3}
-          </Badge>
-        )}
-      </div>
-    ),
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => <span className="text-sm">{row.original.type || "-"}</span>,
   },
   {
     accessorKey: "industry",
@@ -954,16 +1093,63 @@ const columns: ColumnDef<Company>[] = [
   {
     accessorKey: "stage",
     header: "Stage",
+    cell: ({ row }) => <span className="text-sm">{row.original.stage}</span>,
+  },
+  {
+    accessorKey: "associatedPeople",
+    header: "Associated People",
     cell: ({ row }) => (
-      <Badge variant="outline" className="text-xs">
-        {row.original.stage}
-      </Badge>
+      <div className="text-sm">
+        {row.original.associatedPeople && row.original.associatedPeople.length > 0
+          ? row.original.associatedPeople.slice(0, 2).join(", ")
+          : "-"}
+        {row.original.associatedPeople && row.original.associatedPeople.length > 2 && (
+          <span className="text-muted-foreground"> +{row.original.associatedPeople.length - 2}</span>
+        )}
+      </div>
     ),
   },
   {
-    accessorKey: "employees",
-    header: "Employees",
-    cell: ({ row }) => <span className="text-sm">{row.original.employees}</span>,
+    accessorKey: "associatedEntities",
+    header: "Associated Entities",
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {row.original.associatedEntities && row.original.associatedEntities.length > 0
+          ? row.original.associatedEntities.slice(0, 2).join(", ")
+          : "-"}
+        {row.original.associatedEntities && row.original.associatedEntities.length > 2 && (
+          <span className="text-muted-foreground"> +{row.original.associatedEntities.length - 2}</span>
+        )}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "associatedInvestments",
+    header: "Associated Investments",
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {row.original.associatedInvestments && row.original.associatedInvestments.length > 0
+          ? row.original.associatedInvestments.slice(0, 2).join(", ")
+          : "-"}
+        {row.original.associatedInvestments && row.original.associatedInvestments.length > 2 && (
+          <span className="text-muted-foreground"> +{row.original.associatedInvestments.length - 2}</span>
+        )}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "currentOpportunities",
+    header: "Current Opportunities",
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {row.original.currentOpportunities && row.original.currentOpportunities.length > 0
+          ? row.original.currentOpportunities.slice(0, 2).join(", ")
+          : "-"}
+        {row.original.currentOpportunities && row.original.currentOpportunities.length > 2 && (
+          <span className="text-muted-foreground"> +{row.original.currentOpportunities.length - 2}</span>
+        )}
+      </div>
+    ),
   },
   {
     accessorKey: "revenue",
@@ -971,34 +1157,9 @@ const columns: ColumnDef<Company>[] = [
     cell: ({ row }) => <span className="text-sm font-medium">{row.original.revenue}</span>,
   },
   {
-    accessorKey: "lastInteraction",
-    header: "Last Interaction",
-    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastInteraction}</span>,
-  },
-  {
-    accessorKey: "connectionStrength",
-    header: "Connection",
-    cell: ({ row }) => (
-      <Badge className={`text-xs ${getConnectionStrengthColor(row.original.connectionStrength)}`}>
-        {row.original.connectionStrength}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "twitterFollowers",
-    header: "Twitter",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-1">
-        <span className="text-sm">{formatNumber(row.original.twitterFollowers)}</span>
-        <a
-          href={`https://twitter.com/${row.original.twitter.replace("@", "")}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <ExternalLinkIcon className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-        </a>
-      </div>
-    ),
+    accessorKey: "employees",
+    header: "Employees",
+    cell: ({ row }) => <span className="text-sm">{row.original.employees}</span>,
   },
   {
     accessorKey: "website",
@@ -1020,36 +1181,29 @@ const columns: ColumnDef<Company>[] = [
     cell: ({ row }) => <span className="text-sm">{row.original.location}</span>,
   },
   {
-    accessorKey: "estimatedArr",
-    header: "Est. ARR",
-    cell: ({ row }) => <span className="text-sm font-medium">{row.original.estimatedArr}</span>,
+    accessorKey: "internalOwner",
+    header: "Internal Owner",
+    cell: ({ row }) => <span className="text-sm">{row.original.internalOwner || "-"}</span>,
   },
   {
-    accessorKey: "fundingRaised",
-    header: "Funding Raised",
-    cell: ({ row }) => (
-      <span className="text-sm font-medium">
-        {row.original.fundingRaised === "N/A"
-          ? "N/A"
-          : `$${Number.parseFloat(row.original.fundingRaised.replace(/[$,]/g, "")).toLocaleString()}`}
-      </span>
-    ),
+    accessorKey: "introducedBy",
+    header: "Introduced By",
+    cell: ({ row }) => <span className="text-sm">{row.original.introducedBy || "-"}</span>,
   },
   {
-    accessorKey: "investmentScore",
-    header: "Score",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="text-xs font-medium">
-        {row.original.investmentScore}
-      </Badge>
-    ),
+    accessorKey: "lastInteraction",
+    header: "Last Interaction",
+    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastInteraction}</span>,
+  },
+  {
+    accessorKey: "connectionStrength",
+    header: "Connection",
+    cell: ({ row }) => <span className="text-sm">{row.original.connectionStrength}</span>,
   },
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
-      <Badge className={`text-xs ${getStatusColor(row.original.status)}`}>{row.original.status}</Badge>
-    ),
+    cell: ({ row }) => <span className="text-sm">{row.original.status}</span>,
   },
   {
     id: "actions",
