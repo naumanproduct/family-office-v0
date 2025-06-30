@@ -135,53 +135,8 @@ export function EditableField({
         )
 
       case "date":
-        return (
-          <Popover open={isEditing} onOpenChange={setIsEditing}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "h-8 w-full justify-start text-left font-normal text-sm",
-                  !localValue && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {localValue ? (
-                  (() => {
-                    try {
-                      const date = new Date(localValue)
-                      if (isNaN(date.getTime())) {
-                        return <span>{placeholder || "Pick a date"}</span>
-                      }
-                      return format(date, "PPP")
-                    } catch (error) {
-                      return <span>{placeholder || "Pick a date"}</span>
-                    }
-                  })()
-                ) : (
-                  <span>{placeholder || "Pick a date"}</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={localValue && !isNaN(new Date(localValue).getTime()) ? new Date(localValue) : undefined}
-                onSelect={(date) => {
-                  setLocalValue(date?.toISOString())
-                  onChange(date?.toISOString())
-                  setIsEditing(false)
-                }}
-                disabled={(date) => {
-                  if (minDate && date < minDate) return true
-                  if (maxDate && date > maxDate) return true
-                  return false
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        )
+        // Date is handled inline in the main render
+        return null
 
       case "combobox":
         return (
@@ -255,16 +210,178 @@ export function EditableField({
     return <div className={cn("text-sm", className)}>{renderDisplayValue()}</div>
   }
 
-  if (isEditing && (type === "date" || type === "select" || type === "combobox")) {
-    return <div className={cn("w-full", className)}>{renderEditControl()}</div>
+  // Special handling for date picker - render inline without button styling
+  if (type === "date") {
+    return (
+      <Popover open={isEditing} onOpenChange={setIsEditing}>
+        <PopoverTrigger asChild>
+          <div
+            className={cn(
+              "text-sm cursor-pointer rounded px-2 py-1 -mx-2 -my-1 transition-colors",
+              isHovered && "bg-muted/50",
+              className
+            )}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            {renderDisplayValue()}
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={localValue && !isNaN(new Date(localValue).getTime()) ? new Date(localValue) : undefined}
+            onSelect={(date) => {
+              setLocalValue(date?.toISOString())
+              onChange(date?.toISOString())
+              setIsEditing(false)
+            }}
+            disabled={(date) => {
+              if (minDate && date < minDate) return true
+              if (maxDate && date > maxDate) return true
+              return false
+            }}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    )
   }
 
-  if (isEditing) {
+  // For combobox, use popover directly to maintain visual consistency
+  if (type === "combobox") {
     return (
-      <div className={cn("w-full", className)}>
-        {renderEditControl()}
-      </div>
+      <Popover open={isEditing} onOpenChange={setIsEditing}>
+        <PopoverTrigger asChild>
+          <div
+            className={cn(
+              "text-sm cursor-pointer rounded px-2 py-1 -mx-2 -my-1 transition-colors",
+              isHovered && "bg-muted/50",
+              className
+            )}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            {renderDisplayValue()}
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px] p-0">
+          <Command>
+            <CommandInput placeholder={`Search ${placeholder?.toLowerCase() || "options"}...`} className="h-9" />
+            <CommandList>
+              <CommandEmpty>No option found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(currentValue) => {
+                      setLocalValue(currentValue)
+                      onChange(currentValue)
+                      setIsEditing(false)
+                    }}
+                  >
+                    {option.label}
+                    <Check
+                      className={cn(
+                        "ml-auto h-4 w-4",
+                        localValue === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     )
+  }
+
+  // For text inputs, show inline without borders
+  if (isEditing && (type === "text" || type === "email" || type === "phone" || type === "url" || type === "number")) {
+    return (
+      <Input
+        type={type === "number" ? "number" : "text"}
+        value={localValue || ""}
+        onChange={(e) => setLocalValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSave}
+        placeholder={placeholder}
+        className="h-auto p-0 text-sm border-0 shadow-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+        autoFocus
+      />
+    )
+  }
+
+  // For textarea, show inline without borders
+  if (isEditing && type === "textarea") {
+    return (
+      <Textarea
+        value={localValue || ""}
+        onChange={(e) => setLocalValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={handleSave}
+        placeholder={placeholder}
+        className="text-sm min-h-[60px] p-0 border-0 shadow-none bg-transparent resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
+        autoFocus
+      />
+    )
+  }
+
+  // For select type, use popover directly to maintain visual consistency
+  if (type === "select") {
+    return (
+      <Popover open={isEditing} onOpenChange={setIsEditing}>
+        <PopoverTrigger asChild>
+          <div
+            className={cn(
+              "text-sm cursor-pointer rounded px-2 py-1 -mx-2 -my-1 transition-colors",
+              isHovered && "bg-muted/50",
+              className
+            )}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            {renderDisplayValue()}
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px] p-0">
+          <Command>
+            <CommandInput placeholder={`Search ${placeholder?.toLowerCase() || "options"}...`} />
+            <CommandList>
+              <CommandEmpty>No option found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={(currentValue) => {
+                      setLocalValue(currentValue)
+                      onChange(currentValue)
+                      setIsEditing(false)
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        localValue === option.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    )
+  }
+
+  // For other types that need special handling
+  if (isEditing) {
+    return <div className={cn("w-full", className)}>{renderEditControl()}</div>
   }
 
   return (
