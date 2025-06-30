@@ -821,49 +821,79 @@ export function TaskDetailsView({
         {
           label: "Description",
           value: fieldValues.description,
+          editable: true,
+          fieldType: "textarea",
+          onChange: (value) => {
+            setFieldValues(prev => ({ ...prev, description: value }))
+            handleFieldEdit("description", value)
+          }
         },
         {
           label: "Priority",
-          value: (
-            <Combobox
-              options={priorityOptions}
-              value={fieldValues.priority.toLowerCase()}
-              onValueChange={(value) => {
-                setFieldValues(prev => ({ ...prev, priority: value.charAt(0).toUpperCase() + value.slice(1) }))
-                handleFieldEdit("priority", value)
-              }}
-              placeholder="Select priority"
-              searchPlaceholder="Search priority..."
-              className="h-8 w-[180px]"
-            />
-          )
+          value: fieldValues.priority.toLowerCase(),
+          editable: true,
+          fieldType: "combobox",
+          options: priorityOptions,
+          onChange: (value) => {
+            const displayValue = value.charAt(0).toUpperCase() + value.slice(1)
+            setFieldValues(prev => ({ ...prev, priority: displayValue }))
+            handleFieldEdit("priority", value)
+          },
+          formatDisplay: (value) => {
+            const displayValue = value ? value.charAt(0).toUpperCase() + value.slice(1) : ""
+            return (
+              <span className={`text-sm ${
+                value === "high" ? "text-red-600" : 
+                value === "medium" ? "text-yellow-600" : 
+                "text-green-600"
+              }`}>{displayValue}</span>
+            )
+          }
         },
         {
           label: "Status",
-          value: (
-            <Combobox
-              options={statusOptions}
-              value={fieldValues.status.toLowerCase().replace(" ", "-")}
-              onValueChange={(value) => {
-                const displayValue = value.split("-").map(word => 
-                  word.charAt(0).toUpperCase() + word.slice(1)
-                ).join(" ")
-                setFieldValues(prev => ({ ...prev, status: displayValue }))
-                handleFieldEdit("status", value)
-              }}
-              placeholder="Select status"
-              searchPlaceholder="Search status..."
-              className="h-8 w-[180px]"
-            />
-          )
+          value: fieldValues.status.toLowerCase().replace(" ", "-"),
+          editable: true,
+          fieldType: "combobox",
+          options: statusOptions,
+          onChange: (value) => {
+            const displayValue = value.split("-").map((word: string) => 
+              word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(" ")
+            setFieldValues(prev => ({ ...prev, status: displayValue }))
+            handleFieldEdit("status", value)
+          },
+          formatDisplay: (value) => {
+            const displayValue = value ? value.split("-").map((word: string) => 
+              word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(" ") : ""
+            return (
+              <span className={`text-sm ${
+                value === "completed" ? "text-green-600" : 
+                "text-muted-foreground"
+              }`}>{displayValue}</span>
+            )
+          }
         },
         {
           label: "Assignee",
           value: fieldValues.assignee,
+          editable: true,
+          fieldType: "text",
+          onChange: (value) => {
+            setFieldValues(prev => ({ ...prev, assignee: value }))
+            handleFieldEdit("assignee", value)
+          }
         },
         {
           label: "Due Date",
           value: fieldValues.dueDate,
+          editable: true,
+          fieldType: "date",
+          onChange: (value) => {
+            setFieldValues(prev => ({ ...prev, dueDate: value }))
+            handleFieldEdit("dueDate", value)
+          }
         },
         {
           label: "Related to",

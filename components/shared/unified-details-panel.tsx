@@ -5,11 +5,20 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { ChevronRight, ChevronDown, ExternalLinkIcon, UnlinkIcon } from "lucide-react"
+import { EditableField, type FieldType } from "@/components/shared/editable-field"
+import { ComboboxOption } from "@/components/ui/combobox"
 
 export interface DetailField {
   label: string
   value: React.ReactNode
   isLink?: boolean
+  editable?: boolean
+  fieldType?: FieldType
+  options?: ComboboxOption[]
+  onChange?: (value: any) => void
+  formatDisplay?: (value: any) => React.ReactNode
+  minDate?: Date
+  maxDate?: Date
 }
 
 export interface SectionData {
@@ -97,11 +106,23 @@ export function UnifiedDetailsPanel({
         {fieldsToShow.map((field, index) => (
           <div key={index} className="flex items-center">
             <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
-            {field.isLink ? (
-              <p className="text-sm text-blue-600 flex-1">{field.value}</p>
-            ) : (
-              <p className="text-sm flex-1">{field.value}</p>
-            )}
+            <div className="flex-1">
+              {field.editable && field.fieldType ? (
+                <EditableField
+                  value={field.value}
+                  onChange={field.onChange || (() => {})}
+                  type={field.fieldType}
+                  options={field.options}
+                  formatDisplay={field.formatDisplay}
+                  minDate={field.minDate}
+                  maxDate={field.maxDate}
+                />
+              ) : field.isLink ? (
+                <p className="text-sm text-blue-600">{field.value}</p>
+              ) : (
+                <p className="text-sm">{field.value}</p>
+              )}
+            </div>
           </div>
         ))}
         

@@ -24,16 +24,66 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
+import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
+import { ComboboxOption } from "@/components/ui/combobox"
 
 interface MeetingDetailsViewProps {
   meeting: any
   onBack: () => void
 }
 
+// Meeting type options
+const meetingTypeOptions: ComboboxOption[] = [
+  { value: "video-call", label: "Video call" },
+  { value: "in-person", label: "In person" },
+  { value: "phone-call", label: "Phone call" },
+  { value: "conference", label: "Conference" },
+]
+
+// Status options
+const statusOptions: ComboboxOption[] = [
+  { value: "scheduled", label: "Scheduled" },
+  { value: "in-progress", label: "In Progress" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
+]
+
+// Recurring options
+const recurringOptions: ComboboxOption[] = [
+  { value: "none", label: "Does not repeat" },
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
+  { value: "yearly", label: "Yearly" },
+]
+
+// Reminder options
+const reminderOptions: ComboboxOption[] = [
+  { value: "5-minutes", label: "5 minutes before" },
+  { value: "15-minutes", label: "15 minutes before" },
+  { value: "30-minutes", label: "30 minutes before" },
+  { value: "1-hour", label: "1 hour before" },
+  { value: "1-day", label: "1 day before" },
+]
+
+// Visibility options
+const visibilityOptions: ComboboxOption[] = [
+  { value: "private", label: "Private" },
+  { value: "public", label: "Public" },
+  { value: "team", label: "Team only" },
+]
+
+// Show as options
+const showAsOptions: ComboboxOption[] = [
+  { value: "busy", label: "Busy" },
+  { value: "free", label: "Free" },
+  { value: "tentative", label: "Tentative" },
+  { value: "out-of-office", label: "Out of office" },
+]
+
 export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps) {
   const [meetingTitle, setMeetingTitle] = React.useState(meeting.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
-  const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
     description: meeting?.description || meeting?.agenda || "",
     location: meeting?.location || "",
@@ -41,132 +91,156 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
     endTime: meeting?.endTime || "",
     attendees: meeting?.attendees || [],
     organizer: meeting?.organizer || "",
-    meetingType: meeting?.meetingType || "Video call",
-    status: meeting?.status || "Scheduled",
-    recurring: meeting?.recurring || "Does not repeat",
-    reminder: meeting?.reminder || "15 minutes before",
-    visibility: meeting?.visibility || "Private",
-    showAs: meeting?.showAs || "Busy",
+    meetingType: meeting?.meetingType || "video-call",
+    status: meeting?.status || "scheduled",
+    recurring: meeting?.recurring || "none",
+    reminder: meeting?.reminder || "15-minutes",
+    visibility: meeting?.visibility || "private",
+    showAs: meeting?.showAs || "busy",
   })
 
   const [meetingNotes, setMeetingNotes] = React.useState("")
-  
-  // State for which sections are open
-  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
-    details: true,
-    notes: false,
-  })
 
-  // Toggle section open/closed
-  const toggleSection = (sectionId: string) => {
-    setOpenSections(prev => ({
-      ...prev,
-      [sectionId]: !prev[sectionId]
-    }))
+  const handleFieldEdit = (field: string, value: any) => {
+    setFieldValues((prev) => ({ ...prev, [field]: value }))
+    // Here you would typically make an API call to save the change
+    console.log(`Updated ${field} to:`, value)
   }
 
-  const getStatusColor = (status: string | undefined | null) => {
-    if (!status) return "bg-gray-100 text-gray-800"
-
-    switch (status.toLowerCase()) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800"
+        return "text-green-600"
       case "scheduled":
-        return "bg-blue-100 text-blue-800"
+        return "text-blue-600"
       case "cancelled":
-        return "bg-red-100 text-red-800"
-      case "in progress":
-        return "bg-yellow-100 text-yellow-800"
+        return "text-red-600"
+      case "in-progress":
+        return "text-yellow-600"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "text-muted-foreground"
     }
   }
 
-  const handleFieldEdit = (field: string, value: string) => {
-    setFieldValues((prev) => ({ ...prev, [field]: value }))
-    setEditingField(null)
-  }
-
-  const renderEditableField = (
-    field: string,
-    value: string,
-    icon: React.ReactNode,
-    label: string,
-    isBadge = false,
-    isTextarea = false,
-  ) => {
-    const isEditing = editingField === field
-
-    return (
-      <div className="flex items-start gap-2">
-        <div className="mt-1">{icon}</div>
-        <div className="flex-1">
-          <div className="flex items-start gap-4">
-            <Label className="text-xs text-muted-foreground mt-1 w-24">{label}</Label>
-            {isEditing ? (
-              isTextarea ? (
-                <Textarea
-                  value={value}
-                  onChange={(e) => setFieldValues((prev) => ({ ...prev, [field]: e.target.value }))}
-                  onBlur={() => handleFieldEdit(field, value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      setEditingField(null)
-                    }
-                  }}
-                  className="text-sm min-h-[80px]"
-                  autoFocus
-                />
-              ) : (
-                <Input
-                  value={value}
-                  onChange={(e) => setFieldValues((prev) => ({ ...prev, [field]: e.target.value }))}
-                  onBlur={() => handleFieldEdit(field, value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleFieldEdit(field, value)
-                    }
-                    if (e.key === "Escape") {
-                      setEditingField(null)
-                    }
-                  }}
-                  className="h-6 text-sm w-32"
-                  autoFocus
-                />
-              )
-            ) : (
-              <div
-                className="cursor-pointer hover:bg-muted/50 px-2 py-1 rounded text-sm flex-1"
-                onClick={() => setEditingField(field)}
-              >
-                {isBadge ? (
-                  <Badge className={`text-xs ${getStatusColor(value)}`}>{value}</Badge>
-                ) : field === "attendees" ? (
-                  <div className="flex flex-wrap gap-1">
-                    {Array.isArray(value) ? (
-                      value.map((attendee) => (
-                        <Badge key={attendee} variant="secondary" className="text-xs">
-                          {attendee}
-                        </Badge>
-                      ))
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">
-                        {value}
-                      </Badge>
-                    )}
-                  </div>
-                ) : field === "startTime" || field === "endTime" ? (
-                  new Date(value).toLocaleString()
-                ) : (
-                  value
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // Define sections for the details panel
+  const sections: DetailSection[] = [
+    {
+      id: "details",
+      title: "Meeting Information",
+      icon: <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
+      fields: [
+        {
+          label: "Description",
+          value: fieldValues.description,
+          editable: true,
+          fieldType: "textarea",
+          onChange: (value) => handleFieldEdit("description", value),
+        },
+        {
+          label: "Start Time",
+          value: fieldValues.startTime,
+          editable: true,
+          fieldType: "date",
+          onChange: (value) => handleFieldEdit("startTime", value),
+        },
+        {
+          label: "End Time",
+          value: fieldValues.endTime,
+          editable: true,
+          fieldType: "date",
+          onChange: (value) => handleFieldEdit("endTime", value),
+          minDate: fieldValues.startTime ? new Date(fieldValues.startTime) : undefined,
+        },
+        {
+          label: "Location",
+          value: fieldValues.location,
+          editable: true,
+          fieldType: "text",
+          onChange: (value) => handleFieldEdit("location", value),
+        },
+        {
+          label: "Organizer",
+          value: fieldValues.organizer,
+          editable: true,
+          fieldType: "text",
+          onChange: (value) => handleFieldEdit("organizer", value),
+        },
+        {
+          label: "Type",
+          value: fieldValues.meetingType,
+          editable: true,
+          fieldType: "combobox",
+          options: meetingTypeOptions,
+          onChange: (value) => handleFieldEdit("meetingType", value),
+          formatDisplay: (value) => {
+            const option = meetingTypeOptions.find(opt => opt.value === value)
+            return option?.label || value
+          }
+        },
+        {
+          label: "Status",
+          value: fieldValues.status,
+          editable: true,
+          fieldType: "combobox",
+          options: statusOptions,
+          onChange: (value) => handleFieldEdit("status", value),
+          formatDisplay: (value) => {
+            const option = statusOptions.find(opt => opt.value === value)
+            const label = option?.label || value
+            return <span className={getStatusColor(value)}>{label}</span>
+          }
+        },
+        {
+          label: "Recurring",
+          value: fieldValues.recurring,
+          editable: true,
+          fieldType: "combobox",
+          options: recurringOptions,
+          onChange: (value) => handleFieldEdit("recurring", value),
+          formatDisplay: (value) => {
+            const option = recurringOptions.find(opt => opt.value === value)
+            return option?.label || value
+          }
+        },
+        {
+          label: "Reminder",
+          value: fieldValues.reminder,
+          editable: true,
+          fieldType: "combobox",
+          options: reminderOptions,
+          onChange: (value) => handleFieldEdit("reminder", value),
+          formatDisplay: (value) => {
+            const option = reminderOptions.find(opt => opt.value === value)
+            return option?.label || value
+          }
+        },
+        {
+          label: "Visibility",
+          value: fieldValues.visibility,
+          editable: true,
+          fieldType: "combobox",
+          options: visibilityOptions,
+          onChange: (value) => handleFieldEdit("visibility", value),
+          formatDisplay: (value) => {
+            const option = visibilityOptions.find(opt => opt.value === value)
+            return option?.label || value
+          }
+        },
+        {
+          label: "Show As",
+          value: fieldValues.showAs,
+          editable: true,
+          fieldType: "combobox",
+          options: showAsOptions,
+          onChange: (value) => handleFieldEdit("showAs", value),
+          formatDisplay: (value) => {
+            const option = showAsOptions.find(opt => opt.value === value)
+            return option?.label || value
+          }
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="flex flex-col flex-1">
@@ -206,133 +280,18 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
         </div>
       </div>
 
-      {/* Content with expandable sections */}
-      <div className="p-6 space-y-4 overflow-y-auto">
-        {/* Meeting Details Section */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          <button
-            onClick={() => toggleSection('details')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-          >
-            {openSections.details ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Meeting Information</span>
-          </button>
-          
-          {openSections.details && (
-            <div className="px-4 pb-4 pt-1">
-              <div className="space-y-3">
-                {renderEditableField(
-                  "description",
-                  fieldValues.description,
-                  <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Description",
-                  false,
-                  true,
-                )}
-
-                {renderEditableField(
-                  "startTime",
-                  fieldValues.startTime,
-                  <ClockIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Start Time",
-                )}
-
-                {renderEditableField(
-                  "endTime",
-                  fieldValues.endTime,
-                  <ClockIcon className="h-4 w-4 text-muted-foreground" />,
-                  "End Time",
-                )}
-
-                {renderEditableField(
-                  "location",
-                  fieldValues.location,
-                  <MapPinIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Location",
-                )}
-
-                {renderEditableField(
-                  "organizer",
-                  fieldValues.organizer,
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Organizer",
-                )}
-
-                {renderEditableField(
-                  "attendees",
-                  fieldValues.attendees,
-                  <UsersIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Attendees",
-                )}
-
-                {renderEditableField(
-                  "meetingType",
-                  fieldValues.meetingType,
-                  <VideoIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Type",
-                )}
-
-                {renderEditableField(
-                  "status",
-                  fieldValues.status,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Status",
-                  true,
-                )}
-
-                {renderEditableField(
-                  "recurring",
-                  fieldValues.recurring,
-                  <RepeatIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Recurring",
-                )}
-
-                {renderEditableField(
-                  "reminder",
-                  fieldValues.reminder,
-                  <BellIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Reminder",
-                )}
-
-                {renderEditableField(
-                  "visibility",
-                  fieldValues.visibility,
-                  <EyeIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Visibility",
-                )}
-
-                {renderEditableField(
-                  "showAs",
-                  fieldValues.showAs,
-                  <CalendarCheckIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Show As",
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Meeting Notes Section */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          <button
-            onClick={() => toggleSection('notes')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-          >
-            {openSections.notes ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-            <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Meeting Notes</span>
-          </button>
-          
-          {openSections.notes && (
+      {/* Content with UnifiedDetailsPanel */}
+      <UnifiedDetailsPanel
+        sections={sections}
+        additionalContent={
+          <div className="rounded-lg border border-muted overflow-hidden">
+            <button
+              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+            >
+              <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Meeting Notes</span>
+            </button>
+            
             <div className="px-4 pb-4 pt-1">
               <TypableArea
                 value={meetingNotes}
@@ -341,9 +300,9 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
                 showButtons={false}
               />
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        }
+      />
     </div>
   )
 }
