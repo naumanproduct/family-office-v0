@@ -7,17 +7,21 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   PlusIcon,
-  EditIcon
+  EditIcon,
+  FolderIcon,
+  CheckSquareIcon
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { TypableArea } from "@/components/typable-area"
-import { FileContent } from "@/components/shared/file-content"
+import { FileContent, getContextualFiles } from "@/components/shared/file-content"
 import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
 import { generateNoteActivities } from "@/components/shared/activity-generators"
 import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 
 interface NoteDetailsViewProps {
   note: any
@@ -33,14 +37,16 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
     title: note?.title || "Untitled Note",
-    topic: note?.content || "",
+    topic: note?.topic || "",
     author: note?.author || "Unknown Author",
     createdAt: note?.createdAt || new Date().toISOString(),
     updatedAt: note?.updatedAt || new Date().toISOString(),
   })
 
-  const [noteText, setNoteText] = React.useState("")
+  const [noteText, setNoteText] = React.useState(note?.content || "")
   const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
+  const [filesViewMode, setFilesViewMode] = React.useState<"table" | "card" | "list">("table")
+  const [tasksViewMode, setTasksViewMode] = React.useState<"table" | "card" | "list">(isFullScreen ? "table" : "list")
 
   // State for which sections are open
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
@@ -56,7 +62,11 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
     }))
   }
 
-  const tabs = [{ id: "details", label: "Details", icon: FileTextIcon }]
+  const tabs = [
+    { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", icon: CheckSquareIcon },
+    { id: "files", label: "Files", icon: FolderIcon }
+  ]
 
   // Mock activities for activity section
   const activities = generateNoteActivities()
@@ -114,9 +124,53 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
   // Custom content for tabs other than details
   const getTabContent = () => {
     if (activeTab === "tasks") {
-      return <UnifiedTaskTable data={mockTasks} viewMode={isFullScreen ? "table" : "list"} isInDrawer={!isFullScreen} />;
+      return (
+        <>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Tasks</h3>
+            <div className="flex items-center gap-2">
+              <ViewModeSelector viewMode={tasksViewMode} onViewModeChange={setTasksViewMode} />
+              <Button variant="outline" size="sm" onClick={() => console.log("Add task")}>
+                <PlusIcon className="h-4 w-4" />
+                Add task
+              </Button>
+            </div>
+          </div>
+          <UnifiedTaskTable data={mockTasks} viewMode={tasksViewMode} isInDrawer={!isFullScreen} />
+        </>
+      );
     } else if (activeTab === "files") {
-      return <FileContent />;
+      // Get contextual files
+      const files = getContextualFiles(note?.title);
+      
+      // Transform files to match TabContentRenderer format
+      const transformedFiles = files.map(file => ({
+        ...file,
+        name: file.name || file.fileName || file.title,
+        uploadedBy: file.uploadedBy || "Unknown",
+        uploadedDate: file.uploadedDate || (file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Unknown"),
+        size: file.size || file.fileSize || "Unknown",
+      }));
+      
+      return (
+        <>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Files</h3>
+            <div className="flex items-center gap-2">
+              <ViewModeSelector viewMode={filesViewMode} onViewModeChange={setFilesViewMode} />
+              <Button variant="outline" size="sm" onClick={() => console.log("Add file")}>
+                <PlusIcon className="h-4 w-4" />
+                Add file
+              </Button>
+            </div>
+          </div>
+          <TabContentRenderer
+            activeTab="files"
+            viewMode={filesViewMode}
+            data={transformedFiles}
+          />
+        </>
+      );
     }
     return null;
   };
