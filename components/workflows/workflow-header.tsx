@@ -632,9 +632,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleSave}>
-                  Save Changes
-                </Button>
+                {/* Save button moved to footer for consistency */}
               </div>
             </div>
 
@@ -735,8 +733,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
         )}
 
         {/* Tab Content */}
-        <div className={`flex-1 ${selectedAutomation && isEditingAutomation ? 'flex' : ''} overflow-hidden`}>
+        <div className={`flex-1 ${selectedAutomation && isEditingAutomation ? 'flex' : ''} overflow-hidden flex flex-col`}>
           {!selectedAutomation ? (
+            <>
             <div className="flex-1 overflow-y-auto">
               {activeTab === "details" && (
                 <div className="p-6">
@@ -1052,10 +1051,31 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                 </div>
               )}
             </div>
+            
+            {/* Footer with Save/Cancel buttons */}
+            <div className="border-t bg-background p-4">
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // Reset config to original
+                    setConfig(workflowConfig)
+                    // Close sheet
+                    setIsOpen(false)
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleSave}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+            </>
           ) : (
-            <>
+            <div className="flex flex-1 overflow-hidden">
               {/* Automation Detail/Edit View */}
-              <div className={`flex-1 overflow-y-auto ${isEditingAutomation ? 'pr-96' : ''}`}>
+              <div className={`flex-1 overflow-y-auto ${isEditingAutomation ? '' : ''}`}>
                 <div className="py-6">
                   {/* Visual Rule Builder */}
                   <div className="max-w-3xl mx-auto px-6 space-y-6">
@@ -1108,12 +1128,12 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                       >
                         {(isEditingAutomation && droppedItems.when.length > 0) || (!isEditingAutomation && selectedAutomation.triggerType) ? (
                           <div className="space-y-2">
-                            {!isEditingAutomation && droppedItems.when.length === 0 && (
-                              <div className="flex items-center gap-3">
-                                <Zap className="h-5 w-5 text-foreground" />
+                            {!isEditingAutomation && selectedAutomation.triggerType && (
+                              <div className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                                <Zap className="h-4 w-4 text-foreground flex-shrink-0" />
                                 <div>
-                                  <div className="font-medium">{selectedAutomation.triggerType}</div>
-                                  <div className="text-sm text-muted-foreground">Triggers when this event occurs</div>
+                                  <div className="text-sm font-medium">{selectedAutomation.triggerType}</div>
+                                  <div className="text-xs text-muted-foreground">Triggers when this event occurs</div>
                                 </div>
                               </div>
                             )}
@@ -2204,7 +2224,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </SheetContent>
