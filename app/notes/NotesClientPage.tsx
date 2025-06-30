@@ -247,7 +247,7 @@ export default function NotesClientPage() {
     if (isDesktop) {
       return (
         <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
-          <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
+          <SheetContent side="right" className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
               <div className="flex items-center gap-3">

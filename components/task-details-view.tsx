@@ -1044,26 +1044,26 @@ export function TaskDetailsView({
           onNavigateToRecord={navigateToRecord}
           onAddRecord={handleAddRecord}
           onUnlinkRecord={handleUnlinkRecord}
-          activityContent={
+          activityContent={renderCommentSection()}
+          additionalContent={
             <>
               {renderSubtasksSection()}
-              {renderCommentSection()}
+              {(() => {
+                // Only show AI output for subtasks (tasks that have a parent)
+                if (parentTask && task.title) {
+                  const aiOutput = generateAIOutput(task.title)
+                  if (aiOutput) {
+                    return (
+                      <AIAssistantSection
+                        outputs={[aiOutput]}
+                      />
+                    )
+                  }
+                }
+                return null
+              })()}
             </>
           }
-          additionalContent={(() => {
-            // Only show AI output for subtasks (tasks that have a parent)
-            if (parentTask && task.title) {
-              const aiOutput = generateAIOutput(task.title)
-              if (aiOutput) {
-                return (
-                  <AIAssistantSection
-                    outputs={[aiOutput]}
-                  />
-                )
-              }
-            }
-            return null
-          })()}
         />
       ) : (
         <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>

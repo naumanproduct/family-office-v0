@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -334,9 +334,9 @@ export function MasterCreationDialog({
 
   const renderTypeCard = (type: CreationType) => {
     return (
-      <Card
+      <div
         key={type.id}
-        className="group relative transition-all duration-200 hover:shadow-md"
+        className="group relative rounded-lg border border-border bg-card transition-all duration-200 hover:shadow-sm"
       >
         {/* More menu button */}
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -354,8 +354,8 @@ export function MasterCreationDialog({
         </div>
 
         {editingTypeId === type.id ? (
-          <CardHeader className="space-y-3">
-            <CardTitle className="text-sm font-medium">Edit {recordType} Type</CardTitle>
+          <div className="p-4 space-y-3">
+            <div className="text-sm font-medium text-card-foreground">Edit {recordType} Type</div>
             <Input
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
@@ -376,37 +376,33 @@ export function MasterCreationDialog({
                 Cancel
               </Button>
             </div>
-          </CardHeader>
+          </div>
         ) : (
-          <CardHeader
-            className="cursor-pointer pb-3"
+          <div
+            className="group flex items-center space-x-3 p-4 cursor-pointer"
             onClick={() => handleTypeSelect(type)}
           >
-            <div className="flex items-start gap-3">
-              <div className="flex items-center gap-2 min-w-0">
-                <div
-                  className={`p-2 rounded-full flex-shrink-0 ${
-                    type.isCustom ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
-                  }`}
-                >
-                  <PlusIcon className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-base font-normal">{type.name}</CardTitle>
-                  <CardDescription className="text-sm mt-1">{type.description}</CardDescription>
-                </div>
-              </div>
+            <div
+              className={`h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                type.isCustom ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+              }`}
+            >
+              <PlusIcon className="h-4 w-4" />
             </div>
-          </CardHeader>
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-sm text-card-foreground">{type.name}</div>
+              <div className="text-xs text-muted-foreground">{type.description}</div>
+            </div>
+          </div>
         )}
-      </Card>
+              </div>
     )
   }
 
   return (
     <>
       <Sheet open={isOpen} onOpenChange={handleClose}>
-        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
+        <SheetContent side="right" className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">

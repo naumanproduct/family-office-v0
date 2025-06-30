@@ -44,6 +44,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { Label } from "@/components/ui/label"
+import { UnifiedDetailsPanel, DetailSection, DetailField } from "@/components/shared/unified-details-panel"
 
 interface Tab {
   id: string
@@ -328,80 +329,6 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
       );
     }
 
-    // State for collapsible sections
-    const [openSections, setOpenSections] = React.useState({
-      details: true,
-      company: false,
-      people: false,
-      entities: false,
-      investments: false,
-      opportunities: false,
-    });
-
-    // State for showing all values
-    const [showingAllValues, setShowingAllValues] = React.useState(false);
-
-    // Toggle function for collapsible sections
-    const toggleSection = (section: 'details' | 'company' | 'people' | 'entities' | 'investments' | 'opportunities') => {
-      setOpenSections(prev => ({
-        ...prev,
-        [section]: !prev[section],
-      }));
-    };
-
-    // Basic fields for collapsed view
-    const basicFields: {
-      label: string;
-      value: React.ReactNode;
-      isLink?: boolean;
-    }[] = [
-      {
-        label: "File Name",
-        value: file.fileName || file.name || "Untitled",
-      },
-      {
-        label: "Title",
-        value: file.title || file.name || "Untitled",
-      },
-      {
-        label: "Description",
-        value: file.description || "No description provided",
-      },
-      {
-        label: "Category",
-        value: file.category || "Uncategorized",
-      },
-      {
-        label: "Status",
-        value: file.status || "Unknown",
-      },
-    ];
-
-    // Extended fields for "Show all" view
-    const extendedFields: {
-      label: string;
-      value: React.ReactNode;
-      isLink?: boolean;
-    }[] = [
-      ...basicFields,
-      {
-        label: "File Type",
-        value: (file.fileType || file.type || "FILE").toUpperCase(),
-      },
-      {
-        label: "Size",
-        value: file.fileSize || file.size || "Unknown",
-      },
-      {
-        label: "Uploaded By",
-        value: file.uploadedBy || "Unknown",
-      },
-      {
-        label: "Upload Date",
-        value: file.uploadedDate || (file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Unknown"),
-      },
-    ];
-
     // Mock data for related entities
     const relatedData = {
       companies: [
@@ -427,229 +354,120 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
       ],
     };
 
-    // Render the detail fields
-    const renderFields = (fields: typeof basicFields, showAllButton: boolean = false) => (
-      <div className="space-y-3">
-        {fields.map((field, index) => (
-          <div key={index} className="flex items-center">
-            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
-            {field.isLink ? (
-              <p className="text-sm text-blue-600 flex-1">{field.value}</p>
-            ) : (
-              <p className="text-sm flex-1">{field.value}</p>
-            )}
-          </div>
-        ))}
-        {showAllButton && (
-          <div className="flex items-center mt-2">
-            <Button 
-              variant="link" 
-              className="h-auto p-0 text-xs text-blue-600 ml-2"
-              onClick={() => setShowingAllValues(true)}
-            >
-              Show all
-            </Button>
-          </div>
-        )}
-      </div>
-    );
+    // Define sections for UnifiedDetailsPanel
+    const sections: DetailSection[] = [
+      {
+        id: "details",
+        title: "File Details",
+        icon: <FileIcon className="h-4 w-4 text-muted-foreground" />,
+        fields: [
+          {
+            label: "File Name",
+            value: file.fileName || file.name || "Untitled",
+          },
+          {
+            label: "Title",
+            value: file.title || file.name || "Untitled",
+          },
+          {
+            label: "Description",
+            value: file.description || "No description provided",
+          },
+          {
+            label: "Category",
+            value: file.category || "Uncategorized",
+          },
+          {
+            label: "Status",
+            value: file.status || "Unknown",
+          },
+          {
+            label: "File Type",
+            value: (file.fileType || file.type || "FILE").toUpperCase(),
+          },
+          {
+            label: "Size",
+            value: file.fileSize || file.size || "Unknown",
+          },
+          {
+            label: "Uploaded By",
+            value: file.uploadedBy || "Unknown",
+          },
+          {
+            label: "Upload Date",
+            value: file.uploadedDate || (file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Unknown"),
+          },
+        ],
+      },
+      {
+        id: "companies",
+        title: "Companies",
+        icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.companies
+        },
+      },
+      {
+        id: "people",
+        title: "People",
+        icon: <UserIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.people
+        },
+      },
+      {
+        id: "entities",
+        title: "Entities",
+        icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.entities
+        },
+      },
+      {
+        id: "investments",
+        title: "Investments",
+        icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.investments
+        },
+      },
+      {
+        id: "opportunities",
+        title: "Opportunities",
+        icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
+        sectionData: {
+          items: relatedData.opportunities
+        },
+      },
+    ];
 
-    // Items section for related data
-    const ItemsSection = ({ 
-      items 
-    }: { 
-      items: any[] 
-    }) => {
-      // Handler functions for related items
-      const handleAddRecord = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        console.log("Add new related record");
-      };
-
-      const handleUnlinkRecord = (e: React.MouseEvent, id: number) => {
-        e.stopPropagation();
-        console.log("Unlink record", id);
-      };
-
-      const handleViewRecord = (e: React.MouseEvent, id: number) => {
-        e.stopPropagation();
-        console.log("View record", id);
-      };
-
-      if (!items || items.length === 0) {
-        return (
-          <div className="flex items-center justify-between py-1 px-2">
-            <p className="text-sm text-muted-foreground">No related records</p>
-            <Button variant="ghost" size="sm" className="h-6 px-2" onClick={handleAddRecord}>
-              <PlusIcon className="h-3 w-3" />
-            </Button>
-          </div>
-        );
-      }
-
-      return (
-        <div className="ml-2 group/section">
-          <div className="flex flex-col space-y-2">
-            {items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between group">
-                <Badge 
-                  variant="outline" 
-                  className="cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-1 py-1 w-fit font-normal"
-                  onClick={() => console.log(`Navigate to ${item.type || item.role || ''} record with ID: ${item.id}`)}
-                >
-                  {item.name}
-                </Badge>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <MoreHorizontalIcon className="h-3 w-3 text-muted-foreground" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[160px]">
-                    <DropdownMenuItem onClick={(e) => handleViewRecord(e, item.id)}>
-                      <ExternalLinkIcon className="mr-2 h-3.5 w-3.5" />
-                      <span>View</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={(e) => handleUnlinkRecord(e, item.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <XIcon className="mr-2 h-3.5 w-3.5" />
-                      <span>Unlink</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ))}
-          </div>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mt-2 text-xs text-muted-foreground opacity-0 group-hover/section:opacity-100 transition-opacity"
-            onClick={handleAddRecord}
-          >
-            <PlusIcon className="h-3 w-3 mr-1" />
-            Add
-          </Button>
-        </div>
-      );
+    // Handler functions for related items
+    const handleAddRecord = (sectionId: string) => {
+      console.log("Add new related record for section:", sectionId);
     };
 
-    // Apple-style section headers and content
-    const sections = [
-      {
-        id: 'details',
-        title: 'Record Details',
-        icon: FileIcon,
-        content: renderFields(showingAllValues ? extendedFields : basicFields, !showingAllValues),
-        count: null
-      },
-      {
-        id: 'company',
-        title: 'Company',
-        icon: BuildingIcon,
-        content: <ItemsSection items={relatedData.companies} />,
-        count: relatedData.companies.length
-      },
-      {
-        id: 'people',
-        title: 'People',
-        icon: UserIcon,
-        content: <ItemsSection items={relatedData.people} />,
-        count: relatedData.people.length
-      },
-      {
-        id: 'entities',
-        title: 'Entities',
-        icon: LayoutIcon,
-        content: <ItemsSection items={relatedData.entities} />,
-        count: relatedData.entities.length
-      },
-      {
-        id: 'investments',
-        title: 'Investments',
-        icon: DollarSignIcon,
-        content: <ItemsSection items={relatedData.investments} />,
-        count: relatedData.investments.length
-      },
-      {
-        id: 'opportunities',
-        title: 'Opportunities',
-        icon: TrendingUpIcon,
-        content: <ItemsSection items={relatedData.opportunities} />,
-        count: relatedData.opportunities.length
-      }
-    ];
+    const handleUnlinkRecord = (sectionId: string, id: number) => {
+      console.log("Unlink record", id, "from section", sectionId);
+    };
+
+    const navigateToRecord = (recordType: string, id: number) => {
+      console.log(`Navigate to ${recordType} record with ID: ${id}`);
+    };
 
     // Mock activities for the file
     const activities = generateFileActivities()
 
     return (
-      <div className="px-6 pt-2 pb-6">
-        {/* Unified container with Apple-style cohesive design */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          {sections.map((section, index) => {
-            const isOpen = openSections[section.id as keyof typeof openSections];
-            const Icon = section.icon;
-            
-            return (
-              <React.Fragment key={section.id}>
-                {/* Divider between sections (except for the first one) */}
-                {index > 0 && (
-                  <div className="h-px bg-muted mx-3" />
-                )}
-                
-                {/* Section Header */}
-                <button 
-                  onClick={() => toggleSection(section.id as 'details' | 'company' | 'people' | 'entities' | 'investments' | 'opportunities')}
-                  className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
-                >
-                  <div className="flex items-center">
-                    <Icon className="h-4 w-4 text-muted-foreground ml-2" />
-                    <h4 className="text-sm font-medium ml-2">{section.title}</h4>
-                    
-                    {/* Show count badge for sections that have counts */}
-                    {section.count !== null && (
-                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 rounded-full text-xs">
-                        {section.count}
-                      </Badge>
-                    )}
-                  </div>
-                  <ChevronDownIcon 
-                    className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-                  />
-                </button>
-                
-                {/* Section Content with smooth height transition */}
-                {isOpen && (
-                  <div className="px-3 pb-3 pt-2 group/section">
-                    {section.content}
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-
-        {/* Activity Section - Only in Drawer View */}
-        {!isFullScreen && (
-          <div className="mt-8 -mx-6 border-t bg-background">
-            <div className="px-6 py-4">
-              <div className="mb-4">
-                <h4 className="text-sm font-medium">Activity</h4>
-              </div>
-              <FileActivityContent file={file} activities={activities} />
-            </div>
-          </div>
-        )}
-      </div>
+      <UnifiedDetailsPanel
+        sections={sections}
+        isFullScreen={isFullScreen}
+        onNavigateToRecord={navigateToRecord}
+        onAddRecord={handleAddRecord}
+        onUnlinkRecord={handleUnlinkRecord}
+        activityContent={
+          <UnifiedActivitySection activities={activities} />
+        }
+      />
     );
   };
 
@@ -697,7 +515,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
                 <ChevronLeftIcon className="h-4 w-4" />
               </Button>
               <Badge variant="outline" className="bg-background">
-                Document
+                File
               </Badge>
             </div>
             <div className="flex items-center gap-2">
@@ -797,11 +615,9 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
                     )}
                   </div>
                   
-                  <div className="px-6 pb-6">
-                    {activeTab === "details" && <FileDetailsPanel isFullScreen={true} />}
-                    {activeTab === "tasks" && renderEmptyTabContent("tasks")}
-                    {activeTab === "notes" && renderEmptyTabContent("notes")}
-                  </div>
+                  {activeTab === "details" && <FileDetailsPanel isFullScreen={true} />}
+                  {activeTab === "tasks" && <div className="px-6 pb-6">{renderEmptyTabContent("tasks")}</div>}
+                  {activeTab === "notes" && <div className="px-6 pb-6">{renderEmptyTabContent("notes")}</div>}
                 </div>
               </div>
             </div>
@@ -816,7 +632,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
   return (
     <>
       <Sheet open={isOpen && !isFullScreen} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
+        <SheetContent side="right" className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden">
           {/* Add SheetTitle to fix Radix UI Dialog warning */}
           <SheetTitle className="sr-only">Document Viewer</SheetTitle>
           
@@ -831,7 +647,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
                 <ChevronLeftIcon className="h-4 w-4" />
               </Button>
               <Badge variant="outline" className="bg-background">
-                Document
+                File
               </Badge>
             </div>
             <div className="flex items-center gap-2">
@@ -905,11 +721,9 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
                 )}
               </div>
               
-              <div className="px-6 pb-6">
-                {activeTab === "details" && <FileDetailsPanel />}
-                {activeTab === "tasks" && renderEmptyTabContent("tasks")}
-                {activeTab === "notes" && renderEmptyTabContent("notes")}
-              </div>
+              {activeTab === "details" && <FileDetailsPanel />}
+              {activeTab === "tasks" && <div className="px-6 pb-6">{renderEmptyTabContent("tasks")}</div>}
+              {activeTab === "notes" && <div className="px-6 pb-6">{renderEmptyTabContent("notes")}</div>}
             </div>
           </div>
         </SheetContent>

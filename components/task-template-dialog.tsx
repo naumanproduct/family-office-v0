@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -155,7 +155,7 @@ export function TaskTemplateDialog({ isOpen, onClose }: TaskTemplateDialogProps)
   return (
     <>
       <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
+        <SheetContent side="right" className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">
@@ -187,82 +187,76 @@ export function TaskTemplateDialog({ isOpen, onClose }: TaskTemplateDialogProps)
           <div className="flex-1 overflow-y-auto p-6">
             <div className="space-y-4">
               {/* Start from Scratch Option */}
-              <Card
-                className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]"
+              <div
+                className="group rounded-lg border border-border bg-card transition-all duration-200 hover:shadow-sm cursor-pointer"
                 onClick={handleStartFromScratch}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-purple-100 text-purple-800">
-                      <PlusIcon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-base font-normal">Start from Scratch</CardTitle>
-                      <CardDescription className="text-sm">
-                        Create a custom task tailored to your specific needs
-                      </CardDescription>
+                <div className="flex items-center space-x-3 p-4">
+                  <div className="h-8 w-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center flex-shrink-0">
+                    <PlusIcon className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm text-card-foreground">Start from Scratch</div>
+                    <div className="text-xs text-muted-foreground">
+                      Create a custom task tailored to your specific needs
                     </div>
                   </div>
-                </CardHeader>
-              </Card>
+                </div>
+              </div>
 
               {/* Template Options */}
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-muted-foreground">Templates</h3>
                 {taskTemplates.map((template) => (
-                  <Card
+                  <div
                     key={template.id}
-                    className="group cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01] relative"
+                    className="group rounded-lg border border-border bg-card transition-all duration-200 hover:shadow-sm cursor-pointer relative"
                     onClick={() => handleTemplateSelect(template)}
                   >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-full bg-blue-100 text-blue-800 mr-2 flex-shrink-0">
-                          <PlusIcon className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base font-normal">{template.name}</CardTitle>
-                          <CardDescription className="text-sm mt-1">{template.description}</CardDescription>
-                        </div>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={(e) => handleEditTemplate(template, e)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Template
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => handleDuplicateTemplate(template, e)}>
-                                <Copy className="mr-2 h-4 w-4" />
-                                Duplicate
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={(e) => handleDeleteTemplate(template, e)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                    <div className="flex items-center space-x-3 p-4">
+                      <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center flex-shrink-0">
+                        <PlusIcon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm text-card-foreground">{template.name}</div>
+                        <div className="text-xs text-muted-foreground">{template.description}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {template.subtasks.length} subtasks
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="flex justify-end text-xs text-muted-foreground">
-                        <span>{template.subtasks.length} subtasks</span>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => handleEditTemplate(template, e)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit Template
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => handleDuplicateTemplate(template, e)}>
+                              <Copy className="mr-2 h-4 w-4" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => handleDeleteTemplate(template, e)}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

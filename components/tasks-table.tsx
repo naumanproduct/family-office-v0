@@ -303,42 +303,54 @@ export function TasksTable() {
     }
 
     return createPortal(
-      <div className="fixed inset-0 z-[9999] bg-background">
-        {/* Full Screen Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setIsFullScreen(false)
-                setSelectedTask(null)
-                setSelectedSubtask(null)
-              }}
-            >
-              <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="outline" className="bg-background">
-              {selectedSubtask ? "Subtask" : "Task"}
-            </Badge>
+      <>
+        {/* Semi-transparent overlay */}
+        <div
+          className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm"
+          onClick={() => {
+            setIsFullScreen(false)
+            setSelectedTask(null)
+            setSelectedSubtask(null)
+          }}
+        />
+        
+        {/* Modal container with rounded corners */}
+        <div className="fixed inset-4 z-[9999] bg-background rounded-xl shadow-xl overflow-hidden">
+          {/* Full Screen Header */}
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setIsFullScreen(false)
+                  setSelectedTask(null)
+                  setSelectedSubtask(null)
+                }}
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="outline" className="bg-background">
+                {selectedSubtask ? "Subtask" : "Task"}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  setIsFullScreen(false)
+                  setSelectedTask(null)
+                  setSelectedSubtask(null)
+                }}
+              >
+                <XIcon className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                setIsFullScreen(false)
-                setSelectedTask(null)
-                setSelectedSubtask(null)
-              }}
-            >
-              <XIcon className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
 
-        {/* Split Pane Content */}
-        <div className="flex h-[calc(100vh-73px)]">
+          {/* Split Pane Content */}
+          <div className="flex h-[calc(100%-73px)]">
           {/* Left Panel */}
           <div className="w-[672px] border-r bg-background flex flex-col">
             {/* Record Header */}
@@ -518,7 +530,8 @@ export function TasksTable() {
             </div>
           </div>
         </div>
-      </div>,
+        </div>
+      </>,
       document.body,
     )
   }
@@ -581,7 +594,7 @@ export function TasksTable() {
       {/* Task Details Sheet/Drawer */}
       {selectedTask && !isFullScreen && (
         <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-          <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
+          <SheetContent side="right" className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden">
             <SheetTitle className="sr-only">Task Details</SheetTitle>
             {/* Header */}
             <div className="flex items-center justify-between border-b bg-muted px-6 py-4">

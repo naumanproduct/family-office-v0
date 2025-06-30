@@ -407,7 +407,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000] overflow-hidden"
+              className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10000] overflow-hidden"
             >
               <SheetTitle className="sr-only">Task Details</SheetTitle>
               {/* Header */}
@@ -453,7 +453,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000] overflow-hidden"
+              className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10000] overflow-hidden"
             >
               <SheetTitle className="sr-only">Note Details</SheetTitle>
               {/* Header */}
@@ -493,7 +493,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedMeeting} onOpenChange={(open) => !open && setSelectedMeeting(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000] overflow-hidden"
+              className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10000] overflow-hidden"
             >
               <SheetTitle className="sr-only">Meeting Details</SheetTitle>
               {/* Header */}
@@ -533,7 +533,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedEmail} onOpenChange={(open) => !open && setSelectedEmail(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000] overflow-hidden"
+              className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10000] overflow-hidden"
             >
               <SheetTitle className="sr-only">Email Details</SheetTitle>
               {/* Header */}
@@ -585,7 +585,7 @@ export function MasterDrawer({
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent 
         side="right" 
-        className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden"
+        className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden"
         onInteractOutside={() => {
           // Clear all selection states when closing
           setSelectedTask(null)

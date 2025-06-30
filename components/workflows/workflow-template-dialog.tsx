@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { MasterCreationDialog } from "../master-creation-dialog"
 import { CreateWorkflowDialog } from "./create-workflow-dialog"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+
 import { PlusIcon, ChevronLeftIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -151,7 +151,7 @@ export function WorkflowTemplateDialog({ isOpen, onClose }: WorkflowTemplateDial
         if (!open) onClose()
         setShowTemplateSelector(open)
       }}>
-        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
+        <SheetContent side="right" className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">
@@ -183,35 +183,36 @@ export function WorkflowTemplateDialog({ isOpen, onClose }: WorkflowTemplateDial
           <div className="flex-1 overflow-y-auto p-6">
             <div className="grid grid-cols-1 gap-4">
               {/* Custom Workflow Option */}
-              <Card className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]" onClick={() => handleTemplateSelect({ id: "from-scratch" })}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center font-normal">
-                    <div className="bg-purple-100 text-purple-800 p-2 rounded-full mr-2">
-                      <PlusIcon className="h-4 w-4" />
-                    </div>
-                    <span className="font-normal">Start from scratch</span>
-                  </CardTitle>
-                  <CardDescription>Create a completely custom workflow with your own stages and fields</CardDescription>
-                </CardHeader>
-              </Card>
+              <div className="group rounded-lg border border-border bg-card transition-all duration-200 hover:shadow-sm cursor-pointer" onClick={() => handleTemplateSelect({ id: "from-scratch" })}>
+                <div className="flex items-center space-x-3 p-4">
+                  <div className="h-8 w-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center flex-shrink-0">
+                    <PlusIcon className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm text-card-foreground">Start from scratch</div>
+                    <div className="text-xs text-muted-foreground">Create a completely custom workflow with your own stages and fields</div>
+                  </div>
+                </div>
+              </div>
               
               {/* Template Options */}
+              <h3 className="text-sm font-medium text-muted-foreground mt-4 mb-3">Templates</h3>
               {workflowTypes.map((template) => (
-                <Card 
+                <div 
                   key={template.id} 
-                  className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]"
+                  className="group rounded-lg border border-border bg-card transition-all duration-200 hover:shadow-sm cursor-pointer"
                   onClick={() => handleTemplateSelect(template)}
                 >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex items-center font-normal">
-                      <div className="bg-blue-100 text-blue-800 p-2 rounded-full mr-2">
-                        <PlusIcon className="h-4 w-4" />
-                      </div>
-                      <span className="font-normal">{template.name}</span>
-                    </CardTitle>
-                    <CardDescription>{template.description}</CardDescription>
-                  </CardHeader>
-                </Card>
+                  <div className="flex items-center space-x-3 p-4">
+                    <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center flex-shrink-0">
+                      <PlusIcon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-card-foreground">{template.name}</div>
+                      <div className="text-xs text-muted-foreground">{template.description}</div>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>

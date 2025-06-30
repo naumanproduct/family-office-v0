@@ -27,8 +27,13 @@ import {
   PlayCircle,
   PauseCircle,
   ChevronLeftIcon,
+  FolderOpen,
+  Cloud,
+  Globe,
+  Calendar,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -153,7 +158,7 @@ function SelectedAttributeItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="group flex items-center space-x-3 rounded-lg border border-border bg-card p-3 hover:shadow-sm transition-all duration-200"
+      className="group flex items-center space-x-3 rounded-lg border border-border bg-card p-4 hover:shadow-sm transition-all duration-200"
     >
       <div
         {...attributes}
@@ -451,6 +456,12 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     checkIf: [],
     doThis: []
   })
+  const [selectedBlock, setSelectedBlock] = React.useState<{
+    section: 'when' | 'check-if' | 'do-this',
+    index: number,
+    item: any
+  } | null>(null)
+  const [isOpen, setIsOpen] = React.useState(false)
   
   // Initialize dropped items when selecting an automation
   React.useEffect(() => {
@@ -468,6 +479,16 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
       })
     }
   }, [selectedAutomation, isEditingAutomation])
+
+  // Reset activeTab to "details" when sheet opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab("details")
+      setSelectedAutomation(null)
+      setIsEditingAutomation(false)
+    }
+  }, [isOpen])
+
   const automations = getWorkflowAutomation(workflowName)
 
   const sensors = useSensors(
@@ -479,11 +500,8 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
   const handleSave = () => {
     onSave(config)
-    // Close the sheet by clicking the close button
-    const element = document.querySelector('[data-state="open"]');
-    if (element && element instanceof HTMLElement) {
-      element.click();
-    }
+    // Close the sheet
+    setIsOpen(false)
   }
 
   const handleAttributeDragEnd = (event: DragEndEvent) => {
@@ -596,13 +614,13 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   ]
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8" title="Configure Workflow">
           <Settings2Icon className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className={`flex w-full flex-col p-0 [&>button]:hidden overflow-hidden ${selectedAutomation && isEditingAutomation ? '!max-w-[calc(100%-2rem)] sm:!max-w-[calc(100%-2rem)] lg:!max-w-[calc(100%-2rem)]' : 'max-w-2xl sm:max-w-2xl'}`}>
+      <SheetContent side="right" className={`flex w-full flex-col p-0 [&>button]:hidden overflow-hidden ${selectedAutomation && isEditingAutomation ? '!max-w-[calc(100%-2rem)] sm:!max-w-[calc(100%-2rem)] lg:!max-w-[calc(100%-2rem)]' : 'max-w-[30vw] sm:max-w-[30vw]'}`}>
         {/* Conditional Header based on selectedAutomation */}
         {!selectedAutomation ? (
           <>
@@ -668,6 +686,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                   onClick={() => {
                     setSelectedAutomation(null)
                     setIsEditingAutomation(false)
+                    setActiveTab("details")
                   }}
                 >
                   <ChevronLeftIcon className="h-4 w-4" />
@@ -687,7 +706,12 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                     <Button variant="outline" size="sm" onClick={() => setIsEditingAutomation(false)}>
                       Cancel
                     </Button>
-                    <Button size="sm" onClick={() => setIsEditingAutomation(false)}>
+                    <Button size="sm" onClick={() => {
+                      setIsEditingAutomation(false)
+                      // In a real implementation, this would save the automation
+                      // For now, just close the sheet
+                      setIsOpen(false)
+                    }}>
                       Save Changes
                     </Button>
                   </>
@@ -715,10 +739,12 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
           {!selectedAutomation ? (
             <div className="flex-1 overflow-y-auto">
               {activeTab === "details" && (
-                <MasterDetailsPanel 
-                  fieldGroups={[
-                    {
-                      id: "workflow-info",
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Workflow Details</h3>
+                  <MasterDetailsPanel 
+                    fieldGroups={[
+                      {
+                        id: "workflow-info",
                       label: "Workflow Information",
                       icon: FileTextIcon,
                       fields: [
@@ -758,7 +784,8 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                       ],
                     },
                   ]}
-                />
+                  />
+                </div>
               )}
 
               {activeTab === "activity" && (
@@ -975,7 +1002,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         items={config.stages.map((stage) => stage.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        <div className="space-y-2">
                           {config.stages.map((stage) => (
                             <SortableStageItem
                               key={stage.id}
@@ -997,27 +1024,25 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold">Automations</h3>
-                      {/* Only 1 rule per workflow for now */}
-                      <span className="text-xs text-muted-foreground">1 rule per workflow</span>
                     </div>
                     <div className="space-y-2">
                       {automations.map((automation) => (
                         <div
                           key={automation.id}
-                          className="flex items-center justify-between p-4 border rounded-lg bg-background hover:bg-muted/50 cursor-pointer transition"
+                          className="group flex items-center space-x-3 rounded-lg border border-border bg-card p-4 hover:shadow-sm transition-all duration-200 cursor-pointer"
                           onClick={() => setSelectedAutomation(automation)}
                         >
-                          <div className="flex items-center gap-3 min-w-0">
-                            {React.createElement(automation.triggerIcon, { className: "h-5 w-5 text-primary" })}
-                            <div className="min-w-0">
-                              <div className="font-medium text-sm truncate">{automation.name}</div>
-                              <div className="text-xs text-muted-foreground truncate">{automation.description}</div>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {React.createElement(automation.triggerIcon, { className: "h-4 w-4 text-muted-foreground flex-shrink-0" })}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm text-card-foreground">{automation.name}</div>
+                              <div className="text-xs text-muted-foreground">{automation.description}</div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <span className="text-xs text-muted-foreground">{automation.executionCount} runs</span>
-                            <Button variant="outline" size="icon" className="h-7 w-7" title="View">
-                              <Zap className="h-4 w-4" />
+                          <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-xs text-muted-foreground mr-2">{automation.executionCount} runs</span>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" title="View">
+                              <Zap className="h-3 w-3" />
                             </Button>
                           </div>
                         </div>
@@ -1030,7 +1055,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
           ) : (
             <>
               {/* Automation Detail/Edit View */}
-              <div className={`flex-1 overflow-y-auto ${isEditingAutomation ? 'pr-80' : ''}`}>
+              <div className={`flex-1 overflow-y-auto ${isEditingAutomation ? 'pr-96' : ''}`}>
                 <div className="py-6">
                   {/* Visual Rule Builder */}
                   <div className="max-w-3xl mx-auto px-6 space-y-6">
@@ -1041,30 +1066,43 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         className={`border-2 rounded-lg p-4 min-h-[100px] transition-all cursor-pointer ${
                           isEditingAutomation 
                             ? activeSection === 'when' 
-                              ? 'border-primary bg-primary/5 shadow-sm' 
-                              : 'border-dashed border-primary/30 hover:border-primary/50 hover:bg-muted/30'
+                              ? 'border-dashed border-blue-500 shadow-sm' 
+                              : 'border-dashed border-muted-foreground/30 hover:border-muted-foreground/50'
                             : 'border-border'
                         } bg-background`}
                         onClick={() => isEditingAutomation && setActiveSection('when')}
                         onDragOver={(e) => {
                           if (isEditingAutomation && activeSection === 'when') {
                             e.preventDefault()
-                            e.currentTarget.classList.add('bg-primary/10')
+                            e.currentTarget.classList.add('bg-muted/50')
                           }
                         }}
                         onDragLeave={(e) => {
-                          e.currentTarget.classList.remove('bg-primary/10')
+                          e.currentTarget.classList.remove('bg-muted/50')
                         }}
                         onDrop={(e) => {
                           e.preventDefault()
-                          e.currentTarget.classList.remove('bg-primary/10')
-                          if (isEditingAutomation && activeSection === 'when') {
-                            const data = e.dataTransfer.getData('text/plain')
-                            const item = JSON.parse(data)
-                            setDroppedItems(prev => ({
-                              ...prev,
-                              when: [...prev.when, item]
-                            }))
+                          e.currentTarget.classList.remove('ring-2', 'ring-primary')
+                          
+                          if (isEditingAutomation) {
+                            try {
+                              const data = JSON.parse(e.dataTransfer.getData('text/plain'))
+                              if (data.type === 'trigger') {
+                                const newItems = [...droppedItems.when, data]
+                                setDroppedItems(prev => ({
+                                  ...prev,
+                                  when: newItems
+                                }))
+                                // Automatically select the newly dropped block
+                                setSelectedBlock({
+                                  section: 'when',
+                                  index: newItems.length - 1,
+                                  item: data
+                                })
+                              }
+                            } catch (error) {
+                              console.error('Failed to parse drag data:', error)
+                            }
                           }
                         }}
                       >
@@ -1072,7 +1110,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                           <div className="space-y-2">
                             {!isEditingAutomation && droppedItems.when.length === 0 && (
                               <div className="flex items-center gap-3">
-                                <Zap className="h-5 w-5 text-primary" />
+                                <Zap className="h-5 w-5 text-foreground" />
                                 <div>
                                   <div className="font-medium">{selectedAutomation.triggerType}</div>
                                   <div className="text-sm text-muted-foreground">Triggers when this event occurs</div>
@@ -1091,8 +1129,25 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                               const IconComponent = iconMap[item.iconName] || Zap
                               
                               return (
-                                <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
-                                  <IconComponent className="h-4 w-4 text-primary flex-shrink-0" />
+                                <div 
+                                  key={index} 
+                                  className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-all ${
+                                    selectedBlock?.section === 'when' && selectedBlock?.index === index
+                                      ? 'ring-2 ring-blue-500/50'
+                                      : 'bg-muted/50 hover:bg-muted/70'
+                                  }`}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    if (isEditingAutomation) {
+                                      setSelectedBlock({
+                                        section: 'when',
+                                        index,
+                                        item
+                                      })
+                                    }
+                                  }}
+                                >
+                                  <IconComponent className="h-4 w-4 text-foreground flex-shrink-0" />
                                   <div className="flex-1">
                                     <div className="text-sm font-medium">{item.label}</div>
                                     {item.description && <div className="text-xs text-muted-foreground">{item.description}</div>}
@@ -1108,6 +1163,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                           ...prev,
                                           when: prev.when.filter((_, i) => i !== index)
                                         }))
+                                        if (selectedBlock?.section === 'when' && selectedBlock?.index === index) {
+                                          setSelectedBlock(null)
+                                        }
                                       }}
                                     >
                                       <XIcon className="h-3 w-3" />
@@ -1135,30 +1193,43 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         className={`border-2 rounded-lg p-4 min-h-[120px] transition-all cursor-pointer ${
                           isEditingAutomation 
                             ? activeSection === 'check-if' 
-                              ? 'border-primary bg-primary/5 shadow-sm' 
-                              : 'border-dashed border-primary/30 hover:border-primary/50 hover:bg-muted/30'
+                              ? 'border-dashed border-blue-500 shadow-sm' 
+                              : 'border-dashed border-muted-foreground/30 hover:border-muted-foreground/50'
                             : 'border-border'
                         } bg-background`}
                         onClick={() => isEditingAutomation && setActiveSection('check-if')}
                         onDragOver={(e) => {
                           if (isEditingAutomation && activeSection === 'check-if') {
                             e.preventDefault()
-                            e.currentTarget.classList.add('bg-primary/10')
+                            e.currentTarget.classList.add('bg-muted/50')
                           }
                         }}
                         onDragLeave={(e) => {
-                          e.currentTarget.classList.remove('bg-primary/10')
+                          e.currentTarget.classList.remove('bg-muted/50')
                         }}
                         onDrop={(e) => {
                           e.preventDefault()
-                          e.currentTarget.classList.remove('bg-primary/10')
+                          e.currentTarget.classList.remove('bg-muted/50')
+                          
                           if (isEditingAutomation && activeSection === 'check-if') {
-                            const data = e.dataTransfer.getData('text/plain')
-                            const item = JSON.parse(data)
-                            setDroppedItems(prev => ({
-                              ...prev,
-                              checkIf: [...prev.checkIf, item]
-                            }))
+                            try {
+                              const data = JSON.parse(e.dataTransfer.getData('text/plain'))
+                              if (data.type === 'condition') {
+                                const newItems = [...droppedItems.checkIf, data]
+                                setDroppedItems(prev => ({
+                                  ...prev,
+                                  checkIf: newItems
+                                }))
+                                // Automatically select the newly dropped block
+                                setSelectedBlock({
+                                  section: 'check-if',
+                                  index: newItems.length - 1,
+                                  item: data
+                                })
+                              }
+                            } catch (error) {
+                              console.error('Failed to parse drag data:', error)
+                            }
                           }
                         }}
                       >
@@ -1166,13 +1237,30 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                           <div className="space-y-2">
                             {!isEditingAutomation && selectedAutomation.conditions.map((condition, index) => (
                               <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
-                                <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                                <CheckCircle2 className="h-4 w-4 text-foreground flex-shrink-0" />
                                 <span className="text-sm">{condition}</span>
                               </div>
                             ))}
                             {droppedItems.checkIf.map((item, index) => (
-                              <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
-                                <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                              <div 
+                                key={index} 
+                                className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-all ${
+                                  selectedBlock?.section === 'check-if' && selectedBlock?.index === index
+                                    ? 'ring-2 ring-blue-500/50'
+                                    : 'bg-muted/50 hover:bg-muted/70'
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (isEditingAutomation) {
+                                    setSelectedBlock({
+                                      section: 'check-if',
+                                      index,
+                                      item
+                                    })
+                                  }
+                                }}
+                              >
+                                <CheckCircle2 className="h-4 w-4 text-foreground flex-shrink-0" />
                                 <span className="text-sm flex-1">{item.label || item}</span>
                                 {isEditingAutomation && (
                                   <Button 
@@ -1185,6 +1273,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                         ...prev,
                                         checkIf: prev.checkIf.filter((_, i) => i !== index)
                                       }))
+                                      if (selectedBlock?.section === 'check-if' && selectedBlock?.index === index) {
+                                        setSelectedBlock(null)
+                                      }
                                     }}
                                   >
                                     <XIcon className="h-3 w-3" />
@@ -1211,30 +1302,43 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                         className={`border-2 rounded-lg p-4 min-h-[120px] transition-all cursor-pointer ${
                           isEditingAutomation 
                             ? activeSection === 'do-this' 
-                              ? 'border-primary bg-primary/5 shadow-sm' 
-                              : 'border-dashed border-primary/30 hover:border-primary/50 hover:bg-muted/30'
+                              ? 'border-dashed border-blue-500 shadow-sm' 
+                              : 'border-dashed border-muted-foreground/30 hover:border-muted-foreground/50'
                             : 'border-border'
                         } bg-background`}
                         onClick={() => isEditingAutomation && setActiveSection('do-this')}
                         onDragOver={(e) => {
                           if (isEditingAutomation && activeSection === 'do-this') {
                             e.preventDefault()
-                            e.currentTarget.classList.add('bg-primary/10')
+                            e.currentTarget.classList.add('bg-muted/50')
                           }
                         }}
                         onDragLeave={(e) => {
-                          e.currentTarget.classList.remove('bg-primary/10')
+                          e.currentTarget.classList.remove('bg-muted/50')
                         }}
                         onDrop={(e) => {
                           e.preventDefault()
-                          e.currentTarget.classList.remove('bg-primary/10')
+                          e.currentTarget.classList.remove('bg-muted/50')
+                          
                           if (isEditingAutomation && activeSection === 'do-this') {
-                            const data = e.dataTransfer.getData('text/plain')
-                            const item = JSON.parse(data)
-                            setDroppedItems(prev => ({
-                              ...prev,
-                              doThis: [...prev.doThis, item]
-                            }))
+                            try {
+                              const data = JSON.parse(e.dataTransfer.getData('text/plain'))
+                              if (data.type === 'action') {
+                                const newItems = [...droppedItems.doThis, data]
+                                setDroppedItems(prev => ({
+                                  ...prev,
+                                  doThis: newItems
+                                }))
+                                // Automatically select the newly dropped block
+                                setSelectedBlock({
+                                  section: 'do-this',
+                                  index: newItems.length - 1,
+                                  item: data
+                                })
+                              }
+                            } catch (error) {
+                              console.error('Failed to parse drag data:', error)
+                            }
                           }
                         }}
                       >
@@ -1242,13 +1346,30 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                           <div className="space-y-2">
                             {!isEditingAutomation && selectedAutomation.actions.map((action, index) => (
                               <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
-                                <PlayCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                                <PlayCircle className="h-4 w-4 text-foreground flex-shrink-0" />
                                 <span className="text-sm">{action}</span>
                               </div>
                             ))}
                             {droppedItems.doThis.map((item, index) => (
-                              <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
-                                <PlayCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                              <div 
+                                key={index} 
+                                className={`flex items-center gap-3 p-2 rounded cursor-pointer transition-all ${
+                                  selectedBlock?.section === 'do-this' && selectedBlock?.index === index
+                                    ? 'ring-2 ring-blue-500/50'
+                                    : 'bg-muted/50 hover:bg-muted/70'
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (isEditingAutomation) {
+                                    setSelectedBlock({
+                                      section: 'do-this',
+                                      index,
+                                      item
+                                    })
+                                  }
+                                }}
+                              >
+                                <PlayCircle className="h-4 w-4 text-foreground flex-shrink-0" />
                                 <span className="text-sm flex-1">{item.label || item}</span>
                                 {isEditingAutomation && (
                                   <Button 
@@ -1261,6 +1382,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                                         ...prev,
                                         doThis: prev.doThis.filter((_, i) => i !== index)
                                       }))
+                                      if (selectedBlock?.section === 'do-this' && selectedBlock?.index === index) {
+                                        setSelectedBlock(null)
+                                      }
                                     }}
                                   >
                                     <XIcon className="h-3 w-3" />
@@ -1302,155 +1426,780 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
               {/* Edit Mode Right Sidebar */}
               {isEditingAutomation && (
-                <div className="w-80 border-l bg-muted/30 p-4 overflow-y-auto">
-                  <h3 className="font-medium mb-2">Automation Blocks</h3>
-                  
-                  {/* Instructions */}
-                  <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                    <p className="text-xs text-primary font-medium">
-                      {activeSection ? (
-                        <>Click and drag blocks to the "{activeSection === 'when' ? 'When' : activeSection === 'check-if' ? 'Check if' : 'Do this'}" section</>
-                      ) : (
-                        <>Click on a section (When, Check if, or Do this) to start building your automation</>
-                      )}
-                    </p>
+                <div className="w-96 border-l bg-muted/30 flex flex-col h-full">
+                  <div className="flex-1 p-6 overflow-y-auto">
+                    <div className="mb-6">
+                      <h3 className="font-semibold text-lg mb-2">Automation Builder</h3>
+                    
+                    {/* Instructions */}
+                    <div className="p-4 bg-muted rounded-lg border border-border">
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        {selectedBlock ? (
+                          <>Configure: {selectedBlock.item.label}</>
+                        ) : activeSection ? (
+                          <>Building: {activeSection === 'when' ? 'Triggers' : activeSection === 'check-if' ? 'Conditions' : 'Actions'}</>
+                        ) : (
+                          <>Get Started</>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {selectedBlock ? (
+                          <>Set up the details for this {selectedBlock.section === 'when' ? 'trigger' : selectedBlock.section === 'check-if' ? 'condition' : 'action'}</>
+                        ) : activeSection ? (
+                          <>Drag and drop blocks below into the "{activeSection === 'when' ? 'When' : activeSection === 'check-if' ? 'Check if' : 'Do this'}" section</>
+                        ) : (
+                          <>Click on a section in the workflow to see available blocks</>
+                        )}
+                      </p>
+                    </div>
                   </div>
                   
-                  {/* Triggers */}
-                  <div className={`mb-6 ${activeSection === 'when' ? 'ring-2 ring-primary ring-offset-2 rounded-lg p-2 -m-2' : ''}`}>
-                    <h4 className={`text-sm font-medium mb-3 ${activeSection === 'when' ? 'text-primary' : 'text-muted-foreground'}`}>
-                      Triggers {activeSection === 'when' && <span className="text-xs ml-2">(Drag to "When" section)</span>}
-                    </h4>
-                    <div className="space-y-2">
-                      {[
-                        { icon: FileUp, iconName: 'FileUp', label: "File Upload", description: "When a file is uploaded" },
-                        { icon: Mail, iconName: 'Mail', label: "Email Received", description: "When an email arrives" },
-                        { icon: Clock, iconName: 'Clock', label: "Scheduled", description: "At specific times" },
-                        { icon: AlertCircle, iconName: 'AlertCircle', label: "Condition Met", description: "When conditions are met" },
-                      ].map((trigger) => (
-                        <div
-                          key={trigger.label}
-                          className={`p-3 border rounded-lg bg-background cursor-move transition-all ${
-                            activeSection === 'when' 
-                              ? 'hover:shadow-md hover:border-primary hover:scale-[1.02]' 
-                              : 'opacity-50 cursor-not-allowed'
-                          }`}
-                          draggable={activeSection === 'when'}
-                          onDragStart={(e) => {
-                            if (activeSection === 'when') {
-                              // Store only serializable data
-                              const dragData = {
-                                type: 'trigger',
-                                label: trigger.label,
-                                description: trigger.description,
-                                iconName: trigger.iconName
-                              }
-                              e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
-                              e.currentTarget.classList.add('opacity-50')
-                            }
-                          }}
-                          onDragEnd={(e) => {
-                            e.currentTarget.classList.remove('opacity-50')
-                          }}
-                        >
-                          <div className="flex items-center gap-3">
-                            {React.createElement(trigger.icon, { className: "h-4 w-4 text-primary" })}
-                            <div>
-                              <div className="text-sm font-medium">{trigger.label}</div>
-                              <div className="text-xs text-muted-foreground">{trigger.description}</div>
+                  {/* Show configuration when block is selected */}
+                  {selectedBlock ? (
+                    <>
+                      <div className="space-y-6">
+                      {/* Configuration based on block type */}
+                      {selectedBlock.item.label === "File type is..." && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">File Type</Label>
+                            <Select defaultValue="pdf">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pdf">PDF Document (.pdf)</SelectItem>
+                                <SelectItem value="docx">Word Document (.docx, .doc)</SelectItem>
+                                <SelectItem value="xlsx">Excel Spreadsheet (.xlsx, .xls)</SelectItem>
+                                <SelectItem value="pptx">PowerPoint (.pptx, .ppt)</SelectItem>
+                                <SelectItem value="image">Image (JPG, PNG, GIF)</SelectItem>
+                                <SelectItem value="video">Video (MP4, MOV, AVI)</SelectItem>
+                                <SelectItem value="text">Text File (.txt, .csv)</SelectItem>
+                                <SelectItem value="zip">Archive (.zip, .rar)</SelectItem>
+                                <SelectItem value="any">Any File Type</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Condition</Label>
+                            <Select defaultValue="is">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="is">Is</SelectItem>
+                                <SelectItem value="is-not">Is not</SelectItem>
+                                <SelectItem value="contains">Contains</SelectItem>
+                                <SelectItem value="starts-with">Starts with</SelectItem>
+                                <SelectItem value="ends-with">Ends with</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Additional Filters</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="size-limit" />
+                                <label htmlFor="size-limit" className="text-sm">File size limit</label>
+                              </div>
+                              {/* Show size input when checked */}
+                              <div className="ml-6">
+                                <div className="flex items-center gap-2">
+                                  <Input type="number" placeholder="10" className="h-8 w-20" />
+                                  <Select defaultValue="mb">
+                                    <SelectTrigger className="h-8 w-20">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="kb">KB</SelectItem>
+                                      <SelectItem value="mb">MB</SelectItem>
+                                      <SelectItem value="gb">GB</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Conditions */}
-                  <div className={`mb-6 ${activeSection === 'check-if' ? 'ring-2 ring-primary ring-offset-2 rounded-lg p-2 -m-2' : ''}`}>
-                    <h4 className={`text-sm font-medium mb-3 ${activeSection === 'check-if' ? 'text-primary' : 'text-muted-foreground'}`}>
-                      Conditions {activeSection === 'check-if' && <span className="text-xs ml-2">(Drag to "Check if" section)</span>}
-                    </h4>
-                    <div className="space-y-2">
-                      {[
-                        "File name contains...",
-                        "File type is...",
-                        "Entity matches...",
-                        "Date is before/after...",
-                        "Amount is greater than...",
-                      ].map((condition) => (
-                        <div
-                          key={condition}
-                          className={`p-3 border rounded-lg bg-background cursor-move transition-all ${
-                            activeSection === 'check-if' 
-                              ? 'hover:shadow-md hover:border-primary hover:scale-[1.02]' 
-                              : 'opacity-50 cursor-not-allowed'
-                          }`}
-                          draggable={activeSection === 'check-if'}
-                          onDragStart={(e) => {
-                            if (activeSection === 'check-if') {
-                              const dragData = {
-                                type: 'condition',
-                                label: condition
-                              }
-                              e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
-                              e.currentTarget.classList.add('opacity-50')
-                            }
-                          }}
-                          onDragEnd={(e) => {
-                            e.currentTarget.classList.remove('opacity-50')
-                          }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <CheckCircle2 className="h-4 w-4 text-primary" />
-                            <span className="text-sm">{condition}</span>
+                      )}
+                      
+                      {selectedBlock.item.label === "File name contains..." && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Search Text</Label>
+                            <Input 
+                              placeholder="e.g., invoice, report, contract"
+                              className="h-9"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Search In</Label>
+                            <Select defaultValue="filename">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="filename">File name only</SelectItem>
+                                <SelectItem value="filepath">Full file path</SelectItem>
+                                <SelectItem value="content">File content</SelectItem>
+                                <SelectItem value="both">Name and content</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Match Options</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="case-sensitive" defaultChecked={false} />
+                                <label htmlFor="case-sensitive" className="text-sm">Case sensitive</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="whole-word" defaultChecked={false} />
+                                <label htmlFor="whole-word" className="text-sm">Match whole words only</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="regex" defaultChecked={false} />
+                                <label htmlFor="regex" className="text-sm">Use regular expression</label>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className={`${activeSection === 'do-this' ? 'ring-2 ring-primary ring-offset-2 rounded-lg p-2 -m-2' : ''}`}>
-                    <h4 className={`text-sm font-medium mb-3 ${activeSection === 'do-this' ? 'text-primary' : 'text-muted-foreground'}`}>
-                      Actions {activeSection === 'do-this' && <span className="text-xs ml-2">(Drag to "Do this" section)</span>}
-                    </h4>
-                    <div className="space-y-2">
-                      {[
-                        "Create task",
-                        "Send notification",
-                        "Move to stage",
-                        "Update field",
-                        "Add comment",
-                        "Assign to user",
-                      ].map((action) => (
-                        <div
-                          key={action}
-                          className={`p-3 border rounded-lg bg-background cursor-move transition-all ${
-                            activeSection === 'do-this' 
-                              ? 'hover:shadow-md hover:border-primary hover:scale-[1.02]' 
-                              : 'opacity-50 cursor-not-allowed'
-                          }`}
-                          draggable={activeSection === 'do-this'}
-                          onDragStart={(e) => {
-                            if (activeSection === 'do-this') {
-                              const dragData = {
-                                type: 'action',
-                                label: action
-                              }
-                              e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
-                              e.currentTarget.classList.add('opacity-50')
-                            }
-                          }}
-                          onDragEnd={(e) => {
-                            e.currentTarget.classList.remove('opacity-50')
-                          }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <PlayCircle className="h-4 w-4 text-primary" />
-                            <span className="text-sm">{action}</span>
+                      )}
+                      
+                      {selectedBlock.item.label === "Create task" && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Task Template</Label>
+                            <Select defaultValue="custom">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="custom">Custom task</SelectItem>
+                                <SelectItem value="review">Document review</SelectItem>
+                                <SelectItem value="approve">Approval required</SelectItem>
+                                <SelectItem value="followup">Follow-up action</SelectItem>
+                                <SelectItem value="process">Process document</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Task Title</Label>
+                            <Input 
+                              placeholder="Use {filename} to include file name"
+                              className="h-9"
+                              defaultValue="Review {filename}"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Description</Label>
+                            <Textarea 
+                              placeholder="Task description (optional)"
+                              className="resize-none"
+                              rows={3}
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-sm font-medium mb-2">Assign To</Label>
+                              <Select defaultValue="uploader">
+                                <SelectTrigger className="h-9">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="uploader">File uploader</SelectItem>
+                                  <SelectItem value="owner">Record owner</SelectItem>
+                                  <SelectItem value="specific">Specific person</SelectItem>
+                                  <SelectItem value="role">By role</SelectItem>
+                                  <SelectItem value="team">Team</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div>
+                              <Label className="text-sm font-medium mb-2">Due Date</Label>
+                              <Select defaultValue="3-days">
+                                <SelectTrigger className="h-9">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="same-day">Same day</SelectItem>
+                                  <SelectItem value="1-day">Next business day</SelectItem>
+                                  <SelectItem value="3-days">3 business days</SelectItem>
+                                  <SelectItem value="1-week">1 week</SelectItem>
+                                  <SelectItem value="custom">Custom</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Priority</Label>
+                            <Select defaultValue="normal">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="urgent">Urgent</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="normal">Normal</SelectItem>
+                                <SelectItem value="low">Low</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
-                      ))}
+                      )}
+                      
+                      {selectedBlock.item.label === "Send notification" && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Notification Channel</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="email" defaultChecked />
+                                <label htmlFor="email" className="text-sm">Email</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="in-app" defaultChecked />
+                                <label htmlFor="in-app" className="text-sm">In-app notification</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="slack" />
+                                <label htmlFor="slack" className="text-sm">Slack</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="sms" />
+                                <label htmlFor="sms" className="text-sm">SMS</label>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Recipients</Label>
+                            <Select defaultValue="relevant">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="relevant">Relevant stakeholders</SelectItem>
+                                <SelectItem value="uploader">File uploader</SelectItem>
+                                <SelectItem value="owner">Record owner</SelectItem>
+                                <SelectItem value="watchers">All watchers</SelectItem>
+                                <SelectItem value="specific">Specific people</SelectItem>
+                                <SelectItem value="distribution">Distribution list</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Notification Template</Label>
+                            <Select defaultValue="file-uploaded">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="file-uploaded">New file uploaded</SelectItem>
+                                <SelectItem value="action-required">Action required</SelectItem>
+                                <SelectItem value="review-needed">Review needed</SelectItem>
+                                <SelectItem value="approved">Approved</SelectItem>
+                                <SelectItem value="rejected">Rejected</SelectItem>
+                                <SelectItem value="custom">Custom message</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Message Preview</Label>
+                            <div className="p-3 bg-muted rounded-md text-sm">
+                              <p className="font-medium">New file uploaded: {"{filename}"}</p>
+                              <p className="text-muted-foreground mt-1">A new file has been uploaded to {"{record_name}"} by {"{uploader_name}"}.</p>
+                              <p className="text-muted-foreground mt-2">Click here to view the file.</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedBlock.item.label === "Move to folder" && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Destination Folder</Label>
+                            <Select defaultValue="by-type">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="by-type">Organize by file type</SelectItem>
+                                <SelectItem value="by-date">Organize by date</SelectItem>
+                                <SelectItem value="by-entity">Organize by entity</SelectItem>
+                                <SelectItem value="processed">Processed files</SelectItem>
+                                <SelectItem value="archive">Archive</SelectItem>
+                                <SelectItem value="custom">Custom folder</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Folder Structure</Label>
+                            <Input 
+                              placeholder="e.g., /Documents/{year}/{month}/{file_type}/"
+                              className="h-9"
+                              defaultValue="/Documents/{file_type}/{year}-{month}/"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">If Folder Doesn't Exist</Label>
+                            <Select defaultValue="create">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="create">Create folder</SelectItem>
+                                <SelectItem value="skip">Skip file</SelectItem>
+                                <SelectItem value="error">Show error</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">After Moving</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="keep-original" />
+                                <label htmlFor="keep-original" className="text-sm">Keep copy in original location</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="update-references" defaultChecked />
+                                <label htmlFor="update-references" className="text-sm">Update all references</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Email Attachment trigger configuration */}
+                      {selectedBlock.item.label === "Email Attachment" && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Email Address</Label>
+                            <Input 
+                              placeholder="inbox@company.com"
+                              className="h-9"
+                              type="email"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">Monitor this email for attachments</p>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Sender Filter</Label>
+                            <Select defaultValue="any">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="any">Any sender</SelectItem>
+                                <SelectItem value="whitelist">Specific senders</SelectItem>
+                                <SelectItem value="domain">From domain</SelectItem>
+                                <SelectItem value="contacts">Known contacts only</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Subject Contains</Label>
+                            <Input 
+                              placeholder="e.g., Invoice, Statement, Report"
+                              className="h-9"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Attachment Handling</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="extract-zip" defaultChecked />
+                                <label htmlFor="extract-zip" className="text-sm">Extract ZIP files automatically</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="ocr-scan" defaultChecked />
+                                <label htmlFor="ocr-scan" className="text-sm">OCR scan documents</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="virus-scan" defaultChecked />
+                                <label htmlFor="virus-scan" className="text-sm">Virus scan before processing</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Manual Upload trigger configuration */}
+                      {selectedBlock.item.label === "Manual Upload" && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Upload Location</Label>
+                            <Select defaultValue="drawer">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="drawer">Any record drawer</SelectItem>
+                                <SelectItem value="specific-type">Specific record type</SelectItem>
+                                <SelectItem value="documents">Documents page</SelectItem>
+                                <SelectItem value="bulk">Bulk upload area</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">File Requirements</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="require-metadata" />
+                                <label htmlFor="require-metadata" className="text-sm">Require metadata on upload</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="auto-categorize" defaultChecked />
+                                <label htmlFor="auto-categorize" className="text-sm">Auto-categorize by file type</label>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Upload Permissions</Label>
+                            <Select defaultValue="all-users">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all-users">All users</SelectItem>
+                                <SelectItem value="specific-roles">Specific roles</SelectItem>
+                                <SelectItem value="admins">Admins only</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Folder Sync trigger configuration */}
+                      {selectedBlock.item.label === "Folder Sync" && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Watch Folder</Label>
+                            <Input 
+                              placeholder="/Dropbox/Family Office/Incoming"
+                              className="h-9"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Sync Frequency</Label>
+                            <Select defaultValue="realtime">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="realtime">Real-time</SelectItem>
+                                <SelectItem value="5min">Every 5 minutes</SelectItem>
+                                <SelectItem value="15min">Every 15 minutes</SelectItem>
+                                <SelectItem value="hourly">Hourly</SelectItem>
+                                <SelectItem value="daily">Daily</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">File Handling</Label>
+                            <Select defaultValue="move">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="move">Move files after processing</SelectItem>
+                                <SelectItem value="copy">Copy files (keep original)</SelectItem>
+                                <SelectItem value="sync">Two-way sync</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Include Subfolders</Label>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox id="include-subfolders" defaultChecked />
+                              <label htmlFor="include-subfolders" className="text-sm">Monitor all subfolders</label>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Cloud Storage trigger configuration */}
+                      {selectedBlock.item.label === "Cloud Storage" && (
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Cloud Provider</Label>
+                            <Select defaultValue="dropbox">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="dropbox">Dropbox</SelectItem>
+                                <SelectItem value="google-drive">Google Drive</SelectItem>
+                                <SelectItem value="onedrive">OneDrive</SelectItem>
+                                <SelectItem value="box">Box</SelectItem>
+                                <SelectItem value="sharepoint">SharePoint</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Connected Account</Label>
+                            <Select defaultValue="connect">
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="connect">Connect new account</SelectItem>
+                                <SelectItem value="existing">john@company.com</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Folder Path</Label>
+                            <Input 
+                              placeholder="/Family Office/Documents"
+                              className="h-9"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium mb-2">Sync Options</Label>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="auto-sync" defaultChecked />
+                                <label htmlFor="auto-sync" className="text-sm">Auto-sync new files</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="sync-updates" defaultChecked />
+                                <label htmlFor="sync-updates" className="text-sm">Sync file updates</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="sync-deletes" />
+                                <label htmlFor="sync-deletes" className="text-sm">Sync deletions</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Default configuration for other blocks */}
+                      {!["File type is...", "File name contains...", "Create task", "Send notification", "Move to folder", 
+                        "Email Attachment", "Manual Upload", "Folder Sync", "Cloud Storage"].includes(selectedBlock.item.label) && (
+                        <div className="text-center py-8 text-sm text-muted-foreground">
+                          Configuration options for "{selectedBlock.item.label}" coming soon
+                        </div>
+                      )}
+                    </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Show blocks only for active section */}
+                      {!activeSection ? (
+                        <div className="text-center py-12">
+                          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                            <Zap className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Select a workflow section to view available blocks
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Triggers - Only show when 'when' is active */}
+                          {activeSection === 'when' && (
+                            <div>
+                              <h4 className="text-sm font-medium mb-3 text-foreground">
+                                Ingestion Triggers
+                              </h4>
+                              <div className="space-y-2">
+                                {[
+                                  { icon: Mail, iconName: 'Mail', label: "Email Attachment", description: "When email with attachments arrives" },
+                                  { icon: FileUp, iconName: 'FileUp', label: "Manual Upload", description: "When files are uploaded manually" },
+                                  { icon: FolderOpen, iconName: 'FolderOpen', label: "Folder Sync", description: "When files appear in watched folder" },
+                                  { icon: Cloud, iconName: 'Cloud', label: "Cloud Storage", description: "From Dropbox, Google Drive, etc." },
+                                  { icon: Globe, iconName: 'Globe', label: "API Integration", description: "Via API or webhook" },
+                                  { icon: Calendar, iconName: 'Calendar', label: "Scheduled Import", description: "At scheduled intervals" },
+                                ].map((trigger) => (
+                                  <div
+                                    key={trigger.label}
+                                    className="p-3 border rounded-lg bg-background cursor-move transition-all hover:shadow-sm hover:border-foreground/20 hover:scale-[1.01] border-border"
+                                    draggable
+                                    onDragStart={(e) => {
+                                      // Store only serializable data
+                                      const dragData = {
+                                        type: 'trigger',
+                                        label: trigger.label,
+                                        description: trigger.description,
+                                        iconName: trigger.iconName
+                                      }
+                                      e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
+                                      e.currentTarget.classList.add('opacity-50')
+                                    }}
+                                    onDragEnd={(e) => {
+                                      e.currentTarget.classList.remove('opacity-50')
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      {React.createElement(trigger.icon, { className: "h-4 w-4 text-foreground" })}
+                                      <div>
+                                        <div className="text-sm font-medium">{trigger.label}</div>
+                                        <div className="text-xs text-muted-foreground">{trigger.description}</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Conditions - Only show when 'check-if' is active */}
+                          {activeSection === 'check-if' && (
+                            <div>
+                              <h4 className="text-sm font-medium mb-3 text-foreground">
+                                Available Conditions
+                              </h4>
+                              <div className="space-y-2">
+                                {[
+                                  "File name contains...",
+                                  "File type is...",
+                                  "Entity matches...",
+                                  "Date is before/after...",
+                                  "Amount is greater than...",
+                                ].map((condition) => (
+                                  <div
+                                    key={condition}
+                                    className="p-3 border rounded-lg bg-background cursor-move transition-all hover:shadow-sm hover:border-foreground/20 hover:scale-[1.01] border-border"
+                                    draggable
+                                    onDragStart={(e) => {
+                                      const dragData = {
+                                        type: 'condition',
+                                        label: condition
+                                      }
+                                      e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
+                                      e.currentTarget.classList.add('opacity-50')
+                                    }}
+                                    onDragEnd={(e) => {
+                                      e.currentTarget.classList.remove('opacity-50')
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <CheckCircle2 className="h-4 w-4 text-foreground" />
+                                      <span className="text-sm">{condition}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Actions - Only show when 'do-this' is active */}
+                          {activeSection === 'do-this' && (
+                            <div>
+                              <h4 className="text-sm font-medium mb-3 text-foreground">
+                                Available Actions
+                              </h4>
+                              <div className="space-y-2">
+                                {[
+                                  "Create task",
+                                  "Send notification",
+                                  "Move to stage",
+                                  "Update field",
+                                  "Add comment",
+                                  "Assign to user",
+                                ].map((action) => (
+                                  <div
+                                    key={action}
+                                    className="p-3 border rounded-lg bg-background cursor-move transition-all hover:shadow-sm hover:border-foreground/20 hover:scale-[1.01] border-border"
+                                    draggable
+                                    onDragStart={(e) => {
+                                      const dragData = {
+                                        type: 'action',
+                                        label: action
+                                      }
+                                      e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
+                                      e.currentTarget.classList.add('opacity-50')
+                                    }}
+                                    onDragEnd={(e) => {
+                                      e.currentTarget.classList.remove('opacity-50')
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <PlayCircle className="h-4 w-4 text-foreground" />
+                                      <span className="text-sm">{action}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                  </div>
+                  
+                  {/* Footer with Cancel and Save buttons */}
+                  <div className="border-t bg-background p-4">
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          if (selectedBlock) {
+                            // Cancel block configuration
+                            setSelectedBlock(null)
+                          } else {
+                            // Cancel entire automation editing
+                            setIsEditingAutomation(false)
+                            setActiveSection(null)
+                            setSelectedBlock(null)
+                            setDroppedItems({ when: [], checkIf: [], doThis: [] })
+                          }
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          if (selectedBlock) {
+                            // Save block configuration
+                            console.log('Block configuration saved:', selectedBlock)
+                            setSelectedBlock(null)
+                          } else {
+                            // Save entire automation
+                            console.log('Saving automation:', {
+                              when: droppedItems.when,
+                              checkIf: droppedItems.checkIf,
+                              doThis: droppedItems.doThis
+                            })
+                            setIsEditingAutomation(false)
+                            setActiveSection(null)
+                            setSelectedBlock(null)
+                            // Note: In a real implementation, you would save the automation here
+                            // For now, close the sheet and reset to details tab
+                            setIsOpen(false)
+                            setActiveTab("details")
+                          }
+                        }}
+                      >
+                        {selectedBlock ? 'Save' : 'Save Automation'}
+                      </Button>
                     </div>
                   </div>
                 </div>

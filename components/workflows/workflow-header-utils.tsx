@@ -177,7 +177,7 @@ export function SelectedAttributeItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="group flex items-center space-x-3 rounded-lg border border-border bg-card p-3 hover:shadow-sm transition-all duration-200"
+      className="group flex items-center space-x-3 rounded-lg border border-border bg-card p-4 hover:shadow-sm transition-all duration-200"
     >
       <div
         {...attributes}
