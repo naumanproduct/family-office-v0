@@ -442,6 +442,30 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
     }
   }, [isFullScreen, tabs])
 
+  // Lock body scroll when full screen is active
+  React.useEffect(() => {
+    if (isFullScreen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Add styles to prevent scrolling
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scroll position and remove styles
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      };
+    }
+  }, [isFullScreen]);
+
   const ViewModeSelector = () => {
     if (activeTab === "details") return null
 
@@ -477,98 +501,104 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 
   const FullScreenContent = () => {
     const content = (
-      <div className="fixed inset-0 z-[9999] bg-background">
-        {/* Full Screen Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="bg-background">
-              {item.header}
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <MailIcon className="h-4 w-4" />
-              Compose email
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setIsFullScreen(false)}>
-              <XIcon className="h-4 w-4" />
-              Close
-            </Button>
-          </div>
-        </div>
-
-        {/* Full Screen Content - Two Column Layout */}
-        <div className="flex h-[calc(100vh-73px)]">
-          {/* Left Panel - Details (Persistent) */}
-          <div className="w-[672px] border-r bg-background">
-            <DetailsPanel item={item} isFullScreen={true} />
+      <>
+        {/* Semi-transparent overlay */}
+        <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm" onClick={() => setIsFullScreen(false)} />
+        
+        {/* Main container with rounded corners and spacing */}
+        <div className="fixed inset-4 z-[9999] bg-background rounded-xl shadow-xl overflow-hidden">
+          {/* Full Screen Header */}
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="bg-background">
+                {item.header}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <MailIcon className="h-4 w-4" />
+                Compose email
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setIsFullScreen(false)}>
+                <XIcon className="h-4 w-4" />
+                Close
+              </Button>
+            </div>
           </div>
 
-          {/* Right Panel - Main Content */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Record Header - moved here */}
-            <div className="border-b bg-background px-6 py-2">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {item.header.charAt(0)}
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">{item.header}</h2>
-                </div>
-              </div>
+          {/* Full Screen Content - Two Column Layout */}
+          <div className="flex h-[calc(100%-73px)]">
+            {/* Left Panel - Details (Persistent) */}
+            <div className="w-[672px] border-r bg-background">
+              <DetailsPanel item={item} isFullScreen={true} />
             </div>
 
-            {/* Tabs */}
-            <div className="border-b bg-background px-6">
-              <div className="flex gap-8 overflow-x-auto">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                      activeTab === tab.id
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.icon && <tab.icon className="h-4 w-4" />}
-                    {tab.label}
-                    {tab.count !== null && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                        {tab.count}
-                      </Badge>
+            {/* Right Panel - Main Content */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Record Header - moved here */}
+              <div className="border-b bg-background px-6 py-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                    {item.header.charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold">{item.header}</h2>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="border-b bg-background px-6">
+                <div className="flex gap-8 overflow-x-auto">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
+                        activeTab === tab.id
+                          ? "border-b-2 border-primary text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {tab.icon && <tab.icon className="h-4 w-4" />}
+                      {tab.label}
+                      {tab.count !== null && (
+                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                          {tab.count}
+                        </Badge>
+                      )}
+                      {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
+                  <div className="flex items-center gap-2">
+                    <ViewModeSelector />
+                    {activeTab !== "activity" && activeTab !== "company" && (
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add {activeTab === "team" ? "member" : activeTab.slice(0, -1)}
+                      </Button>
                     )}
-                    {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tab Content */}
-            <div className="p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold">{tabs.find((tab) => tab.id === activeTab)?.label}</h3>
-                <div className="flex items-center gap-2">
-                  <ViewModeSelector />
-                  {activeTab !== "activity" && activeTab !== "company" && (
-                    <Button variant="outline" size="sm">
-                      <PlusIcon className="h-4 w-4" />
-                      Add {activeTab === "team" ? "member" : activeTab.slice(0, -1)}
-                    </Button>
-                  )}
-                  {activeTab === "activity" && (
-                    <Button variant="outline" size="sm">
-                      <PlusIcon className="h-4 w-4" />
-                      Add meeting
-                    </Button>
-                  )}
+                    {activeTab === "activity" && (
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4" />
+                        Add meeting
+                      </Button>
+                    )}
+                  </div>
                 </div>
+                <TabContent activeTab={activeTab} viewMode={viewMode} item={item} />
               </div>
-              <TabContent activeTab={activeTab} viewMode={viewMode} item={item} />
             </div>
           </div>
         </div>
-      </div>
+      </>
     )
 
     // Use portal to render outside of current DOM hierarchy
@@ -586,7 +616,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           {item.header}
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
           <div className="flex items-center gap-3">

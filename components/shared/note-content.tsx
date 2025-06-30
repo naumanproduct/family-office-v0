@@ -45,6 +45,7 @@ type Note = {
   date: string
   lastModified: string
   author: string
+  content: string
 }
 
 // Function to get context-specific notes based on task title
@@ -61,6 +62,36 @@ export function getContextualNotes(taskTitle?: string) {
         date: "4 days ago",
         lastModified: "4 days ago",
         author: "Michael Chen",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
       },
       {
         id: "NOTE-4002",
@@ -71,6 +102,36 @@ export function getContextualNotes(taskTitle?: string) {
         date: "5 days ago",
         lastModified: "5 days ago",
         author: "Sarah Johnson",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
       },
       {
         id: "NOTE-4003",
@@ -81,6 +142,36 @@ export function getContextualNotes(taskTitle?: string) {
         date: "6 days ago",
         lastModified: "6 days ago",
         author: "Emily Watson",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
       },
     ];
   }
@@ -97,6 +188,36 @@ export function getContextualNotes(taskTitle?: string) {
         date: "3 days ago",
         lastModified: "3 days ago",
         author: "Michael Chen",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
       },
       {
         id: "NOTE-4102",
@@ -107,6 +228,36 @@ export function getContextualNotes(taskTitle?: string) {
         date: "3 days ago",
         lastModified: "3 days ago",
         author: "David Park",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
       }
     ];
   }
@@ -118,6 +269,36 @@ export function getContextualNotes(taskTitle?: string) {
         id: "NOTE-4201",
         title: "Capital Account Update Process",
         topic: "Remember to update both committed capital percentage and the called capital tracking in the LP portal. System requires update to fund data first, then individual LP records.",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
         createdAt: "2023-10-20T09:45:00Z",
         updatedAt: "2023-10-20T11:30:00Z",
         date: "2 days ago",
@@ -128,6 +309,36 @@ export function getContextualNotes(taskTitle?: string) {
         id: "NOTE-4202",
         title: "Historical Capital Account Data",
         topic: "Call #1: $10M (10%), Call #2: $25M (25%), Call #3: $30M (30%), Current Call #4: $15M (15%). Total called after this call will be $80M (80%).",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
         createdAt: "2023-10-20T14:20:00Z",
         updatedAt: "2023-10-20T16:40:00Z",
         date: "2 days ago",
@@ -144,6 +355,36 @@ export function getContextualNotes(taskTitle?: string) {
         id: "NOTE-4301",
         title: "Call Notice Template Updates",
         topic: "Using updated capital call template approved by legal in September. New template includes expanded wire instructions section and digital signature capability.",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
         createdAt: "2023-10-21T08:15:00Z",
         updatedAt: "2023-10-21T10:20:00Z",
         date: "Yesterday",
@@ -154,6 +395,36 @@ export function getContextualNotes(taskTitle?: string) {
         id: "NOTE-4302",
         title: "LP Special Instructions",
         topic: "Remember Meridian Holdings requires 2 business days advance notice before formal call notice. Ridge Family Office needs notice copied to their new administrative email: admin@ridgefamily.com",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
         createdAt: "2023-10-21T13:40:00Z",
         updatedAt: "2023-10-21T15:10:00Z",
         date: "Yesterday",
@@ -170,6 +441,36 @@ export function getContextualNotes(taskTitle?: string) {
         id: "NOTE-4401",
         title: "Fund Tracker Spreadsheet Location",
         topic: "Latest version of commitment tracker is in the shared drive: Finance/Fund III/Capital Calls/Tracker_v3.4.xlsx - Make sure to back up before updating.",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
         createdAt: "2023-10-22T09:10:00Z",
         updatedAt: "2023-10-22T09:30:00Z",
         date: "Today",
@@ -180,6 +481,36 @@ export function getContextualNotes(taskTitle?: string) {
         id: "NOTE-4402",
         title: "New Reporting Requirements",
         topic: "After Call #4, we'll exceed 75% called capital threshold, triggering quarterly reporting requirements to Investment Committee on uncalled capital plans.",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
         createdAt: "2023-10-22T11:45:00Z",
         updatedAt: "2023-10-22T14:15:00Z",
         date: "Today",
@@ -196,6 +527,36 @@ export function getContextualNotes(taskTitle?: string) {
         id: "NOTE-4501",
         title: "Previous Reconciliation Issues",
         topic: "Last reconciliation for Call #3 found a $50K discrepancy in Apex Capital's account. Issue was due to FX conversion rate difference. Confirm with accounting on any similar watch items for Call #4.",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
         createdAt: "2023-10-22T15:30:00Z",
         updatedAt: "2023-10-22T17:20:00Z",
         date: "Today",
@@ -206,6 +567,36 @@ export function getContextualNotes(taskTitle?: string) {
         id: "NOTE-4502",
         title: "Reconciliation Checklist",
         topic: "Steps for reconciliation: 1) Compare LP management system data vs. accounting system, 2) Verify total called amounts match fund admin records, 3) Check individual LP records match capital accounts, 4) Confirm percentages align with LP agreements, 5) Document and resolve any discrepancies.",
+        content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
         createdAt: "2023-10-22T16:15:00Z",
         updatedAt: "2023-10-22T16:45:00Z",
         date: "Today",
@@ -232,6 +623,36 @@ const defaultNotes: Note[] = [
     date: "2 days ago",
     lastModified: "2 days ago",
     author: "Sarah Johnson",
+    content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
   },
   {
     id: "NOTE-1002",
@@ -242,6 +663,36 @@ const defaultNotes: Note[] = [
     date: "3 days ago",
     lastModified: "3 days ago",
     author: "Michael Chen",
+    content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
   },
   {
     id: "NOTE-1003",
@@ -252,8 +703,38 @@ const defaultNotes: Note[] = [
     date: "4 days ago",
     lastModified: "4 days ago",
     author: "You",
+    content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
   },
-]
+];
 
 export type NoteContentProps = {
   data?: any[] // Optional - if not provided, uses default mock data
@@ -294,6 +775,36 @@ export function NoteContent({
       date: "Just now",
       lastModified: "Just now",
       author: "You",
+      content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+
+Key Discussion Points:
+1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+
+2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+
+3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+
+4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
+   - Technical architecture review and scalability assessment
+   - Customer reference calls with at least 10 enterprise clients
+   - Detailed financial audit including revenue recognition practices
+   - Management team background checks and reference verification
+   - Legal review of IP portfolio and existing contracts
+
+5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+
+6. Risk Factors Identified:
+   - High customer concentration with top 5 clients representing 35% of revenue
+   - Dependency on key technical talent, particularly the CTO
+   - Potential platform risk with heavy reliance on AWS infrastructure
+   - Increasing competition from well-funded competitors
+
+Next Steps:
+- Due diligence team formation by October 25th
+- Initial findings presentation scheduled for November 15th
+- Final investment decision expected by November 30th
+
+The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
     };
     
     // Add the new note to the beginning of the array

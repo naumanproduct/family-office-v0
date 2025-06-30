@@ -247,7 +247,7 @@ export default function NotesClientPage() {
     if (isDesktop) {
       return (
         <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
-          <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+          <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
               <div className="flex items-center gap-3">
@@ -312,18 +312,41 @@ export default function NotesClientPage() {
   React.useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isFullScreen) {
-        setIsFullScreen(false)
-        setSelectedNote(null)
+        setIsFullScreen(false);
       }
-    }
+    };
 
     if (isFullScreen) {
-      document.addEventListener("keydown", handleEscKey)
+      document.addEventListener("keydown", handleEscKey);
       return () => {
-        document.removeEventListener("keydown", handleEscKey)
-      }
+        document.removeEventListener("keydown", handleEscKey);
+      };
     }
-  }, [isFullScreen])
+  }, [isFullScreen]);
+
+  // Lock body scroll when full screen is active
+  React.useEffect(() => {
+    if (isFullScreen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Add styles to prevent scrolling
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scroll position and remove styles
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      };
+    }
+  }, [isFullScreen]);
 
   return (
     <SidebarProvider>

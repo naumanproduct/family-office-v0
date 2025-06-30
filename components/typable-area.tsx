@@ -67,36 +67,38 @@ export function TypableArea({
 
   return (
     <div className="space-y-3">
-      <div className="relative">
-        <div className="min-h-[100px] p-3 rounded-lg bg-background">
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => {
-              if (!value.trim() && !showButtons) {
-                setIsFocused(false)
-              }
-            }}
-            placeholder={placeholder}
-            className={`w-full bg-transparent border-none outline-none resize-none placeholder:text-gray-400 text-sm ${
-              !isExpanded && !isFocused && shouldShowExpandButton ? 'overflow-hidden' : 'overflow-hidden'
-            }`}
-            style={{ minHeight: '76px' }} // Approximately 3 lines of text
-          />
-          
-          {/* Gradient overlay when truncated */}
-          {!isExpanded && !isFocused && shouldShowExpandButton && (
-            <div className="absolute bottom-3 left-3 right-3 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-          )}
+      <div>
+        <div className="relative">
+          <div className="min-h-[100px] p-3 rounded-lg bg-background">
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => {
+                if (!value.trim() && !showButtons) {
+                  setIsFocused(false)
+                }
+              }}
+              placeholder={placeholder}
+              className={`w-full bg-transparent border-none outline-none resize-none placeholder:text-gray-400 text-sm ${
+                !isExpanded && !isFocused && shouldShowExpandButton ? 'overflow-hidden' : 'overflow-hidden'
+              }`}
+              style={{ minHeight: '76px' }} // Approximately 3 lines of text
+            />
+            
+            {/* Gradient overlay when truncated */}
+            {!isExpanded && !isFocused && shouldShowExpandButton && (
+              <div className="absolute bottom-3 left-3 right-3 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+            )}
+          </div>
         </div>
         
         {/* Show all/Show less button */}
         {shouldShowExpandButton && !isFocused && (
           <button
             onClick={handleToggleExpand}
-            className="mt-2 text-sm text-blue-600 hover:text-blue-700 hover:underline focus:outline-none"
+            className="mt-2 text-sm text-primary hover:text-primary/80 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded px-1"
           >
             {isExpanded ? 'Show less' : 'Show all'}
           </button>

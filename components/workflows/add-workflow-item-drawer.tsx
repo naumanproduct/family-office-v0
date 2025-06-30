@@ -111,7 +111,7 @@ export function AddWorkflowItemDrawer({
           Add company
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
         <SheetTitle className="sr-only">Add {workflowType}</SheetTitle>
         
         {/* Header */}

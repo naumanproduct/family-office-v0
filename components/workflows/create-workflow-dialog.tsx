@@ -557,7 +557,7 @@ export function CreateWorkflowDialog({ isOpen, onClose, onSave, existingWorkflow
   return (
     <>
       <Sheet open={isOpen} onOpenChange={handleCloseRequest}>
-        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">

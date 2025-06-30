@@ -18,6 +18,15 @@ import {
   LayoutIcon,
   ListIcon,
   BuildingIcon,
+  Zap,
+  CheckCircle2,
+  FileUp,
+  Mail,
+  Clock,
+  AlertCircle,
+  PlayCircle,
+  PauseCircle,
+  ChevronLeftIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -68,6 +77,42 @@ interface WorkflowHeaderProps {
   workflowConfig: WorkflowConfig
   onSave: (config: WorkflowConfig) => void
 }
+
+// AutomationRule type (adapted from settings/automations-management)
+type AutomationRule = {
+  id: string
+  name: string
+  description: string
+  status: "active" | "inactive" | "draft"
+  triggerType: string
+  triggerIcon: any
+  conditions: string[]
+  actions: string[]
+  executionCount: number
+  lastExecuted?: string
+}
+
+// Mock: 1 automation per workflow
+const getWorkflowAutomation = (workflowName: string): AutomationRule[] => [
+  {
+    id: "1",
+    name: `${workflowName} Automation`,
+    description: `Automatically run actions for ${workflowName}`,
+    status: "active",
+    triggerType: "File Upload",
+    triggerIcon: FileUp,
+    conditions: [
+      `File name contains '${workflowName}'`,
+      "File is linked to this workflow"
+    ],
+    actions: [
+      `Create a Task for ${workflowName}`,
+      "Notify team"
+    ],
+    executionCount: 5,
+    lastExecuted: "2024-06-30T12:00:00Z"
+  }
+]
 
 // Sortable attribute item component for selected fields
 function SelectedAttributeItem({
@@ -394,6 +439,36 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   const [customName, setCustomName] = React.useState("")
   const [customType, setCustomType] = React.useState("text")
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [selectedAutomation, setSelectedAutomation] = React.useState<AutomationRule | null>(null)
+  const [isEditingAutomation, setIsEditingAutomation] = React.useState(false)
+  const [activeSection, setActiveSection] = React.useState<'when' | 'check-if' | 'do-this' | null>(null)
+  const [droppedItems, setDroppedItems] = React.useState<{
+    when: any[],
+    checkIf: any[],
+    doThis: any[]
+  }>({
+    when: [],
+    checkIf: [],
+    doThis: []
+  })
+  
+  // Initialize dropped items when selecting an automation
+  React.useEffect(() => {
+    if (selectedAutomation && isEditingAutomation) {
+      // Initialize with existing data if needed
+      setDroppedItems({
+        when: selectedAutomation.triggerType ? [{
+          type: 'trigger',
+          label: selectedAutomation.triggerType,
+          description: 'Existing trigger',
+          iconName: 'Zap'
+        }] : [],
+        checkIf: [],
+        doThis: []
+      })
+    }
+  }, [selectedAutomation, isEditingAutomation])
+  const automations = getWorkflowAutomation(workflowName)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -515,9 +590,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
-
     { id: "attributes", label: "Card Attributes", icon: LayoutIcon },
     { id: "stages", label: "Stages", icon: ListIcon },
+    { id: "automations", label: "Automations", icon: Zap },
   ]
 
   return (
@@ -527,336 +602,860 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
           <Settings2Icon className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
-        {/* Header - matches master-drawer pattern */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="bg-background">
-              Workflow Configuration
-            </Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleSave}>
-              Save Changes
-            </Button>
-          </div>
-        </div>
-
-        {/* Record Header - matches master-drawer pattern */}
-        <div className="border-b bg-background px-6 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-              {workflowName.charAt(0)}
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">{workflowName}</h2>
-              <p className="text-sm text-muted-foreground">Configure workflow settings</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs - matches master-drawer pattern */}
-        <div className="border-b bg-background px-6">
-          <div className="flex gap-8 overflow-x-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? "border-b-2 border-primary text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {Icon && <Icon className="h-4 w-4" />}
-                  {tab.label}
-                  {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto">
-          {activeTab === "details" && (
-            <MasterDetailsPanel 
-              fieldGroups={[
-                {
-                  id: "workflow-info",
-                  label: "Workflow Information",
-                  icon: FileTextIcon,
-                  fields: [
-                    { 
-                      label: "Workflow Name", 
-                      value: (
-                        <Input
-                          value={config.name}
-                          onChange={(e) => setConfig({ ...config, name: e.target.value })}
-                          className="mt-1"
-                        />
-                      )
-                    },
-                    { 
-                      label: "Description", 
-                      value: (
-                        <Textarea
-                          value={config.description}
-                          onChange={(e) => setConfig({ ...config, description: e.target.value })}
-                          className="resize-none mt-1"
-                          rows={3}
-                        />
-                      )
-                    },
-                  ],
-                },
-                {
-                  id: "workflow-stats",
-                  label: "Workflow Statistics",
-                  icon: LayoutIcon,
-                  fields: [
-                    { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span> },
-                    { label: "Card Fields", value: `${config.attributes.length} fields configured` },
-                    { label: "Stages", value: `${config.stages.length} stages configured` },
-                    { label: "Created", value: "January 15, 2024" },
-                    { label: "Last Modified", value: "Today" },
-                  ],
-                },
-              ]}
-            />
-          )}
-
-          {activeTab === "activity" && (
-            <div className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Workflow Activity</h3>
-              <UnifiedActivitySection activities={generateWorkflowActivities()} />
-            </div>
-          )}
-
-          {activeTab === "attributes" && (
-            <div className="flex flex-col h-full">
-              <div className="p-6 pb-3">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Card Fields</h3>
-                  <Badge variant="secondary">
-                    {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {config.attributes.length > 0
-                    ? "Drag to reorder how they appear on cards"
-                    : "Add fields to display on your cards"}
-                </p>
+      <SheetContent side="right" className={`flex w-full flex-col p-0 [&>button]:hidden overflow-hidden ${selectedAutomation && isEditingAutomation ? '!max-w-[calc(100%-2rem)] sm:!max-w-[calc(100%-2rem)] lg:!max-w-[calc(100%-2rem)]' : 'max-w-2xl sm:max-w-2xl'}`}>
+        {/* Conditional Header based on selectedAutomation */}
+        {!selectedAutomation ? (
+          <>
+            {/* Default Header - matches master-drawer pattern */}
+            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="bg-background">
+                  Workflow Configuration
+                </Badge>
               </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleSave}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
 
-              {/* Selected Fields List */}
-              <div className="px-6 flex-1 overflow-auto">
-                {config.attributes.length > 0 ? (
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAttributeDragEnd}>
-                    <SortableContext
-                      items={config.attributes.map((attr) => attr.id)}
-                      strategy={verticalListSortingStrategy}
+            {/* Record Header - matches master-drawer pattern */}
+            <div className="border-b bg-background px-6 py-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                  {workflowName.charAt(0)}
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold">{workflowName}</h2>
+                  <p className="text-sm text-muted-foreground">Configure workflow settings</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs - matches master-drawer pattern */}
+            <div className="border-b bg-background px-6">
+              <div className="flex gap-8 overflow-x-auto">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative whitespace-nowrap py-3 text-sm font-medium flex items-center gap-2 ${
+                        activeTab === tab.id
+                          ? "border-b-2 border-primary text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
                     >
-                      <div className="space-y-2">
-                        {config.attributes.map((attribute) => (
-                          <SelectedAttributeItem
-                            key={attribute.id}
-                            attribute={attribute}
-                            onEdit={editAttribute}
-                            onDelete={deleteAttribute}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
+                      {Icon && <Icon className="h-4 w-4" />}
+                      {tab.label}
+                      {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Automation Detail Header */}
+            <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => {
+                    setSelectedAutomation(null)
+                    setIsEditingAutomation(false)
+                  }}
+                >
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <Badge variant="outline" className="bg-background">
+                  Automation
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                {!isEditingAutomation ? (
+                  <Button variant="outline" size="sm" onClick={() => setIsEditingAutomation(true)}>
+                    <EditIcon className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
                 ) : (
-                  <div className="text-center py-12 border border-dashed border-border rounded-lg bg-muted/50">
-                    <div className="max-w-sm mx-auto">
-                      <div className="text-muted-foreground mb-3">
-                        <FileTextIcon className="h-8 w-8 mx-auto" />
-                      </div>
-                      <h4 className="text-sm font-medium mb-1">No fields selected</h4>
-                      <p className="text-xs text-muted-foreground mb-4">
-                        Choose which fields to display on your kanban cards
-                      </p>
-                      <Button size="sm" onClick={() => setShowAddFields(true)}>
-                        <PlusIcon className="h-3 w-3 mr-1" />
-                        Add Your First Field
-                      </Button>
-                    </div>
-                  </div>
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => setIsEditingAutomation(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={() => setIsEditingAutomation(false)}>
+                      Save Changes
+                    </Button>
+                  </>
                 )}
               </div>
+            </div>
 
-              {/* Add Field Section - matches drawer pattern */}
-              <div className="border-t mt-auto">
-                <div
-                  className={`p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors ${
-                    showAddFields ? "bg-muted/50" : ""
-                  }`}
-                  onClick={() => setShowAddFields(!showAddFields)}
-                >
-                  <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                    <PlusIcon className="h-4 w-4" />
-                    Add Field
+            {/* Automation Record Header */}
+            <div className="border-b bg-background px-6 py-2">
+              <div className="flex items-center gap-3">
+                {React.createElement(selectedAutomation.triggerIcon, { 
+                  className: "h-8 w-8 p-1.5 rounded-full bg-primary/10 text-primary" 
+                })}
+                <div>
+                  <h2 className="text-lg font-semibold">{selectedAutomation.name}</h2>
+                  <p className="text-sm text-muted-foreground">{selectedAutomation.description}</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Tab Content */}
+        <div className={`flex-1 ${selectedAutomation && isEditingAutomation ? 'flex' : ''} overflow-hidden`}>
+          {!selectedAutomation ? (
+            <div className="flex-1 overflow-y-auto">
+              {activeTab === "details" && (
+                <MasterDetailsPanel 
+                  fieldGroups={[
+                    {
+                      id: "workflow-info",
+                      label: "Workflow Information",
+                      icon: FileTextIcon,
+                      fields: [
+                        { 
+                          label: "Workflow Name", 
+                          value: (
+                            <Input
+                              value={config.name}
+                              onChange={(e) => setConfig({ ...config, name: e.target.value })}
+                              className="mt-1"
+                            />
+                          )
+                        },
+                        { 
+                          label: "Description", 
+                          value: (
+                            <Textarea
+                              value={config.description}
+                              onChange={(e) => setConfig({ ...config, description: e.target.value })}
+                              className="resize-none mt-1"
+                              rows={3}
+                            />
+                          )
+                        },
+                      ],
+                    },
+                    {
+                      id: "workflow-stats",
+                      label: "Workflow Statistics",
+                      icon: LayoutIcon,
+                      fields: [
+                        { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span> },
+                        { label: "Card Fields", value: `${config.attributes.length} fields configured` },
+                        { label: "Stages", value: `${config.stages.length} stages configured` },
+                        { label: "Created", value: "January 15, 2024" },
+                        { label: "Last Modified", value: "Today" },
+                      ],
+                    },
+                  ]}
+                />
+              )}
+
+              {activeTab === "activity" && (
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Workflow Activity</h3>
+                  <UnifiedActivitySection activities={generateWorkflowActivities()} />
+                </div>
+              )}
+
+              {activeTab === "attributes" && (
+                <div className="flex flex-col h-full">
+                  <div className="p-6 pb-3">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">Card Fields</h3>
+                      <Badge variant="secondary">
+                        {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {config.attributes.length > 0
+                        ? "Drag to reorder how they appear on cards"
+                        : "Add fields to display on your cards"}
+                    </p>
                   </div>
-                  <div>
-                    {showAddFields ? (
-                      <ChevronUpIcon className="h-4 w-4 text-muted-foreground" />
+
+                  {/* Selected Fields List */}
+                  <div className="px-6 flex-1 overflow-auto">
+                    {config.attributes.length > 0 ? (
+                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAttributeDragEnd}>
+                        <SortableContext
+                          items={config.attributes.map((attr) => attr.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div className="space-y-2">
+                            {config.attributes.map((attribute) => (
+                              <SelectedAttributeItem
+                                key={attribute.id}
+                                attribute={attribute}
+                                onEdit={editAttribute}
+                                onDelete={deleteAttribute}
+                              />
+                            ))}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
                     ) : (
-                      <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="text-center py-12 border border-dashed border-border rounded-lg bg-muted/50">
+                        <div className="max-w-sm mx-auto">
+                          <div className="text-muted-foreground mb-3">
+                            <FileTextIcon className="h-8 w-8 mx-auto" />
+                          </div>
+                          <h4 className="text-sm font-medium mb-1">No fields selected</h4>
+                          <p className="text-xs text-muted-foreground mb-4">
+                            Choose which fields to display on your kanban cards
+                          </p>
+                          <Button size="sm" onClick={() => setShowAddFields(true)}>
+                            <PlusIcon className="h-3 w-3 mr-1" />
+                            Add Your First Field
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Add Field Section - matches drawer pattern */}
+                  <div className="border-t mt-auto">
+                    <div
+                      className={`p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors ${
+                        showAddFields ? "bg-muted/50" : ""
+                      }`}
+                      onClick={() => setShowAddFields(!showAddFields)}
+                    >
+                      <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                        <PlusIcon className="h-4 w-4" />
+                        Add Field
+                      </div>
+                      <div>
+                        {showAddFields ? (
+                          <ChevronUpIcon className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                    </div>
+
+                    {showAddFields && (
+                      <div className="p-4 border-t bg-muted/50">
+                        {/* Search and Custom Field Toggle */}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="relative flex-1">
+                            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              placeholder="Search fields..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="pl-9 h-8 text-sm"
+                            />
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowCustomField(!showCustomField)}
+                            className="whitespace-nowrap h-8 text-xs"
+                          >
+                            {showCustomField ? "Cancel" : "Create Custom"}
+                          </Button>
+                        </div>
+
+                        {/* Custom Field Creator */}
+                        {showCustomField && (
+                          <div className="mb-4 p-3 bg-background rounded-lg border shadow-sm">
+                            <div className="space-y-3">
+                              <div>
+                                <Label htmlFor="customName" className="text-xs font-medium">
+                                  Field Name
+                                </Label>
+                                <Input
+                                  id="customName"
+                                  placeholder="Enter field name"
+                                  value={customName}
+                                  onChange={(e) => setCustomName(e.target.value)}
+                                  className="h-8 text-sm mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="customType" className="text-xs font-medium">
+                                  Field Type
+                                </Label>
+                                <Select value={customType} onValueChange={setCustomType}>
+                                  <SelectTrigger id="customType" className="h-8 text-sm mt-1">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="text">Text</SelectItem>
+                                    <SelectItem value="number">Number</SelectItem>
+                                    <SelectItem value="date">Date</SelectItem>
+                                    <SelectItem value="currency">Currency</SelectItem>
+                                    <SelectItem value="select">Select</SelectItem>
+                                    <SelectItem value="user">User</SelectItem>
+                                    <SelectItem value="relation">Relation</SelectItem>
+                                    <SelectItem value="tags">Tags</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="pt-1">
+                                <Button
+                                  size="sm"
+                                  onClick={createCustomField}
+                                  disabled={!customName.trim()}
+                                  className="w-full"
+                                >
+                                  Create Field
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Available Fields List */}
+                        <div className="max-h-48 overflow-y-auto rounded-lg border bg-background">
+                          {filteredAvailableFields.length > 0 ? (
+                            <div className="divide-y divide-border">
+                              {filteredAvailableFields.map((field) => {
+                                const Icon = getAttributeIcon(field.type)
+                                return (
+                                  <div
+                                    key={field.id}
+                                    className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                                    onClick={() => addField(field)}
+                                  >
+                                    <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-medium">{field.name}</div>
+                                      <div className="text-xs text-muted-foreground capitalize">{field.type}</div>
+                                    </div>
+                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full">
+                                      <PlusIcon className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4 text-sm text-muted-foreground">
+                              {searchQuery ? "No fields match your search" : "All available fields have been added"}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
+              )}
 
-                {showAddFields && (
-                  <div className="p-4 border-t bg-muted/50">
-                    {/* Search and Custom Field Toggle */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="relative flex-1">
-                        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search fields..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-9 h-8 text-sm"
-                        />
+              {activeTab === "stages" && (
+                <div className="p-6 space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">Workflow Stages</h3>
+                        <p className="text-sm text-muted-foreground mt-1">Drag to reorder columns on your kanban board</p>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowCustomField(!showCustomField)}
-                        className="whitespace-nowrap h-8 text-xs"
-                      >
-                        {showCustomField ? "Cancel" : "Create Custom"}
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary">{config.stages.length} stages</Badge>
+                        <Button variant="outline" size="sm" onClick={addStage}>
+                          <PlusIcon className="h-3 w-3 mr-1" />
+                          Add Stage
+                        </Button>
+                      </div>
                     </div>
 
-                    {/* Custom Field Creator */}
-                    {showCustomField && (
-                      <div className="mb-4 p-3 bg-background rounded-lg border shadow-sm">
-                        <div className="space-y-3">
-                          <div>
-                            <Label htmlFor="customName" className="text-xs font-medium">
-                              Field Name
-                            </Label>
-                            <Input
-                              id="customName"
-                              placeholder="Enter field name"
-                              value={customName}
-                              onChange={(e) => setCustomName(e.target.value)}
-                              className="h-8 text-sm mt-1"
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
+                      <SortableContext
+                        items={config.stages.map((stage) => stage.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                          {config.stages.map((stage) => (
+                            <SortableStageItem
+                              key={stage.id}
+                              stage={stage}
+                              onEdit={editStage}
+                              onDelete={deleteStage}
+                              canDelete={config.stages.length > 1}
                             />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "automations" && (
+                <div className="p-6">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">Automations</h3>
+                      {/* Only 1 rule per workflow for now */}
+                      <span className="text-xs text-muted-foreground">1 rule per workflow</span>
+                    </div>
+                    <div className="space-y-2">
+                      {automations.map((automation) => (
+                        <div
+                          key={automation.id}
+                          className="flex items-center justify-between p-4 border rounded-lg bg-background hover:bg-muted/50 cursor-pointer transition"
+                          onClick={() => setSelectedAutomation(automation)}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {React.createElement(automation.triggerIcon, { className: "h-5 w-5 text-primary" })}
+                            <div className="min-w-0">
+                              <div className="font-medium text-sm truncate">{automation.name}</div>
+                              <div className="text-xs text-muted-foreground truncate">{automation.description}</div>
+                            </div>
                           </div>
-                          <div>
-                            <Label htmlFor="customType" className="text-xs font-medium">
-                              Field Type
-                            </Label>
-                            <Select value={customType} onValueChange={setCustomType}>
-                              <SelectTrigger id="customType" className="h-8 text-sm mt-1">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="text">Text</SelectItem>
-                                <SelectItem value="number">Number</SelectItem>
-                                <SelectItem value="date">Date</SelectItem>
-                                <SelectItem value="currency">Currency</SelectItem>
-                                <SelectItem value="select">Select</SelectItem>
-                                <SelectItem value="user">User</SelectItem>
-                                <SelectItem value="relation">Relation</SelectItem>
-                                <SelectItem value="tags">Tags</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="pt-1">
-                            <Button
-                              size="sm"
-                              onClick={createCustomField}
-                              disabled={!customName.trim()}
-                              className="w-full"
-                            >
-                              Create Field
+                          <div className="flex items-center gap-4">
+                            <span className="text-xs text-muted-foreground">{automation.executionCount} runs</span>
+                            <Button variant="outline" size="icon" className="h-7 w-7" title="View">
+                              <Zap className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
-                      </div>
-                    )}
-
-                    {/* Available Fields List */}
-                    <div className="max-h-48 overflow-y-auto rounded-lg border bg-background">
-                      {filteredAvailableFields.length > 0 ? (
-                        <div className="divide-y divide-border">
-                          {filteredAvailableFields.map((field) => {
-                            const Icon = getAttributeIcon(field.type)
-                            return (
-                              <div
-                                key={field.id}
-                                className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors"
-                                onClick={() => addField(field)}
-                              >
-                                <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium">{field.name}</div>
-                                  <div className="text-xs text-muted-foreground capitalize">{field.type}</div>
-                                </div>
-                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-full">
-                                  <PlusIcon className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      ) : (
-                        <div className="text-center py-4 text-sm text-muted-foreground">
-                          {searchQuery ? "No fields match your search" : "All available fields have been added"}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "stages" && (
-            <div className="p-6 space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold">Workflow Stages</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Drag to reorder columns on your kanban board</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="secondary">{config.stages.length} stages</Badge>
-                    <Button variant="outline" size="sm" onClick={addStage}>
-                      <PlusIcon className="h-3 w-3 mr-1" />
-                      Add Stage
-                    </Button>
-                  </div>
-                </div>
-
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
-                  <SortableContext
-                    items={config.stages.map((stage) => stage.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                      {config.stages.map((stage) => (
-                        <SortableStageItem
-                          key={stage.id}
-                          stage={stage}
-                          onEdit={editStage}
-                          onDelete={deleteStage}
-                          canDelete={config.stages.length > 1}
-                        />
                       ))}
                     </div>
-                  </SortableContext>
-                </DndContext>
-              </div>
+                  </div>
+                </div>
+              )}
             </div>
+          ) : (
+            <>
+              {/* Automation Detail/Edit View */}
+              <div className={`flex-1 overflow-y-auto ${isEditingAutomation ? 'pr-80' : ''}`}>
+                <div className="py-6">
+                  {/* Visual Rule Builder */}
+                  <div className="max-w-3xl mx-auto px-6 space-y-6">
+                    {/* When Section */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-muted-foreground">When</h3>
+                      <div 
+                        className={`border-2 rounded-lg p-4 min-h-[100px] transition-all cursor-pointer ${
+                          isEditingAutomation 
+                            ? activeSection === 'when' 
+                              ? 'border-primary bg-primary/5 shadow-sm' 
+                              : 'border-dashed border-primary/30 hover:border-primary/50 hover:bg-muted/30'
+                            : 'border-border'
+                        } bg-background`}
+                        onClick={() => isEditingAutomation && setActiveSection('when')}
+                        onDragOver={(e) => {
+                          if (isEditingAutomation && activeSection === 'when') {
+                            e.preventDefault()
+                            e.currentTarget.classList.add('bg-primary/10')
+                          }
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('bg-primary/10')
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          e.currentTarget.classList.remove('bg-primary/10')
+                          if (isEditingAutomation && activeSection === 'when') {
+                            const data = e.dataTransfer.getData('text/plain')
+                            const item = JSON.parse(data)
+                            setDroppedItems(prev => ({
+                              ...prev,
+                              when: [...prev.when, item]
+                            }))
+                          }
+                        }}
+                      >
+                        {(isEditingAutomation && droppedItems.when.length > 0) || (!isEditingAutomation && selectedAutomation.triggerType) ? (
+                          <div className="space-y-2">
+                            {!isEditingAutomation && droppedItems.when.length === 0 && (
+                              <div className="flex items-center gap-3">
+                                <Zap className="h-5 w-5 text-primary" />
+                                <div>
+                                  <div className="font-medium">{selectedAutomation.triggerType}</div>
+                                  <div className="text-sm text-muted-foreground">Triggers when this event occurs</div>
+                                </div>
+                              </div>
+                            )}
+                            {(isEditingAutomation ? droppedItems.when : droppedItems.when.length > 0 ? droppedItems.when : []).map((item, index) => {
+                              // Map icon names back to components
+                              const iconMap: { [key: string]: any } = {
+                                'FileUp': FileUp,
+                                'Mail': Mail,
+                                'Clock': Clock,
+                                'AlertCircle': AlertCircle,
+                                'Zap': Zap
+                              }
+                              const IconComponent = iconMap[item.iconName] || Zap
+                              
+                              return (
+                                <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                                  <IconComponent className="h-4 w-4 text-primary flex-shrink-0" />
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium">{item.label}</div>
+                                    {item.description && <div className="text-xs text-muted-foreground">{item.description}</div>}
+                                  </div>
+                                  {isEditingAutomation && (
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-6 w-6"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setDroppedItems(prev => ({
+                                          ...prev,
+                                          when: prev.when.filter((_, i) => i !== index)
+                                        }))
+                                      }}
+                                    >
+                                      <XIcon className="h-3 w-3" />
+                                    </Button>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        ) : (
+                          <div className="text-center py-4">
+                            <Zap className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground">
+                              Click to select, then drag triggers here
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Check if Section */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-muted-foreground">Check if</h3>
+                      <div 
+                        className={`border-2 rounded-lg p-4 min-h-[120px] transition-all cursor-pointer ${
+                          isEditingAutomation 
+                            ? activeSection === 'check-if' 
+                              ? 'border-primary bg-primary/5 shadow-sm' 
+                              : 'border-dashed border-primary/30 hover:border-primary/50 hover:bg-muted/30'
+                            : 'border-border'
+                        } bg-background`}
+                        onClick={() => isEditingAutomation && setActiveSection('check-if')}
+                        onDragOver={(e) => {
+                          if (isEditingAutomation && activeSection === 'check-if') {
+                            e.preventDefault()
+                            e.currentTarget.classList.add('bg-primary/10')
+                          }
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('bg-primary/10')
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          e.currentTarget.classList.remove('bg-primary/10')
+                          if (isEditingAutomation && activeSection === 'check-if') {
+                            const data = e.dataTransfer.getData('text/plain')
+                            const item = JSON.parse(data)
+                            setDroppedItems(prev => ({
+                              ...prev,
+                              checkIf: [...prev.checkIf, item]
+                            }))
+                          }
+                        }}
+                      >
+                        {(droppedItems.checkIf.length > 0 || (!isEditingAutomation && selectedAutomation.conditions.length > 0)) ? (
+                          <div className="space-y-2">
+                            {!isEditingAutomation && selectedAutomation.conditions.map((condition, index) => (
+                              <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                                <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                                <span className="text-sm">{condition}</span>
+                              </div>
+                            ))}
+                            {droppedItems.checkIf.map((item, index) => (
+                              <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                                <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                                <span className="text-sm flex-1">{item.label || item}</span>
+                                {isEditingAutomation && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setDroppedItems(prev => ({
+                                        ...prev,
+                                        checkIf: prev.checkIf.filter((_, i) => i !== index)
+                                      }))
+                                    }}
+                                  >
+                                    <XIcon className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <CheckCircle2 className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground">
+                              {isEditingAutomation ? "Click to select, then drag conditions here" : "No conditions defined"}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Do this Section */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-muted-foreground">Do this</h3>
+                      <div 
+                        className={`border-2 rounded-lg p-4 min-h-[120px] transition-all cursor-pointer ${
+                          isEditingAutomation 
+                            ? activeSection === 'do-this' 
+                              ? 'border-primary bg-primary/5 shadow-sm' 
+                              : 'border-dashed border-primary/30 hover:border-primary/50 hover:bg-muted/30'
+                            : 'border-border'
+                        } bg-background`}
+                        onClick={() => isEditingAutomation && setActiveSection('do-this')}
+                        onDragOver={(e) => {
+                          if (isEditingAutomation && activeSection === 'do-this') {
+                            e.preventDefault()
+                            e.currentTarget.classList.add('bg-primary/10')
+                          }
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove('bg-primary/10')
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          e.currentTarget.classList.remove('bg-primary/10')
+                          if (isEditingAutomation && activeSection === 'do-this') {
+                            const data = e.dataTransfer.getData('text/plain')
+                            const item = JSON.parse(data)
+                            setDroppedItems(prev => ({
+                              ...prev,
+                              doThis: [...prev.doThis, item]
+                            }))
+                          }
+                        }}
+                      >
+                        {(droppedItems.doThis.length > 0 || (!isEditingAutomation && selectedAutomation.actions.length > 0)) ? (
+                          <div className="space-y-2">
+                            {!isEditingAutomation && selectedAutomation.actions.map((action, index) => (
+                              <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                                <PlayCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                                <span className="text-sm">{action}</span>
+                              </div>
+                            ))}
+                            {droppedItems.doThis.map((item, index) => (
+                              <div key={index} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                                <PlayCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                                <span className="text-sm flex-1">{item.label || item}</span>
+                                {isEditingAutomation && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setDroppedItems(prev => ({
+                                        ...prev,
+                                        doThis: prev.doThis.filter((_, i) => i !== index)
+                                      }))
+                                    }}
+                                  >
+                                    <XIcon className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <PlayCircle className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                            <p className="text-sm text-muted-foreground">
+                              {isEditingAutomation ? "Click to select, then drag actions here" : "No actions defined"}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Execution Stats */}
+                  <div className="max-w-3xl mx-auto px-6 mt-8">
+                    <div className="flex items-center gap-6 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Last run: {selectedAutomation.lastExecuted ? new Date(selectedAutomation.lastExecuted).toLocaleString() : "Never"}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <PlayCircle className="h-3 w-3" />
+                      Total runs: {selectedAutomation.executionCount}
+                    </div>
+                    <Badge variant={selectedAutomation.status === 'active' ? 'default' : 'secondary'} className="capitalize">
+                      {selectedAutomation.status}
+                    </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Edit Mode Right Sidebar */}
+              {isEditingAutomation && (
+                <div className="w-80 border-l bg-muted/30 p-4 overflow-y-auto">
+                  <h3 className="font-medium mb-2">Automation Blocks</h3>
+                  
+                  {/* Instructions */}
+                  <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                    <p className="text-xs text-primary font-medium">
+                      {activeSection ? (
+                        <>Click and drag blocks to the "{activeSection === 'when' ? 'When' : activeSection === 'check-if' ? 'Check if' : 'Do this'}" section</>
+                      ) : (
+                        <>Click on a section (When, Check if, or Do this) to start building your automation</>
+                      )}
+                    </p>
+                  </div>
+                  
+                  {/* Triggers */}
+                  <div className={`mb-6 ${activeSection === 'when' ? 'ring-2 ring-primary ring-offset-2 rounded-lg p-2 -m-2' : ''}`}>
+                    <h4 className={`text-sm font-medium mb-3 ${activeSection === 'when' ? 'text-primary' : 'text-muted-foreground'}`}>
+                      Triggers {activeSection === 'when' && <span className="text-xs ml-2">(Drag to "When" section)</span>}
+                    </h4>
+                    <div className="space-y-2">
+                      {[
+                        { icon: FileUp, iconName: 'FileUp', label: "File Upload", description: "When a file is uploaded" },
+                        { icon: Mail, iconName: 'Mail', label: "Email Received", description: "When an email arrives" },
+                        { icon: Clock, iconName: 'Clock', label: "Scheduled", description: "At specific times" },
+                        { icon: AlertCircle, iconName: 'AlertCircle', label: "Condition Met", description: "When conditions are met" },
+                      ].map((trigger) => (
+                        <div
+                          key={trigger.label}
+                          className={`p-3 border rounded-lg bg-background cursor-move transition-all ${
+                            activeSection === 'when' 
+                              ? 'hover:shadow-md hover:border-primary hover:scale-[1.02]' 
+                              : 'opacity-50 cursor-not-allowed'
+                          }`}
+                          draggable={activeSection === 'when'}
+                          onDragStart={(e) => {
+                            if (activeSection === 'when') {
+                              // Store only serializable data
+                              const dragData = {
+                                type: 'trigger',
+                                label: trigger.label,
+                                description: trigger.description,
+                                iconName: trigger.iconName
+                              }
+                              e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
+                              e.currentTarget.classList.add('opacity-50')
+                            }
+                          }}
+                          onDragEnd={(e) => {
+                            e.currentTarget.classList.remove('opacity-50')
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            {React.createElement(trigger.icon, { className: "h-4 w-4 text-primary" })}
+                            <div>
+                              <div className="text-sm font-medium">{trigger.label}</div>
+                              <div className="text-xs text-muted-foreground">{trigger.description}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Conditions */}
+                  <div className={`mb-6 ${activeSection === 'check-if' ? 'ring-2 ring-primary ring-offset-2 rounded-lg p-2 -m-2' : ''}`}>
+                    <h4 className={`text-sm font-medium mb-3 ${activeSection === 'check-if' ? 'text-primary' : 'text-muted-foreground'}`}>
+                      Conditions {activeSection === 'check-if' && <span className="text-xs ml-2">(Drag to "Check if" section)</span>}
+                    </h4>
+                    <div className="space-y-2">
+                      {[
+                        "File name contains...",
+                        "File type is...",
+                        "Entity matches...",
+                        "Date is before/after...",
+                        "Amount is greater than...",
+                      ].map((condition) => (
+                        <div
+                          key={condition}
+                          className={`p-3 border rounded-lg bg-background cursor-move transition-all ${
+                            activeSection === 'check-if' 
+                              ? 'hover:shadow-md hover:border-primary hover:scale-[1.02]' 
+                              : 'opacity-50 cursor-not-allowed'
+                          }`}
+                          draggable={activeSection === 'check-if'}
+                          onDragStart={(e) => {
+                            if (activeSection === 'check-if') {
+                              const dragData = {
+                                type: 'condition',
+                                label: condition
+                              }
+                              e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
+                              e.currentTarget.classList.add('opacity-50')
+                            }
+                          }}
+                          onDragEnd={(e) => {
+                            e.currentTarget.classList.remove('opacity-50')
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                            <span className="text-sm">{condition}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className={`${activeSection === 'do-this' ? 'ring-2 ring-primary ring-offset-2 rounded-lg p-2 -m-2' : ''}`}>
+                    <h4 className={`text-sm font-medium mb-3 ${activeSection === 'do-this' ? 'text-primary' : 'text-muted-foreground'}`}>
+                      Actions {activeSection === 'do-this' && <span className="text-xs ml-2">(Drag to "Do this" section)</span>}
+                    </h4>
+                    <div className="space-y-2">
+                      {[
+                        "Create task",
+                        "Send notification",
+                        "Move to stage",
+                        "Update field",
+                        "Add comment",
+                        "Assign to user",
+                      ].map((action) => (
+                        <div
+                          key={action}
+                          className={`p-3 border rounded-lg bg-background cursor-move transition-all ${
+                            activeSection === 'do-this' 
+                              ? 'hover:shadow-md hover:border-primary hover:scale-[1.02]' 
+                              : 'opacity-50 cursor-not-allowed'
+                          }`}
+                          draggable={activeSection === 'do-this'}
+                          onDragStart={(e) => {
+                            if (activeSection === 'do-this') {
+                              const dragData = {
+                                type: 'action',
+                                label: action
+                              }
+                              e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
+                              e.currentTarget.classList.add('opacity-50')
+                            }
+                          }}
+                          onDragEnd={(e) => {
+                            e.currentTarget.classList.remove('opacity-50')
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <PlayCircle className="h-4 w-4 text-primary" />
+                            <span className="text-sm">{action}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </SheetContent>

@@ -95,7 +95,7 @@ export const opportunitySchema = z.object({
   stage: z.string(),
   amount: z.string(),
   probability: z.number(),
-  expectedClose: z.string(),
+  expectedCloseDate: z.string(),
   lastActivity: z.string(),
   status: z.string(),
   description: z.string(),
@@ -103,6 +103,13 @@ export const opportunitySchema = z.object({
   valuation: z.string(),
   sector: z.string(),
   geography: z.string(),
+  dealType: z.string(),
+  sourcedBy: z.string(),
+  introducedBy: z.string(),
+  internalOwner: z.string(),
+  targetRaise: z.string(),
+  minCommitment: z.string(),
+  decisionStatus: z.string(),
 })
 
 export type Opportunity = z.infer<typeof opportunitySchema>
@@ -126,7 +133,7 @@ export const opportunitiesData: Opportunity[] = [
     stage: "Due Diligence",
     amount: "$15M",
     probability: 75,
-    expectedClose: "2024-08-15",
+    expectedCloseDate: "2024-08-15",
     lastActivity: "2 days ago",
     status: "Active",
     description: "Growth stage investment in enterprise software company",
@@ -134,6 +141,13 @@ export const opportunitiesData: Opportunity[] = [
     valuation: "$150M",
     sector: "Enterprise Software",
     geography: "North America",
+    dealType: "Series C",
+    sourcedBy: "Sarah Chen",
+    introducedBy: "Venture Capital",
+    internalOwner: "Meridian Capital",
+    targetRaise: "$15M",
+    minCommitment: "$10M",
+    decisionStatus: "Approved",
   },
   {
     id: 2,
@@ -153,7 +167,7 @@ export const opportunitiesData: Opportunity[] = [
     stage: "Term Sheet",
     amount: "$3M",
     probability: 60,
-    expectedClose: "2024-07-30",
+    expectedCloseDate: "2024-07-30",
     lastActivity: "1 week ago",
     status: "Active",
     description: "Early stage investment in digital health platform",
@@ -161,6 +175,13 @@ export const opportunitiesData: Opportunity[] = [
     valuation: "$20M",
     sector: "Healthcare Technology",
     geography: "North America",
+    dealType: "Seed",
+    sourcedBy: "Dr. Michael Rodriguez",
+    introducedBy: "HealthTech Angels",
+    internalOwner: "Innovation Ventures",
+    targetRaise: "$3M",
+    minCommitment: "$2M",
+    decisionStatus: "Approved",
   },
   {
     id: 3,
@@ -180,7 +201,7 @@ export const opportunitiesData: Opportunity[] = [
     stage: "Initial Contact",
     amount: "$25M",
     probability: 30,
-    expectedClose: "2024-10-15",
+    expectedCloseDate: "2024-10-15",
     lastActivity: "3 days ago",
     status: "Active",
     description: "Growth capital for payment processing expansion",
@@ -188,6 +209,13 @@ export const opportunitiesData: Opportunity[] = [
     valuation: "$200M",
     sector: "Financial Technology",
     geography: "Global",
+    dealType: "Series B",
+    sourcedBy: "Jennifer Kim",
+    introducedBy: "Global Growth Partners",
+    internalOwner: "Global Growth Partners",
+    targetRaise: "$25M",
+    minCommitment: "$15M",
+    decisionStatus: "Pending",
   },
   {
     id: 4,
@@ -207,7 +235,7 @@ export const opportunitiesData: Opportunity[] = [
     stage: "Closed Won",
     amount: "$50M",
     probability: 100,
-    expectedClose: "2024-06-01",
+    expectedCloseDate: "2024-06-01",
     lastActivity: "1 month ago",
     status: "Closed",
     description: "Strategic acquisition of AI/ML technology company",
@@ -215,6 +243,13 @@ export const opportunitiesData: Opportunity[] = [
     valuation: "$50M",
     sector: "Artificial Intelligence",
     geography: "North America",
+    dealType: "Acquisition",
+    sourcedBy: "Alex Thompson",
+    introducedBy: "Strategic Acquisitions Fund",
+    internalOwner: "Strategic Acquisitions Fund",
+    targetRaise: "$50M",
+    minCommitment: "$50M",
+    decisionStatus: "Approved",
   },
   {
     id: 5,
@@ -234,7 +269,7 @@ export const opportunitiesData: Opportunity[] = [
     stage: "Proposal",
     amount: "$100M",
     probability: 45,
-    expectedClose: "2024-09-30",
+    expectedCloseDate: "2024-09-30",
     lastActivity: "5 days ago",
     status: "Active",
     description: "Commercial real estate development fund",
@@ -242,6 +277,251 @@ export const opportunitiesData: Opportunity[] = [
     valuation: "N/A",
     sector: "Real Estate",
     geography: "North America",
+    dealType: "Fund Investment",
+    sourcedBy: "Robert Martinez",
+    introducedBy: "Urban Development Partners",
+    internalOwner: "Urban Development Partners",
+    targetRaise: "$100M",
+    minCommitment: "$75M",
+    decisionStatus: "Pending",
+  },
+  {
+    id: 6,
+    name: "Co-Investment - Consumer Tech",
+    company: {
+      name: "Apollo Global Management",
+      type: "GP",
+    },
+    contact: {
+      name: "Lisa Wang",
+      role: "Partner",
+    },
+    legalEntity: {
+      name: "Family Office Co-Invest Vehicle",
+      type: "SPV",
+    },
+    stage: "Due Diligence",
+    amount: "$5M",
+    probability: 65,
+    expectedCloseDate: "2024-08-30",
+    lastActivity: "1 day ago",
+    status: "Active",
+    description: "Co-investment alongside Apollo in consumer technology platform",
+    fundingRound: "Buyout",
+    valuation: "$500M",
+    sector: "Consumer Technology",
+    geography: "North America",
+    dealType: "Co-Investment",
+    sourcedBy: "Investment Team",
+    introducedBy: "Apollo Global Management",
+    internalOwner: "Michael Chen",
+    targetRaise: "$150M",
+    minCommitment: "$5M",
+    decisionStatus: "Under Review",
+  },
+  {
+    id: 7,
+    name: "KKR Americas Fund XIII",
+    company: {
+      name: "KKR & Co.",
+      type: "GP",
+    },
+    contact: {
+      name: "James Patterson",
+      role: "Managing Director",
+    },
+    legalEntity: {
+      name: "Family Office Master Fund",
+      type: "Investment Fund",
+    },
+    stage: "Term Sheet",
+    amount: "$20M",
+    probability: 80,
+    expectedCloseDate: "2024-07-15",
+    lastActivity: "3 hours ago",
+    status: "Active",
+    description: "Commitment to KKR's flagship North American buyout fund",
+    fundingRound: "Fund Commitment",
+    valuation: "N/A",
+    sector: "Diversified",
+    geography: "North America",
+    dealType: "Fund Commitment",
+    sourcedBy: "CIO Office",
+    introducedBy: "KKR Investor Relations",
+    internalOwner: "Sarah Johnson",
+    targetRaise: "$15B",
+    minCommitment: "$10M",
+    decisionStatus: "Approved",
+  },
+  {
+    id: 8,
+    name: "Secondary Purchase - Vista Fund",
+    company: {
+      name: "Vista Equity Partners",
+      type: "GP",
+    },
+    contact: {
+      name: "David Miller",
+      role: "Secondary Advisory",
+    },
+    legalEntity: {
+      name: "Secondary Investment Vehicle",
+      type: "SPV",
+    },
+    stage: "Initial Contact",
+    amount: "$8M",
+    probability: 40,
+    expectedCloseDate: "2024-09-15",
+    lastActivity: "1 week ago",
+    status: "Active",
+    description: "Secondary purchase of LP interest in Vista Equity Fund VI",
+    fundingRound: "Secondary",
+    valuation: "$8M",
+    sector: "Enterprise Software",
+    geography: "Global",
+    dealType: "Secondary",
+    sourcedBy: "Secondary Desk",
+    introducedBy: "Jefferies",
+    internalOwner: "Tom Anderson",
+    targetRaise: "N/A",
+    minCommitment: "$8M",
+    decisionStatus: "Pending",
+  },
+  {
+    id: 9,
+    name: "Direct Investment - Renewable Energy",
+    company: {
+      name: "SolarTech Industries",
+      type: "Issuer",
+    },
+    contact: {
+      name: "Emma Green",
+      role: "CFO",
+    },
+    legalEntity: {
+      name: "Green Investment Holdings",
+      type: "Investment Vehicle",
+    },
+    stage: "Closed Lost",
+    amount: "$30M",
+    probability: 0,
+    expectedCloseDate: "2024-05-15",
+    lastActivity: "2 months ago",
+    status: "Closed",
+    description: "Direct investment in solar panel manufacturing",
+    fundingRound: "Growth Equity",
+    valuation: "$300M",
+    sector: "Renewable Energy",
+    geography: "Europe",
+    dealType: "Direct Investment",
+    sourcedBy: "European Team",
+    introducedBy: "Credit Suisse",
+    internalOwner: "Klaus Weber",
+    targetRaise: "$100M",
+    minCommitment: "$25M",
+    decisionStatus: "Rejected",
+  },
+  {
+    id: 10,
+    name: "Blackstone Strategic Partners IV",
+    company: {
+      name: "Blackstone",
+      type: "GP",
+    },
+    contact: {
+      name: "Rachel Cohen",
+      role: "Senior Managing Director",
+    },
+    legalEntity: {
+      name: "Family Office Fund Holdings",
+      type: "Investment Fund",
+    },
+    stage: "Due Diligence",
+    amount: "$25M",
+    probability: 70,
+    expectedCloseDate: "2024-08-01",
+    lastActivity: "4 days ago",
+    status: "Active",
+    description: "Commitment to Blackstone's secondary fund",
+    fundingRound: "Fund Commitment",
+    valuation: "N/A",
+    sector: "Diversified",
+    geography: "Global",
+    dealType: "Fund Commitment",
+    sourcedBy: "Investment Committee",
+    introducedBy: "Blackstone",
+    internalOwner: "Jessica Martinez",
+    targetRaise: "$20B",
+    minCommitment: "$15M",
+    decisionStatus: "Under Review",
+  },
+  {
+    id: 11,
+    name: "Citadel Wellington Fund",
+    company: {
+      name: "Citadel",
+      type: "GP",
+    },
+    contact: {
+      name: "Mark Stevens",
+      role: "Portfolio Manager",
+    },
+    legalEntity: {
+      name: "Liquid Strategies Portfolio",
+      type: "Investment Fund",
+    },
+    stage: "Proposal",
+    amount: "$50M",
+    probability: 55,
+    expectedCloseDate: "2024-07-31",
+    lastActivity: "2 days ago",
+    status: "Active",
+    description: "Allocation to Citadel's multi-strategy hedge fund",
+    fundingRound: "Fund Investment",
+    valuation: "N/A",
+    sector: "Hedge Fund",
+    geography: "Global",
+    dealType: "Hedge Fund",
+    sourcedBy: "Risk Management",
+    introducedBy: "Goldman Sachs PB",
+    internalOwner: "Robert Chen",
+    targetRaise: "N/A",
+    minCommitment: "$25M",
+    decisionStatus: "Pending",
+  },
+  {
+    id: 12,
+    name: "Warburg Pincus Asia Fund",
+    company: {
+      name: "Warburg Pincus",
+      type: "GP",
+    },
+    contact: {
+      name: "Kevin Liu",
+      role: "Managing Director",
+    },
+    legalEntity: {
+      name: "Asia Growth Capital",
+      type: "Investment Fund",
+    },
+    stage: "Term Sheet",
+    amount: "$15M",
+    probability: 85,
+    expectedCloseDate: "2024-07-20",
+    lastActivity: "6 hours ago",
+    status: "Active",
+    description: "Commitment to Warburg Pincus Asia-focused growth fund",
+    fundingRound: "Fund Commitment",
+    valuation: "N/A",
+    sector: "Diversified",
+    geography: "Asia",
+    dealType: "Fund Commitment",
+    sourcedBy: "Asia Team",
+    introducedBy: "Warburg Pincus",
+    internalOwner: "Linda Zhang",
+    targetRaise: "$8B",
+    minCommitment: "$10M",
+    decisionStatus: "Approved",
   },
 ]
 
@@ -672,16 +952,27 @@ function OpportunityDetailsPanel({
   
   const infoFields = [
     { label: "Opportunity Name", value: opportunity.name },
+    { label: "Deal Type", value: opportunity.dealType },
+    { label: "Stage", value: opportunity.stage },
+    { label: "Decision Status", value: opportunity.decisionStatus },
+    { label: "Our Investment", value: opportunity.amount },
+    { label: "Target Raise", value: opportunity.targetRaise },
+    { label: "Minimum Commitment", value: opportunity.minCommitment },
+    { label: "Valuation", value: opportunity.valuation },
     { label: "Company", value: `${opportunity.company.name} (${opportunity.company.type})` },
+    { label: "Sourced By", value: opportunity.sourcedBy },
+    { label: "Introduced By", value: opportunity.introducedBy },
+    { label: "Internal Owner", value: opportunity.internalOwner },
     { label: "Contact", value: `${opportunity.contact.name} - ${opportunity.contact.role}` },
     { label: "Legal Entity", value: `${opportunity.legalEntity.name} (${opportunity.legalEntity.type})` },
-    { label: "Investment Amount", value: opportunity.amount },
-    { label: "Expected Close", value: opportunity.expectedClose },
+    { label: "Expected Close Date", value: opportunity.expectedCloseDate },
     { label: "Probability", value: `${opportunity.probability}%` },
-    { label: "Description", value: opportunity.description },
-    { label: "Stage", value: opportunity.stage },
+    { label: "Funding Round", value: opportunity.fundingRound },
+    { label: "Sector", value: opportunity.sector },
+    { label: "Geography", value: opportunity.geography },
     { label: "Status", value: opportunity.status },
     { label: "Last Activity", value: opportunity.lastActivity },
+    { label: "Description", value: opportunity.description },
   ]
 
   const sections = buildStandardDetailSections({
@@ -724,34 +1015,9 @@ const columns: ColumnDef<Opportunity>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "company",
-    header: "Company",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-sm font-medium">{row.original.company.name}</p>
-        <p className="text-xs text-muted-foreground">{row.original.company.type}</p>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "contact",
-    header: "Contact",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-sm font-medium">{row.original.contact.name}</p>
-        <p className="text-xs text-muted-foreground">{row.original.contact.role}</p>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "legalEntity",
-    header: "Legal Entity",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-sm font-medium">{row.original.legalEntity.name}</p>
-        <p className="text-xs text-muted-foreground">{row.original.legalEntity.type}</p>
-      </div>
-    ),
+    accessorKey: "dealType",
+    header: "Deal Type",
+    cell: ({ row }) => <span className="text-sm font-medium">{row.original.dealType}</span>,
   },
   {
     accessorKey: "stage",
@@ -759,19 +1025,96 @@ const columns: ColumnDef<Opportunity>[] = [
     cell: ({ row }) => <Badge className={`text-xs ${getStageColor(row.original.stage)}`}>{row.original.stage}</Badge>,
   },
   {
+    accessorKey: "decisionStatus",
+    header: "Decision Status",
+    cell: ({ row }) => (
+      <Badge className={`text-xs ${row.original.decisionStatus === "Approved" ? "bg-green-100 text-green-800" : row.original.decisionStatus === "Pending" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}>
+        {row.original.decisionStatus}
+      </Badge>
+    ),
+  },
+  {
     accessorKey: "amount",
-    header: "Amount",
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+        Our Investment
+        {column.getIsSorted() === "asc" ? (
+          <SortAscIcon className="ml-2 h-3 w-3" />
+        ) : column.getIsSorted() === "desc" ? (
+          <SortDescIcon className="ml-2 h-3 w-3" />
+        ) : null}
+      </Button>
+    ),
     cell: ({ row }) => <span className="text-sm font-medium">{row.original.amount}</span>,
   },
   {
-    accessorKey: "probability",
-    header: "Probability",
-    cell: ({ row }) => <span className="text-sm">{row.original.probability}%</span>,
+    accessorKey: "targetRaise",
+    header: "Target Raise",
+    cell: ({ row }) => <span className="text-sm">{row.original.targetRaise}</span>,
   },
   {
-    accessorKey: "expectedClose",
-    header: "Expected Close",
-    cell: ({ row }) => <span className="text-sm">{row.original.expectedClose}</span>,
+    accessorKey: "minCommitment",
+    header: "Min Commitment",
+    cell: ({ row }) => <span className="text-sm">{row.original.minCommitment}</span>,
+  },
+  {
+    accessorKey: "valuation",
+    header: "Valuation",
+    cell: ({ row }) => <span className="text-sm font-medium">{row.original.valuation}</span>,
+  },
+  {
+    accessorKey: "company",
+    header: "Company",
+    cell: ({ row }) => <span className="text-sm font-medium">{row.original.company.name}</span>,
+  },
+  {
+    accessorKey: "companyType",
+    header: "Company Type",
+    cell: ({ row }) => <span className="text-sm">{row.original.company.type}</span>,
+  },
+  {
+    accessorKey: "sourcedBy",
+    header: "Sourced By",
+    cell: ({ row }) => <span className="text-sm">{row.original.sourcedBy}</span>,
+  },
+  {
+    accessorKey: "introducedBy",
+    header: "Introduced By",
+    cell: ({ row }) => <span className="text-sm">{row.original.introducedBy}</span>,
+  },
+  {
+    accessorKey: "internalOwner",
+    header: "Internal Owner",
+    cell: ({ row }) => <span className="text-sm font-medium">{row.original.internalOwner}</span>,
+  },
+  {
+    accessorKey: "expectedCloseDate",
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+        Expected Close
+        {column.getIsSorted() === "asc" ? (
+          <SortAscIcon className="ml-2 h-3 w-3" />
+        ) : column.getIsSorted() === "desc" ? (
+          <SortDescIcon className="ml-2 h-3 w-3" />
+        ) : null}
+      </Button>
+    ),
+    cell: ({ row }) => <span className="text-sm">{row.original.expectedCloseDate}</span>,
+  },
+  {
+    accessorKey: "sector",
+    header: "Sector",
+    cell: ({ row }) => <span className="text-sm">{row.original.sector}</span>,
+  },
+  {
+    accessorKey: "geography",
+    header: "Geography",
+    cell: ({ row }) => <span className="text-sm">{row.original.geography}</span>,
+  },
+  {
+    accessorKey: "lastActivity",
+    header: "Last Activity",
+    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastActivity}</span>,
   },
   {
     accessorKey: "status",
@@ -779,11 +1122,6 @@ const columns: ColumnDef<Opportunity>[] = [
     cell: ({ row }) => (
       <Badge className={`text-xs ${getStatusColor(row.original.status)}`}>{row.original.status}</Badge>
     ),
-  },
-  {
-    accessorKey: "lastActivity",
-    header: "Last Activity",
-    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastActivity}</span>,
   },
   {
     id: "actions",

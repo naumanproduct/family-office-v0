@@ -23,7 +23,7 @@ import {
   CalendarIcon,
 } from "lucide-react"
 import { createPortal } from "react-dom"
-import { useState, createContext, useContext } from "react"
+import { useState, createContext, useContext, useEffect } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -39,7 +39,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 import { TaskDetailsView } from "./task-details-view"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { TaskTemplateDialog } from "./task-template-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { UnifiedTaskTable } from "./shared/unified-task-table"
@@ -181,7 +181,7 @@ export function TasksTable() {
   }
 
   // ESC key handler for full screen mode
-  React.useEffect(() => {
+  useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isFullScreen) {
         setIsFullScreen(false)
@@ -195,6 +195,30 @@ export function TasksTable() {
       }
     }
   }, [isFullScreen])
+
+  // Lock body scroll when full screen is active
+  useEffect(() => {
+    if (isFullScreen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Add styles to prevent scrolling
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scroll position and remove styles
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      };
+    }
+  }, [isFullScreen]);
 
   const ViewModeSelector = () => (
     <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -557,7 +581,8 @@ export function TasksTable() {
       {/* Task Details Sheet/Drawer */}
       {selectedTask && !isFullScreen && (
         <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-          <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+          <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
+            <SheetTitle className="sr-only">Task Details</SheetTitle>
             {/* Header */}
             <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
               <div className="flex items-center gap-3">

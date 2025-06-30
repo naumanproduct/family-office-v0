@@ -68,65 +68,6 @@ export function MasterDrawer({
     [tabs],
   )
 
-  const [hiddenTabs, setHiddenTabs] = React.useState<Tab[]>([])
-  const [visibleTabs, setVisibleTabs] = React.useState<Tab[]>([])
-  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = React.useState(false)
-
-  // Add this after the other state variables
-  const [fullScreenVisibleTabs, setFullScreenVisibleTabs] = React.useState<Tab[]>([])
-  const [fullScreenHiddenTabs, setFullScreenHiddenTabs] = React.useState<Tab[]>([])
-
-  React.useEffect(() => {
-    // For regular drawer, show first 5 tabs as visible, rest as hidden
-    const maxVisibleTabs = 5
-    if (filteredTabs.length > maxVisibleTabs) {
-      setVisibleTabs(filteredTabs.slice(0, maxVisibleTabs))
-      setHiddenTabs(filteredTabs.slice(maxVisibleTabs))
-    } else {
-      setVisibleTabs(filteredTabs)
-      setHiddenTabs([])
-    }
-
-    // For full screen, show first 10 tabs as visible, rest as hidden, but exclude details tab
-    const tabsWithoutDetails = filteredTabs.filter((tab) => tab.id !== "details")
-    const maxFullScreenVisibleTabs = 10
-    if (tabsWithoutDetails.length > maxFullScreenVisibleTabs) {
-      setFullScreenVisibleTabs(tabsWithoutDetails.slice(0, maxFullScreenVisibleTabs))
-      setFullScreenHiddenTabs(tabsWithoutDetails.slice(maxFullScreenVisibleTabs))
-    } else {
-      setFullScreenVisibleTabs(tabsWithoutDetails)
-      setFullScreenHiddenTabs([])
-    }
-  }, [filteredTabs])
-
-  const handleTabSwap = (selectedTab: Tab) => {
-    if (visibleTabs.length === 0) return
-
-    const lastVisibleTab = visibleTabs[visibleTabs.length - 1]
-    const newVisibleTabs = [...visibleTabs.slice(0, -1), selectedTab]
-    const newHiddenTabs = hiddenTabs.filter((tab) => tab.id !== selectedTab.id)
-    newHiddenTabs.push(lastVisibleTab)
-
-    setVisibleTabs(newVisibleTabs)
-    setHiddenTabs(newHiddenTabs)
-    setActiveTab(selectedTab.id)
-    setIsMoreDropdownOpen(false)
-  }
-
-  const handleFullScreenTabSwap = (selectedTab: Tab) => {
-    if (fullScreenVisibleTabs.length === 0) return
-
-    const lastVisibleTab = fullScreenVisibleTabs[fullScreenVisibleTabs.length - 1]
-    const newVisibleTabs = [...fullScreenVisibleTabs.slice(0, -1), selectedTab]
-    const newHiddenTabs = fullScreenHiddenTabs.filter((tab) => tab.id !== selectedTab.id)
-    newHiddenTabs.push(lastVisibleTab)
-
-    setFullScreenVisibleTabs(newVisibleTabs)
-    setFullScreenHiddenTabs(newHiddenTabs)
-    setActiveTab(selectedTab.id)
-    setIsMoreDropdownOpen(false)
-  }
-
   // ESC key handler for full screen mode
   React.useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
@@ -143,10 +84,34 @@ export function MasterDrawer({
     }
   }, [isFullScreen])
 
+  // Lock body scroll when full screen is active
+  React.useEffect(() => {
+    if (isFullScreen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Add styles to prevent scrolling
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scroll position and remove styles
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      };
+    }
+  }, [isFullScreen]);
+
   React.useEffect(() => {
     // When switching to full screen mode, if we're on details tab, switch to first available tab
     if (isFullScreen && activeTab === "details") {
-      const availableTabs = [...fullScreenVisibleTabs, ...fullScreenHiddenTabs]
+      const availableTabs = filteredTabs
       if (availableTabs.length > 0) {
         setActiveTab(availableTabs[0].id)
       }
@@ -155,7 +120,7 @@ export function MasterDrawer({
     if (!isFullScreen && !filteredTabs.find((tab) => tab.id === activeTab)) {
       setActiveTab("details")
     }
-  }, [isFullScreen, activeTab, fullScreenVisibleTabs, fullScreenHiddenTabs, filteredTabs])
+  }, [isFullScreen, activeTab, filteredTabs])
 
   // Add this effect to update viewMode when isFullScreen changes
   React.useEffect(() => {
@@ -300,7 +265,19 @@ export function MasterDrawer({
 
     const content = (
       <>
-        <div className="fixed inset-0 z-[9999] bg-background">
+        {/* Semi-transparent overlay */}
+        <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm" onClick={() => {
+          setIsFullScreen(false)
+          // Clear any selected items when exiting fullscreen
+          setSelectedTask(null)
+          setSelectedNote(null)
+          setSelectedMeeting(null)
+          setSelectedEmail(null)
+          setSelectedSubtask(null)
+          setParentTaskForSubtask(null)
+        }} />
+        
+        <div className="fixed inset-4 z-[9999] bg-background rounded-xl shadow-xl overflow-hidden">
           {/* Full Screen Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">
@@ -348,9 +325,9 @@ export function MasterDrawer({
           </div>
 
           {/* Full Screen Content - Two Column Layout */}
-          <div className="flex h-[calc(100vh-73px)]">
+          <div className="flex h-[calc(100%-73px)]">
             {/* Left Panel - Details (Persistent) */}
-            <div className="w-[672px] border-r bg-background">
+            <div className="w-[672px] border-r bg-background overflow-y-auto">
               {/* Record Header - Always show original record info in left panel (no bottom border to align with tab line) */}
               <div className="bg-background px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -370,56 +347,30 @@ export function MasterDrawer({
             <div className="flex-1 overflow-y-auto">
               {/* Tabs */}
               <div className="border-b bg-background px-6">
-                <div className="flex relative overflow-x-auto">
-                  {fullScreenVisibleTabs.map((tab, index) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 min-w-0 ${
-                        activeTab === tab.id
-                          ? "border-b-2 border-primary text-primary"
-                          : "text-muted-foreground hover:text-foreground"
-                      } ${index === 0 ? 'pl-0' : ''}`}
-                    >
-                      {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
-                      <span className="truncate">{tab.label}</span>
-                      {tab.count !== null && (
-                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                          {tab.count}
-                        </Badge>
-                      )}
-                      {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                    </button>
-                  ))}
-                  {fullScreenHiddenTabs.length > 0 && (
-                    <div className="relative ml-2">
-                      <DropdownMenu open={isMoreDropdownOpen} onOpenChange={setIsMoreDropdownOpen}>
-                        <DropdownMenuTrigger asChild>
-                          <button className="relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                            More
-                            <ChevronDownIcon className="h-4 w-4" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[200px]">
-                          {fullScreenHiddenTabs.map((tab) => (
-                            <DropdownMenuItem
-                              key={tab.id}
-                              onClick={() => handleFullScreenTabSwap(tab)}
-                              className="flex items-center gap-2"
-                            >
-                              {tab.icon && <tab.icon className="h-4 w-4" />}
-                              {tab.label}
-                              {tab.count !== null && (
-                                <Badge variant="secondary" className="ml-auto h-5 w-5 rounded-full p-0 text-xs">
-                                  {tab.count}
-                                </Badge>
-                              )}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  )}
+                <div className="flex relative">
+                  <div className="flex flex-1 overflow-x-auto scrollbar-none">
+                    {filteredTabs.filter(tab => tab.id !== "details").map((tab, index) => (
+                      <button
+                        key={tab.id}
+                        data-tab-button
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
+                          activeTab === tab.id
+                            ? "border-b-2 border-primary text-primary"
+                            : "text-muted-foreground hover:text-foreground"
+                        } ${index === 0 ? 'pl-0' : ''}`}
+                      >
+                        {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
+                        <span>{tab.label}</span>
+                        {tab.count !== null && (
+                          <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                            {tab.count}
+                          </Badge>
+                        )}
+                        {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -427,7 +378,7 @@ export function MasterDrawer({
               <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">
-                    {[...fullScreenVisibleTabs, ...fullScreenHiddenTabs].find((tab) => tab.id === activeTab)?.label}
+                    {filteredTabs.find((tab) => tab.id === activeTab)?.label}
                   </h3>
                   <div className="flex items-center gap-2">
                     {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
@@ -456,7 +407,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
+              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000] overflow-hidden"
             >
               <SheetTitle className="sr-only">Task Details</SheetTitle>
               {/* Header */}
@@ -502,7 +453,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
+              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000] overflow-hidden"
             >
               <SheetTitle className="sr-only">Note Details</SheetTitle>
               {/* Header */}
@@ -542,7 +493,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedMeeting} onOpenChange={(open) => !open && setSelectedMeeting(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
+              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000] overflow-hidden"
             >
               <SheetTitle className="sr-only">Meeting Details</SheetTitle>
               {/* Header */}
@@ -582,7 +533,7 @@ export function MasterDrawer({
           <Sheet open={!!selectedEmail} onOpenChange={(open) => !open && setSelectedEmail(null)}>
             <SheetContent
               side="right"
-              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000]"
+              className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden z-[10000] overflow-hidden"
             >
               <SheetTitle className="sr-only">Email Details</SheetTitle>
               {/* Header */}
@@ -634,7 +585,7 @@ export function MasterDrawer({
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent 
         side="right" 
-        className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden"
+        className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden"
         onInteractOutside={() => {
           // Clear all selection states when closing
           setSelectedTask(null)
@@ -720,56 +671,30 @@ export function MasterDrawer({
           {/* Tabs */}
           {!selectedTask && !selectedNote && !selectedMeeting && !selectedEmail && (
             <div className="border-b bg-background px-6">
-              <div className="flex relative overflow-x-auto">
-                {visibleTabs.map((tab, index) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 min-w-0 ${
-                      activeTab === tab.id
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-muted-foreground hover:text-foreground"
-                    } ${index === 0 ? 'pl-0' : ''}`}
-                  >
-                    {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
-                    <span className="truncate">{tab.label}</span>
-                    {tab.count !== null && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                        {tab.count}
-                      </Badge>
-                    )}
-                    {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                  </button>
-                ))}
-                {hiddenTabs.length > 0 && (
-                  <div className="relative ml-2">
-                    <DropdownMenu open={isMoreDropdownOpen} onOpenChange={setIsMoreDropdownOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <button className="relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                          More
-                          <ChevronDownIcon className="h-4 w-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[200px]">
-                        {hiddenTabs.map((tab) => (
-                          <DropdownMenuItem
-                            key={tab.id}
-                            onClick={() => handleTabSwap(tab)}
-                            className="flex items-center gap-2"
-                          >
-                            {tab.icon && <tab.icon className="h-4 w-4" />}
-                            {tab.label}
-                            {tab.count !== null && (
-                              <Badge variant="secondary" className="ml-auto h-5 w-5 rounded-full p-0 text-xs">
-                                {tab.count}
-                              </Badge>
-                            )}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
+              <div className="flex relative">
+                <div className="flex flex-1 overflow-x-auto scrollbar-none">
+                  {filteredTabs.map((tab, index) => (
+                    <button
+                      key={tab.id}
+                      data-tab-button
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
+                        activeTab === tab.id
+                          ? "border-b-2 border-primary text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      } ${index === 0 ? 'pl-0' : ''}`}
+                    >
+                      {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
+                      <span>{tab.label}</span>
+                      {tab.count !== null && (
+                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                          {tab.count}
+                        </Badge>
+                      )}
+                      {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -780,7 +705,7 @@ export function MasterDrawer({
               <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">
-                    {[...visibleTabs, ...hiddenTabs].find((tab) => tab.id === activeTab)?.label}
+                    {filteredTabs.find((tab) => tab.id === activeTab)?.label}
                   </h3>
                   <div className="flex items-center gap-2">
                     {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}

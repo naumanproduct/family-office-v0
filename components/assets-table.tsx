@@ -279,16 +279,8 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
         header: "Type",
       },
       {
-        accessorKey: "category",
-        header: "Category",
-      },
-      {
         accessorKey: "currentValue",
         header: "Current Value",
-      },
-      {
-        accessorKey: "originalCost",
-        header: "Original Cost",
       },
       {
         accessorKey: "unrealizedGain",
@@ -296,7 +288,7 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
       },
       {
         accessorKey: "percentageGain",
-        header: "Percentage Gain",
+        header: "% Gain",
         cell: ({ row }) => {
           const percentage = row.original.percentageGain
           const gainColor = getGainColor(percentage)
@@ -309,18 +301,6 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
         },
       },
       {
-        accessorKey: "acquisitionDate",
-        header: "Acquisition Date",
-      },
-      {
-        accessorKey: "lastValuation",
-        header: "Last Valuation",
-      },
-      {
-        accessorKey: "entity",
-        header: "Entity",
-      },
-      {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => {
@@ -330,12 +310,32 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
         },
       },
       {
+        accessorKey: "entity",
+        header: "Entity",
+      },
+      {
+        accessorKey: "acquisitionDate",
+        header: "Acquisition Date",
+      },
+      {
+        accessorKey: "lastValuation",
+        header: "Last Valuation",
+      },
+      {
         accessorKey: "sector",
         header: "Sector",
       },
       {
         accessorKey: "geography",
         header: "Geography",
+      },
+      {
+        accessorKey: "category",
+        header: "Category",
+      },
+      {
+        accessorKey: "originalCost",
+        header: "Original Cost",
       },
     ],
     onSortingChange: setSorting,

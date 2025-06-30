@@ -70,69 +70,6 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
     { id: "notes", label: "Notes", count: 0, icon: FileIcon },
   ], []);
   
-  // Tab pagination state
-  const [hiddenTabs, setHiddenTabs] = React.useState<Tab[]>([])
-  const [visibleTabs, setVisibleTabs] = React.useState<Tab[]>([])
-  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = React.useState(false)
-  
-  // Full screen tab pagination state
-  const [fullScreenVisibleTabs, setFullScreenVisibleTabs] = React.useState<Tab[]>([])
-  const [fullScreenHiddenTabs, setFullScreenHiddenTabs] = React.useState<Tab[]>([])
-  const [isFullScreenMoreDropdownOpen, setIsFullScreenMoreDropdownOpen] = React.useState(false)
-  
-  // Set up visible and hidden tabs - run only once on component mount
-  React.useEffect(() => {
-    // For regular drawer, show first 6 tabs as visible, rest as hidden
-    const maxVisibleTabs = 6
-    if (tabs.length > maxVisibleTabs) {
-      setVisibleTabs(tabs.slice(0, maxVisibleTabs))
-      setHiddenTabs(tabs.slice(maxVisibleTabs))
-    } else {
-      setVisibleTabs(tabs)
-      setHiddenTabs([])
-    }
-
-    // For full screen, show all tabs including details tab
-    const maxFullScreenVisibleTabs = 10
-    if (tabs.length > maxFullScreenVisibleTabs) {
-      setFullScreenVisibleTabs(tabs.slice(0, maxFullScreenVisibleTabs))
-      setFullScreenHiddenTabs(tabs.slice(maxFullScreenVisibleTabs))
-    } else {
-      setFullScreenVisibleTabs(tabs)
-      setFullScreenHiddenTabs([])
-    }
-  }, [tabs]) // Include tabs in dependency array to update when tabs change
-  
-  // Handle tab swapping for regular drawer
-  const handleTabSwap = (selectedTab: Tab) => {
-    if (visibleTabs.length === 0) return
-
-    const lastVisibleTab = visibleTabs[visibleTabs.length - 1]
-    const newVisibleTabs = [...visibleTabs.slice(0, -1), selectedTab]
-    const newHiddenTabs = hiddenTabs.filter((tab) => tab.id !== selectedTab.id)
-    newHiddenTabs.push(lastVisibleTab)
-
-    setVisibleTabs(newVisibleTabs)
-    setHiddenTabs(newHiddenTabs)
-    setActiveTab(selectedTab.id)
-    setIsMoreDropdownOpen(false)
-  }
-
-  // Handle tab swapping for full screen
-  const handleFullScreenTabSwap = (selectedTab: Tab) => {
-    if (fullScreenVisibleTabs.length === 0) return
-
-    const lastVisibleTab = fullScreenVisibleTabs[fullScreenVisibleTabs.length - 1]
-    const newVisibleTabs = [...fullScreenVisibleTabs.slice(0, -1), selectedTab]
-    const newHiddenTabs = fullScreenHiddenTabs.filter((tab) => tab.id !== selectedTab.id)
-    newHiddenTabs.push(lastVisibleTab)
-
-    setFullScreenVisibleTabs(newVisibleTabs)
-    setFullScreenHiddenTabs(newHiddenTabs)
-    setActiveTab(selectedTab.id)
-    setIsFullScreenMoreDropdownOpen(false)
-  }
-
   // ESC key handler for full screen mode
   React.useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
@@ -149,6 +86,30 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
       }
     }
   }, [isFullScreen, onOpenChange])
+  
+  // Lock body scroll when full screen is active
+  React.useEffect(() => {
+    if (isFullScreen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Add styles to prevent scrolling
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scroll position and remove styles
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      };
+    }
+  }, [isFullScreen]);
   
   // Handle tab switching between full screen and regular mode
   React.useEffect(() => {
@@ -189,33 +150,117 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
     switch (fileType) {
       case "pdf":
         return (
-          <div className="w-full h-full flex flex-col">
-            <div className="bg-muted p-2 flex items-center justify-between">
-              <div>
-                <span className="text-sm font-medium">{file.title || file.name}</span>
+          <div className="w-full h-full bg-gray-100 overflow-y-auto">
+            {/* Mock PDF pages */}
+            <div className="max-w-4xl mx-auto py-8 space-y-8">
+              {/* Page 1 */}
+              <div className="bg-white shadow-lg mx-4" style={{ aspectRatio: '8.5/11' }}>
+                <div className="p-16 h-full flex flex-col">
+                  <div className="mb-8">
+                    <h1 className="text-3xl font-bold mb-4">Investment Agreement</h1>
+                    <p className="text-gray-600">Document ID: {file.id || 'DOC-001'}</p>
+                  </div>
+                  
+                  <div className="space-y-4 text-gray-700">
+                    <p className="leading-relaxed">
+                      This Investment Agreement ("Agreement") is entered into as of the date last signed below (the "Effective Date") by and between the parties identified below.
+                    </p>
+                    
+                    <h2 className="text-xl font-semibold mt-6">1. Parties</h2>
+                    <p className="leading-relaxed">
+                      This Agreement is between Family Office Holdings LLC ("Investor") and Portfolio Company Inc. ("Company"), collectively referred to as the "Parties."
+                    </p>
+                    
+                    <h2 className="text-xl font-semibold mt-6">2. Investment Terms</h2>
+                    <p className="leading-relaxed">
+                      Subject to the terms and conditions set forth in this Agreement, Investor agrees to invest the principal amount specified in Schedule A attached hereto.
+                    </p>
+                    
+                    <h2 className="text-xl font-semibold mt-6">3. Representations and Warranties</h2>
+                    <p className="leading-relaxed">
+                      Each Party represents and warrants to the other Party that: (a) it has full corporate power and authority to enter into this Agreement; (b) the execution and delivery of this Agreement has been duly authorized by all necessary corporate action.
+                    </p>
+                  </div>
+                  
+                  <div className="mt-auto text-center text-gray-400 text-sm">
+                    Page 1 of 3
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm">
-                  <DownloadIcon className="h-4 w-4 mr-1" />
-                  Download
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <PrinterIcon className="h-4 w-4 mr-1" />
-                  Print
-                </Button>
+              
+              {/* Page 2 */}
+              <div className="bg-white shadow-lg mx-4" style={{ aspectRatio: '8.5/11' }}>
+                <div className="p-16 h-full flex flex-col">
+                  <div className="space-y-4 text-gray-700">
+                    <h2 className="text-xl font-semibold">4. Use of Proceeds</h2>
+                    <p className="leading-relaxed">
+                      The Company shall use the proceeds from the investment solely for the purposes set forth in the business plan previously provided to the Investor and for general working capital purposes.
+                    </p>
+                    
+                    <h2 className="text-xl font-semibold mt-6">5. Governance</h2>
+                    <p className="leading-relaxed">
+                      Following the closing of the investment, the Investor shall have the right to appoint one (1) member to the Company's Board of Directors. The Company agrees to take all necessary actions to effectuate such appointment.
+                    </p>
+                    
+                    <h2 className="text-xl font-semibold mt-6">6. Information Rights</h2>
+                    <p className="leading-relaxed">
+                      The Company shall provide to the Investor: (a) quarterly unaudited financial statements within forty-five (45) days after the end of each fiscal quarter; (b) annual audited financial statements within ninety (90) days after the end of each fiscal year; and (c) such other information as the Investor may reasonably request.
+                    </p>
+                    
+                    <h2 className="text-xl font-semibold mt-6">7. Transfer Restrictions</h2>
+                    <p className="leading-relaxed">
+                      The securities acquired pursuant to this Agreement may not be transferred without the prior written consent of the Company, except for transfers to affiliates of the Investor.
+                    </p>
+                  </div>
+                  
+                  <div className="mt-auto text-center text-gray-400 text-sm">
+                    Page 2 of 3
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex-1 flex items-center justify-center bg-muted-foreground/10 p-4">
-              <div className="max-w-md text-center">
-                <FileTextIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">PDF Preview</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  This is a placeholder for the PDF viewer.
-                </p>
-                <Button variant="outline" size="sm">
-                  <DownloadIcon className="h-4 w-4 mr-1" />
-                  Download PDF
-                </Button>
+              
+              {/* Page 3 */}
+              <div className="bg-white shadow-lg mx-4" style={{ aspectRatio: '8.5/11' }}>
+                <div className="p-16 h-full flex flex-col">
+                  <div className="space-y-4 text-gray-700">
+                    <h2 className="text-xl font-semibold">8. Confidentiality</h2>
+                    <p className="leading-relaxed">
+                      Each Party agrees to maintain the confidentiality of all non-public information received from the other Party in connection with this Agreement and the transactions contemplated hereby.
+                    </p>
+                    
+                    <h2 className="text-xl font-semibold mt-6">9. Miscellaneous</h2>
+                    <p className="leading-relaxed">
+                      This Agreement shall be governed by the laws of the State of Delaware. Any disputes arising under this Agreement shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.
+                    </p>
+                  </div>
+                  
+                  <div className="mt-auto space-y-8">
+                    <div className="grid grid-cols-2 gap-8">
+                      <div>
+                        <p className="font-semibold mb-2">INVESTOR:</p>
+                        <div className="border-b border-gray-400 mb-2"></div>
+                        <p className="text-sm">Family Office Holdings LLC</p>
+                        <p className="text-sm">By: _______________________</p>
+                        <p className="text-sm">Name:</p>
+                        <p className="text-sm">Title:</p>
+                        <p className="text-sm">Date:</p>
+                      </div>
+                      <div>
+                        <p className="font-semibold mb-2">COMPANY:</p>
+                        <div className="border-b border-gray-400 mb-2"></div>
+                        <p className="text-sm">Portfolio Company Inc.</p>
+                        <p className="text-sm">By: _______________________</p>
+                        <p className="text-sm">Name:</p>
+                        <p className="text-sm">Title:</p>
+                        <p className="text-sm">Date:</p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center text-gray-400 text-sm">
+                      Page 3 of 3
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -630,7 +675,14 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
   const FullScreenContent = () => {
     const content = (
       <>
-        <div className="fixed inset-0 z-[9999] bg-background">
+        {/* Semi-transparent overlay */}
+        <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm" onClick={() => {
+          setIsFullScreen(false)
+          onOpenChange(false)
+        }} />
+        
+        {/* Main container with rounded corners and spacing */}
+        <div className="fixed inset-4 z-[9999] bg-background rounded-xl shadow-xl overflow-hidden">
           {/* Full Screen Header */}
           <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">
@@ -649,6 +701,14 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
               </Badge>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <DownloadIcon className="h-4 w-4 mr-1" />
+                Download
+              </Button>
+              <Button variant="outline" size="sm">
+                <PrinterIcon className="h-4 w-4 mr-1" />
+                Print
+              </Button>
               <Button
                 variant="outline"
                 size="icon"
@@ -663,16 +723,16 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
           </div>
 
           {/* Full Screen Content - Two Column Layout */}
-          <div className="flex h-[calc(100vh-73px)]">
-            {/* Left Panel - Document Preview (moved from right) */}
+          <div className="flex h-[calc(100%-73px)]">
+            {/* Left Panel - Document Preview */}
             <div className="flex-1 overflow-y-auto">
               <FilePreview file={file} />
             </div>
 
-            {/* Right Panel - Details (moved from left) */}
+            {/* Right Panel - Details (same width as drawer to prevent jumping) */}
             <div className="w-[672px] border-l bg-background flex flex-col">
               {/* Record Header */}
-              <div className="border-b bg-background px-6 py-4">
+              <div className="border-b bg-background px-6 py-2">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
                     {file && (file.title || file.name || "Untitled").charAt(0)}
@@ -691,63 +751,58 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
               {/* Tabs */}
               <div className="border-b bg-background px-6">
                 <div className="flex relative">
-                  {fullScreenVisibleTabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`relative whitespace-nowrap py-3 px-4 text-sm font-medium flex items-center gap-2 ${
-                        activeTab === tab.id
-                          ? "border-b-2 border-primary text-primary"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {tab.icon && <tab.icon className="h-4 w-4" />}
-                      <span>{tab.label}</span>
-                      {tab.count !== null && (
-                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                          {tab.count}
-                        </Badge>
-                      )}
-                      {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                    </button>
-                  ))}
-                  {fullScreenHiddenTabs.length > 0 && (
-                    <div className="relative">
-                      <DropdownMenu open={isFullScreenMoreDropdownOpen} onOpenChange={setIsFullScreenMoreDropdownOpen}>
-                        <DropdownMenuTrigger asChild>
-                          <button className="relative whitespace-nowrap py-3 px-4 text-sm font-medium flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                            More
-                            <ChevronDownIcon className="h-4 w-4" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[200px]">
-                          {fullScreenHiddenTabs.map((tab) => (
-                            <DropdownMenuItem
-                              key={tab.id}
-                              onClick={() => handleFullScreenTabSwap(tab)}
-                              className="flex items-center gap-2"
-                            >
-                              {tab.icon && <tab.icon className="h-4 w-4" />}
-                              {tab.label}
-                              {tab.count !== null && (
-                                <Badge variant="secondary" className="ml-auto h-5 w-5 rounded-full p-0 text-xs">
-                                  {tab.count}
-                                </Badge>
-                              )}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  )}
+                  <div className="flex flex-1 overflow-x-auto scrollbar-none">
+                    {tabs.map((tab, index) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
+                          activeTab === tab.id
+                            ? "border-b-2 border-primary text-primary"
+                            : "text-muted-foreground hover:text-foreground"
+                        } ${index === 0 ? 'pl-0' : ''}`}
+                      >
+                        {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
+                        <span>{tab.label}</span>
+                        {tab.count !== null && (
+                          <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                            {tab.count}
+                          </Badge>
+                        )}
+                        {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
               
-              {/* Tab Content */}
+              {/* Tab Content - matching drawer layout */}
               <div className="flex-1 overflow-y-auto">
-                {activeTab === "details" && <FileDetailsPanel isFullScreen={true} />}
-                {activeTab === "tasks" && renderEmptyTabContent("tasks")}
-                {activeTab === "notes" && renderEmptyTabContent("notes")}
+                <div className="p-0">
+                  <div className="mb-4 px-6 pt-6 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">
+                      {tabs.find((tab) => tab.id === activeTab)?.label || ""}
+                    </h3>
+                    {activeTab === "tasks" && (
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4 mr-1" />
+                        Add Task
+                      </Button>
+                    )}
+                    {activeTab === "notes" && (
+                      <Button variant="outline" size="sm">
+                        <PlusIcon className="h-4 w-4 mr-1" />
+                        Add Note
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="px-6 pb-6">
+                    {activeTab === "details" && <FileDetailsPanel isFullScreen={true} />}
+                    {activeTab === "tasks" && renderEmptyTabContent("tasks")}
+                    {activeTab === "notes" && renderEmptyTabContent("notes")}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -761,7 +816,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
   return (
     <>
       <Sheet open={isOpen && !isFullScreen} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden">
+        <SheetContent side="right" className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl [&>button]:hidden overflow-hidden">
           {/* Add SheetTitle to fix Radix UI Dialog warning */}
           <SheetTitle className="sr-only">Document Viewer</SheetTitle>
           
@@ -780,6 +835,14 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
               </Badge>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <DownloadIcon className="h-4 w-4 mr-1" />
+                Download
+              </Button>
+              <Button variant="outline" size="sm">
+                <PrinterIcon className="h-4 w-4 mr-1" />
+                Print
+              </Button>
               <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
                 <ExpandIcon className="h-4 w-4" />
               </Button>
@@ -788,75 +851,31 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
 
           {/* Main Content */}
           <div className="flex-1 overflow-y-auto">
-            {/* Record Header */}
-            <div className="border-b bg-background px-6 py-2">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {file && (file.title || file.name || "Untitled").charAt(0)}
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">{file ? (file.title || file.name || "Untitled") : "Untitled"}</h2>
-                  {file && file.fileType && (
-                    <p className="text-sm text-muted-foreground">
-                      {(file.fileType || file.type || "FILE").toUpperCase()}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Tabs */}
+            {/* Tabs - no record header anymore */}
             <div className="border-b bg-background px-6">
               <div className="flex relative">
-                {visibleTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative whitespace-nowrap py-3 px-4 text-sm font-medium flex items-center gap-2 ${
-                      activeTab === tab.id
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.icon && <tab.icon className="h-4 w-4" />}
-                    <span>{tab.label}</span>
-                    {tab.count !== null && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
-                        {tab.count}
-                      </Badge>
-                    )}
-                    {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                  </button>
-                ))}
-                {hiddenTabs.length > 0 && (
-                  <div className="relative">
-                    <DropdownMenu open={isMoreDropdownOpen} onOpenChange={setIsMoreDropdownOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <button className="relative whitespace-nowrap py-3 px-4 text-sm font-medium flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                          More
-                          <ChevronDownIcon className="h-4 w-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[200px]">
-                        {hiddenTabs.map((tab) => (
-                          <DropdownMenuItem
-                            key={tab.id}
-                            onClick={() => handleTabSwap(tab)}
-                            className="flex items-center gap-2"
-                          >
-                            {tab.icon && <tab.icon className="h-4 w-4" />}
-                            {tab.label}
-                            {tab.count !== null && (
-                              <Badge variant="secondary" className="ml-auto h-5 w-5 rounded-full p-0 text-xs">
-                                {tab.count}
-                              </Badge>
-                            )}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
+                <div className="flex flex-1 overflow-x-auto scrollbar-none">
+                  {tabs.map((tab, index) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
+                        activeTab === tab.id
+                          ? "border-b-2 border-primary text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      } ${index === 0 ? 'pl-0' : ''}`}
+                    >
+                      {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
+                      <span>{tab.label}</span>
+                      {tab.count !== null && (
+                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                          {tab.count}
+                        </Badge>
+                      )}
+                      {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -864,7 +883,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
             <div className="p-0">
               <div className="mb-4 px-6 pt-6 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">
-                  {[...visibleTabs, ...hiddenTabs].find((tab) => tab.id === activeTab)?.label || ""}
+                  {tabs.find((tab) => tab.id === activeTab)?.label || ""}
                 </h3>
                 {activeTab === "details" && (
                   <Button variant="default" size="sm" onClick={() => setIsFullScreen(true)}>

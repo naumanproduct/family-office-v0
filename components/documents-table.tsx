@@ -2,7 +2,7 @@
 import {
   CalendarIcon,
   ChevronDownIcon,
-  DotIcon as DotsHorizontalIcon,
+  MoreVerticalIcon,
   SearchIcon,
   SortAscIcon,
   TagIcon,
@@ -177,12 +177,11 @@ export function DocumentsTable() {
             <TableHeader>
               <TableRow>
                 <TableHead>File</TableHead>
-                <TableHead>Uploaded</TableHead>
-                <TableHead>Uploaded By</TableHead>
                 <TableHead>Related To</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Tags</TableHead>
+                <TableHead>Uploaded</TableHead>
+                <TableHead>Uploaded By</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -201,26 +200,7 @@ export function DocumentsTable() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                      <span>{new Date(document.uploadedAt).toLocaleDateString()}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <UserIcon className="h-4 w-4 text-muted-foreground" />
-                      <span>{document.uploadedBy}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {document.relatedTo.type === "Company" ? (
-                        <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                      )}
-                      <span>{document.relatedTo.name}</span>
-                    </div>
+                    <span>{document.relatedTo.name}</span>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{document.category}</Badge>
@@ -235,24 +215,16 @@ export function DocumentsTable() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {document.tags.slice(0, 2).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {document.tags.length > 2 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{document.tags.length - 2}
-                        </Badge>
-                      )}
-                    </div>
+                    <span>{new Date(document.uploadedAt).toLocaleDateString()}</span>
+                  </TableCell>
+                  <TableCell>
+                    <span>{document.uploadedBy}</span>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <DotsHorizontalIcon className="h-4 w-4" />
+                          <MoreVerticalIcon className="h-4 w-4" />
                           <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>

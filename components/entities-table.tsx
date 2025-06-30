@@ -240,36 +240,6 @@ export const entitiesData: Entity[] = [
   },
 ]
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Active":
-      return "bg-green-100 text-green-800"
-    case "Inactive":
-      return "bg-yellow-100 text-yellow-800"
-    case "Dissolved":
-      return "bg-red-100 text-red-800"
-    default:
-      return "bg-gray-100 text-gray-800"
-  }
-}
-
-const getEntityTypeColor = (type: string) => {
-  switch (type) {
-    case "LLC":
-      return "bg-blue-100 text-blue-800"
-    case "LP":
-      return "bg-purple-100 text-purple-800"
-    case "Trust":
-      return "bg-green-100 text-green-800"
-    case "Corp":
-      return "bg-orange-100 text-orange-800"
-    case "Foundation":
-      return "bg-pink-100 text-pink-800"
-    default:
-      return "bg-gray-100 text-gray-800"
-  }
-}
-
 function TableView({
   data,
   activeTab,
@@ -805,14 +775,12 @@ const columns: ColumnDef<Entity>[] = [
   },
   {
     accessorKey: "entityType",
-    header: "Entity Type",
-    cell: ({ row }) => (
-      <Badge className={`text-xs ${getEntityTypeColor(row.original.entityType)}`}>{row.original.entityType}</Badge>
-    ),
+    header: "Type",
+    cell: ({ row }) => <span className="text-sm">{row.original.entityType}</span>,
   },
   {
     accessorKey: "rolePurpose",
-    header: "Role / Purpose",
+    header: "Purpose",
     cell: ({ row }) => <span className="text-sm">{row.original.rolePurpose}</span>,
   },
   {
@@ -821,15 +789,17 @@ const columns: ColumnDef<Entity>[] = [
     cell: ({ row }) => <span className="text-sm">{row.original.jurisdiction}</span>,
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <Badge className={`text-xs ${getStatusColor(row.original.status)}`}>{row.original.status}</Badge>
-    ),
-  },
-  {
     accessorKey: "ownershipPercent",
-    header: "Ownership %",
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+        Ownership %
+        {column.getIsSorted() === "asc" ? (
+          <SortAscIcon className="ml-2 h-3 w-3" />
+        ) : column.getIsSorted() === "desc" ? (
+          <SortDescIcon className="ml-2 h-3 w-3" />
+        ) : null}
+      </Button>
+    ),
     cell: ({ row }) => (
       <span className="text-sm">{row.original.ownershipPercent ? `${row.original.ownershipPercent}%` : "—"}</span>
     ),
@@ -837,65 +807,42 @@ const columns: ColumnDef<Entity>[] = [
   {
     accessorKey: "parentEntity",
     header: "Parent Entity",
-    cell: ({ row }) => <span className="text-sm text-blue-600">{row.original.parentEntity || "—"}</span>,
+    cell: ({ row }) => <span className="text-sm">{row.original.parentEntity || "—"}</span>,
   },
   {
     accessorKey: "managerController",
-    header: "Manager / Controller",
+    header: "Manager",
     cell: ({ row }) => <span className="text-sm">{row.original.managerController}</span>,
   },
   {
     accessorKey: "dateFormed",
-    header: "Date Formed",
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+        Date Formed
+        {column.getIsSorted() === "asc" ? (
+          <SortAscIcon className="ml-2 h-3 w-3" />
+        ) : column.getIsSorted() === "desc" ? (
+          <SortDescIcon className="ml-2 h-3 w-3" />
+        ) : null}
+      </Button>
+    ),
     cell: ({ row }) => <span className="text-sm">{new Date(row.original.dateFormed).toLocaleDateString()}</span>,
   },
   {
-    accessorKey: "tags",
-    header: "Tags",
-    cell: ({ row }) => (
-      <div className="flex flex-wrap gap-1 max-w-[150px]">
-        {row.original.tags.slice(0, 2).map((tag) => (
-          <Badge key={tag} variant="outline" className="text-xs px-1 py-0">
-            {tag}
-          </Badge>
-        ))}
-        {row.original.tags.length > 2 && (
-          <Badge variant="outline" className="text-xs px-1 py-0">
-            +{row.original.tags.length - 2}
-          </Badge>
-        )}
-      </div>
-    ),
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => <span className="text-sm">{row.original.status}</span>,
+  },
+  {
+    accessorKey: "linkedDocs",
+    header: "Documents",
+    cell: ({ row }) => <span className="text-sm">{row.original.linkedDocs}</span>,
   },
   {
     accessorKey: "lastModified",
     header: "Last Modified",
     cell: ({ row }) => (
       <span className="text-sm text-muted-foreground">{new Date(row.original.lastModified).toLocaleDateString()}</span>
-    ),
-  },
-  {
-    accessorKey: "linkedDocs",
-    header: "# of Linked Docs",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-1">
-        <FolderIcon className="h-3 w-3 text-muted-foreground" />
-        <span className="text-sm font-medium">{row.original.linkedDocs}</span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "upcomingDeadlines",
-    header: "Upcoming Deadlines",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-1">
-        <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-        <span className="text-sm">
-          {row.original.upcomingDeadlines.length > 0
-            ? `${row.original.upcomingDeadlines.length} deadline${row.original.upcomingDeadlines.length > 1 ? "s" : ""}`
-            : "None"}
-        </span>
-      </div>
     ),
   },
   {

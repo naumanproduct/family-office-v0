@@ -110,10 +110,10 @@ function TableView({
           <TableRow>
             <TableHead className="w-12"></TableHead>
             <TableHead>Title</TableHead>
-            <TableHead>Due Date</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Assignee</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Priority</TableHead>
+            <TableHead>Due Date</TableHead>
+            <TableHead>Assignee</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
@@ -143,7 +143,14 @@ function TableView({
                   item.title
                 )}
               </TableCell>
-              <TableCell className="text-sm">{item.dueDate}</TableCell>
+              <TableCell>
+                <span className={`text-sm ${
+                  item.status.toLowerCase() === "completed" ? "text-green-600" : 
+                  "text-muted-foreground"
+                }`}>
+                  {item.status}
+                </span>
+              </TableCell>
               <TableCell>
                 <span className={`text-sm ${
                   item.priority === "High" ? "text-red-600" : 
@@ -153,15 +160,8 @@ function TableView({
                   {item.priority}
                 </span>
               </TableCell>
+              <TableCell className="text-sm">{item.dueDate}</TableCell>
               <TableCell className="text-sm">{item.assignee}</TableCell>
-              <TableCell>
-                <span className={`text-sm ${
-                  item.status.toLowerCase() === "completed" ? "text-green-600" : 
-                  "text-muted-foreground"
-                }`}>
-                  {item.status}
-                </span>
-              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

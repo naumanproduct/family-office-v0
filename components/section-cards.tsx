@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 
 interface SectionCardsProps {
-  viewType: "assets" | "liabilities";
+  viewType?: "assets" | "liabilities" | "opportunities";
 }
 
 export function SectionCards({ viewType = "assets" }: SectionCardsProps) {
@@ -102,6 +102,93 @@ export function SectionCards({ viewType = "assets" }: SectionCardsProps) {
                 13% of portfolio <TrendingDownIcon className="size-4" />
               </div>
               <div className="text-muted-foreground">Target: 10-15%</div>
+            </CardFooter>
+          </Card>
+        </>
+      ) : viewType === "opportunities" ? (
+        <>
+          <Card className="@container/card">
+            <CardHeader className="relative">
+              <CardDescription>Active Opportunities</CardDescription>
+              <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                18
+              </CardTitle>
+              <div className="absolute right-4 top-4">
+                <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                  <TrendingUpIcon className="size-3" />
+                  +3
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium">
+                New this month <TrendingUpIcon className="size-4" />
+              </div>
+              <div className="text-muted-foreground">
+                6 in due diligence
+              </div>
+            </CardFooter>
+          </Card>
+          <Card className="@container/card">
+            <CardHeader className="relative">
+              <CardDescription>Total Pipeline Value</CardDescription>
+              <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                $45.2M
+              </CardTitle>
+              <div className="absolute right-4 top-4">
+                <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                  <TrendingUpIcon className="size-3" />
+                  +12.5%
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium">
+                Potential investments <TrendingUpIcon className="size-4" />
+              </div>
+              <div className="text-muted-foreground">
+                Across 18 opportunities
+              </div>
+            </CardFooter>
+          </Card>
+          <Card className="@container/card">
+            <CardHeader className="relative">
+              <CardDescription>Win Rate</CardDescription>
+              <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                23%
+              </CardTitle>
+              <div className="absolute right-4 top-4">
+                <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                  <TrendingUpIcon className="size-3" />
+                  +2.1%
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium">
+                Last 12 months <TrendingUpIcon className="size-4" />
+              </div>
+              <div className="text-muted-foreground">Target: 25%</div>
+            </CardFooter>
+          </Card>
+          <Card className="@container/card">
+            <CardHeader className="relative">
+              <CardDescription>Avg. Deal Size</CardDescription>
+              <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+                $2.5M
+              </CardTitle>
+              <div className="absolute right-4 top-4">
+                <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                  <TrendingDownIcon className="size-3" />
+                  -0.3M
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium">
+                Check size trending down <TrendingDownIcon className="size-4" />
+              </div>
+              <div className="text-muted-foreground">Range: $500K - $10M</div>
             </CardFooter>
           </Card>
         </>
