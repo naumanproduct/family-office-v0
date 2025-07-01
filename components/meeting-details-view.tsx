@@ -28,9 +28,10 @@ import { TypableArea } from "@/components/typable-area"
 interface MeetingDetailsViewProps {
   meeting: any
   onBack: () => void
+  isFullScreen?: boolean
 }
 
-export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps) {
+export function MeetingDetailsView({ meeting, onBack, isFullScreen = false }: MeetingDetailsViewProps) {
   const [meetingTitle, setMeetingTitle] = React.useState(meeting.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [editingField, setEditingField] = React.useState<string | null>(null)
@@ -212,65 +213,69 @@ Next meeting scheduled for January 15, 2024.`)
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Meeting Header - Same placement as task header */}
-      <div className="border-b bg-background px-6 py-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <CalendarIcon className="h-4 w-4" />
-          </div>
-          <div className="flex-1">
-            {isEditingTitle ? (
-              <Input
-                value={meetingTitle}
-                onChange={(e) => setMeetingTitle(e.target.value)}
-                onBlur={() => setIsEditingTitle(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setIsEditingTitle(false)
-                  }
-                  if (e.key === "Escape") {
-                    setMeetingTitle(meeting.title || "")
-                    setIsEditingTitle(false)
-                  }
-                }}
-                className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                autoFocus
-              />
-            ) : (
-              <h2
-                className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
-                onClick={() => setIsEditingTitle(true)}
-              >
-                {meetingTitle || "Untitled"}
-              </h2>
-            )}
+      {/* Meeting Header - Only show when not in fullscreen mode */}
+      {!isFullScreen && (
+        <div className="border-b bg-background px-6 py-2">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <CalendarIcon className="h-4 w-4" />
+            </div>
+            <div className="flex-1">
+              {isEditingTitle ? (
+                <Input
+                  value={meetingTitle}
+                  onChange={(e) => setMeetingTitle(e.target.value)}
+                  onBlur={() => setIsEditingTitle(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsEditingTitle(false)
+                    }
+                    if (e.key === "Escape") {
+                      setMeetingTitle(meeting.title || "")
+                      setIsEditingTitle(false)
+                    }
+                  }}
+                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                  autoFocus
+                />
+              ) : (
+                <h2
+                  className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
+                  onClick={() => setIsEditingTitle(true)}
+                >
+                  {meetingTitle || "Untitled"}
+                </h2>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Tabs */}
-      <div className="border-b bg-background px-6 py-1">
-        <div className="flex gap-6 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {activeTab === tab.id && (
-                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
-                )}
-              </button>
-            )
-          })}
+      {/* Tabs - hide in fullscreen to avoid duplication */}
+      {!isFullScreen && (
+        <div className="border-b bg-background px-6 py-1">
+          <div className="flex gap-6 overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                    activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                  {activeTab === tab.id && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Content with expandable sections */}
       <div className="p-6 space-y-4 overflow-y-auto">

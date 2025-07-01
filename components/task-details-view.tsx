@@ -22,6 +22,7 @@ import {
   TrendingUpIcon,
   MoreVerticalIcon,
   Sparkles,
+  ActivityIcon,
 } from "lucide-react"
 
 import {
@@ -193,6 +194,7 @@ export function TaskDetailsView({
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
+    ...(isFullScreen ? [{ id: "activity", label: "Activity", icon: ActivityIcon }] : []),
     { id: "notes", label: "Notes", icon: FileIcon },
     { id: "files", label: "Files", icon: FileTextIcon },
   ]
@@ -893,7 +895,9 @@ export function TaskDetailsView({
 
   // Custom content for tabs other than details
   const getTabContent = () => {
-    if (activeTab === "notes") {
+    if (activeTab === "activity") {
+      return renderCommentSection();
+    } else if (activeTab === "notes") {
       // Get contextual notes
       const notes = getContextualNotes(task.title || taskTitle);
       

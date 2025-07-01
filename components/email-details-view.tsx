@@ -55,71 +55,101 @@ function EmailAttachment({ attachment, index }: { attachment: any; index: number
 }
 
 // Email content component to reduce main component complexity
-function EmailContent({ emailItem }: { emailItem: any }) {
+function EmailContent({ emailItem, isExpanded, onToggle }: { emailItem: any; isExpanded: boolean; onToggle: () => void }) {
   const isOriginal = emailItem.isOriginal
-  const formattedDate = new Date(emailItem.date).toLocaleString()
+  
+  // Format date as "Jun 28, 2025, 3:48 PM"
+  const formatEmailDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    }) + ', ' + date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    })
+  }
+  
+  const formattedDate = formatEmailDate(emailItem.date)
+  
+  // Get first line of email body for collapsed view
+  const firstLine = emailItem.body.split('\n')[0]
 
   return (
-    <div className={`mb-6 ${isOriginal ? "" : "opacity-80"}`}>
-      <div className="flex items-start gap-3 mb-3">
+    <div className={`${isOriginal ? "" : "opacity-80"}`}>
+      <div 
+        className="flex items-start gap-3 mb-3 cursor-pointer hover:bg-muted/30 rounded-lg p-2 -m-2 transition-colors"
+        onClick={onToggle}
+      >
         <Avatar className="h-8 w-8">
           <AvatarFallback>{emailItem.from.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="flex justify-between">
-            <div>
+            <div className="flex-1">
               <p className="text-sm font-medium">{emailItem.from}</p>
-              <p className="text-xs text-muted-foreground">
-                To: {Array.isArray(emailItem.to) ? emailItem.to.join(", ") : emailItem.to}
-                {emailItem.cc && emailItem.cc.length > 0 && ` • CC: ${emailItem.cc.join(", ")}`}
+              {isExpanded ? (
+                <p className="text-xs text-muted-foreground">
+                  To: {Array.isArray(emailItem.to) ? emailItem.to.join(", ") : emailItem.to}
+                  {emailItem.cc && emailItem.cc.length > 0 && ` • CC: ${emailItem.cc.join(", ")}`}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                  {firstLine}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-xs text-muted-foreground">{formattedDate}</div>
+              <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Email body with proper formatting - only show when expanded */}
+      {isExpanded && (
+        <div className="pl-11">
+          <div className="text-sm text-foreground">
+            {emailItem.body.split("\n").map((paragraph: string, i: number) => (
+              <p key={i} className="my-2">
+                {paragraph}
               </p>
-            </div>
-            <div className="text-xs text-muted-foreground">{formattedDate}</div>
+            ))}
           </div>
-        </div>
-      </div>
 
-      {/* Email body with proper formatting */}
-      <div className="pl-11">
-        <div className="text-sm text-foreground">
-          {emailItem.body.split("\n").map((paragraph: string, i: number) => (
-            <p key={i} className="my-2">
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        {/* Attachments if any */}
-        {emailItem.attachments && emailItem.attachments.length > 0 && (
-          <div className="mt-4 p-3 border rounded-lg bg-muted/20">
-            <div className="flex items-center gap-2 mb-3">
-              <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Attachments ({emailItem.attachments.length})</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {emailItem.attachments.map((attachment: any, i: number) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 p-2 border rounded bg-background hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex h-6 w-6 items-center justify-center rounded bg-muted">
-                    <FileTextIcon className="h-3 w-3 text-muted-foreground" />
+          {/* Attachments if any */}
+          {emailItem.attachments && emailItem.attachments.length > 0 && (
+            <div className="mt-4 p-3 border rounded-lg bg-muted/20">
+              <div className="flex items-center gap-2 mb-3">
+                <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Attachments ({emailItem.attachments.length})</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {emailItem.attachments.map((attachment: any, i: number) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 p-2 border rounded bg-background hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex h-6 w-6 items-center justify-center rounded bg-muted">
+                      <FileTextIcon className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{attachment.name || `Attachment ${i + 1}`}</p>
+                      <p className="text-xs text-muted-foreground">{attachment.size || "Unknown size"}</p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0">
+                      <DownloadIcon className="h-3 w-3" />
+                    </Button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">{attachment.name || `Attachment ${i + 1}`}</p>
-                    <p className="text-xs text-muted-foreground">{attachment.size || "Unknown size"}</p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0">
-                    <DownloadIcon className="h-3 w-3" />
-                  </Button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-
-      {!isOriginal && <Separator className="my-6" />}
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -136,6 +166,7 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   const [replyText, setReplyText] = React.useState("")
   const [isReplying, setIsReplying] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
+  const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
   
   // Define tabs
   const tabs = [
@@ -406,7 +437,20 @@ Sarah`,
                   <div className="flex-1">
                     <div className="flex items-start gap-4">
                       <Label className="text-xs text-muted-foreground mt-1 w-16">Sent</Label>
-                      <div className="text-sm">{new Date(fieldValues.date).toLocaleString()}</div>
+                      <div className="text-sm">
+                        {(() => {
+                          const date = new Date(fieldValues.date)
+                          return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          }) + ', ' + date.toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit',
+                            hour12: true 
+                          })
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -460,13 +504,34 @@ Sarah`,
           
           {openSections.threads && (
             <div className="px-4 pb-4 pt-1">
-              <div className="space-y-6">
-                {emailThread.map((emailItem, index) => (
-                  <div key={emailItem.id}>
-                    <EmailContent emailItem={emailItem} />
-                    {index < emailThread.length - 1 && <Separator className="my-6" />}
-                  </div>
-                ))}
+              <div className="space-y-4">
+                {emailThread
+                  .slice()
+                  .reverse()
+                  .map((emailItem, index, reversedArray) => {
+                    // The most recent email is the last one in reversed array (originally first)
+                    const isLatest = index === reversedArray.length - 1
+                    const isExpanded = isLatest || expandedEmails.has(emailItem.id)
+                    
+                    return (
+                      <div key={emailItem.id}>
+                        <EmailContent 
+                          emailItem={emailItem}
+                          isExpanded={isExpanded}
+                          onToggle={() => {
+                            const newExpanded = new Set(expandedEmails)
+                            if (isExpanded && !isLatest) {
+                              newExpanded.delete(emailItem.id)
+                            } else {
+                              newExpanded.add(emailItem.id)
+                            }
+                            setExpandedEmails(newExpanded)
+                          }}
+                        />
+                        {index < reversedArray.length - 1 && <Separator className="my-4" />}
+                      </div>
+                    )
+                  })}
               </div>
 
               {/* Reply section */}

@@ -47,6 +47,8 @@ import { NoteContent } from "@/components/shared/note-content"
 import { FileContent } from "@/components/shared/file-content"
 import { TypableArea } from "@/components/typable-area"
 import { formatDate } from "@/lib/utils"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateTaskActivities } from "@/components/shared/activity-generators"
 
 // Task data - extended from investment tab but across all objects
 const tasksData = [
@@ -448,7 +450,46 @@ export function TasksTable() {
             {/* Tab Content */}
             <div className="p-6 flex-1 space-y-4">
               {activeTab === "activity" && (
-                <p className="text-muted-foreground">No recent activity for this task.</p>
+                <UnifiedActivitySection 
+                  activities={generateTaskActivities()} 
+                  comments={[
+                    {
+                      id: 101,
+                      type: "comment",
+                      actor: "Sarah Johnson",
+                      action: "commented",
+                      target: "",
+                      content: "I've reviewed the quarterly report and the numbers look solid. The 15% increase in revenue is particularly impressive.",
+                      timestamp: "2 hours ago",
+                      date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                    },
+                    {
+                      id: 102,
+                      type: "comment",
+                      actor: "Michael Chen",
+                      action: "commented",
+                      target: "",
+                      content: "Please make sure to use the updated wire instructions for this call. Treasury updated them last week.",
+                      timestamp: "5 hours ago",
+                      date: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+                    },
+                    {
+                      id: 103,
+                      type: "comment",
+                      actor: "You",
+                      action: "commented",
+                      target: "",
+                      content: "Noted. I'll double-check with Treasury before sending out the notices.",
+                      timestamp: "4 hours ago",
+                      date: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                    },
+                  ]}
+                  showHeader={true}
+                  onCommentSubmit={(comment) => {
+                    console.log("Adding comment:", comment)
+                    // In a real app, this would add the comment to the database
+                  }}
+                />
               )}
 
               {activeTab === "subtasks" && (
