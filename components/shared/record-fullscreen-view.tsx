@@ -13,19 +13,25 @@ import {
   FileIcon,
   MessageSquareIcon,
   PlusIcon,
+  PaperclipIcon,
+  ChevronRight,
+  DownloadIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { TaskDetailsView } from "@/components/task-details-view"
 import { NoteDetailsView } from "@/components/note-details-view"
 import { MeetingDetailsView } from "@/components/meeting-details-view"
-import { EmailDetailsView } from "@/components/email-details-view"
+import { EmailDetailsView, EmailContent, generateEmailThread } from "@/components/email-details-view"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 import { TypableArea } from "@/components/typable-area"
+import { DocumentViewer } from "@/components/document-viewer"
+import { Separator } from "@/components/ui/separator"
 
 interface RecordFullscreenViewProps {
   recordType: 'Task' | 'Note' | 'Meeting' | 'Email'
@@ -58,6 +64,18 @@ export function RecordFullscreenView({
   const [tasksViewMode, setTasksViewMode] = React.useState<"card" | "list" | "table">("table")
   const [filesViewMode, setFilesViewMode] = React.useState<"card" | "list" | "table">("table")
   const [notesViewMode, setNotesViewMode] = React.useState<"card" | "list" | "table">("table")
+  
+  // Add state for nested record navigation
+  const [nestedRecord, setNestedRecord] = React.useState<{
+    type: 'Task' | 'Note' | 'Meeting' | 'Email' | null
+    record: any
+  }>({ type: null, record: null })
+  
+  // Add state for document viewer
+  const [documentViewerFile, setDocumentViewerFile] = React.useState<any>(null)
+  
+  // Add state for expanded emails
+  const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
   
   // ESC key handler
   React.useEffect(() => {
@@ -123,6 +141,7 @@ export function RecordFullscreenView({
       baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
       baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
       baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
+      baseTabs.push({ id: "emails", label: "Emails", icon: MailIcon, count: null })
     } else if (recordType === "Email") {
       baseTabs.push({ id: "threads", label: "Email Threads", icon: MessageSquareIcon, count: null })
       baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
@@ -172,6 +191,40 @@ export function RecordFullscreenView({
             author: "Sarah Johnson",
             createdAt: "2024-01-19",
             tags: ["update", "progress"]
+          },
+        ]
+      case 'emails':
+        return [
+          {
+            id: 1,
+            subject: "Meeting follow-up",
+            from: "john@example.com",
+            date: "2024-01-20",
+            preview: "Thanks for the meeting today. Here are the action items...",
+          },
+          {
+            id: 2,
+            subject: "Document review request",
+            from: "sarah@example.com", 
+            date: "2024-01-19",
+            preview: "Please review the attached documents and provide feedback...",
+          },
+        ]
+      case 'meetings':
+        return [
+          {
+            id: 1,
+            title: "Strategy Session",
+            date: "2024-02-01",
+            time: "2:00 PM",
+            attendees: ["John Smith", "Sarah Johnson"],
+          },
+          {
+            id: 2,
+            title: "Weekly Review",
+            date: "2024-02-05",
+            time: "10:00 AM",
+            attendees: ["Team Members"],
           },
         ]
       case 'files':
@@ -276,6 +329,7 @@ export function RecordFullscreenView({
                 <EmailDetailsView 
                   email={record} 
                   onBack={onClose}
+                  isFullScreen={true}
                 />
               )}
             </div>
@@ -357,6 +411,9 @@ export function RecordFullscreenView({
                   activeTab="tasks"
                   viewMode={tasksViewMode}
                   data={getMockData('tasks')}
+                  onTaskClick={(task) => {
+                    setNestedRecord({ type: 'Task', record: task })
+                  }}
                 />
               )}
               
@@ -381,6 +438,9 @@ export function RecordFullscreenView({
                   activeTab="notes"
                   viewMode={notesViewMode}
                   data={getMockData('notes')}
+                  onNoteClick={(note) => {
+                    setNestedRecord({ type: 'Note', record: note })
+                  }}
                 />
               )}
               
@@ -389,13 +449,73 @@ export function RecordFullscreenView({
                   activeTab="files"
                   viewMode={filesViewMode}
                   data={getMockData('files')}
+                  onFileClick={(file) => {
+                    setDocumentViewerFile(file)
+                  }}
                 />
               )}
               
               {activeTab === "threads" && recordType === "Email" && (
-                <div className="text-muted-foreground">
-                  Email threads would be displayed here
+                <div className="space-y-4">
+                  {(() => {
+                    // Generate email thread using the same function as drawer view
+                    const emailThread = generateEmailThread(record)
+                    
+                    return (
+                      <>
+                        {emailThread
+                          .slice()
+                          .reverse()
+                          .map((emailItem, index, reversedArray) => {
+                            // The most recent email is the last one in reversed array (originally first)
+                            const isLatest = index === reversedArray.length - 1
+                            const isExpanded = isLatest || expandedEmails.has(emailItem.id)
+                            
+                            return (
+                              <div key={emailItem.id}>
+                                <EmailContent 
+                                  emailItem={emailItem}
+                                  isExpanded={isExpanded}
+                                  onToggle={() => {
+                                    const newExpanded = new Set(expandedEmails)
+                                    if (isExpanded && !isLatest) {
+                                      newExpanded.delete(emailItem.id)
+                                    } else {
+                                      newExpanded.add(emailItem.id)
+                                    }
+                                    setExpandedEmails(newExpanded)
+                                  }}
+                                />
+                                {index < reversedArray.length - 1 && <Separator className="my-4" />}
+                              </div>
+                            )
+                          })}
+                      </>
+                    )
+                  })()}
                 </div>
+              )}
+              
+              {activeTab === "emails" && (
+                <TabContentRenderer
+                  activeTab="emails"
+                  viewMode={notesViewMode}
+                  data={getMockData('emails')}
+                  onEmailClick={(email) => {
+                    setNestedRecord({ type: 'Email', record: email })
+                  }}
+                />
+              )}
+              
+              {activeTab === "meetings" && (
+                <TabContentRenderer
+                  activeTab="meetings"
+                  viewMode={notesViewMode}
+                  data={getMockData('meetings')}
+                  onMeetingClick={(meeting) => {
+                    setNestedRecord({ type: 'Meeting', record: meeting })
+                  }}
+                />
               )}
             </div>
           </div>
@@ -404,5 +524,36 @@ export function RecordFullscreenView({
     </>
   )
 
-  return typeof document !== "undefined" ? createPortal(content, document.body) : null
+  // Show nested record if one is selected
+  if (nestedRecord.type && nestedRecord.record) {
+    return (
+      <RecordFullscreenView
+        recordType={nestedRecord.type}
+        record={nestedRecord.record}
+        parentContext={parentContext}
+        parentTitle={record.title || record.subject || record.name || "Parent Record"}
+        parentRecordType={recordType}
+        onClose={() => setNestedRecord({ type: null, record: null })}
+        activityContent={null}
+      />
+    )
+  }
+
+  return (
+    <>
+      {typeof document !== "undefined" ? createPortal(content, document.body) : null}
+      {documentViewerFile && (
+        <DocumentViewer
+          isOpen={!!documentViewerFile}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDocumentViewerFile(null)
+            }
+          }}
+          file={documentViewerFile}
+          startInFullScreen={true}
+        />
+      )}
+    </>
+  )
 } 

@@ -21,6 +21,7 @@ interface TabContentRendererHandlers {
   onNoteClick?: (note: any) => void
   onMeetingClick?: (meeting: any) => void
   onEmailClick?: (email: any) => void
+  onFileClick?: (file: any) => void
   onAdd?: () => void
 }
 
@@ -52,6 +53,7 @@ export function TabContentRenderer({
   onNoteClick,
   onMeetingClick,
   onEmailClick,
+  onFileClick,
   onAdd,
   isFullScreen = false,
 }: TabContentRendererProps & { isFullScreen?: boolean }) {
@@ -70,6 +72,7 @@ export function TabContentRenderer({
         onNoteClick={onNoteClick}
         onMeetingClick={onMeetingClick}
         onEmailClick={onEmailClick}
+        onFileClick={onFileClick}
         onAdd={onAdd}
       />
     )
@@ -84,6 +87,7 @@ export function TabContentRenderer({
         onNoteClick={onNoteClick}
         onMeetingClick={onMeetingClick}
         onEmailClick={onEmailClick}
+        onFileClick={onFileClick}
         onAdd={onAdd}
       />
     )
@@ -98,6 +102,7 @@ export function TabContentRenderer({
       onNoteClick={onNoteClick}
       onMeetingClick={onMeetingClick}
       onEmailClick={onEmailClick}
+      onFileClick={onFileClick}
       onAdd={onAdd}
     />
   )
@@ -127,6 +132,7 @@ function TableView({
   onNoteClick,
   onMeetingClick,
   onEmailClick,
+  onFileClick,
   onAdd,
 }: {
   data: any[]
@@ -199,7 +205,8 @@ function TableView({
                 (activeTab === "tasks" && onTaskClick) ||
                 (activeTab === "notes" && onNoteClick) ||
                 (activeTab === "meetings" && onMeetingClick) ||
-                (activeTab === "emails" && onEmailClick)
+                (activeTab === "emails" && onEmailClick) ||
+                (activeTab === "files" && onFileClick)
                   ? "cursor-pointer hover:bg-muted/50"
                   : ""
               }`}
@@ -212,6 +219,8 @@ function TableView({
                   onMeetingClick(item)
                 } else if (activeTab === "emails" && onEmailClick) {
                   onEmailClick(item)
+                } else if (activeTab === "files" && onFileClick) {
+                  onFileClick(item)
                 }
               }}
             >
@@ -355,6 +364,7 @@ function CardView({
   onNoteClick,
   onMeetingClick,
   onEmailClick,
+  onFileClick,
   onAdd,
 }: {
   data: any[]
@@ -457,7 +467,7 @@ function CardView({
                 left: item.uploadedBy,
                 right: item.uploadedDate
               }}
-              onClick={() => {}}
+              onClick={() => onFileClick?.(item)}
               actions={[
                 { label: "View", onClick: () => {} },
                 { label: "Download", onClick: () => {} },
@@ -515,6 +525,7 @@ function ListView({
   onNoteClick,
   onMeetingClick,
   onEmailClick,
+  onFileClick,
   onAdd,
 }: {
   data: any[]
@@ -617,7 +628,7 @@ function ListView({
                 left: item.uploadedBy,
                 right: item.uploadedDate
               }}
-              onClick={() => {}}
+              onClick={() => onFileClick?.(item)}
               actions={[
                 { label: "View", onClick: () => {} },
                 { label: "Download", onClick: () => {} },

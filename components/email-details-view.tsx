@@ -28,52 +28,51 @@ import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
-import { DocumentViewer } from "@/components/document-viewer"
 
 // Attachment component to reduce main component complexity
-function EmailAttachment({ attachment, index, onClick }: { attachment: any; index: number; onClick: () => void }) {
+function EmailAttachment({ attachment, index }: { attachment: any; index: number }) {
   return (
-    <div
-      key={index}
-      className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors cursor-pointer"
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
-          <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-        </div>
-        <div>
-          <p className="text-sm font-medium">{attachment.name || `Attachment ${index + 1}`}</p>
-          <p className="text-xs text-muted-foreground">
-            {attachment.size || "Unknown size"} • {attachment.type || "Unknown type"}
-          </p>
-        </div>
+    <div className="flex items-center gap-2 p-2 border rounded bg-background">
+      <div className="flex h-6 w-6 items-center justify-center rounded bg-muted">
+        <FileTextIcon className="h-3 w-3 text-muted-foreground" />
       </div>
-      <div className="flex items-center gap-1">
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => e.stopPropagation()}>
-          <DownloadIcon className="h-3 w-3" />
-        </Button>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium truncate">{attachment.name || `Attachment ${index + 1}`}</p>
+        <p className="text-xs text-muted-foreground">{attachment.size || "Unknown size"}</p>
       </div>
+      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0">
+        <DownloadIcon className="h-3 w-3" />
+      </Button>
     </div>
   )
 }
 
 // Email content component to reduce main component complexity
-function EmailContent({ emailItem, isExpanded, onToggle, onAttachmentClick }: { 
+export function EmailContent({ emailItem, isExpanded, onToggle }: { 
   emailItem: any; 
   isExpanded: boolean; 
   onToggle: () => void;
-  onAttachmentClick?: (attachment: any) => void;
 }) {
   const isOriginal = emailItem.isOriginal
   
-  // Format date as "Jun 28, 2025, 3:48 PM"
+  // Function to format date for email headers
   const formatEmailDate = (dateString: string) => {
     const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    
+    if (diffHours < 24) {
+      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+    } else if (diffDays < 7) {
+      return date.toLocaleDateString('en-US', { weekday: 'short' }) + ', ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+    }
+    
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
+      day: 'numeric',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined 
     }) + ', ' + date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
@@ -140,8 +139,7 @@ function EmailContent({ emailItem, isExpanded, onToggle, onAttachmentClick }: {
                 {emailItem.attachments.map((attachment: any, i: number) => (
                   <div
                     key={i}
-                    className="flex items-center gap-2 p-2 border rounded bg-background hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => onAttachmentClick?.(attachment)}
+                    className="flex items-center gap-2 p-2 border rounded bg-background"
                   >
                     <div className="flex h-6 w-6 items-center justify-center rounded bg-muted">
                       <FileTextIcon className="h-3 w-3 text-muted-foreground" />
@@ -167,17 +165,15 @@ function EmailContent({ emailItem, isExpanded, onToggle, onAttachmentClick }: {
 interface EmailDetailsViewProps {
   email: any
   onBack: () => void
+  isFullScreen?: boolean
 }
 
-export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
+export function EmailDetailsView({ email, onBack, isFullScreen = false }: EmailDetailsViewProps) {
   const [emailSubject, setEmailSubject] = React.useState(email?.subject || "No Subject")
   const [isEditingSubject, setIsEditingSubject] = React.useState(false)
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState("details")
   const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
-  
-  // Add state for document viewer
-  const [documentViewerFile, setDocumentViewerFile] = React.useState<any>(null)
   
   // Define tabs - only Details tab for emails
   const tabs = [
@@ -303,265 +299,266 @@ Sarah`,
   return (
     <div className="flex flex-col flex-1">
       {/* Email Header - Similar to the task header */}
-      <div className="border-b bg-background px-6 py-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <MailIcon className="h-4 w-4" />
-          </div>
-          <div className="flex-1">
-            {isEditingSubject ? (
-              <Input
-                value={emailSubject}
-                onChange={(e) => setEmailSubject(e.target.value)}
-                onBlur={() => setIsEditingSubject(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setIsEditingSubject(false)
-                  }
-                  if (e.key === "Escape") {
-                    setEmailSubject(email.subject || "No Subject")
-                    setIsEditingSubject(false)
-                  }
-                }}
-                className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                autoFocus
-              />
-            ) : (
-              <h2
-                className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
-                onClick={() => setIsEditingSubject(true)}
-              >
-                {emailSubject || "No Subject"}
-              </h2>
-            )}
+      {!isFullScreen && (
+        <div className="border-b bg-background px-6 py-2">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <MailIcon className="h-4 w-4" />
+            </div>
+            <div className="flex-1">
+              {isEditingSubject ? (
+                <Input
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  onBlur={() => setIsEditingSubject(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsEditingSubject(false)
+                    }
+                    if (e.key === "Escape") {
+                      setEmailSubject(email.subject || "No Subject")
+                      setIsEditingSubject(false)
+                    }
+                  }}
+                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                  autoFocus
+                />
+              ) : (
+                <h2
+                  className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
+                  onClick={() => setIsEditingSubject(true)}
+                >
+                  {emailSubject || "No Subject"}
+                </h2>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Tabs */}
-      <div className="border-b bg-background px-6 py-1">
-        <div className="flex gap-6 overflow-x-auto">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {activeTab === tab.id && (
-                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
-                )}
-              </button>
-            )
-          })}
+      {!isFullScreen && (
+        <div className="border-b bg-background px-6 py-1">
+          <div className="flex gap-6 overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                    activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.label}
+                  {activeTab === tab.id && (
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Content with expandable sections */}
-      <div className="p-6 space-y-4 overflow-y-auto">
-        {/* Email Details Section */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          <button
-            onClick={() => toggleSection('details')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-          >
-            {openSections.details ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-            <MailIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Email Details</span>
-          </button>
-          
-          {openSections.details && (
-            <div className="px-4 pb-4 pt-1">
-              <div className="space-y-3">
-                {/* From field */}
-                <div className="flex items-start gap-2">
-                  <div className="mt-1">
-                    <SendIcon className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start gap-4">
-                      <Label className="text-xs text-muted-foreground mt-1 w-16">From</Label>
-                      <div className="text-sm">{fieldValues.from}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Subject field */}
-                <div className="flex items-start gap-2">
-                  <div className="mt-1">
-                    <MailIcon className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start gap-4">
-                      <Label className="text-xs text-muted-foreground mt-1 w-16">Subject</Label>
-                      <div className="text-sm font-medium">{fieldValues.subject}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* To field */}
-                <div className="flex items-start gap-2">
-                  <div className="mt-1">
-                    <InboxIcon className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start gap-4">
-                      <Label className="text-xs text-muted-foreground mt-1 w-16">To</Label>
-                      <div className="text-sm">
-                        {Array.isArray(fieldValues.to) ? fieldValues.to.join(", ") : fieldValues.to}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CC field if present */}
-                {fieldValues.cc && fieldValues.cc.length > 0 && (
-                  <div className="flex items-start gap-2">
-                    <div className="mt-1">
-                      <UserIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start gap-4">
-                        <Label className="text-xs text-muted-foreground mt-1 w-16">CC</Label>
-                        <div className="text-sm">
-                          {Array.isArray(fieldValues.cc) ? fieldValues.cc.join(", ") : fieldValues.cc}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sent date */}
-                <div className="flex items-start gap-2">
-                  <div className="mt-1">
-                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start gap-4">
-                      <Label className="text-xs text-muted-foreground mt-1 w-16">Sent</Label>
-                      <div className="text-sm">
-                        {(() => {
-                          const date = new Date(fieldValues.date)
-                          return date.toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            year: 'numeric' 
-                          }) + ', ' + date.toLocaleTimeString('en-US', { 
-                            hour: 'numeric', 
-                            minute: '2-digit',
-                            hour12: true 
-                          })
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Attachments Section */}
-        {fieldValues.attachments && fieldValues.attachments.length > 0 && (
+      <div className={`${isFullScreen ? 'p-0' : 'p-6'} space-y-4 overflow-y-auto`}>
+        {/* Add wrapper div for padding in full screen mode */}
+        <div className={`${isFullScreen ? 'px-6 pt-6' : ''} space-y-4`}>
+          {/* Email Details Section */}
           <div className="rounded-lg border border-muted overflow-hidden">
             <button
-              onClick={() => toggleSection('attachments')}
+              onClick={() => toggleSection('details')}
               className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
             >
-              {openSections.attachments ? (
+              {openSections.details ? (
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               ) : (
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               )}
-              <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Attachments ({fieldValues.attachments.length})</span>
+              <MailIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Email Details</span>
             </button>
             
-            {openSections.attachments && (
+            {openSections.details && (
               <div className="px-4 pb-4 pt-1">
-                <div className="space-y-2">
-                  {fieldValues.attachments.map((attachment: any, i: number) => (
-                    <EmailAttachment 
-                      key={i}
-                      attachment={attachment}
-                      index={i}
-                      onClick={() => {
-                        // Implement the logic to open the document viewer
-                        setDocumentViewerFile(attachment)
-                      }}
-                    />
-                  ))}
+                <div className="space-y-3">
+                  {/* From field */}
+                  <div className="flex items-start gap-2">
+                    <div className="mt-1">
+                      <SendIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start gap-4">
+                        <Label className="text-xs text-muted-foreground mt-1 w-16">From</Label>
+                        <div className="text-sm">{fieldValues.from}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Subject field */}
+                  <div className="flex items-start gap-2">
+                    <div className="mt-1">
+                      <MailIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start gap-4">
+                        <Label className="text-xs text-muted-foreground mt-1 w-16">Subject</Label>
+                        <div className="text-sm font-medium">{fieldValues.subject}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* To field */}
+                  <div className="flex items-start gap-2">
+                    <div className="mt-1">
+                      <InboxIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start gap-4">
+                        <Label className="text-xs text-muted-foreground mt-1 w-16">To</Label>
+                        <div className="text-sm">
+                          {Array.isArray(fieldValues.to) ? fieldValues.to.join(", ") : fieldValues.to}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CC field if present */}
+                  {fieldValues.cc && fieldValues.cc.length > 0 && (
+                    <div className="flex items-start gap-2">
+                      <div className="mt-1">
+                        <UserIcon className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start gap-4">
+                          <Label className="text-xs text-muted-foreground mt-1 w-16">CC</Label>
+                          <div className="text-sm">
+                            {Array.isArray(fieldValues.cc) ? fieldValues.cc.join(", ") : fieldValues.cc}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sent date */}
+                  <div className="flex items-start gap-2">
+                    <div className="mt-1">
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start gap-4">
+                        <Label className="text-xs text-muted-foreground mt-1 w-16">Sent</Label>
+                        <div className="text-sm">
+                          {(() => {
+                            const date = new Date(fieldValues.date)
+                            return date.toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: 'numeric' 
+                            }) + ', ' + date.toLocaleTimeString('en-US', { 
+                              hour: 'numeric', 
+                              minute: '2-digit',
+                              hour12: true 
+                            })
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
           </div>
-        )}
 
-        {/* Email Thread Section */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          <button
-            onClick={() => toggleSection('threads')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-          >
-            {openSections.threads ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-            <MessageSquareIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Email Thread ({emailThread.length} messages)</span>
-          </button>
-          
-          {openSections.threads && (
-            <div className="px-4 pb-4 pt-1">
-              <div className="space-y-4">
-                {emailThread
-                  .slice()
-                  .reverse()
-                  .map((emailItem, index, reversedArray) => {
-                    // The most recent email is the last one in reversed array (originally first)
-                    const isLatest = index === reversedArray.length - 1
-                    const isExpanded = isLatest || expandedEmails.has(emailItem.id)
-                    
-                    return (
-                      <div key={emailItem.id}>
-                        <EmailContent 
-                          emailItem={emailItem}
-                          isExpanded={isExpanded}
-                          onToggle={() => {
-                            const newExpanded = new Set(expandedEmails)
-                            if (isExpanded && !isLatest) {
-                              newExpanded.delete(emailItem.id)
-                            } else {
-                              newExpanded.add(emailItem.id)
-                            }
-                            setExpandedEmails(newExpanded)
-                          }}
-                          onAttachmentClick={(attachment) => {
-                            // Implement the logic to open the document viewer
-                            setDocumentViewerFile(attachment)
-                          }}
-                        />
-                        {index < reversedArray.length - 1 && <Separator className="my-4" />}
-                      </div>
-                    )
-                  })}
-              </div>
+          {/* Attachments Section */}
+          {fieldValues.attachments && fieldValues.attachments.length > 0 && (
+            <div className="rounded-lg border border-muted overflow-hidden">
+              <button
+                onClick={() => toggleSection('attachments')}
+                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+              >
+                {openSections.attachments ? (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                )}
+                <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Attachments ({fieldValues.attachments.length})</span>
+              </button>
+              
+              {openSections.attachments && (
+                <div className="px-4 pb-4 pt-1">
+                  <div className="space-y-2">
+                    {fieldValues.attachments.map((attachment: any, i: number) => (
+                      <EmailAttachment 
+                        key={i}
+                        attachment={attachment}
+                        index={i}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Email Thread Section - Hide in fullscreen mode */}
+          {!isFullScreen && (
+            <div className="rounded-lg border border-muted overflow-hidden">
+              <button
+                onClick={() => toggleSection('threads')}
+                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+              >
+                {openSections.threads ? (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                )}
+                <MessageSquareIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Email Thread ({emailThread.length} messages)</span>
+              </button>
+              
+              {openSections.threads && (
+                <div className="px-4 pb-4 pt-1">
+                  <div className="space-y-4">
+                    {emailThread
+                      .slice()
+                      .reverse()
+                      .map((emailItem, index, reversedArray) => {
+                        // The most recent email is the last one in reversed array (originally first)
+                        const isLatest = index === reversedArray.length - 1
+                        const isExpanded = isLatest || expandedEmails.has(emailItem.id)
+                        
+                        return (
+                          <div key={emailItem.id}>
+                            <EmailContent 
+                              emailItem={emailItem}
+                              isExpanded={isExpanded}
+                              onToggle={() => {
+                                const newExpanded = new Set(expandedEmails)
+                                if (isExpanded && !isLatest) {
+                                  newExpanded.delete(emailItem.id)
+                                } else {
+                                  newExpanded.add(emailItem.id)
+                                }
+                                setExpandedEmails(newExpanded)
+                              }}
+                            />
+                            {index < reversedArray.length - 1 && <Separator className="my-4" />}
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Activity Section */}
-        <div className="mt-8 -mx-6 border-t bg-background">
+        <div className={`${isFullScreen ? 'mt-8' : 'mt-8 -mx-6'} border-t bg-background`}>
           <div className="px-6 py-4">
             <UnifiedActivitySection 
               activities={generateWorkflowActivities()} 
@@ -574,20 +571,91 @@ Sarah`,
           </div>
         </div>
       </div>
-      
-      {/* Document Viewer */}
-      {documentViewerFile && (
-        <DocumentViewer
-          isOpen={!!documentViewerFile}
-          onOpenChange={(open) => {
-            if (!open) {
-              setDocumentViewerFile(null)
-            }
-          }}
-          file={documentViewerFile}
-          startInFullScreen={true}
-        />
-      )}
     </div>
   )
+}
+
+// Export helper function to generate email thread data
+export function generateEmailThread(email: any) {
+  return [
+    {
+      id: email?.id || "email-1",
+      from: email?.from || "sarah.johnson@company.com",
+      to: email?.to || ["john.doe@client.com"],
+      cc: email?.cc || [],
+      subject: email?.subject || "Project Proposal Discussion",
+      date: email?.sentAt || new Date().toISOString(),
+      body:
+        email?.body ||
+        email?.preview ||
+        `Hi John,
+
+I hope this email finds you well. I wanted to follow up on our conversation from last week regarding the new project proposal.
+
+I've attached the updated proposal document with the revisions we discussed. The key changes include:
+- Updated timeline reflecting the Q2 delivery date
+- Revised budget allocation for the development phase
+- Additional resources for the testing phase
+
+Please review the document and let me know if you have any questions or need further clarification on any of the points.
+
+Looking forward to your feedback.
+
+Best regards,
+Sarah`,
+      attachments: email?.attachments || [
+        { name: "proposal-v2.pdf", size: "2.4 MB", type: "PDF" },
+        { name: "budget-breakdown.xlsx", size: "156 KB", type: "Excel" },
+      ],
+      isOriginal: true,
+    },
+    {
+      id: "email-2",
+      from: "john.doe@client.com",
+      to: ["sarah.johnson@company.com"],
+      cc: [],
+      subject: "Re: Project Proposal Discussion",
+      date: new Date(new Date(email?.sentAt || new Date()).getTime() - 86400000).toISOString(),
+      body: `Hi Sarah,
+
+Thank you for sending the updated proposal. I've had a chance to review it with my team.
+
+Overall, we're very pleased with the revisions. The timeline looks much more realistic, and the budget breakdown is exactly what we needed to see.
+
+I do have a couple of questions:
+1. Can we discuss the testing phase timeline in more detail?
+2. What's the process for change requests during development?
+
+Would you be available for a call this Thursday to discuss these points?
+
+Best,
+John`,
+      attachments: [],
+      isOriginal: false,
+    },
+    {
+      id: "email-3",
+      from: "sarah.johnson@company.com",
+      to: ["john.doe@client.com"],
+      cc: ["mike.wilson@company.com"],
+      subject: "Re: Project Proposal Discussion",
+      date: new Date(new Date(email?.sentAt || new Date()).getTime() - 172800000).toISOString(),
+      body: `Hi John,
+
+Great to hear that you're pleased with the revisions!
+
+To answer your questions:
+1. The testing phase is structured in three stages: unit testing (week 1), integration testing (week 2), and user acceptance testing (week 3). I'll send you a detailed testing plan separately.
+2. We have a formal change request process that includes impact assessment and approval workflow. Minor changes can usually be accommodated within the existing timeline.
+
+Thursday works perfectly for me. How about 2 PM EST? I'll send a calendar invite.
+
+I'm also CC'ing Mike Wilson, our project manager, who will be your main point of contact during the development phase.
+
+Best regards,
+Sarah`,
+      attachments: [{ name: "testing-plan.pdf", size: "890 KB", type: "PDF" }],
+      isOriginal: false,
+    },
+  ]
 }
