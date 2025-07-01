@@ -3,7 +3,7 @@
 import * as React from "react"
 import {
   FileTextIcon,
-  StickyNoteIcon,
+  FileIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   PlusIcon,
@@ -222,7 +222,7 @@ This note will be updated following next month's investment committee meeting.`)
         <div className="border-b bg-background px-6 py-2">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <StickyNoteIcon className="h-4 w-4" />
+              <FileIcon className="h-4 w-4" />
             </div>
             <div className="flex-1">
               {isEditingTitle ? (

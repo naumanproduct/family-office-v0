@@ -216,7 +216,7 @@ Next meeting scheduled for January 15, 2024.`)
       <div className="border-b bg-background px-6 py-2">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <VideoIcon className="h-4 w-4" />
+            <CalendarIcon className="h-4 w-4" />
           </div>
           <div className="flex-1">
             {isEditingTitle ? (
