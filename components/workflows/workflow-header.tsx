@@ -740,57 +740,79 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
             <div className="flex-1 overflow-y-auto">
               {activeTab === "details" && (
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Workflow Details</h3>
-                  <MasterDetailsPanel 
-                    fieldGroups={[
-                      {
-                        id: "workflow-info",
-                      label: "Workflow Information",
-                      icon: FileTextIcon,
-                      fields: [
-                        { 
-                          label: "Workflow Name", 
-                          value: (
-                            <Input
-                              value={config.name}
-                              onChange={(e) => setConfig({ ...config, name: e.target.value })}
-                              className="mt-1"
-                            />
-                          )
-                        },
-                        { 
-                          label: "Description", 
-                          value: (
-                            <Textarea
-                              value={config.description}
-                              onChange={(e) => setConfig({ ...config, description: e.target.value })}
-                              className="resize-none mt-1"
-                              rows={3}
-                            />
-                          )
-                        },
-                      ],
-                    },
-                    {
-                      id: "workflow-stats",
-                      label: "Workflow Statistics",
-                      icon: LayoutIcon,
-                      fields: [
-                        { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span> },
-                        { label: "Card Fields", value: `${config.attributes.length} fields configured` },
-                        { label: "Stages", value: `${config.stages.length} stages configured` },
-                        { label: "Created", value: "January 15, 2024" },
-                        { label: "Last Modified", value: "Today" },
-                      ],
-                    },
-                  ]}
-                  />
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold">Workflow Details</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Configure basic workflow settings and information</p>
+                  </div>
+                  <div className="space-y-6">
+                    {/* Workflow Information */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                        <Label className="text-sm font-medium">Workflow Information</Label>
+                      </div>
+                      <div className="space-y-4 pl-6">
+                        <div>
+                          <Label htmlFor="workflow-name" className="text-xs text-muted-foreground">Workflow Name</Label>
+                          <Input
+                            id="workflow-name"
+                            value={config.name}
+                            onChange={(e) => setConfig({ ...config, name: e.target.value })}
+                            className="max-w-md"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="workflow-description" className="text-xs text-muted-foreground">Description</Label>
+                          <Textarea
+                            id="workflow-description"
+                            value={config.description}
+                            onChange={(e) => setConfig({ ...config, description: e.target.value })}
+                            className="resize-none max-w-md"
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Workflow Statistics */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <LayoutIcon className="h-4 w-4 text-muted-foreground" />
+                        <Label className="text-sm font-medium">Workflow Statistics</Label>
+                      </div>
+                      <div className="space-y-3 pl-6">
+                        <div className="flex items-center">
+                          <Label className="text-xs text-muted-foreground w-32">Object Type</Label>
+                          <span className="text-sm capitalize">{config.objectType}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Label className="text-xs text-muted-foreground w-32">Card Fields</Label>
+                          <span className="text-sm">{config.attributes.length} fields configured</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Label className="text-xs text-muted-foreground w-32">Stages</Label>
+                          <span className="text-sm">{config.stages.length} stages configured</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Label className="text-xs text-muted-foreground w-32">Created</Label>
+                          <span className="text-sm">January 15, 2024</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Label className="text-xs text-muted-foreground w-32">Last Modified</Label>
+                          <span className="text-sm">Today</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {activeTab === "activity" && (
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Workflow Activity</h3>
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold">Workflow Activity</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Recent activity and changes to this workflow</p>
+                  </div>
                   <UnifiedActivitySection activities={generateWorkflowActivities()} />
                 </div>
               )}
@@ -798,17 +820,19 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
               {activeTab === "attributes" && (
                 <div className="flex flex-col h-full">
                   <div className="p-6 pb-3">
-                    <div className="mb-4 flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">Card Fields</h3>
-                      <Badge variant="secondary">
-                        {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
-                      </Badge>
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-lg font-semibold">Card Fields</h3>
+                        <Badge variant="secondary">
+                          {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {config.attributes.length > 0
+                          ? "Drag to reorder how they appear on cards"
+                          : "Add fields to display on your cards"}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {config.attributes.length > 0
-                        ? "Drag to reorder how they appear on cards"
-                        : "Add fields to display on your cards"}
-                    </p>
                   </div>
 
                   {/* Selected Fields List */}
@@ -982,19 +1006,19 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
               {activeTab === "stages" && (
                 <div className="p-6 space-y-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
+                  <div>
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-1">
                         <h3 className="text-lg font-semibold">Workflow Stages</h3>
-                        <p className="text-sm text-muted-foreground mt-1">Drag to reorder columns on your kanban board</p>
+                        <div className="flex items-center gap-3">
+                          <Badge variant="secondary">{config.stages.length} stages</Badge>
+                          <Button variant="outline" size="sm" onClick={addStage}>
+                            <PlusIcon className="h-3 w-3 mr-1" />
+                            Add Stage
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant="secondary">{config.stages.length} stages</Badge>
-                        <Button variant="outline" size="sm" onClick={addStage}>
-                          <PlusIcon className="h-3 w-3 mr-1" />
-                          Add Stage
-                        </Button>
-                      </div>
+                      <p className="text-sm text-muted-foreground">Drag to reorder columns on your kanban board</p>
                     </div>
 
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
@@ -1022,8 +1046,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
               {activeTab === "automations" && (
                 <div className="p-6">
                   <div>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="mb-4">
                       <h3 className="text-lg font-semibold">Automations</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Configure automated actions for this workflow</p>
                     </div>
                     <div className="space-y-2">
                       {automations.map((automation) => (
