@@ -739,72 +739,50 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
             <>
             <div className="flex-1 overflow-y-auto">
               {activeTab === "details" && (
-                <div className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold">Workflow Details</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Configure basic workflow settings and information</p>
-                  </div>
-                  <div className="space-y-6">
-                    {/* Workflow Information */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                        <Label className="text-sm font-medium">Workflow Information</Label>
-                      </div>
-                      <div className="space-y-4 pl-6">
-                        <div>
-                          <Label htmlFor="workflow-name" className="text-xs text-muted-foreground">Workflow Name</Label>
-                          <Input
-                            id="workflow-name"
-                            value={config.name}
-                            onChange={(e) => setConfig({ ...config, name: e.target.value })}
-                            className="max-w-md"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="workflow-description" className="text-xs text-muted-foreground">Description</Label>
-                          <Textarea
-                            id="workflow-description"
-                            value={config.description}
-                            onChange={(e) => setConfig({ ...config, description: e.target.value })}
-                            className="resize-none max-w-md"
-                            rows={3}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Workflow Statistics */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <LayoutIcon className="h-4 w-4 text-muted-foreground" />
-                        <Label className="text-sm font-medium">Workflow Statistics</Label>
-                      </div>
-                      <div className="space-y-3 pl-6">
-                        <div className="flex items-center">
-                          <Label className="text-xs text-muted-foreground w-32">Object Type</Label>
-                          <span className="text-sm capitalize">{config.objectType}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Label className="text-xs text-muted-foreground w-32">Card Fields</Label>
-                          <span className="text-sm">{config.attributes.length} fields configured</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Label className="text-xs text-muted-foreground w-32">Stages</Label>
-                          <span className="text-sm">{config.stages.length} stages configured</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Label className="text-xs text-muted-foreground w-32">Created</Label>
-                          <span className="text-sm">January 15, 2024</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Label className="text-xs text-muted-foreground w-32">Last Modified</Label>
-                          <span className="text-sm">Today</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <MasterDetailsPanel 
+                  fieldGroups={[
+                    {
+                      id: "workflow-stats",
+                      label: "Workflow Statistics",
+                      icon: LayoutIcon,
+                      fields: [
+                        { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span> },
+                        { label: "Card Fields", value: `${config.attributes.length} fields configured` },
+                        { label: "Stages", value: `${config.stages.length} stages configured` },
+                        { label: "Created", value: "January 15, 2024" },
+                        { label: "Last Modified", value: "Today" },
+                      ],
+                    },
+                    {
+                      id: "workflow-info",
+                      label: "Workflow Information",
+                      icon: FileTextIcon,
+                      fields: [
+                        { 
+                          label: "Workflow Name", 
+                          value: (
+                            <Input
+                              value={config.name}
+                              onChange={(e) => setConfig({ ...config, name: e.target.value })}
+                              className="mt-1"
+                            />
+                          )
+                        },
+                        { 
+                          label: "Description", 
+                          value: (
+                            <Textarea
+                              value={config.description}
+                              onChange={(e) => setConfig({ ...config, description: e.target.value })}
+                              className="resize-none mt-1"
+                              rows={3}
+                            />
+                          )
+                        },
+                      ],
+                    },
+                  ]}
+                />
               )}
 
               {activeTab === "activity" && (
