@@ -64,6 +64,12 @@ export function UnifiedDetailsPanel({
     if (sections.length > 0) {
       initialState[sections[0].id] = true;
     }
+    // Also open workflow-info by default if it exists
+    sections.forEach(section => {
+      if (section.id === 'workflow-info') {
+        initialState[section.id] = true;
+      }
+    });
     return initialState;
   });
 
