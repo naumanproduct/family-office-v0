@@ -98,9 +98,9 @@ export function UnifiedDetailsPanel({
           <div key={index} className="flex items-center">
             <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
             {field.isLink ? (
-              <p className="text-sm text-blue-600 cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
+              <p className="flex-1 text-sm text-blue-600 cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
             ) : (
-              <p className="text-sm cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
+              <p className="flex-1 text-sm cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
             )}
           </div>
         ))}

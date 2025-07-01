@@ -764,7 +764,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                             <Input
                               value={config.name}
                               onChange={(e) => setConfig({ ...config, name: e.target.value })}
-                              className="mt-1"
+                              className="mt-1 w-full"
                             />
                           )
                         },
@@ -774,7 +774,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                             <Textarea
                               value={config.description}
                               onChange={(e) => setConfig({ ...config, description: e.target.value })}
-                              className="resize-none mt-1"
+                              className="resize-none mt-1 w-full"
                               rows={3}
                             />
                           )
