@@ -983,41 +983,41 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
               )}
 
               {activeTab === "stages" && (
-                <div className="p-6 space-y-6">
-                  <div>
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between mb-1">
+                <div className="p-6">
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
                         <h3 className="text-lg font-semibold">Workflow Stages</h3>
-                        <div className="flex items-center gap-3">
-                          <Badge variant="secondary">{config.stages.length} stages</Badge>
-                          <Button variant="outline" size="sm" onClick={addStage}>
-                            <PlusIcon className="h-3 w-3 mr-1" />
-                            Add Stage
-                          </Button>
-                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">Drag to reorder columns on your kanban board</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">Drag to reorder columns on your kanban board</p>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary">{config.stages.length} stages</Badge>
+                        <Button variant="outline" size="sm" onClick={addStage}>
+                          <PlusIcon className="h-3 w-3 mr-1" />
+                          Add Stage
+                        </Button>
+                      </div>
                     </div>
-
-                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
-                      <SortableContext
-                        items={config.stages.map((stage) => stage.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <div className="space-y-2">
-                          {config.stages.map((stage) => (
-                            <SortableStageItem
-                              key={stage.id}
-                              stage={stage}
-                              onEdit={editStage}
-                              onDelete={deleteStage}
-                              canDelete={config.stages.length > 1}
-                            />
-                          ))}
-                        </div>
-                      </SortableContext>
-                    </DndContext>
                   </div>
+
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleStageDragEnd}>
+                    <SortableContext
+                      items={config.stages.map((stage) => stage.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-2">
+                        {config.stages.map((stage) => (
+                          <SortableStageItem
+                            key={stage.id}
+                            stage={stage}
+                            onEdit={editStage}
+                            onDelete={deleteStage}
+                            canDelete={config.stages.length > 1}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
                 </div>
               )}
 
