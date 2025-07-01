@@ -139,7 +139,7 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   
   // Define tabs
   const tabs = [
-    { id: "details", label: "Details", icon: MailIcon }
+    { id: "details", label: "Details", icon: FileTextIcon }
   ]
   
   // State for which sections are open

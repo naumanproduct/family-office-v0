@@ -90,7 +90,7 @@ Next meeting scheduled for January 15, 2024.`)
   
   // Define tabs
   const tabs = [
-    { id: "details", label: "Details", icon: CalendarIcon }
+    { id: "details", label: "Details", icon: FileTextIcon }
   ]
   
   // State for which sections are open
