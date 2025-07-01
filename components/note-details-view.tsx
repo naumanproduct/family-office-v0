@@ -9,7 +9,9 @@ import {
   PlusIcon,
   EditIcon,
   FolderIcon,
-  CheckSquareIcon
+  CheckSquareIcon,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -47,46 +49,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
     updatedAt: note?.updatedAt || new Date().toISOString(),
   })
 
-  const [noteText, setNoteText] = React.useState(note?.content || `Investment Review Summary:
-This note captures key insights from our quarterly portfolio review and strategic planning session.
-
-Portfolio Analysis:
-- Current AUM: $485M across 23 entities
-- YTD Performance: +12.3% (outperforming benchmark by 280bps)
-- Asset Allocation: 42% Private Equity, 35% Public Markets, 18% Fixed Income, 5% Alternatives
-- Geographic Distribution: 60% North America, 25% Europe, 15% Asia-Pacific
-
-Key Investment Decisions:
-1. Approved $15M commitment to emerging markets growth fund
-2. Initiated position reduction in technology sector (currently overweight at 32%)
-3. Exploring co-investment opportunity in healthcare logistics platform
-4. Evaluating secondary market opportunities for mature PE positions
-
-Risk Management Considerations:
-- Increasing hedge ratio on international equity exposure due to currency volatility
-- Implementing stop-loss protocols for concentrated positions exceeding 5% of portfolio
-- Enhanced due diligence procedures for new fund managers (minimum 5-year track record)
-- Quarterly stress testing of portfolio under various market scenarios
-
-Tax Optimization Strategies:
-- Identified $2.3M in potential tax loss harvesting opportunities
-- Restructuring Delaware entities to optimize state tax exposure
-- Exploring Qualified Opportunity Zone investments for capital gains deferral
-- Year-end charitable giving strategy to offset realized gains
-
-Compliance Updates:
-- All entities current with quarterly filings
-- KYC documentation updated for international banking relationships
-- New beneficial ownership reporting requirements effective Q1 2024
-- Annual audit preparation commenced with target completion by March
-
-Next Steps:
-- Execute approved rebalancing trades by month-end
-- Schedule due diligence calls with three prospective fund managers
-- Review and update Investment Policy Statement
-- Prepare detailed attribution analysis for board presentation
-
-This note will be updated following next month's investment committee meeting.`)
+  const [noteText, setNoteText] = React.useState(note?.content || "")
   const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
   const [filesViewMode, setFilesViewMode] = React.useState<"table" | "card" | "list">("table")
   const [tasksViewMode, setTasksViewMode] = React.useState<"table" | "card" | "list">(isFullScreen ? "table" : "list")
@@ -95,6 +58,7 @@ This note will be updated following next month's investment committee meeting.`)
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
     details: true,
     addNotes: true,
+    notes: true,
   })
 
   // Toggle section open/closed
@@ -329,6 +293,34 @@ This note will be updated following next month's investment committee meeting.`)
             })}
             activityContent={<NoteActivityContent />}
             isFullScreen={isFullScreen}
+            additionalContent={
+              // Add Notes section as additional content
+              <div className="rounded-lg border border-muted overflow-hidden">
+                <button
+                  onClick={() => toggleSection('notes')}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                >
+                  {openSections.notes ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Notes</span>
+                </button>
+                
+                {openSections.notes && (
+                  <div className="px-4 pb-4 pt-1">
+                    <TypableArea
+                      value={noteText}
+                      onChange={setNoteText}
+                      placeholder="Add notes..."
+                      showButtons={false}
+                    />
+                  </div>
+                )}
+              </div>
+            }
           />
         </div>
       ) : (
