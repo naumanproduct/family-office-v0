@@ -52,7 +52,7 @@ import {
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
+import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 
@@ -739,12 +739,12 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
             <>
             <div className="flex-1 overflow-y-auto">
               {activeTab === "details" && (
-                <MasterDetailsPanel 
-                  fieldGroups={[
+                <UnifiedDetailsPanel 
+                  sections={[
                     {
                       id: "workflow-stats",
-                      label: "Workflow Statistics",
-                      icon: LayoutIcon,
+                      title: "Workflow Statistics",
+                      icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
                       fields: [
                         { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span> },
                         { label: "Card Fields", value: `${config.attributes.length} fields configured` },
@@ -755,8 +755,8 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                     },
                     {
                       id: "workflow-info",
-                      label: "Workflow Information",
-                      icon: FileTextIcon,
+                      title: "Workflow Information",
+                      icon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
                       fields: [
                         { 
                           label: "Workflow Name", 
