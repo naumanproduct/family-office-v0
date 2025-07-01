@@ -170,12 +170,9 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   const [activeTab, setActiveTab] = React.useState("details")
   const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
   
-  // Define tabs - updated to include Notes, Files, Tasks
+  // Define tabs - only Details tab for emails
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
-    { id: "notes", label: "Notes", icon: FileIcon },
-    { id: "files", label: "Files", icon: FileTextIcon },
-    { id: "tasks", label: "Tasks", icon: CheckCircleIcon },
   ]
   
   // State for which sections are open
