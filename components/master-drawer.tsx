@@ -289,7 +289,7 @@ export function MasterDrawer({
 
     // Handle meeting details view (only in non-fullscreen mode)
     if (activeTab === "meetings" && selectedMeeting && !isFullScreen) {
-      return <MeetingDetailsView meeting={selectedMeeting} onBack={() => setSelectedMeeting(null)} />
+      return <MeetingDetailsView meeting={selectedMeeting} onBack={() => setSelectedMeeting(null)} isInDrawer={true} />
     }
 
     // Handle email details view (only in non-fullscreen mode)
@@ -1443,7 +1443,7 @@ Sarah`,
               </div>
               {/* Meeting Details Content */}
               <div className="flex-1 overflow-auto">
-                <MeetingDetailsView meeting={selectedMeeting} onBack={handleDrawerBackClick} />
+                <MeetingDetailsView meeting={selectedMeeting} onBack={handleDrawerBackClick} isInDrawer={true} />
               </div>
             </SheetContent>
           </Sheet>

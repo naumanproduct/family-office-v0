@@ -31,9 +31,10 @@ interface MeetingDetailsViewProps {
   meeting: any
   onBack: () => void
   isFullScreen?: boolean
+  isInDrawer?: boolean
 }
 
-export function MeetingDetailsView({ meeting, onBack, isFullScreen = false }: MeetingDetailsViewProps) {
+export function MeetingDetailsView({ meeting, onBack, isFullScreen = false, isInDrawer = false }: MeetingDetailsViewProps) {
   const [meetingTitle, setMeetingTitle] = React.useState(meeting.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [editingField, setEditingField] = React.useState<string | null>(null)
@@ -91,9 +92,12 @@ Action Items:
 
 Next meeting scheduled for January 15, 2024.`)
   
-  // Define tabs - only Details tab for meetings
+  // Define tabs
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "notes", label: "Notes", icon: FileIcon },
+    { id: "files", label: "Files", icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", icon: CheckCircleIcon },
   ]
   
   // State for which sections are open
@@ -253,8 +257,8 @@ Next meeting scheduled for January 15, 2024.`)
         </div>
       )}
 
-      {/* Tabs - hide in fullscreen to avoid duplication */}
-      {!isFullScreen && (
+      {/* Tabs - hide in fullscreen and in drawer mode */}
+      {!isFullScreen && !isInDrawer && (
         <div className="border-b bg-background px-6 py-1">
           <div className="flex gap-6 overflow-x-auto">
             {tabs.map((tab) => {
@@ -279,144 +283,154 @@ Next meeting scheduled for January 15, 2024.`)
         </div>
       )}
 
-      {/* Content with expandable sections */}
-      <div className="p-6 space-y-4 overflow-y-auto">
-        {/* Meeting Details Section */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          <button
-            onClick={() => toggleSection('details')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-          >
-            {openSections.details ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Meeting Information</span>
-          </button>
-          
-          {openSections.details && (
-            <div className="px-4 pb-4 pt-1">
-              <div className="space-y-3">
-                {renderEditableField(
-                  "description",
-                  fieldValues.description,
-                  <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Description",
-                  false,
-                  true,
-                )}
+      {/* Content based on active tab - when in drawer mode, always show details */}
+      {(isInDrawer || activeTab === "details") ? (
+        <div className="p-6 space-y-4 overflow-y-auto">
+          {/* Meeting Details Section */}
+          <div className="rounded-lg border border-muted overflow-hidden">
+            <button
+              onClick={() => toggleSection('details')}
+              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+            >
+              {openSections.details ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Meeting Information</span>
+            </button>
+            
+            {openSections.details && (
+              <div className="px-4 pb-4 pt-1">
+                <div className="space-y-3">
+                  {renderEditableField(
+                    "description",
+                    fieldValues.description,
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Description",
+                    false,
+                    true,
+                  )}
 
-                {renderEditableField(
-                  "startTime",
-                  fieldValues.startTime,
-                  <ClockIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Start Time",
-                )}
+                  {renderEditableField(
+                    "startTime",
+                    fieldValues.startTime,
+                    <ClockIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Start Time",
+                  )}
 
-                {renderEditableField(
-                  "endTime",
-                  fieldValues.endTime,
-                  <ClockIcon className="h-4 w-4 text-muted-foreground" />,
-                  "End Time",
-                )}
+                  {renderEditableField(
+                    "endTime",
+                    fieldValues.endTime,
+                    <ClockIcon className="h-4 w-4 text-muted-foreground" />,
+                    "End Time",
+                  )}
 
-                {renderEditableField(
-                  "location",
-                  fieldValues.location,
-                  <MapPinIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Location",
-                )}
+                  {renderEditableField(
+                    "location",
+                    fieldValues.location,
+                    <MapPinIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Location",
+                  )}
 
-                {renderEditableField(
-                  "organizer",
-                  fieldValues.organizer,
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Organizer",
-                )}
+                  {renderEditableField(
+                    "organizer",
+                    fieldValues.organizer,
+                    <UserIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Organizer",
+                  )}
 
-                {renderEditableField(
-                  "attendees",
-                  fieldValues.attendees,
-                  <UsersIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Attendees",
-                )}
+                  {renderEditableField(
+                    "attendees",
+                    fieldValues.attendees,
+                    <UsersIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Attendees",
+                  )}
 
-                {renderEditableField(
-                  "meetingType",
-                  fieldValues.meetingType,
-                  <VideoIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Type",
-                )}
+                  {renderEditableField(
+                    "meetingType",
+                    fieldValues.meetingType,
+                    <VideoIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Type",
+                  )}
 
-                {renderEditableField(
-                  "status",
-                  fieldValues.status,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Status",
-                  true,
-                )}
+                  {renderEditableField(
+                    "status",
+                    fieldValues.status,
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Status",
+                    true,
+                  )}
 
-                {renderEditableField(
-                  "recurring",
-                  fieldValues.recurring,
-                  <RepeatIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Recurring",
-                )}
+                  {renderEditableField(
+                    "recurring",
+                    fieldValues.recurring,
+                    <RepeatIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Recurring",
+                  )}
 
-                {renderEditableField(
-                  "reminder",
-                  fieldValues.reminder,
-                  <BellIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Reminder",
-                )}
+                  {renderEditableField(
+                    "reminder",
+                    fieldValues.reminder,
+                    <BellIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Reminder",
+                  )}
 
-                {renderEditableField(
-                  "visibility",
-                  fieldValues.visibility,
-                  <EyeIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Visibility",
-                )}
+                  {renderEditableField(
+                    "visibility",
+                    fieldValues.visibility,
+                    <EyeIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Visibility",
+                  )}
 
-                {renderEditableField(
-                  "showAs",
-                  fieldValues.showAs,
-                  <CalendarCheckIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Show As",
-                )}
+                  {renderEditableField(
+                    "showAs",
+                    fieldValues.showAs,
+                    <CalendarCheckIcon className="h-4 w-4 text-muted-foreground" />,
+                    "Show As",
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Meeting Notes Section */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          <button
-            onClick={() => toggleSection('notes')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-          >
-            {openSections.notes ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             )}
-            <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Meeting Notes</span>
-          </button>
-          
-          {openSections.notes && (
-            <div className="px-4 pb-4 pt-1">
-              <TypableArea
-                value={meetingNotes}
-                onChange={setMeetingNotes}
-                placeholder="Add meeting notes..."
-                showButtons={false}
-              />
-            </div>
-          )}
+          </div>
+
+          {/* Meeting Notes Section */}
+          <div className="rounded-lg border border-muted overflow-hidden">
+            <button
+              onClick={() => toggleSection('notes')}
+              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+            >
+              {openSections.notes ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+              <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Meeting Notes</span>
+            </button>
+            
+            {openSections.notes && (
+              <div className="px-4 pb-4 pt-1">
+                <TypableArea
+                  value={meetingNotes}
+                  onChange={setMeetingNotes}
+                  placeholder="Add meeting notes..."
+                  showButtons={false}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        // For other tabs (notes, files, tasks), show placeholder content
+        <div className="p-6">
+          <div className="text-center py-8 text-muted-foreground">
+            <p>No {activeTab} found for this meeting</p>
+            <p className="text-sm mt-2">Add some {activeTab} to get started</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
