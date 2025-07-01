@@ -167,19 +167,31 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [replyText, setReplyText] = React.useState("")
   const [isReplying, setIsReplying] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState("details")
   const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
-  const [fieldValues, setFieldValues] = React.useState({
-    from: email?.from || "",
-    to: email?.to || "",
-    cc: email?.cc || "",
-    bcc: email?.bcc || "",
-    date: email?.date || new Date().toISOString(),
-    status: email?.status || "Read",
-    tags: email?.tags || [],
-    priority: email?.priority || "Normal",
-    subject: email?.subject || "Q3 Investment Performance Report",
-    attachments: email?.attachments || [],
+  
+  // Define tabs - updated to include Notes, Files, Tasks
+  const tabs = [
+    { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "notes", label: "Notes", icon: FileIcon },
+    { id: "files", label: "Files", icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", icon: CheckCircleIcon },
+  ]
+  
+  // State for which sections are open
+  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+    details: true,
+    attachments: true,
+    threads: true,
   })
+
+  // Toggle section open/closed
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }))
+  }
 
   // Create email thread with multiple emails
   const emailThread = React.useMemo(
@@ -267,6 +279,16 @@ Sarah`,
     [email],
   )
 
+  // Simplified field values
+  const [fieldValues, setFieldValues] = React.useState({
+    from: email?.from || "john.doe@example.com",
+    to: email?.to || ["me@familyoffice.com"],
+    cc: email?.cc || [],
+    subject: email?.subject || "Q3 Investment Performance Report",
+    date: email?.date || "2023-05-15 10:30 AM",
+    attachments: emailThread[0]?.attachments || [],
+  })
+
   const handleFieldEdit = (field: string, value: string) => {
     setFieldValues((prev) => ({ ...prev, [field]: value }))
     setEditingField(null)
@@ -310,201 +332,269 @@ Sarah`,
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="border-b bg-background px-6 py-1">
+        <div className="flex gap-6 overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+                {activeTab === tab.id && (
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       {/* Content with expandable sections */}
       <div className="p-6 space-y-4 overflow-y-auto">
         {/* Email Details Section */}
         <div className="rounded-lg border border-muted overflow-hidden">
           <button
+            onClick={() => toggleSection('details')}
             className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
           >
+            {openSections.details ? (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            )}
             <MailIcon className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Email Details</span>
           </button>
           
-          <div className="px-4 pb-4 pt-1">
-            <div className="space-y-3">
-              {/* From field */}
-              <div className="flex items-start gap-2">
-                <div className="mt-1">
-                  <SendIcon className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start gap-4">
-                    <Label className="text-xs text-muted-foreground mt-1 w-16">From</Label>
-                    <div className="text-sm">{fieldValues.from}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Subject field */}
-              <div className="flex items-start gap-2">
-                <div className="mt-1">
-                  <MailIcon className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start gap-4">
-                    <Label className="text-xs text-muted-foreground mt-1 w-16">Subject</Label>
-                    <div className="text-sm font-medium">{fieldValues.subject}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* To field */}
-              <div className="flex items-start gap-2">
-                <div className="mt-1">
-                  <InboxIcon className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start gap-4">
-                    <Label className="text-xs text-muted-foreground mt-1 w-16">To</Label>
-                    <div className="text-sm">
-                      {Array.isArray(fieldValues.to) ? fieldValues.to.join(", ") : fieldValues.to}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* CC field if present */}
-              {fieldValues.cc && fieldValues.cc.length > 0 && (
+          {openSections.details && (
+            <div className="px-4 pb-4 pt-1">
+              <div className="space-y-3">
+                {/* From field */}
                 <div className="flex items-start gap-2">
                   <div className="mt-1">
-                    <UserIcon className="h-4 w-4 text-muted-foreground" />
+                    <SendIcon className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start gap-4">
-                      <Label className="text-xs text-muted-foreground mt-1 w-16">CC</Label>
+                      <Label className="text-xs text-muted-foreground mt-1 w-16">From</Label>
+                      <div className="text-sm">{fieldValues.from}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subject field */}
+                <div className="flex items-start gap-2">
+                  <div className="mt-1">
+                    <MailIcon className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start gap-4">
+                      <Label className="text-xs text-muted-foreground mt-1 w-16">Subject</Label>
+                      <div className="text-sm font-medium">{fieldValues.subject}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* To field */}
+                <div className="flex items-start gap-2">
+                  <div className="mt-1">
+                    <InboxIcon className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start gap-4">
+                      <Label className="text-xs text-muted-foreground mt-1 w-16">To</Label>
                       <div className="text-sm">
-                        {Array.isArray(fieldValues.cc) ? fieldValues.cc.join(", ") : fieldValues.cc}
+                        {Array.isArray(fieldValues.to) ? fieldValues.to.join(", ") : fieldValues.to}
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* Sent date */}
-              <div className="flex items-start gap-2">
-                <div className="mt-1">
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start gap-4">
-                    <Label className="text-xs text-muted-foreground mt-1 w-16">Sent</Label>
-                    <div className="text-sm">
-                      {(() => {
-                        const date = new Date(fieldValues.date)
-                        return date.toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        }) + ', ' + date.toLocaleTimeString('en-US', { 
-                          hour: 'numeric', 
-                          minute: '2-digit',
-                          hour12: true 
-                        })
-                      })()}
+                {/* CC field if present */}
+                {fieldValues.cc && fieldValues.cc.length > 0 && (
+                  <div className="flex items-start gap-2">
+                    <div className="mt-1">
+                      <UserIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start gap-4">
+                        <Label className="text-xs text-muted-foreground mt-1 w-16">CC</Label>
+                        <div className="text-sm">
+                          {Array.isArray(fieldValues.cc) ? fieldValues.cc.join(", ") : fieldValues.cc}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sent date */}
+                <div className="flex items-start gap-2">
+                  <div className="mt-1">
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start gap-4">
+                      <Label className="text-xs text-muted-foreground mt-1 w-16">Sent</Label>
+                      <div className="text-sm">
+                        {(() => {
+                          const date = new Date(fieldValues.date)
+                          return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          }) + ', ' + date.toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit',
+                            hour12: true 
+                          })
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
+
+        {/* Attachments Section */}
+        {fieldValues.attachments && fieldValues.attachments.length > 0 && (
+          <div className="rounded-lg border border-muted overflow-hidden">
+            <button
+              onClick={() => toggleSection('attachments')}
+              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+            >
+              {openSections.attachments ? (
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              )}
+              <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Attachments ({fieldValues.attachments.length})</span>
+            </button>
+            
+            {openSections.attachments && (
+              <div className="px-4 pb-4 pt-1">
+                <div className="space-y-2">
+                  {fieldValues.attachments.map((attachment: any, i: number) => (
+                    <EmailAttachment key={i} attachment={attachment} index={i} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Email Thread Section */}
         <div className="rounded-lg border border-muted overflow-hidden">
           <button
+            onClick={() => toggleSection('threads')}
             className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
           >
+            {openSections.threads ? (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            )}
             <MessageSquareIcon className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Email Thread ({emailThread.length} messages)</span>
           </button>
           
-          <div className="px-4 pb-4 pt-1">
-            <div className="space-y-4">
-              {emailThread
-                .slice()
-                .reverse()
-                .map((emailItem, index, reversedArray) => {
-                  // The most recent email is the last one in reversed array (originally first)
-                  const isLatest = index === reversedArray.length - 1
-                  const isExpanded = isLatest || expandedEmails.has(emailItem.id)
-                  
-                  return (
-                    <div key={emailItem.id}>
-                      <EmailContent 
-                        emailItem={emailItem}
-                        isExpanded={isExpanded}
-                        onToggle={() => {
-                          const newExpanded = new Set(expandedEmails)
-                          if (isExpanded && !isLatest) {
-                            newExpanded.delete(emailItem.id)
-                          } else {
-                            newExpanded.add(emailItem.id)
-                          }
-                          setExpandedEmails(newExpanded)
-                        }}
-                      />
-                      {index < reversedArray.length - 1 && <Separator className="my-4" />}
-                    </div>
-                  )
-                })}
-            </div>
-
-            {/* Reply section */}
-            <div className="mt-6 space-y-4">
-              <div className="flex items-center gap-2">
-                {!isReplying ? (
-                  <>
-                    <Button variant="outline" size="sm" className="h-8" onClick={() => setIsReplying(true)}>
-                      <ReplyIcon className="h-3 w-3 mr-2" />
-                      Reply
-                    </Button>
-                    <Button variant="outline" size="sm" className="h-8">
-                      <ForwardIcon className="h-3 w-3 mr-2" />
-                      Forward
-                    </Button>
-                  </>
-                ) : (
-                  <h4 className="text-sm font-medium">Reply</h4>
-                )}
+          {openSections.threads && (
+            <div className="px-4 pb-4 pt-1">
+              <div className="space-y-4">
+                {emailThread
+                  .slice()
+                  .reverse()
+                  .map((emailItem, index, reversedArray) => {
+                    // The most recent email is the last one in reversed array (originally first)
+                    const isLatest = index === reversedArray.length - 1
+                    const isExpanded = isLatest || expandedEmails.has(emailItem.id)
+                    
+                    return (
+                      <div key={emailItem.id}>
+                        <EmailContent 
+                          emailItem={emailItem}
+                          isExpanded={isExpanded}
+                          onToggle={() => {
+                            const newExpanded = new Set(expandedEmails)
+                            if (isExpanded && !isLatest) {
+                              newExpanded.delete(emailItem.id)
+                            } else {
+                              newExpanded.add(emailItem.id)
+                            }
+                            setExpandedEmails(newExpanded)
+                          }}
+                        />
+                        {index < reversedArray.length - 1 && <Separator className="my-4" />}
+                      </div>
+                    )
+                  })}
               </div>
 
-              {isReplying && (
-                <div className="rounded-lg border border-muted p-4 bg-background">
-                  <div className="mb-2 flex justify-between">
-                    <div>
-                      <p className="text-sm">
-                        <span className="text-muted-foreground">To:</span> {fieldValues.from}
-                      </p>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setIsReplying(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-
-                  <Textarea
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Type your reply here..."
-                    className="min-h-[120px] text-sm"
-                  />
-
-                  <div className="mt-3 flex justify-between">
-                    <div className="flex gap-2">
-                      <Button size="sm">
-                        <SendIcon className="h-3 w-3 mr-2" />
-                        Send
+              {/* Reply section */}
+              <div className="mt-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  {!isReplying ? (
+                    <>
+                      <Button variant="outline" size="sm" className="h-8" onClick={() => setIsReplying(true)}>
+                        <ReplyIcon className="h-3 w-3 mr-2" />
+                        Reply
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <PaperclipIcon className="h-3 w-3 mr-2" />
-                        Attach
+                      <Button variant="outline" size="sm" className="h-8">
+                        <ForwardIcon className="h-3 w-3 mr-2" />
+                        Forward
                       </Button>
-                    </div>
-                  </div>
+                    </>
+                  ) : (
+                    <h4 className="text-sm font-medium">Reply</h4>
+                  )}
                 </div>
-              )}
+
+                {isReplying && (
+                  <div className="rounded-lg border border-muted p-4 bg-background">
+                    <div className="mb-2 flex justify-between">
+                      <div>
+                        <p className="text-sm">
+                          <span className="text-muted-foreground">To:</span> {fieldValues.from}
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setIsReplying(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+
+                    <Textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Type your reply here..."
+                      className="min-h-[120px] text-sm"
+                    />
+
+                    <div className="mt-3 flex justify-between">
+                      <div className="flex gap-2">
+                        <Button size="sm">
+                          <SendIcon className="h-3 w-3 mr-2" />
+                          Send
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <PaperclipIcon className="h-3 w-3 mr-2" />
+                          Attach
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
