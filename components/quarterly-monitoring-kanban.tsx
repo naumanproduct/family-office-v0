@@ -674,6 +674,7 @@ function QuarterlyReviewCard({
       children={renderTabContent}
       detailsPanel={detailsPanel}
       onComposeEmail={() => {}}
+      activityContent={<UnifiedActivitySection activities={generateWorkflowActivities()} />}
     />
   )
 }

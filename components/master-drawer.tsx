@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { createPortal } from "react-dom"
-import { ChevronLeftIcon, ExpandIcon, PlusIcon, XIcon, ChevronDownIcon } from "lucide-react"
+import { ChevronLeftIcon, ExpandIcon, PlusIcon, XIcon, ChevronDownIcon, ActivityIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -38,6 +38,7 @@ interface MasterDrawerProps {
   detailsPanel: (isFullScreen?: boolean) => React.ReactNode
   onComposeEmail?: () => void
   customActions?: React.ReactNode[]
+  activityContent?: React.ReactNode
 }
 
 export function MasterDrawer({
@@ -50,9 +51,10 @@ export function MasterDrawer({
   detailsPanel,
   onComposeEmail,
   customActions = [],
+  activityContent,
 }: MasterDrawerProps) {
   const [isFullScreen, setIsFullScreen] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState(isFullScreen ? "activity" : "details")
+  const [activeTab, setActiveTab] = React.useState("details")
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">(isFullScreen ? "table" : "list")
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
@@ -60,6 +62,46 @@ export function MasterDrawer({
   const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
   const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
   const [parentTaskForSubtask, setParentTaskForSubtask] = React.useState<any>(null)
+
+  // Check if we should add Activity tab for specific record types in full screen
+  const shouldAddActivityTab = React.useMemo(() => {
+    return isFullScreen && [
+      "Investment", 
+      "Entity", 
+      "Opportunity", 
+      "Opportunities", 
+      "Company", 
+      "People", 
+      "Person", 
+      "Contact", 
+      "Workflow",
+      "Investment Onboarding",
+      "Cash Forecast",
+      "Capital Calls", 
+      "Distributions",
+      "Tax Documents",
+      "Compliance Items"
+    ].includes(recordType)
+  }, [isFullScreen, recordType])
+
+  // Create tabs for full screen mode
+  const fullScreenTabs = React.useMemo(() => {
+    const excludedTabIds = ["contacts", "people", "team", "company"]
+    let baseTabs = tabs.filter((tab) => !excludedTabIds.includes(tab.id.toLowerCase()))
+    
+    // Add Activity tab as first tab if needed
+    if (shouldAddActivityTab) {
+      const activityTab: Tab = {
+        id: "activity",
+        label: "Activity",
+        count: null,
+        icon: ActivityIcon
+      }
+      baseTabs = [activityTab, ...baseTabs]
+    }
+    
+    return baseTabs
+  }, [tabs, shouldAddActivityTab])
 
   // Exclude specific tab ids across all drawers
   const excludedTabIds = ["contacts", "people", "team", "company"]
@@ -109,18 +151,15 @@ export function MasterDrawer({
   }, [isFullScreen]);
 
   React.useEffect(() => {
-    // When switching to full screen mode, if we're on details tab, switch to first available tab
-    if (isFullScreen && activeTab === "details") {
-      const availableTabs = filteredTabs
-      if (availableTabs.length > 0) {
-        setActiveTab(availableTabs[0].id)
-      }
+    // When switching to full screen mode and should add activity tab, set it as default
+    if (isFullScreen && shouldAddActivityTab && activeTab === "details") {
+      setActiveTab("activity")
     }
-    // When switching back from full screen, if current tab doesn't exist in regular tabs, switch to details
-    if (!isFullScreen && !filteredTabs.find((tab) => tab.id === activeTab)) {
+    // When switching back from full screen, if on activity tab, switch to details
+    if (!isFullScreen && activeTab === "activity") {
       setActiveTab("details")
     }
-  }, [isFullScreen, activeTab, filteredTabs])
+  }, [isFullScreen, shouldAddActivityTab, activeTab])
 
   // Add this effect to update viewMode when isFullScreen changes
   React.useEffect(() => {
@@ -131,6 +170,21 @@ export function MasterDrawer({
   const renderTabContent = (activeTab: string, viewMode: "card" | "list" | "table", isCurrentFullScreen = false) => {
     if (activeTab === "details") {
       return detailsPanel(isCurrentFullScreen)
+    }
+
+    // Handle activity tab in full screen mode
+    if (activeTab === "activity" && isCurrentFullScreen && shouldAddActivityTab) {
+      // Use the activityContent prop if provided
+      if (activityContent) {
+        return (
+          <div className="-mx-6 -mt-6">
+            <div className="px-6 py-4 bg-background">
+              {activityContent}
+            </div>
+          </div>
+        )
+      }
+      return <div className="text-muted-foreground">No activity available</div>
     }
 
     // Handle subtask details view (highest priority)
@@ -349,7 +403,7 @@ export function MasterDrawer({
               <div className="border-b bg-background px-6">
                 <div className="flex relative">
                   <div className="flex flex-1 overflow-x-auto scrollbar-none">
-                    {filteredTabs.filter(tab => tab.id !== "details").map((tab, index) => (
+                    {fullScreenTabs.filter(tab => tab.id !== "details").map((tab, index) => (
                       <button
                         key={tab.id}
                         data-tab-button
@@ -378,7 +432,7 @@ export function MasterDrawer({
               <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">
-                    {filteredTabs.find((tab) => tab.id === activeTab)?.label}
+                    {fullScreenTabs.find((tab) => tab.id === activeTab)?.label}
                   </h3>
                   <div className="flex items-center gap-2">
                     {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
@@ -386,12 +440,6 @@ export function MasterDrawer({
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4" />
                         Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
-                      </Button>
-                    )}
-                    {activeTab === "activity" && (
-                      <Button variant="outline" size="sm">
-                        <PlusIcon className="h-4 w-4" />
-                        Add meeting
                       </Button>
                     )}
                   </div>
@@ -713,12 +761,6 @@ export function MasterDrawer({
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4" />
                         Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
-                      </Button>
-                    )}
-                    {activeTab === "activity" && (
-                      <Button variant="outline" size="sm">
-                        <PlusIcon className="h-4 w-4" />
-                        Add meeting
                       </Button>
                     )}
                   </div>

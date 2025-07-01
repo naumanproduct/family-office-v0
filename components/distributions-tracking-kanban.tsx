@@ -38,6 +38,7 @@ import { Label } from "@/components/ui/label"
 import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 
 interface Distribution {
   id: string
@@ -307,6 +308,7 @@ function DistributionCard({
       subtitle={`${distribution.distributionNumber} • ${distribution.distributionAmount}`}
       tabs={tabs}
       detailsPanel={detailsPanel}
+      activityContent={<UnifiedActivitySection activities={generateWorkflowActivities()} />}
     >
       {renderTabContent}
     </MasterDrawer>

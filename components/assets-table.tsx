@@ -47,6 +47,7 @@ import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
 import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
+import { generateInvestmentActivities } from "@/components/shared/activity-generators"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -172,7 +173,7 @@ const getGainColor = (percentage: number) => {
 }
 
 interface AssetsTableProps {
-  onAssetClick: (asset: Asset) => void
+  onAssetClick?: (asset: Asset) => void
 }
 
 function AssetNameCell({ asset }: { asset: Asset }) {
@@ -407,6 +408,7 @@ Recommendation: PROCEED with $15M investment at $450M pre-money valuation.` },
       recordType="Investment"
       subtitle={asset.type}
       tabs={tabs}
+      activityContent={<UnifiedActivitySection activities={generateInvestmentActivities()} />}
       detailsPanel={(isFullScreen) => <AssetDetailsPanel asset={asset} isFullScreen={isFullScreen} />}
     >
       {renderTabContent}

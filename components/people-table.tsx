@@ -624,6 +624,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
       detailsPanel={renderDetailsPanel}
       customActions={customActions}
       onComposeEmail={() => console.log("Compose email clicked")}
+      activityContent={<PersonActivityContent contact={contact} />}
     >
       {renderTabContent}
     </MasterDrawer>

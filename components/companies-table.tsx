@@ -70,7 +70,7 @@ import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
 import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateCompanyActivities } from "@/components/shared/activity-generators"
 
 export const companySchema = z.object({
@@ -592,6 +592,7 @@ function CompanyNameCell({ company }: { company: Company }) {
       tabs={tabs}
       detailsPanel={renderDetailsPanel}
       customActions={customActions}
+      activityContent={<UnifiedActivitySection activities={generateCompanyActivities()} />}
     >
       {renderTabContent}
     </MasterDrawer>

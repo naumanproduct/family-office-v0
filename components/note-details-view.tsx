@@ -23,6 +23,8 @@ import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { formatDate } from "@/lib/utils"
+import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
+import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
 
 interface NoteDetailsViewProps {
   note: any
@@ -292,104 +294,42 @@ This note will be updated following next month's investment committee meeting.`)
       {/* Tab Content */}
       {activeTab === "details" ? (
         <div className="flex flex-col flex-1">
-          {/* Scrollable content area */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="px-6 pt-2 pb-6">
-              <div className="space-y-5">
-                {/* Note Details Card */}
-                <div className="rounded-lg border border-muted overflow-hidden">
-                  {/* Note Details Section */}
-                  <div className="group">
-                    <button 
-                      onClick={() => toggleSection('details')}
-                      className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${openSections.details ? 'bg-muted/20' : ''}`}
-                    >
-                      <div className="flex items-center">
-                        {openSections.details ? (
-                          <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
-                        ) : (
-                          <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
-                        )}
-                        <div className="flex items-center gap-2">
-                          <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-sm">Note Details</span>
-                        </div>
-                      </div>
-                    </button>
-
-                    {/* Section Content */}
-                    {openSections.details && (
-                      <div className="px-3 pb-3 pt-2">
-                        <div className="space-y-3">
-                          <div className="flex items-center">
-                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Topic</Label>
-                            <p className="text-sm flex-1">{fieldValues.topic}</p>
-                          </div>
-                          <div className="flex items-center">
-                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Author</Label>
-                            <p className="text-sm flex-1">{fieldValues.author}</p>
-                          </div>
-                          <div className="flex items-center">
-                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Created</Label>
-                            <p className="text-sm flex-1">{formatDate(new Date(fieldValues.createdAt))}</p>
-                          </div>
-                          <div className="flex items-center">
-                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Updated</Label>
-                            <p className="text-sm flex-1">{formatDate(new Date(fieldValues.updatedAt))}</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Add Notes Card - Separate */}
-                {!hideAddNotes && (
-                  <div className="rounded-lg border border-muted overflow-hidden">
-                    <div className="group">
-                      <button 
-                        onClick={() => toggleSection('addNotes')}
-                        className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${openSections.addNotes ? 'bg-muted/20' : ''}`}
-                      >
-                        <div className="flex items-center">
-                          {openSections.addNotes ? (
-                            <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
-                          ) : (
-                            <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
-                          )}
-                          <div className="flex items-center gap-2">
-                            <EditIcon className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium text-sm">Notes</span>
-                          </div>
-                        </div>
-                      </button>
-
-                      {/* Section Content */}
-                      {openSections.addNotes && (
-                        <div className="px-5 pb-3 pt-2">
-                          <TypableArea 
-                            value={noteText} 
-                            onChange={setNoteText} 
-                            placeholder="Start typing to add your thoughts..." 
-                            showButtons={false} 
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Activity Section - Fixed at bottom */}
-          {!isFullScreen && (
-            <div className="border-t bg-background">
-              <div className="px-6 py-4">
-                <NoteActivityContent />
-              </div>
-            </div>
-          )}
+          {/* Use UnifiedDetailsPanel to show all related sections */}
+          <UnifiedDetailsPanel
+            sections={buildStandardDetailSections({
+              infoTitle: "Note Details",
+              infoIcon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
+              infoFields: [
+                { label: "Topic", value: fieldValues.topic },
+                { label: "Author", value: fieldValues.author },
+                { label: "Created", value: formatDate(new Date(fieldValues.createdAt)) },
+                { label: "Updated", value: formatDate(new Date(fieldValues.updatedAt)) }
+              ],
+              // Add mock data for related sections
+              companies: [
+                { id: 1, name: "TechFlow Inc", type: "Investment Target", date: "2 days ago" },
+                { id: 2, name: "Global Ventures", type: "Co-investor", date: "1 week ago" }
+              ],
+              people: [
+                { id: 1, name: "Sarah Johnson", role: "Investment Manager", date: "2 hours ago" },
+                { id: 2, name: "Michael Chen", role: "Analyst", date: "Yesterday" }
+              ],
+              entities: [
+                { id: 1, name: "Johnson Family Trust", type: "Trust", date: "3 days ago" },
+                { id: 2, name: "Tech Investment LLC", type: "LLC", date: "1 week ago" }
+              ],
+              investments: [
+                { id: 1, name: "Series B - TechFlow", amount: "$10M", date: "Pending" },
+                { id: 2, name: "Growth Fund III", amount: "$50M", date: "Active" }
+              ],
+              opportunities: [
+                { id: 1, name: "SaaS Platform Acquisition", status: "Due Diligence", date: "In Progress" },
+                { id: 2, name: "Healthcare Tech Investment", status: "Evaluating", date: "Q1 2024" }
+              ]
+            })}
+            activityContent={<NoteActivityContent />}
+            isFullScreen={isFullScreen}
+          />
         </div>
       ) : (
         <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>

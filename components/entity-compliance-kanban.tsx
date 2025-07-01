@@ -53,6 +53,10 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { MasterDrawer } from "./master-drawer"
+import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper"
+import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
+import { generateWorkflowActivities } from "@/components/shared/activity-generators"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 
 interface ComplianceItem {
   id: string
@@ -649,6 +653,7 @@ function ComplianceItemCard({ item }: { item: ComplianceItem }) {
       subtitle={`${item.entityName} • ${item.entityType || 'Entity'}`}
       tabs={tabs}
       detailsPanel={detailsPanel}
+      activityContent={<UnifiedActivitySection activities={generateWorkflowActivities()} />}
     >
       {renderTabContent}
     </MasterDrawer>

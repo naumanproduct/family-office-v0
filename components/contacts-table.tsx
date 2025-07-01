@@ -360,6 +360,7 @@ function ContactNameCell({ contact }: { contact: Contact }) {
       detailsPanel={renderDetailsPanel}
       customActions={customActions}
       onComposeEmail={() => console.log("Compose email to", contact.email)}
+      activityContent={<ContactActivityContent contact={contact} />}
     >
       {renderTabContent}
     </MasterDrawer>

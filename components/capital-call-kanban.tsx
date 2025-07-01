@@ -52,6 +52,7 @@ import { MasterDrawer } from "./master-drawer"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 
 interface CapitalCall {
   id: string
@@ -479,6 +480,7 @@ function CapitalCallCard({
       subtitle={`${capitalCall.callNumber} • ${capitalCall.callAmount}`}
       tabs={tabs}
       detailsPanel={detailsPanel}
+      activityContent={<UnifiedActivitySection activities={generateWorkflowActivities()} />}
     >
       {renderTabContent}
     </MasterDrawer>

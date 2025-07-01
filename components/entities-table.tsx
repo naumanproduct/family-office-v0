@@ -787,7 +787,7 @@ function EntityNameCell({ entity }: { entity: Entity }) {
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
     { id: "emails", label: "Emails", count: 3, icon: MailIcon },
     { id: "meetings", label: "Meetings", count: 1, icon: CalendarIcon },
-    { id: "team", label: "People", count: 1, icon: UsersIcon },
+    { id: "team", label: "Team", count: 1, icon: UsersIcon },
   ]
 
   const renderTabContent = (
@@ -823,6 +823,7 @@ function EntityNameCell({ entity }: { entity: Entity }) {
       recordType="Entity"
       subtitle={`${entity.entityType} • ${entity.jurisdiction}`}
       tabs={tabs}
+      activityContent={<EntityActivityContent />}
       detailsPanel={(isFullScreen) => <EntityDetailsPanel entity={entity} isFullScreen={isFullScreen} />}
     >
       {renderTabContent}

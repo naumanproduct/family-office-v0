@@ -1133,6 +1133,7 @@ function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
       subtitle={`${opportunity.company.name} • ${opportunity.stage}`}
       tabs={tabs}
       detailsPanel={renderDetailsPanel}
+      activityContent={<OpportunityActivityContent />}
       customActions={customActions}
     >
       {renderTabContent}
