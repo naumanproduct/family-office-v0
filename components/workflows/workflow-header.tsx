@@ -787,7 +787,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
               {activeTab === "activity" && (
                 <div className="p-6">
-                  <div className="mb-4">
+                  <div className="mb-6">
                     <h3 className="text-lg font-semibold">Workflow Activity</h3>
                     <p className="text-sm text-muted-foreground mt-1">Recent activity and changes to this workflow</p>
                   </div>
@@ -797,15 +797,15 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
               {activeTab === "attributes" && (
                 <div className="flex flex-col h-full">
-                  <div className="p-6 pb-3">
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between mb-1">
+                  <div className="p-6">
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between">
                         <h3 className="text-lg font-semibold">Card Fields</h3>
                         <Badge variant="secondary">
                           {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {config.attributes.length > 0
                           ? "Drag to reorder how they appear on cards"
                           : "Add fields to display on your cards"}
@@ -984,7 +984,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
               {activeTab === "stages" && (
                 <div className="p-6">
-                  <div className="mb-4">
+                  <div className="mb-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="text-lg font-semibold">Workflow Stages</h3>
@@ -1024,7 +1024,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
               {activeTab === "automations" && (
                 <div className="p-6">
                   <div>
-                    <div className="mb-4">
+                    <div className="mb-6">
                       <h3 className="text-lg font-semibold">Automations</h3>
                       <p className="text-sm text-muted-foreground mt-1">Configure automated actions for this workflow</p>
                     </div>
