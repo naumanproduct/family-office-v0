@@ -838,6 +838,7 @@ export function FileContent({
         isOpen={isDocumentViewerOpen} 
         onOpenChange={setIsDocumentViewerOpen} 
         file={selectedFile} 
+        startInFullScreen={true}
       />
     </div>
   )

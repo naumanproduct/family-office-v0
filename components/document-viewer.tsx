@@ -58,12 +58,20 @@ interface DocumentViewerProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   file: any // The file to display
+  startInFullScreen?: boolean // Add this prop to control initial state
 }
 
-export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerProps) {
-  const [isFullScreen, setIsFullScreen] = React.useState(false)
+export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen = false }: DocumentViewerProps) {
+  const [isFullScreen, setIsFullScreen] = React.useState(startInFullScreen)
   const [activeTab, setActiveTab] = React.useState("details")
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
+  
+  // Reset to startInFullScreen when opening
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsFullScreen(startInFullScreen)
+    }
+  }, [isOpen, startInFullScreen])
   
   // Define tabs for the document viewer - define outside of render cycle
   const tabs = React.useMemo(() => [
@@ -730,7 +738,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file }: DocumentViewerPro
         </SheetContent>
       </Sheet>
 
-      {isFullScreen && <FullScreenContent />}
+      {isOpen && isFullScreen && <FullScreenContent />}
     </>
   )
 }

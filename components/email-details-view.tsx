@@ -28,13 +28,15 @@ import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
+import { DocumentViewer } from "@/components/document-viewer"
 
 // Attachment component to reduce main component complexity
-function EmailAttachment({ attachment, index }: { attachment: any; index: number }) {
+function EmailAttachment({ attachment, index, onClick }: { attachment: any; index: number; onClick: () => void }) {
   return (
     <div
       key={index}
-      className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors"
+      className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors cursor-pointer"
+      onClick={onClick}
     >
       <div className="flex items-center gap-3">
         <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
@@ -48,7 +50,7 @@ function EmailAttachment({ attachment, index }: { attachment: any; index: number
         </div>
       </div>
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+        <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => e.stopPropagation()}>
           <DownloadIcon className="h-3 w-3" />
         </Button>
       </div>
@@ -57,7 +59,12 @@ function EmailAttachment({ attachment, index }: { attachment: any; index: number
 }
 
 // Email content component to reduce main component complexity
-function EmailContent({ emailItem, isExpanded, onToggle }: { emailItem: any; isExpanded: boolean; onToggle: () => void }) {
+function EmailContent({ emailItem, isExpanded, onToggle, onAttachmentClick }: { 
+  emailItem: any; 
+  isExpanded: boolean; 
+  onToggle: () => void;
+  onAttachmentClick?: (attachment: any) => void;
+}) {
   const isOriginal = emailItem.isOriginal
   
   // Format date as "Jun 28, 2025, 3:48 PM"
@@ -133,7 +140,8 @@ function EmailContent({ emailItem, isExpanded, onToggle }: { emailItem: any; isE
                 {emailItem.attachments.map((attachment: any, i: number) => (
                   <div
                     key={i}
-                    className="flex items-center gap-2 p-2 border rounded bg-background hover:bg-muted/50 transition-colors"
+                    className="flex items-center gap-2 p-2 border rounded bg-background hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => onAttachmentClick?.(attachment)}
                   >
                     <div className="flex h-6 w-6 items-center justify-center rounded bg-muted">
                       <FileTextIcon className="h-3 w-3 text-muted-foreground" />
@@ -142,9 +150,9 @@ function EmailContent({ emailItem, isExpanded, onToggle }: { emailItem: any; isE
                       <p className="text-xs font-medium truncate">{attachment.name || `Attachment ${i + 1}`}</p>
                       <p className="text-xs text-muted-foreground">{attachment.size || "Unknown size"}</p>
                     </div>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0">
-                      <DownloadIcon className="h-3 w-3" />
-                    </Button>
+                                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <DownloadIcon className="h-3 w-3" />
+                      </Button>
                   </div>
                 ))}
               </div>
@@ -167,6 +175,9 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState("details")
   const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
+  
+  // Add state for document viewer
+  const [documentViewerFile, setDocumentViewerFile] = React.useState<any>(null)
   
   // Define tabs - only Details tab for emails
   const tabs = [
@@ -479,7 +490,15 @@ Sarah`,
               <div className="px-4 pb-4 pt-1">
                 <div className="space-y-2">
                   {fieldValues.attachments.map((attachment: any, i: number) => (
-                    <EmailAttachment key={i} attachment={attachment} index={i} />
+                    <EmailAttachment 
+                      key={i}
+                      attachment={attachment}
+                      index={i}
+                      onClick={() => {
+                        // Implement the logic to open the document viewer
+                        setDocumentViewerFile(attachment)
+                      }}
+                    />
                   ))}
                 </div>
               </div>
@@ -527,6 +546,10 @@ Sarah`,
                             }
                             setExpandedEmails(newExpanded)
                           }}
+                          onAttachmentClick={(attachment) => {
+                            // Implement the logic to open the document viewer
+                            setDocumentViewerFile(attachment)
+                          }}
                         />
                         {index < reversedArray.length - 1 && <Separator className="my-4" />}
                       </div>
@@ -551,6 +574,20 @@ Sarah`,
           </div>
         </div>
       </div>
+      
+      {/* Document Viewer */}
+      {documentViewerFile && (
+        <DocumentViewer
+          isOpen={!!documentViewerFile}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDocumentViewerFile(null)
+            }
+          }}
+          file={documentViewerFile}
+          startInFullScreen={true}
+        />
+      )}
     </div>
   )
 }

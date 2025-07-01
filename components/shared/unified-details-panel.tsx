@@ -241,8 +241,8 @@ export function UnifiedDetailsPanel({
           </div>
         )}
 
-        {/* Activity Section - Only in Drawer View */}
-        {!isFullScreen && activityContent && (
+        {/* Activity Section */}
+        {activityContent && (
           <div className="mt-8 -mx-6 border-t bg-background">
             <div className="px-6 py-4">
               {activityContent}

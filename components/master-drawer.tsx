@@ -43,6 +43,9 @@ import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 import { TypableArea } from "@/components/typable-area"
+import { DocumentViewer } from "@/components/document-viewer"
+import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
+import { RecordFullscreenView } from "@/components/shared/record-fullscreen-view"
 
 interface Tab {
   id: string
@@ -83,21 +86,31 @@ export function MasterDrawer({
   customActions = [],
   activityContent,
 }: MasterDrawerProps) {
+  const [activeTab, setActiveTab] = React.useState(tabs[0].id)
+  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("list")
   const [isFullScreen, setIsFullScreen] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState("details")
-  const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">(isFullScreen ? "table" : "list")
   const [selectedTask, setSelectedTask] = React.useState<any>(null)
   const [selectedNote, setSelectedNote] = React.useState<any>(null)
   const [selectedMeeting, setSelectedMeeting] = React.useState<any>(null)
   const [selectedEmail, setSelectedEmail] = React.useState<any>(null)
+  const [localActiveTab, setLocalActiveTab] = React.useState("activity")
+  const [tasksViewMode, setTasksViewMode] = React.useState<"card" | "list" | "table">("table")
+  const [filesViewMode, setFilesViewMode] = React.useState<"card" | "list" | "table">("table")
+  const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
+  const [isReplying, setIsReplying] = React.useState(false)
+  const [replyText, setReplyText] = React.useState("")
   const [selectedSubtask, setSelectedSubtask] = React.useState<any>(null)
   const [parentTaskForSubtask, setParentTaskForSubtask] = React.useState<any>(null)
   
-  // States for individual record full screen views
-  const [taskFullScreen, setTaskFullScreen] = React.useState(false)
-  const [noteFullScreen, setNoteFullScreen] = React.useState(false)
-  const [meetingFullScreen, setMeetingFullScreen] = React.useState(false)
-  const [emailFullScreen, setEmailFullScreen] = React.useState(false)
+  // Add state for document viewer
+  const [documentViewerFile, setDocumentViewerFile] = React.useState<any>(null)
+  
+  // State for individual record fullscreen
+  const [recordFullscreen, setRecordFullscreen] = React.useState<{
+    type: 'Task' | 'Note' | 'Meeting' | 'Email' | null
+    record: any
+    parentContext: 'drawer' | 'entity-fullscreen'
+  }>({ type: null, record: null, parentContext: 'drawer' })
 
   // Check if we should add Activity tab for specific record types in full screen
   const shouldAddActivityTab = React.useMemo(() => {
@@ -370,825 +383,16 @@ export function MasterDrawer({
     }
   }
 
-  // Individual Record Full Screen Component - matches page view full screen UX
-  const RecordFullScreenContent = ({ recordType, record, onClose, activityContent }: { recordType: string; record: any; onClose: () => void; activityContent?: React.ReactNode }) => {
-    // Local state for tabs in the full screen view
-    const [localActiveTab, setLocalActiveTab] = React.useState("activity") // Default to activity like page views
-    const [localViewMode, setLocalViewMode] = React.useState<"card" | "list" | "table">("table")
-    const [tasksViewMode, setTasksViewMode] = React.useState<"card" | "list" | "table">("table")
-    const [filesViewMode, setFilesViewMode] = React.useState<"card" | "list" | "table">("table")
-    const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
-      notes: true,
-    })
-    
-    // Email thread states - must be declared at top level to avoid hooks order issues
-    const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
-    const [isReplying, setIsReplying] = React.useState(false)
-    const [replyText, setReplyText] = React.useState("")
-    
-    // Get appropriate icon for record type
-    const getRecordIcon = () => {
-      switch(recordType) {
-        case "Task": return CheckCircleIcon
-        case "Note": return FileTextIcon
-        case "Meeting": return CalendarIcon
-        case "Email": return MailIcon
-        default: return FileTextIcon
-      }
-    }
-    
-    const RecordIcon = getRecordIcon()
-    
-    // Define tabs based on record type - matching page view structure
-    const recordTabs = React.useMemo(() => {
-      const baseTabs = []
-      
-      // Activity tab for all record types (first)
-      baseTabs.push({ id: "activity", label: "Activity", icon: ActivityIcon })
-      
-      // Additional tabs based on record type
-      if (recordType === "Task") {
-        baseTabs.push({ id: "tasks", label: "Subtasks", icon: CheckCircleIcon, count: null }) // Moved to 2nd position after Activity
-        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
-        baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
-      } else if (recordType === "Note") {
-        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null }) // For editing the note
-        baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
-        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
-      } else if (recordType === "Meeting") {
-        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
-        baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
-        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
-      } else if (recordType === "Email") {
-        baseTabs.push({ id: "threads", label: "Email Threads", icon: MessageSquareIcon, count: null }) // Email threads moved to tab
-        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
-        baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
-        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
-      }
-      
-      return baseTabs
-    }, [recordType])
-    
-    // Mock data for demonstration - same as page views
-    const mockTasks = [
-      {
-        id: 1,
-        title: `Review ${recordType.toLowerCase()} content for accuracy`,
-        status: "In Progress",
-        priority: "High",
-        assignee: "John Smith",
-        dueDate: "2023-06-15",
-        description: `Verify all information in the ${recordType.toLowerCase()} is accurate and up-to-date.`
-      },
-      {
-        id: 2,
-        title: `Follow up on action items from ${recordType.toLowerCase()}`,
-        status: "To Do",
-        priority: "Medium",
-        assignee: "Sarah Johnson",
-        dueDate: "2023-06-20",
-        description: `Address all action items mentioned in the ${recordType.toLowerCase()}.`
-      },
-    ]
-    
-    const mockFiles = [
-      {
-        id: 1,
-        name: "Related Document.pdf",
-        uploadedBy: "John Smith",
-        uploadedDate: "2024-01-20",
-        size: "2.3 MB"
-      },
-      {
-        id: 2,
-        name: "Supporting Materials.docx",
-        uploadedBy: "Sarah Johnson",
-        uploadedDate: "2024-01-19",
-        size: "1.5 MB"
-      },
-    ]
-    
-    // Mock notes data for Task full screen
-    const mockNotes = [
-      {
-        id: 1,
-        title: "Initial task assessment",
-        content: "Task requires careful review of all documentation...",
-        author: "John Smith",
-        createdAt: "2024-01-18",
-        tags: ["review", "priority"]
-      },
-      {
-        id: 2,
-        title: "Progress update",
-        content: "Completed initial review phase, moving to implementation...",
-        author: "Sarah Johnson",
-        createdAt: "2024-01-19",
-        tags: ["update", "progress"]
-      },
-    ]
-    
-    // Mock email threads for Email full screen - using actual email data
-    const mockEmailThreads = React.useMemo(() => {
-      // Helper function to safely parse date
-      const getValidDate = (dateValue: any): Date => {
-        if (!dateValue) return new Date()
-        const parsed = new Date(dateValue)
-        return isNaN(parsed.getTime()) ? new Date() : parsed
-      }
-      
-      // Get base date from the record
-      const baseDate = getValidDate(record.sentAt || record.date)
-      
-      // Create email thread based on the actual email record
-      const baseThread = [
-        {
-          id: record.id || "email-1",
-          from: record.from || "sarah.johnson@company.com",
-          to: record.to || ["john.doe@client.com"],
-          cc: record.cc || [],
-          subject: record.subject || "Project Proposal Discussion",
-          date: baseDate.toISOString(),
-          body: record.body || record.preview || `Hi John,
-
-I hope this email finds you well. I wanted to follow up on our conversation from last week regarding the new project proposal.
-
-I've attached the updated proposal document with the revisions we discussed. The key changes include:
-- Updated timeline reflecting the Q2 delivery date
-- Revised budget allocation for the development phase
-- Additional resources for the testing phase
-
-Please review the document and let me know if you have any questions or need further clarification on any of the points.
-
-Looking forward to your feedback.
-
-Best regards,
-Sarah`,
-          attachments: record.attachments || [
-            { name: "proposal-v2.pdf", size: "2.4 MB", type: "PDF" },
-            { name: "budget-breakdown.xlsx", size: "156 KB", type: "Excel" },
-          ],
-          isOriginal: true,
-        }
-      ]
-      
-      // Add reply emails if this is part of a thread
-      const isReplyEmail = record.subject && (record.subject.includes("Re:") || record.subject.includes("RE:"))
-      if (isReplyEmail) {
-        // This is already a reply, so add the original email before it
-        const originalSender = Array.isArray(record.to) ? record.to[0] : record.to
-        baseThread.unshift({
-          id: "email-0",
-          from: originalSender || "john.doe@client.com",
-          to: [record.from || "sarah.johnson@company.com"],
-          cc: [],
-          subject: record.subject?.replace(/^(Re:|RE:)\s*/g, '') || "Original Subject",
-          date: new Date(baseDate.getTime() - 172800000).toISOString(),
-          body: `Dear Sarah,
-
-I wanted to discuss the upcoming project proposal with you. Could you please prepare an updated version with the following considerations:
-
-1. Updated timeline to reflect Q2 delivery
-2. Budget breakdown for each phase
-3. Resource allocation details
-
-Let me know if you need any additional information from my end.
-
-Best regards,
-John`,
-          attachments: [],
-          isOriginal: false,
-        })
-      } else {
-        // This is an original email, add mock replies
-        baseThread.push({
-          id: "email-2",
-          from: Array.isArray(record.to) ? record.to[0] : record.to || "john.doe@client.com",
-          to: [record.from || "sarah.johnson@company.com"],
-          cc: [],
-          subject: `Re: ${record.subject || "Project Proposal Discussion"}`,
-          date: new Date(baseDate.getTime() - 86400000).toISOString(),
-          body: `Hi Sarah,
-
-Thank you for sending the updated proposal. I've had a chance to review it with my team.
-
-Overall, we're very pleased with the revisions. The timeline looks much more realistic, and the budget breakdown is exactly what we needed to see.
-
-I do have a couple of questions:
-1. Can we discuss the testing phase timeline in more detail?
-2. What's the process for change requests during development?
-
-Would you be available for a call this Thursday to discuss these points?
-
-Best,
-John`,
-          attachments: [],
-          isOriginal: false,
-        })
-        
-        // Add a second reply
-        baseThread.push({
-          id: "email-3",
-          from: record.from || "sarah.johnson@company.com",
-          to: Array.isArray(record.to) ? record.to : record.to ? [record.to] : ["john.doe@client.com"],
-          cc: ["mike.wilson@company.com"],
-          subject: `Re: ${record.subject || "Project Proposal Discussion"}`,
-          date: new Date(baseDate.getTime() - 43200000).toISOString(),
-          body: `Hi John,
-
-Great to hear that you're pleased with the revisions!
-
-To answer your questions:
-1. The testing phase is structured in three stages: unit testing (week 1), integration testing (week 2), and user acceptance testing (week 3). I'll send you a detailed testing plan separately.
-2. We have a formal change request process that includes impact assessment and approval workflow. Minor changes can usually be accommodated within the existing timeline.
-
-Thursday works perfectly for me. How about 2 PM EST? I'll send a calendar invite.
-
-I'm also CC'ing Mike Wilson, our project manager, who will be your main point of contact during the development phase.
-
-Best regards,
-Sarah`,
-                      attachments: [{ name: "testing-plan.pdf", size: "890 KB", type: "PDF" }],
-            isOriginal: false,
-          })
-        }
-        
-        return baseThread
-      }, [record])
-    
-    const content = (
-      <>
-        {/* Semi-transparent overlay */}
-        <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm" onClick={onClose} />
-        
-        <div className="fixed inset-4 z-[9999] bg-background rounded-xl shadow-xl overflow-hidden">
-          {/* Full Screen Header */}
-          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <ChevronLeftIcon className="h-4 w-4" />
-              </Button>
-              <Badge variant="outline" className="bg-background">
-                {recordType}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={onClose}>
-                <XIcon className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Full Screen Content - Two Column Layout (matching page view) */}
-          <div className="flex h-[calc(100%-73px)]">
-            {/* Left Panel - Details (Persistent) */}
-            <div className="w-[672px] border-r bg-background overflow-y-auto">
-              {/* Record Header - no bottom border to align with tab line */}
-              <div className="bg-background px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                    {record.title?.charAt(0) || recordType.charAt(0)}
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold">
-                      {record.title || record.subject || record.name || "Untitled"}
-                    </h2>
-                    {/* No subtitle per page view design */}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Details Content */}
-              <div className="flex-1">
-                {recordType === "Task" && (
-                  <TaskDetailsView
-                    task={record}
-                    onBack={onClose}
-                    recordName={title}
-                    recordType={recordType}
-                    isFullScreen={true}
-                    hideSubtasks={true}
-                  />
-                )}
-                {recordType === "Note" && (
-                  <NoteDetailsView 
-                    note={record} 
-                    onBack={onClose}
-                    hideAddNotes={true}
-                    isFullScreen={true}
-                  />
-                )}
-                {recordType === "Meeting" && (
-                  <MeetingDetailsView 
-                    meeting={record} 
-                    onBack={onClose}
-                    isFullScreen={true}
-                  />
-                )}
-                {recordType === "Email" && (() => {
-                  // State for expandable sections
-                  const [emailOpenSections, setEmailOpenSections] = React.useState<Record<string, boolean>>({
-                    details: true,
-                    attachments: true,
-                  })
-                  
-                  const toggleEmailSection = (sectionId: string) => {
-                    setEmailOpenSections(prev => ({
-                      ...prev,
-                      [sectionId]: !prev[sectionId]
-                    }))
-                  }
-                  
-                  return (
-                    <div className="p-6 space-y-4">
-                      {/* Email Details Section - matching drawer styling */}
-                      <div className="rounded-lg border border-muted overflow-hidden">
-                        <button
-                          onClick={() => toggleEmailSection('details')}
-                          className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-                        >
-                          {emailOpenSections.details ? (
-                            <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
-                          )}
-                          <MailIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">Email Details</span>
-                        </button>
-                        
-                        {emailOpenSections.details && (
-                          <div className="px-4 pb-4 pt-1">
-                            <div className="space-y-3">
-                              {/* From field */}
-                              <div className="flex items-start gap-2">
-                                <div className="mt-1">
-                                  <SendIcon className="h-4 w-4 text-muted-foreground" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-start gap-4">
-                                    <Label className="text-xs text-muted-foreground mt-1 w-16">From</Label>
-                                    <div className="text-sm">{record.from || "sender@example.com"}</div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Subject field */}
-                              <div className="flex items-start gap-2">
-                                <div className="mt-1">
-                                  <MailIcon className="h-4 w-4 text-muted-foreground" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-start gap-4">
-                                    <Label className="text-xs text-muted-foreground mt-1 w-16">Subject</Label>
-                                    <div className="text-sm font-medium">{record.subject || "No subject"}</div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* To field */}
-                              <div className="flex items-start gap-2">
-                                <div className="mt-1">
-                                  <InboxIcon className="h-4 w-4 text-muted-foreground" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-start gap-4">
-                                    <Label className="text-xs text-muted-foreground mt-1 w-16">To</Label>
-                                    <div className="text-sm">
-                                      {Array.isArray(record.to) ? record.to.join(", ") : record.to || "recipient@example.com"}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* CC field if present */}
-                              {record.cc && record.cc.length > 0 && (
-                                <div className="flex items-start gap-2">
-                                  <div className="mt-1">
-                                    <UserIcon className="h-4 w-4 text-muted-foreground" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-start gap-4">
-                                      <Label className="text-xs text-muted-foreground mt-1 w-16">CC</Label>
-                                      <div className="text-sm">
-                                        {Array.isArray(record.cc) ? record.cc.join(", ") : record.cc}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Sent date */}
-                              <div className="flex items-start gap-2">
-                                <div className="mt-1">
-                                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-start gap-4">
-                                    <Label className="text-xs text-muted-foreground mt-1 w-16">Sent</Label>
-                                    <div className="text-sm">
-                                      {new Date(record.date || Date.now()).toLocaleDateString('en-US', { 
-                                        month: 'short', 
-                                        day: 'numeric', 
-                                        year: 'numeric' 
-                                      }) + ', ' + new Date(record.date || Date.now()).toLocaleTimeString('en-US', { 
-                                        hour: 'numeric', 
-                                        minute: '2-digit',
-                                        hour12: true 
-                                      })}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Attachments Section - aggregates all attachments from email thread */}
-                      {(() => {
-                        // Aggregate all attachments from the email thread
-                        const allAttachments: any[] = []
-                        mockEmailThreads.forEach((email) => {
-                          if (email.attachments && email.attachments.length > 0) {
-                            email.attachments.forEach((attachment: any) => {
-                              allAttachments.push({
-                                ...attachment,
-                                fromEmail: email.from,
-                                emailDate: email.date
-                              })
-                            })
-                          }
-                        })
-                        
-                        return (
-                          <div className="rounded-lg border border-muted overflow-hidden">
-                            <button
-                              onClick={() => toggleEmailSection('attachments')}
-                              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-                            >
-                              {emailOpenSections.attachments ? (
-                                <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
-                              )}
-                              <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm font-medium">Attachments ({allAttachments.length})</span>
-                            </button>
-                            
-                            {emailOpenSections.attachments && (
-                              <div className="px-4 pb-4 pt-1">
-                                <div className="space-y-2">
-                                  {allAttachments.map((attachment: any, i: number) => (
-                                    <div
-                                      key={i}
-                                      className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted/50 transition-colors"
-                                    >
-                                      <div className="flex items-center gap-3">
-                                        <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
-                                          <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                                        </div>
-                                        <div>
-                                          <p className="text-sm font-medium">{attachment.name || `Attachment ${i + 1}`}</p>
-                                          <p className="text-xs text-muted-foreground">
-                                            {attachment.size || "Unknown size"} • {attachment.type || "Unknown type"}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center gap-1">
-                                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                                          <DownloadIcon className="h-3 w-3" />
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )})()}
-                      </div>
-                  )
-                })()}
-              </div>
-            </div>
-
-            {/* Right Panel - Main Content */}
-            <div className="flex-1 overflow-y-auto">
-              {/* Tabs */}
-              <div className="border-b bg-background px-6">
-                <div className="flex relative overflow-x-auto">
-                  {recordTabs.map((tab, index) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setLocalActiveTab(tab.id)}
-                      className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
-                        localActiveTab === tab.id
-                          ? "border-b-2 border-primary text-primary"
-                          : "text-muted-foreground hover:text-foreground"
-                      } ${index === 0 ? 'pl-0' : ''}`}
-                    >
-                      {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
-                      <span>{tab.label}</span>
-                      {localActiveTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tab Content */}
-              <div className="p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">
-                    {recordTabs.find((tab) => tab.id === localActiveTab)?.label}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    {localActiveTab === "activity" && (
-                      <Button variant="outline" size="sm">
-                        <PlusIcon className="h-4 w-4" />
-                        Add meeting
-                      </Button>
-                    )}
-                    {localActiveTab === "tasks" && (
-                      <>
-                        <ViewModeSelector viewMode={tasksViewMode} onViewModeChange={setTasksViewMode} />
-                        <Button variant="outline" size="sm">
-                          <PlusIcon className="h-4 w-4" />
-                          Add task
-                        </Button>
-                      </>
-                    )}
-                    {localActiveTab === "notes" && recordType !== "Note" && (
-                      <Button variant="outline" size="sm">
-                        <PlusIcon className="h-4 w-4" />
-                        Add note
-                      </Button>
-                    )}
-                    {localActiveTab === "files" && (
-                      <>
-                        <ViewModeSelector viewMode={filesViewMode} onViewModeChange={setFilesViewMode} />
-                        <Button variant="outline" size="sm">
-                          <PlusIcon className="h-4 w-4" />
-                          Add file
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Activity content */}
-                {localActiveTab === "activity" && (
-                  activityContent || <UnifiedActivitySection activities={generateWorkflowActivities()} />
-                )}
-                
-                {/* Tasks content */}
-                {localActiveTab === "tasks" && (
-                  <TabContentRenderer
-                    activeTab="tasks"
-                    viewMode={tasksViewMode}
-                    data={mockTasks}
-                  />
-                )}
-                
-                {/* Notes content - editable for Note type */}
-                {localActiveTab === "notes" && recordType === "Note" && (
-                  <div className="space-y-5">
-                    <TypableArea 
-                      value={record?.content || ''} 
-                      onChange={(value) => {
-                        // Update the note content
-                        if (record) {
-                          record.content = value;
-                        }
-                      }} 
-                      placeholder="Start typing to add your thoughts..." 
-                      showButtons={false}
-                    />
-                  </div>
-                )}
-                
-                {/* Notes content - list for other types */}
-                {localActiveTab === "notes" && recordType !== "Note" && (
-                  <TabContentRenderer
-                    activeTab="notes"
-                    viewMode={filesViewMode}
-                    data={mockNotes}
-                  />
-                )}
-                
-                {/* Files content */}
-                {localActiveTab === "files" && (
-                  <TabContentRenderer
-                    activeTab="files"
-                    viewMode={filesViewMode}
-                    data={mockFiles}
-                  />
-                )}
-                
-                {/* Email threads content - matching drawer view exactly */}
-                {localActiveTab === "threads" && recordType === "Email" && (() => {
-                  // Email content component - same as drawer
-                  const EmailThreadItem = ({ emailItem, isExpanded, onToggle }: { emailItem: any; isExpanded: boolean; onToggle: () => void }) => {
-                    const isOriginal = emailItem.isOriginal
-                    
-                    // Format date as "Jun 28, 2025, 3:48 PM"
-                    const formatEmailDate = (dateString: string) => {
-                      const date = new Date(dateString)
-                      // Check if date is valid
-                      if (isNaN(date.getTime())) {
-                        return "Date unavailable"
-                      }
-                      return date.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      }) + ', ' + date.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        hour12: true 
-                      })
-                    }
-                    
-                    const formattedDate = formatEmailDate(emailItem.date)
-                    
-                    // Get first line of email body for collapsed view
-                    const firstLine = emailItem.body.split('\n')[0]
-
-                    return (
-                      <div className={`${isOriginal ? "" : "opacity-80"}`}>
-                        <div 
-                          className="flex items-start gap-3 mb-3 cursor-pointer hover:bg-muted/30 rounded-lg p-2 -m-2 transition-colors"
-                          onClick={onToggle}
-                        >
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>{emailItem.from.charAt(0).toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <div className="flex justify-between">
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">{emailItem.from}</p>
-                                {isExpanded ? (
-                                  <p className="text-xs text-muted-foreground">
-                                    To: {Array.isArray(emailItem.to) ? emailItem.to.join(", ") : emailItem.to}
-                                    {emailItem.cc && emailItem.cc.length > 0 && ` • CC: ${emailItem.cc.join(", ")}`}
-                                  </p>
-                                ) : (
-                                  <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                                    {firstLine}
-                                  </p>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className="text-xs text-muted-foreground">{formattedDate}</div>
-                                <ChevronRightIcon className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Email body with proper formatting - only show when expanded */}
-                        {isExpanded && (
-                          <div className="pl-11">
-                            <div className="text-sm text-foreground">
-                              {emailItem.body.split("\n").map((paragraph: string, i: number) => (
-                                <p key={i} className="my-2">
-                                  {paragraph}
-                                </p>
-                              ))}
-                            </div>
-
-                            {/* Attachments if any */}
-                            {emailItem.attachments && emailItem.attachments.length > 0 && (
-                              <div className="mt-4 p-3 border rounded-lg bg-muted/20">
-                                <div className="flex items-center gap-2 mb-3">
-                                  <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-sm font-medium">Attachments ({emailItem.attachments.length})</span>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                  {emailItem.attachments.map((attachment: any, i: number) => (
-                                    <div
-                                      key={i}
-                                      className="flex items-center gap-2 p-2 border rounded bg-background hover:bg-muted/50 transition-colors"
-                                    >
-                                      <div className="flex h-6 w-6 items-center justify-center rounded bg-muted">
-                                        <FileTextIcon className="h-3 w-3 text-muted-foreground" />
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium truncate">{attachment.name || `Attachment ${i + 1}`}</p>
-                                        <p className="text-xs text-muted-foreground">{attachment.size || "Unknown size"}</p>
-                                      </div>
-                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0">
-                                        <DownloadIcon className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  }
-                  
-                  return (
-                    <div className="space-y-4">
-                      {mockEmailThreads
-                        .slice()
-                        .reverse()
-                        .map((emailItem, index, reversedArray) => {
-                          // The most recent email is the last one in reversed array (originally first)
-                          const isLatest = index === reversedArray.length - 1
-                          const isExpanded = isLatest || expandedEmails.has(emailItem.id)
-                          
-                          return (
-                            <div key={emailItem.id}>
-                              <EmailThreadItem 
-                                emailItem={emailItem}
-                                isExpanded={isExpanded}
-                                onToggle={() => {
-                                  const newExpanded = new Set(expandedEmails)
-                                  if (isExpanded && !isLatest) {
-                                    newExpanded.delete(emailItem.id)
-                                  } else {
-                                    newExpanded.add(emailItem.id)
-                                  }
-                                  setExpandedEmails(newExpanded)
-                                }}
-                              />
-                              {index < reversedArray.length - 1 && <Separator className="my-4" />}
-                            </div>
-                          )
-                        })}
-
-                      {/* Reply section */}
-                      <div className="mt-6 space-y-4">
-                        <div className="flex items-center gap-2">
-                          {!isReplying ? (
-                            <>
-                              <Button variant="outline" size="sm" className="h-8" onClick={() => setIsReplying(true)}>
-                                <ReplyIcon className="h-3 w-3 mr-2" />
-                                Reply
-                              </Button>
-                              <Button variant="outline" size="sm" className="h-8">
-                                <ForwardIcon className="h-3 w-3 mr-2" />
-                                Forward
-                              </Button>
-                            </>
-                          ) : (
-                            <h4 className="text-sm font-medium">Reply</h4>
-                          )}
-                        </div>
-
-                        {isReplying && (
-                          <div className="rounded-lg border border-muted p-4 bg-background">
-                            <div className="mb-2 flex justify-between">
-                              <div>
-                                <p className="text-sm">
-                                  <span className="text-muted-foreground">To:</span> {mockEmailThreads[0].from}
-                                </p>
-                              </div>
-                              <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setIsReplying(false)}>
-                                Cancel
-                              </Button>
-                            </div>
-
-                            <Textarea
-                              value={replyText}
-                              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setReplyText(e.target.value)}
-                              placeholder="Type your reply here..."
-                              className="min-h-[120px] text-sm"
-                            />
-
-                            <div className="mt-3 flex justify-between">
-                              <div className="flex gap-2">
-                                <Button size="sm">
-                                  <SendIcon className="h-3 w-3 mr-2" />
-                                  Send
-                                </Button>
-                                <Button variant="outline" size="sm">
-                                  <PaperclipIcon className="h-3 w-3 mr-2" />
-                                  Attach
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })()}
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    )
-
-    return typeof document !== "undefined" ? createPortal(content, document.body) : null
-  }
-
   const FullScreenContent = () => {
     const headerInfo = getHeaderInfo()
+    
+    // Local state for selected items in fullscreen mode
+    const [fullscreenSelectedTask, setFullscreenSelectedTask] = React.useState<any>(null)
+    const [fullscreenSelectedNote, setFullscreenSelectedNote] = React.useState<any>(null)
+    const [fullscreenSelectedMeeting, setFullscreenSelectedMeeting] = React.useState<any>(null)
+    const [fullscreenSelectedEmail, setFullscreenSelectedEmail] = React.useState<any>(null)
+    const [fullscreenSelectedSubtask, setFullscreenSelectedSubtask] = React.useState<any>(null)
+    const [fullscreenParentTaskForSubtask, setFullscreenParentTaskForSubtask] = React.useState<any>(null)
 
     const content = (
       <>
@@ -1317,15 +521,37 @@ Sarah`,
                     )}
                   </div>
                 </div>
-                {renderTabContent(activeTab, viewMode, true)}
+                {(() => {
+                  // Special handling for fullscreen mode - pass fullscreen-specific setters
+                  if (activeTab === "details") {
+                    return detailsPanel(true)
+                  }
+
+                  // Handle activity tab in full screen mode
+                  if (activeTab === "activity" && shouldAddActivityTab) {
+                    if (activityContent) {
+                      return (
+                        <div className="-mx-6 -mt-6">
+                          <div className="px-6 py-4 bg-background">
+                            {activityContent}
+                          </div>
+                        </div>
+                      )
+                    }
+                    return <div className="text-muted-foreground">No activity available</div>
+                  }
+
+                  // For other tabs, pass fullscreen-specific setters
+                  return children(activeTab, viewMode, setFullscreenSelectedTask, setFullscreenSelectedNote, setFullscreenSelectedMeeting, setFullscreenSelectedEmail)
+                })()}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Task Details Sheet/Drawer in Full Screen Mode - Only show if not in individual record full screen */}
-        {selectedTask && !taskFullScreen && !noteFullScreen && !meetingFullScreen && !emailFullScreen && (
-          <Sheet open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+        {/* Task Details Sheet in Full Screen Mode */}
+        {fullscreenSelectedTask && (
+          <Sheet open={!!fullscreenSelectedTask} onOpenChange={(open) => !open && setFullscreenSelectedTask(null)}>
             <SheetContent
               side="right"
               className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10000] overflow-hidden"
@@ -1334,23 +560,33 @@ Sarah`,
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                  <Button variant="ghost" size="icon" onClick={() => {
+                    if (fullscreenSelectedSubtask) {
+                      setFullscreenSelectedSubtask(null)
+                      setFullscreenSelectedTask(fullscreenParentTaskForSubtask)
+                      setFullscreenParentTaskForSubtask(null)
+                    } else {
+                      setFullscreenSelectedTask(null)
+                    }
+                  }}>
                     <ChevronLeftIcon className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="bg-background">
-                    {selectedTask
-                      ? selectedTask.parentTask ? "Subtask" : "Task"
-                      : selectedNote
-                        ? "Note"
-                        : selectedMeeting
-                          ? "Meeting"
-                          : selectedEmail
-                            ? "Email"
-                            : recordType}
+                    {fullscreenSelectedSubtask ? "Subtask" : "Task"}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => setTaskFullScreen(true)}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      setRecordFullscreen({
+                        type: 'Task',
+                        record: fullscreenSelectedTask,
+                        parentContext: 'entity-fullscreen'
+                      })
+                    }}
+                  >
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1358,20 +594,24 @@ Sarah`,
               {/* Task Details Content */}
               <div className="flex-1 overflow-auto">
                 <TaskDetailsView
-                  task={selectedTask}
-                  onBack={handleDrawerBackClick}
+                  task={fullscreenSelectedTask}
+                  onBack={() => setFullscreenSelectedTask(null)}
                   recordName={title}
                   recordType={recordType}
                   isInDrawer={true}
+                  onSubtaskClick={(subtask) => {
+                    setFullscreenSelectedSubtask(subtask)
+                    setFullscreenParentTaskForSubtask(fullscreenSelectedTask)
+                  }}
                 />
               </div>
             </SheetContent>
           </Sheet>
         )}
 
-        {/* Note Details Sheet/Drawer in Full Screen Mode - Only show if not in individual record full screen */}
-        {selectedNote && !taskFullScreen && !noteFullScreen && !meetingFullScreen && !emailFullScreen && (
-          <Sheet open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
+        {/* Note Details Sheet in Full Screen Mode */}
+        {fullscreenSelectedNote && (
+          <Sheet open={!!fullscreenSelectedNote} onOpenChange={(open) => !open && setFullscreenSelectedNote(null)}>
             <SheetContent
               side="right"
               className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10000] overflow-hidden"
@@ -1380,38 +620,40 @@ Sarah`,
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                  <Button variant="ghost" size="icon" onClick={() => setFullscreenSelectedNote(null)}>
                     <ChevronLeftIcon className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="bg-background">
-                    {selectedTask
-                      ? selectedTask.parentTask ? "Subtask" : "Task"
-                      : selectedNote
-                        ? "Note"
-                        : selectedMeeting
-                          ? "Meeting"
-                          : selectedEmail
-                            ? "Email"
-                            : recordType}
+                    Note
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => setNoteFullScreen(true)}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      setRecordFullscreen({
+                        type: 'Note',
+                        record: fullscreenSelectedNote,
+                        parentContext: 'entity-fullscreen'
+                      })
+                    }}
+                  >
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               {/* Note Details Content */}
               <div className="flex-1 overflow-auto">
-                <NoteDetailsView note={selectedNote} onBack={handleDrawerBackClick} />
+                <NoteDetailsView note={fullscreenSelectedNote} onBack={() => setFullscreenSelectedNote(null)} />
               </div>
             </SheetContent>
           </Sheet>
         )}
 
-        {/* Meeting Details Sheet/Drawer in Full Screen Mode - Only show if not in individual record full screen */}
-        {selectedMeeting && !taskFullScreen && !noteFullScreen && !meetingFullScreen && !emailFullScreen && (
-          <Sheet open={!!selectedMeeting} onOpenChange={(open) => !open && setSelectedMeeting(null)}>
+        {/* Meeting Details Sheet in Full Screen Mode */}
+        {fullscreenSelectedMeeting && (
+          <Sheet open={!!fullscreenSelectedMeeting} onOpenChange={(open) => !open && setFullscreenSelectedMeeting(null)}>
             <SheetContent
               side="right"
               className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10000] overflow-hidden"
@@ -1420,38 +662,40 @@ Sarah`,
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                  <Button variant="ghost" size="icon" onClick={() => setFullscreenSelectedMeeting(null)}>
                     <ChevronLeftIcon className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="bg-background">
-                    {selectedTask
-                      ? selectedTask.parentTask ? "Subtask" : "Task"
-                      : selectedNote
-                        ? "Note"
-                        : selectedMeeting
-                          ? "Meeting"
-                          : selectedEmail
-                            ? "Email"
-                            : recordType}
+                    Meeting
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => setMeetingFullScreen(true)}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      setRecordFullscreen({
+                        type: 'Meeting',
+                        record: fullscreenSelectedMeeting,
+                        parentContext: 'entity-fullscreen'
+                      })
+                    }}
+                  >
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               {/* Meeting Details Content */}
               <div className="flex-1 overflow-auto">
-                <MeetingDetailsView meeting={selectedMeeting} onBack={handleDrawerBackClick} />
+                <MeetingDetailsView meeting={fullscreenSelectedMeeting} onBack={() => setFullscreenSelectedMeeting(null)} />
               </div>
             </SheetContent>
           </Sheet>
         )}
 
-        {/* Email Details Sheet/Drawer in Full Screen Mode - Only show if not in individual record full screen */}
-        {selectedEmail && !taskFullScreen && !noteFullScreen && !meetingFullScreen && !emailFullScreen && (
-          <Sheet open={!!selectedEmail} onOpenChange={(open) => !open && setSelectedEmail(null)}>
+        {/* Email Details Sheet in Full Screen Mode */}
+        {fullscreenSelectedEmail && (
+          <Sheet open={!!fullscreenSelectedEmail} onOpenChange={(open) => !open && setFullscreenSelectedEmail(null)}>
             <SheetContent
               side="right"
               className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10000] overflow-hidden"
@@ -1460,36 +704,110 @@ Sarah`,
               {/* Header */}
               <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="icon" onClick={handleDrawerBackClick}>
+                  <Button variant="ghost" size="icon" onClick={() => setFullscreenSelectedEmail(null)}>
                     <ChevronLeftIcon className="h-4 w-4" />
                   </Button>
                   <Badge variant="outline" className="bg-background">
-                    {selectedTask
-                      ? selectedTask.parentTask ? "Subtask" : "Task"
-                      : selectedNote
-                        ? "Note"
-                        : selectedMeeting
-                          ? "Meeting"
-                          : selectedEmail
-                            ? "Email"
-                            : recordType}
+                    Email
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={() => setEmailFullScreen(true)}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      setRecordFullscreen({
+                        type: 'Email',
+                        record: fullscreenSelectedEmail,
+                        parentContext: 'entity-fullscreen'
+                      })
+                    }}
+                  >
                     <ExpandIcon className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               {/* Email Details Content */}
               <div className="flex-1 overflow-auto">
-                <EmailDetailsView email={selectedEmail} onBack={handleDrawerBackClick} />
+                <EmailDetailsView email={fullscreenSelectedEmail} onBack={() => setFullscreenSelectedEmail(null)} />
               </div>
             </SheetContent>
           </Sheet>
         )}
+
+        {/* Subtask Details Sheet in Full Screen Mode */}
+        {fullscreenSelectedSubtask && (
+          <Sheet open={!!fullscreenSelectedSubtask} onOpenChange={(open) => !open && setFullscreenSelectedSubtask(null)}>
+            <SheetContent
+              side="right"
+              className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden z-[10001] overflow-hidden"
+            >
+              <SheetTitle className="sr-only">Subtask Details</SheetTitle>
+              {/* Header */}
+              <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <Button variant="ghost" size="icon" onClick={() => {
+                    setFullscreenSelectedSubtask(null)
+                    // Don't clear parent task - let user return to it
+                  }}>
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  </Button>
+                  <Badge variant="outline" className="bg-background">
+                    Subtask
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Subtasks don't need individual fullscreen */}
+                </div>
+              </div>
+              {/* Subtask Details Content */}
+              <div className="flex-1 overflow-auto">
+                <TaskDetailsView 
+                  task={fullscreenSelectedSubtask} 
+                  onBack={() => {
+                    setFullscreenSelectedSubtask(null)
+                  }}
+                  recordName={title} 
+                  recordType={recordType}
+                  parentTask={fullscreenParentTaskForSubtask}
+                  onBackToParent={() => {
+                    setFullscreenSelectedSubtask(null)
+                    setFullscreenSelectedTask(fullscreenParentTaskForSubtask)
+                    setFullscreenParentTaskForSubtask(null)
+                  }}
+                  isInDrawer={true}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
+
       </>
     )
+
+    // Handle record fullscreen from entity fullscreen
+    if (recordFullscreen.type && recordFullscreen.record && recordFullscreen.parentContext === 'entity-fullscreen') {
+      return (
+        <RecordFullscreenView
+          recordType={recordFullscreen.type}
+          record={recordFullscreen.record}
+          parentContext={recordFullscreen.parentContext}
+          parentTitle={title}
+          parentRecordType={recordType}
+          onClose={() => {
+            setRecordFullscreen({ type: null, record: null, parentContext: 'drawer' })
+            // Clear fullscreen states
+            setFullscreenSelectedTask(null)
+            setFullscreenSelectedNote(null)
+            setFullscreenSelectedMeeting(null)
+            setFullscreenSelectedEmail(null)
+            setFullscreenSelectedSubtask(null)
+            setFullscreenParentTaskForSubtask(null)
+          }}
+          activityContent={activityContent}
+        />
+      )
+    }
 
     return typeof document !== "undefined" ? createPortal(content, document.body) : null
   }
@@ -1497,56 +815,34 @@ Sarah`,
   // We will use this conditional check for both instances of ViewModeSelector
   const shouldShowViewSelector = !(activeTab === "activity" || activeTab === "details")
 
-  // Render individual record full screens
-  if (taskFullScreen && selectedTask) {
-    return <RecordFullScreenContent 
-      recordType="Task" 
-      record={selectedTask} 
-      activityContent={activityContent}
-      onClose={() => {
-        setTaskFullScreen(false)
-        setSelectedTask(null) // Clear to close drawer when returning to entity full screen
-        setSelectedSubtask(null) // Clear subtask state as well
-        setParentTaskForSubtask(null)
-      }} 
-    />
-  }
-  if (noteFullScreen && selectedNote) {
-    return <RecordFullScreenContent 
-      recordType="Note" 
-      record={selectedNote} 
-      activityContent={activityContent}
-      onClose={() => {
-        setNoteFullScreen(false)
-        setSelectedNote(null) // Clear to close drawer when returning to entity full screen
-      }} 
-    />
-  }
-  if (meetingFullScreen && selectedMeeting) {
-    return <RecordFullScreenContent 
-      recordType="Meeting" 
-      record={selectedMeeting} 
-      activityContent={activityContent}
-      onClose={() => {
-        setMeetingFullScreen(false)
-        setSelectedMeeting(null) // Clear to close drawer when returning to entity full screen
-      }} 
-    />
-  }
-  if (emailFullScreen && selectedEmail) {
-    return <RecordFullScreenContent 
-      recordType="Email" 
-      record={selectedEmail} 
-      activityContent={activityContent}
-      onClose={() => {
-        setEmailFullScreen(false)
-        setSelectedEmail(null) // Clear to close drawer when returning to entity full screen
-      }} 
-    />
+  // Show record fullscreen if requested
+  if (recordFullscreen.type && recordFullscreen.record) {
+    return (
+      <RecordFullscreenView
+        recordType={recordFullscreen.type}
+        record={recordFullscreen.record}
+        parentContext={recordFullscreen.parentContext}
+        parentTitle={title}
+        parentRecordType={recordType}
+        onClose={() => {
+          setRecordFullscreen({ type: null, record: null, parentContext: 'drawer' })
+          // Clear drawer states when closing record fullscreen
+          if (recordFullscreen.parentContext === 'drawer') {
+            setSelectedTask(null)
+            setSelectedNote(null)
+            setSelectedMeeting(null)
+            setSelectedEmail(null)
+            setSelectedSubtask(null)
+            setParentTaskForSubtask(null)
+          }
+        }}
+        activityContent={activityContent}
+      />
+    )
   }
 
-  // Only show entity full screen if no individual records are in full screen
-  if (isFullScreen && !taskFullScreen && !noteFullScreen && !meetingFullScreen && !emailFullScreen) {
+  // Only show entity full screen
+  if (isFullScreen) {
     return <FullScreenContent />
   }
 
@@ -1612,7 +908,41 @@ Sarah`,
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
+            {/* Fullscreen button for all records */}
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => {
+                if (selectedTask) {
+                  setRecordFullscreen({
+                    type: 'Task',
+                    record: selectedTask,
+                    parentContext: 'drawer'
+                  })
+                } else if (selectedNote) {
+                  setRecordFullscreen({
+                    type: 'Note',
+                    record: selectedNote,
+                    parentContext: 'drawer'
+                  })
+                } else if (selectedMeeting) {
+                  setRecordFullscreen({
+                    type: 'Meeting',
+                    record: selectedMeeting,
+                    parentContext: 'drawer'
+                  })
+                } else if (selectedEmail) {
+                  setRecordFullscreen({
+                    type: 'Email',
+                    record: selectedEmail,
+                    parentContext: 'drawer'
+                  })
+                } else {
+                  // Main record fullscreen
+                  setIsFullScreen(true)
+                }
+              }}
+            >
               <ExpandIcon className="h-4 w-4" />
             </Button>
             {customActions.map((action, index) => (
@@ -1707,6 +1037,22 @@ Sarah`,
           </div>
         </div>
       </SheetContent>
+      
+      {/* Document Viewer - Always rendered, visibility controlled by the file state */}
+      {documentViewerFile && (
+        <DocumentViewer
+          isOpen={!!documentViewerFile}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDocumentViewerFile(null)
+            }
+          }}
+          file={documentViewerFile}
+          startInFullScreen={true}
+        />
+      )}
+      
+
     </Sheet>
   )
 }
