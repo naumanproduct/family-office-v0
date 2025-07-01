@@ -420,15 +420,17 @@ Next meeting scheduled for January 15, 2024.`)
         </div>
 
         {/* Activity Section */}
-        <div className="mt-4">
-          <UnifiedActivitySection 
-            activities={generateWorkflowActivities()} 
-            showHeader={true}
-            onCommentSubmit={(comment) => {
-              console.log("Adding comment:", comment)
-              // Handle comment submission
-            }}
-          />
+        <div className="mt-8 -mx-6 border-t bg-background">
+          <div className="px-6 py-4">
+            <UnifiedActivitySection 
+              activities={generateWorkflowActivities()} 
+              showHeader={true}
+              onCommentSubmit={(comment) => {
+                console.log("Adding comment:", comment)
+                // Handle comment submission
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
