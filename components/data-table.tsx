@@ -563,7 +563,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                       {tab.icon && <tab.icon className="h-4 w-4" />}
                       {tab.label}
                       {tab.count !== null && (
-                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
                           {tab.count}
                         </Badge>
                       )}
@@ -674,7 +674,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   {tab.icon && <tab.icon className="h-4 w-4" />}
                   {tab.label}
                   {tab.count !== null && (
-                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
                       {tab.count}
                     </Badge>
                   )}
@@ -1265,18 +1265,172 @@ function getTabData(activeTab: string, item: z.infer<typeof schema>) {
       return [
         {
           id: 1,
-          title: "Initial client meeting notes",
+          title: "Strategic Review Meeting",
           date: "3 days ago",
-          content: `Great first meeting with ${item.header}. They're looking for a comprehensive solution that can scale with their growing team. Key requirements include: Integration with existing tools, Mobile accessibility, Advanced reporting features, 24/7 support`,
-          tags: ["Client Meeting", "Requirements"],
+          content: `Family Office Strategic Review - ${item.header}
+
+Meeting Date: January 27, 2025
+Participants: Investment Committee, Family Members, Advisory Board
+
+Executive Summary:
+Conducted comprehensive strategic review for ${item.header} within the family office portfolio. The assessment covered investment performance, strategic alignment, and future opportunities.
+
+Key Discussion Points:
+
+1. Portfolio Position Analysis:
+   • Current Allocation: 8.5% of total portfolio
+   • Performance YTD: +15.7% (outperforming benchmark by 320bps)
+   • Risk-Adjusted Returns: Sharpe ratio of 1.8
+   • Correlation with Other Holdings: Low (0.35)
+
+2. Strategic Alignment:
+   • Fits within technology sector allocation (target: 30-35%)
+   • Aligns with ESG investment criteria
+   • Supports multi-generational wealth preservation goals
+   • Provides diversification benefits
+
+3. Investment Thesis Validation:
+   ✓ Market leadership position maintained
+   ✓ Revenue growth exceeding projections (45% YoY)
+   ✓ Management team executing on strategic plan
+   ✓ Competitive moat strengthening
+
+4. Risk Assessment Update:
+   • Market Risk: MODERATE - Sector volatility expected
+   • Operational Risk: LOW - Strong management team
+   • Regulatory Risk: LOW - No significant concerns
+   • Concentration Risk: MODERATE - Consider partial profit-taking
+
+5. Opportunities Identified:
+   a) Follow-on Investment:
+      - Company raising Series D in Q2 2025
+      - Pro-rata rights available ($3-5M)
+      - Valuation expected at 2x current mark
+
+   b) Strategic Initiatives:
+      - Board observer seat available
+      - Co-investment opportunities in acquisitions
+      - Access to management for other portfolio companies
+
+6. Family Member Perspectives:
+   • Next generation expressed interest in deeper involvement
+   • Alignment with family values (innovation, sustainability)
+   • Educational opportunity for younger members
+   • Potential for philanthropic partnership
+
+7. Tax Considerations:
+   • Current unrealized gain: $12.5M
+   • QSBS eligibility confirmed
+   • Opportunity zone investment potential
+   • Estate planning implications reviewed
+
+Recommendations:
+1. HOLD current position (no immediate action required)
+2. Prepare for Series D participation ($5M allocation)
+3. Arrange next-gen family member site visit
+4. Explore board observer opportunity
+5. Monitor for partial exit opportunity at 3x
+
+Action Items:
+• Schedule follow-up with company CEO (February)
+• Update investment memo for family records
+• Coordinate with tax advisor on QSBS planning
+• Plan educational session for next generation
+• Review allocation targets with Investment Committee
+
+Next Review: April 2025 (post Series D announcement)
+
+This investment continues to perform well and aligns with family office objectives. Strong recommendation to maintain position with potential for increase.`,
+          tags: ["Strategic Review", "Investment Committee", "Portfolio Analysis"],
         },
         {
           id: 2,
-          title: "Follow-up action items",
+          title: "Due Diligence Update",
           date: "1 day ago",
-          content:
-            "Action items from our last conversation: 1. Prepare detailed proposal with pricing 2. Schedule technical demo 3. Connect with their IT team 4. Provide case studies from similar clients",
-          tags: ["Action Items", "Follow-up"],
+          content: `Ongoing Due Diligence - ${item.header}
+
+Date: January 29, 2025
+Prepared by: Investment Team
+
+Purpose:
+Continuous monitoring and due diligence update for ${item.header} as part of active portfolio management.
+
+Recent Developments:
+
+1. Financial Performance:
+   • Q4 Revenue: $28.5M (108% of plan)
+   • Gross Margins: 74% (improving from 71%)
+   • Cash Position: $45M (24 months runway)
+   • ARR Growth: 85% year-over-year
+
+2. Operational Updates:
+   • Headcount: 187 (added 25 in Q4)
+   • New CTO hired from major tech company
+   • Opened European office (Amsterdam)
+   • Launched version 3.0 of core product
+
+3. Market Position:
+   • Maintained #2 market share position
+   • Won 3 enterprise logos from competitor
+   • NPS score improved to 67 (from 58)
+   • Industry analyst recognition received
+
+4. Customer Base Analysis:
+   • Total Customers: 450+
+   • Enterprise Clients: 85 (up from 62)
+   • Net Revenue Retention: 125%
+   • Churn Rate: 5% annually (improved)
+
+5. Competitive Landscape:
+   • Main competitor acquired for $1.2B
+   • New entrants focusing on SMB market
+   • Our portfolio company targeting enterprise
+   • Differentiation strategy working well
+
+6. Management Assessment:
+   • CEO performing exceptionally well
+   • Strong bench strength developed
+   • Culture scores high (eNPS: 45)
+   • Low executive turnover
+
+7. Financial Controls Review:
+   ✓ Monthly reporting package on time
+   ✓ Audit completed with no findings
+   ✓ Burn rate within projections
+   ✓ Unit economics improving
+
+8. Legal & Compliance:
+   • No outstanding litigation
+   • IP portfolio expanded (4 new patents)
+   • Data privacy compliance maintained
+   • All contracts reviewed and current
+
+9. Technology Infrastructure:
+   • Platform stability: 99.99% uptime
+   • Security audit passed
+   • Scalability tested to 10x current load
+   • AI/ML capabilities enhanced
+
+Red Flags: None identified
+
+Yellow Flags:
+• Customer concentration improving but still high
+• International expansion requires monitoring
+• Talent retention in competitive market
+
+Investment Recommendation: MAINTAIN POSITIVE OUTLOOK
+
+The company continues to execute well against plan. All key metrics trending positively. Management team aligned with investor interests. No immediate concerns requiring intervention.
+
+Follow-up Actions:
+1. Monthly check-in calls continuing
+2. Board observer attending all meetings
+3. Reviewing Series D terms when available
+4. Monitoring competitive dynamics
+5. Supporting executive recruiting efforts
+
+This investment remains one of the stronger performers in our portfolio with clear path to liquidity event within 3-5 years.`,
+          tags: ["Due Diligence", "Monitoring", "Performance Update"],
         },
       ]
     case "meetings":
@@ -1463,14 +1617,14 @@ function TableView({ data, activeTab }: { data: any[]; activeTab: string }) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className={`text-sm ${task.priority === "High" ? "text-red-600" : "text-yellow-600"}`}>
+                  <span className="text-sm capitalize">
                     {task.priority}
                   </span>
                 </TableCell>
                 <TableCell>{task.assignee}</TableCell>
                 <TableCell>{task.dueDate}</TableCell>
                 <TableCell>
-                  <span className={`text-sm ${task.status.toLowerCase() === "completed" ? "text-green-600" : "text-muted-foreground"}`}>
+                  <span className="text-sm capitalize">
                     {task.status.toLowerCase() === "completed" ? "Completed" : "Pending"}
                   </span>
                 </TableCell>
@@ -1672,7 +1826,7 @@ function CardView({ data, activeTab }: { data: any[]; activeTab: string }) {
                   <div className="mt-2">
                     <Badge
                       variant="outline"
-                      className={item.priority === "High" ? "text-orange-600" : item.status === "Unread" ? "" : ""}
+                      className="capitalize"
                     >
                       {item.status || item.priority}
                     </Badge>
@@ -1767,9 +1921,7 @@ function ListView({ data, activeTab }: { data: any[]; activeTab: string }) {
                   {item.priority && item.status !== "completed" && (
                     <>
                       <span className="text-xs text-muted-foreground mx-1">•</span>
-                      <span
-                        className={`text-xs ${item.priority === "High" ? "text-red-600" : "text-yellow-600"}`}
-                      >
+                      <span className="text-xs capitalize">
                         {item.priority}
                       </span>
                     </>

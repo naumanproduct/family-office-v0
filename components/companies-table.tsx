@@ -727,10 +727,239 @@ function getCompanyTabData(activeTab: string, company: Company) {
       return [
         {
           id: 1,
-          title: "Investment thesis review",
+          title: "Investment Thesis Update",
           date: "3 days ago",
           author: "Sarah Johnson",
-          topic: `Strong performance in ${company.industry} sector. Key growth drivers remain intact.`,
+          topic: `${company.name} investment thesis review and performance update`,
+          content: `Investment Review - ${company.name}
+
+Executive Summary:
+${company.name} continues to demonstrate strong fundamentals in the ${company.industry} sector. Our investment thesis remains intact with several key growth drivers supporting continued outperformance.
+
+Current Performance Metrics:
+• Revenue: ${company.revenue} (YoY growth: 45%)
+• Employee Count: ${company.employees} (up from 120 last year)
+• Market Position: Top 3 player in ${company.industry}
+• Customer Retention: 95% annual retention rate
+
+Investment Thesis Validation:
+1. Market Leadership: Company has expanded market share from 18% to 24% in the past 12 months through strategic acquisitions and organic growth.
+
+2. Technology Moat: Proprietary technology platform creates significant barriers to entry. Recent patent filings strengthen IP portfolio.
+
+3. Management Execution: Leadership team continues to exceed guidance. CEO's track record of successful exits adds credibility to long-term vision.
+
+4. Financial Performance: Path to profitability accelerated by 6 months. Gross margins expanding due to operational leverage.
+
+Risk Assessment Update:
+• Competitive Risk: MODERATE - New entrants from adjacent markets, but switching costs remain high
+• Regulatory Risk: LOW - No significant regulatory changes anticipated
+• Market Risk: MODERATE - Dependent on overall ${company.industry} sector growth
+• Execution Risk: LOW - Management team has consistently delivered on milestones
+
+Valuation Considerations:
+• Current valuation implies 6x forward revenue multiple
+• Comparable public companies trading at 8-10x
+• Recent secondary transactions at 7.5x revenue
+• Significant upside potential if growth trajectory continues
+
+Strategic Opportunities:
+1. International Expansion: Europe launch planned for Q2 2025
+2. Product Suite Extension: AI-powered features in development
+3. Strategic Partnerships: Discussions with 3 Fortune 500 companies
+4. M&A Pipeline: Evaluating 2 bolt-on acquisition targets
+
+Recommendation:
+HOLD current position with potential for follow-on investment in next round. The company's strong execution and market position justify maintaining our stake. Consider increasing allocation if valuation remains attractive in Series D.
+
+Next Review: April 2025 (Post Q1 earnings)`,
+        },
+        {
+          id: 2,
+          title: "Due Diligence Findings",
+          date: "2 weeks ago",
+          author: "Michael Chen",
+          topic: `Operational due diligence report for ${company.name}`,
+          content: `Operational Due Diligence Report - ${company.name}
+
+Date: January 2, 2025
+Prepared by: Operations Team
+
+Company Overview:
+${company.name} operates in the ${company.industry} sector with ${company.employees} employees across ${company.location} and 3 satellite offices. The company has demonstrated exceptional operational efficiency since our initial investment.
+
+Key Operational Metrics:
+• Revenue per Employee: $420K (industry avg: $280K)
+• Customer Acquisition Cost: $1,200 (payback: 8 months)
+• Monthly Burn Rate: $1.8M (24 months runway)
+• Gross Margin: 72% (improving from 65% last year)
+
+Technology Infrastructure:
+- Cloud-first architecture on AWS with 99.99% uptime
+- SOC 2 Type II certified
+- GDPR and CCPA compliant
+- Automated CI/CD pipeline with 2-hour deployment cycles
+- Technical debt ratio: 15% (industry standard: 25%)
+
+Team Assessment:
+Leadership Strength:
+• CEO: 15+ years industry experience, 2 successful exits
+• CTO: Ex-Google, holds 5 patents in core technology
+• CFO: Public company experience (ex-Salesforce)
+• VP Sales: Scaled revenue from $5M to $50M at previous company
+
+Organizational Health:
+• Employee NPS: 72 (excellent)
+• Annual turnover: 8% (industry avg: 22%)
+• Glassdoor rating: 4.6/5.0
+• Gender diversity: 42% female employees
+
+Customer Analysis:
+• Total Customers: 450+ enterprise accounts
+• Logo Retention: 95% annually
+• Net Revenue Retention: 118%
+• Average Contract Value: $85K
+• Customer Satisfaction (CSAT): 4.8/5.0
+
+Top 10 Customers (22% of revenue):
+1. Microsoft - $2.1M ARR
+2. Johnson & Johnson - $1.8M ARR
+3. Wells Fargo - $1.5M ARR
+4. Walmart - $1.2M ARR
+5. Disney - $1.0M ARR
+
+Financial Controls:
+✓ Monthly board reporting package
+✓ Audited financials (clean opinion)
+✓ Revenue recognition per ASC 606
+✓ Strong AR management (DSO: 45 days)
+✓ Conservative cash management
+
+Legal & Compliance:
+• All contracts reviewed by external counsel
+• IP assignment agreements in place
+• No pending litigation
+• Comprehensive D&O and E&O insurance
+• Data privacy policies updated quarterly
+
+Areas of Excellence:
+1. Product-market fit clearly established
+2. Scalable go-to-market engine
+3. Strong unit economics
+4. Culture of innovation and execution
+5. Robust financial planning and analysis
+
+Areas for Improvement:
+1. International expansion strategy needs refinement
+2. Middle management layer requires strengthening
+3. Board composition could add industry expertise
+4. Disaster recovery plan needs updating
+5. Succession planning for key executives
+
+Recommendations:
+1. Support international expansion with operational expertise
+2. Introduce company to our network for BD opportunities
+3. Assist in recruiting independent board members
+4. Share best practices from portfolio companies
+5. Connect with our CISO for security assessment
+
+Overall Assessment: STRONG
+The company demonstrates operational excellence across all key metrics. Management team is executing well against plan with clear vision for scale.`,
+        },
+        {
+          id: 3,
+          title: "Board Meeting Summary",
+          date: "1 month ago",
+          author: "David Williams",
+          topic: `December 2024 board meeting summary for ${company.name}`,
+          content: `${company.name} Board Meeting - December 2024
+
+Attendees:
+- Board Members: 5/5 present
+- Management Team: CEO, CFO, CTO, VP Sales
+- Observers: Family Office Representative
+
+Meeting Duration: 2.5 hours
+Location: Virtual (Zoom)
+
+AGENDA ITEMS COVERED:
+
+1. Q4 Performance Review:
+• Revenue: $18.5M (102% of plan)
+• New Bookings: $22M (115% of plan)
+• Cash Balance: $43M (24 months runway)
+• Headcount: ${company.employees} (+35 in Q4)
+
+Key Achievements:
+- Closed largest enterprise deal ($3.5M ACV)
+- Launched product version 3.0
+- Achieved SOC 2 Type II certification
+- Expanded to 2 new geographic markets
+
+2. 2025 Annual Plan Approval:
+• Revenue Target: $95M (80% growth)
+• Hiring Plan: 150 additional FTEs
+• R&D Investment: $15M (25% of revenue)
+• International Expansion: EU and APAC
+
+Board unanimously approved 2025 plan with emphasis on maintaining capital efficiency.
+
+3. Fundraising Discussion:
+Series D Planning:
+- Target Raise: $75-100M
+- Use of Funds: International expansion, product development, strategic M&A
+- Timeline: Initiate process Q2 2025
+- Target Valuation: $800M-1B
+- Lead Investor Candidates: Discussing with 3 tier-1 VCs
+
+Our Position:
+- Current Ownership: 12.5%
+- Pro-rata Allocation: $9-12M
+- Board recommendation: Maintain pro-rata
+
+4. Strategic Initiatives:
+a) Platform Strategy:
+   - API-first approach approved
+   - Developer ecosystem launch Q1
+   - Partnership program expansion
+
+b) M&A Opportunities:
+   - Evaluating 3 targets ($10-30M range)
+   - Focus on technology and talent acquisition
+   - Due diligence on Target A initiated
+
+c) Competitive Landscape:
+   - Main competitor acquired for $1.2B
+   - Market consolidation accelerating
+   - Our differentiation strategy validated
+
+5. Governance Updates:
+• Audit Committee: Clean audit report for 2024
+• Compensation Committee: Approved equity refresh for key employees
+• Added 2 independent directors with deep industry expertise
+• Updated insider trading policy
+• Approved D&O insurance renewal
+
+6. Risk Management:
+Key Risks Discussed:
+1. Talent retention in competitive market
+   - Mitigation: Equity refresh, culture initiatives
+2. Customer concentration (top 10 = 35% of revenue)
+   - Mitigation: Diversification focus in 2025
+3. Technology platform scaling
+   - Mitigation: Infrastructure investment approved
+
+Action Items for Family Office:
+1. Confirm participation in Series D round
+2. Introduce company to 3 strategic customers
+3. Assist with CFO search (current CFO retiring Q3)
+4. Review and approve updated shareholder agreement
+5. Participate in strategic planning session (February)
+
+Next Board Meeting: March 15, 2025
+
+Overall Assessment:
+Company continues to execute exceptionally well. Management team aligned with board on strategic direction. Strong momentum heading into 2025 with clear path to $100M revenue milestone.`,
         },
       ]
     case "meetings":
@@ -1068,7 +1297,7 @@ const columns: ColumnDef<Company>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Company
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />

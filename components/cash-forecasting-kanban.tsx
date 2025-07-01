@@ -652,7 +652,7 @@ function DroppableColumn({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700 flex items-center justify-center">
               {forecasts.length}
             </Badge>
           </div>

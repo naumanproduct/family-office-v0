@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { ChevronUp, ChevronDown } from "lucide-react"
 
 interface TypableAreaProps {
   value: string
@@ -94,13 +95,17 @@ export function TypableArea({
           </div>
         </div>
         
-        {/* Show all/Show less button */}
+        {/* Show more/Show less button */}
         {shouldShowExpandButton && !isFocused && (
           <button
             onClick={handleToggleExpand}
-            className="mt-2 text-sm text-primary hover:text-primary/80 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded px-1"
+            className="mt-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
           >
-            {isExpanded ? 'Show less' : 'Show all'}
+            {isExpanded ? (
+              <>Show less <ChevronUp className="h-3 w-3" /></>
+            ) : (
+              <>Show more <ChevronDown className="h-3 w-3" /></>
+            )}
           </button>
         )}
       </div>

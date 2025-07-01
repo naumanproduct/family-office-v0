@@ -169,8 +169,8 @@ function Column({ stage, items }: { stage: any; items: DiligenceItem[] }) {
     <div className="flex flex-col min-h-[600px] w-80">
       <div className={`rounded-t-xl p-4 border ${stage.color}`}>
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm">{stage.name}</h3>
-          <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">{items.length}</Badge>
+          <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
+          <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700 flex items-center justify-center">{items.length}</Badge>
         </div>
       </div>
       <div className="flex-1 bg-gray-50/50 rounded-b-xl border-l border-r border-b p-3 space-y-3">

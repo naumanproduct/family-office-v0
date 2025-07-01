@@ -334,7 +334,7 @@ function Column({ stage, items }: { stage: any; items: Distribution[] }) {
       <div className={`rounded-t-xl p-4 border ${stage.color}`}> 
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-sm">{stage.name}</h3>
-          <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
+          <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700 flex items-center justify-center">
             {items.length}
           </Badge>
         </div>

@@ -44,6 +44,7 @@ import { Label } from "@/components/ui/label"
 import { DocumentViewer } from "@/components/document-viewer"
 import { RecordListItem } from "@/components/shared/record-list-item"
 import { RecordCard } from "@/components/shared/record-card"
+import { formatDate } from "@/lib/utils"
 
 // Function to get context-specific files based on task title
 export function getContextualFiles(taskTitle?: string) {
@@ -512,7 +513,7 @@ function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScr
               </div>
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">Upload Date</Label>
-                <span>{file.uploadedDate || (file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Unknown")}</span>
+                <span>{file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : "Unknown")}</span>
               </div>
               <div className="flex flex-col">
                 <Label className="text-xs text-muted-foreground">Tags</Label>
@@ -752,7 +753,7 @@ export function FileContent({
                   </TableCell>
                   <TableCell className="font-medium text-sm">{file.name || file.title}</TableCell>
                   <TableCell className="text-sm">{file.uploadedBy}</TableCell>
-                  <TableCell className="text-sm">{file.uploadedDate || new Date(file.uploadedAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-sm">{file.uploadedDate || formatDate(new Date(file.uploadedAt))}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

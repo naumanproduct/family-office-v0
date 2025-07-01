@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
+import { formatDate } from "@/lib/utils"
 
 const documents = [
   {
@@ -215,7 +216,7 @@ export function DocumentsTable() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span>{new Date(document.uploadedAt).toLocaleDateString()}</span>
+                    <span>{formatDate(new Date(document.uploadedAt))}</span>
                   </TableCell>
                   <TableCell>
                     <span>{document.uploadedBy}</span>

@@ -414,15 +414,143 @@ function getContactTabData(activeTab: string, contact: Contact) {
       return [
         {
           id: 1,
-          title: "Initial Contact Notes",
+          title: "Initial Relationship Assessment",
           date: "2 weeks ago",
-          topic: `First meeting with ${contact.firstName}. Discussed potential collaboration opportunities.`,
+          topic: `Initial assessment and engagement strategy for ${contact.firstName}`,
+          content: `Contact Assessment - ${contact.firstName} ${contact.lastName}
+
+Position: ${contact.jobTitle} at ${contact.company}
+Initial Contact: ${contact.lastInteraction}
+Connection Type: Professional Relationship
+
+Executive Summary:
+${contact.firstName} ${contact.lastName} has been identified as a strategic contact for our family office operations. Their position at ${contact.company} provides valuable access to deal flow and industry insights in our target sectors.
+
+Relationship Development Strategy:
+1. Initial Contact:
+   - Introduction through mutual connection
+   - Common interests: Investment opportunities, industry trends
+   - First meeting scheduled for next week
+
+2. Value Proposition:
+   - Our family office can provide patient capital
+   - Strategic partnership opportunities
+   - Access to our portfolio network
+
+3. Engagement Plan:
+   - Quarterly touchpoints minimum
+   - Industry event co-attendance
+   - Potential advisory role discussion
+
+Background Research:
+• Education: Top-tier business school graduate
+• Experience: 15+ years in ${contact.jobTitle.includes("CEO") ? "executive leadership" : "industry"}
+• Network: Well-connected in venture capital community
+• Investment Activity: Active angel investor
+
+Potential Opportunities:
+1. Deal Flow: Access to early-stage investment opportunities
+2. Co-investment: Potential partner for larger deals
+3. Advisory: Could provide sector expertise
+4. Board Positions: Candidate for portfolio companies
+
+Communication Preferences:
+- Best reached via: ${contact.email.includes("gmail") ? "Personal email" : "Professional email"}
+- Preferred meeting style: In-person over lunch
+- Topics of interest: Innovation, market trends, ESG investing
+
+Next Steps:
+✓ Schedule introductory meeting
+✓ Prepare family office overview deck
+✓ Research recent ${contact.company} developments
+✓ Identify mutual connections for warm intro
+✓ Plan follow-up strategy
+
+Initial Assessment: HIGH POTENTIAL
+This relationship could provide significant value through deal flow, market intelligence, and potential co-investment opportunities.`,
         },
         {
           id: 2,
-          title: "Background Information",
+          title: "Meeting Follow-up",
           date: "1 month ago",
-          topic: `${contact.firstName} previously worked at InnovateTech for 5 years before joining ${contact.company}.`,
+          topic: `Introductory lunch meeting follow-up with ${contact.firstName}`,
+          content: `Follow-up Notes - ${contact.firstName} ${contact.lastName}
+
+Meeting Date: December 15, 2024
+Location: The Capital Grille
+Duration: 1.5 hours
+
+Meeting Summary:
+Had an excellent introductory lunch with ${contact.firstName}. The conversation was engaging and revealed multiple areas of potential collaboration.
+
+Key Discussion Points:
+
+1. Professional Background:
+   - Currently ${contact.jobTitle} at ${contact.company}
+   - Previously held senior positions at 2 Fortune 500 companies
+   - Strong track record in business development
+   - Extensive network in technology and healthcare sectors
+
+2. Investment Philosophy:
+   - Focus on sustainable, long-term value creation
+   - Interest in impact investing
+   - Preference for active involvement in portfolio companies
+   - Risk-adjusted returns with ESG considerations
+
+3. Current Initiatives:
+   - Leading ${contact.company}'s expansion into new markets
+   - Evaluating 3-4 investment opportunities quarterly
+   - Building strategic partnerships program
+   - Mentoring next generation of leaders
+
+4. Areas of Alignment:
+   - Shared interest in healthcare technology
+   - Similar investment horizon (7-10 years)
+   - Focus on operational excellence
+   - Commitment to responsible investing
+
+Opportunities Discussed:
+
+a) Co-investment Partnership:
+   - ${contact.firstName} expressed interest in co-investing
+   - Typical check size: $500K - $2M
+   - Sectors: Healthcare, FinTech, Sustainability
+   - Decision timeline: 2-3 weeks
+
+b) Advisory Engagement:
+   - Open to advisory role with portfolio companies
+   - Expertise in scaling operations
+   - Strong board governance experience
+   - Compensation: Equity preferred over cash
+
+c) Deal Flow Sharing:
+   - Agreed to share relevant opportunities
+   - Monthly deal flow updates
+   - Focus on Series A/B rounds
+   - Preference for B2B SaaS and Healthcare
+
+Personal Interests Noted:
+• Passionate about education philanthropy
+• Board member of local children's hospital
+• Enjoys sailing and golf
+• Wine collector (Bordeaux focus)
+• Travel enthusiast (recent trip to Japan)
+
+Relationship Building:
+- Invited to our annual investor conference
+- Golf outing planned for spring
+- Introduction to portfolio CEO requested
+- Quarterly lunch meetings agreed
+
+Follow-up Actions:
+1. Send thank you note (DONE)
+2. Share recent healthcare investment memo
+3. Schedule follow-up call for January
+4. Introduce to Dr. Smith (portfolio company CEO)
+5. Add to conference invitation list
+
+Assessment Update: VERY PROMISING
+${contact.firstName} is exactly the type of strategic relationship we want to cultivate. High integrity, aligned values, and complementary expertise.`,
         },
       ]
     case "meetings":
@@ -733,7 +861,7 @@ const columns: ColumnDef<Contact>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Name
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />
@@ -811,7 +939,7 @@ const columns: ColumnDef<Contact>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge className={`text-xs ${getStatusColor(row.original.status)}`}>{row.original.status}</Badge>
+      <Badge variant="outline" className="text-xs capitalize">{row.original.status}</Badge>
     ),
   },
   {

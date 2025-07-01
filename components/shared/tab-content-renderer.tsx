@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -395,9 +394,7 @@ function CardView({
             <RecordCard
           key={item.id}
               title={item.title}
-              primaryMetadata={item.tags ? item.tags.map((tag: string) => (
-                <Badge key={tag} variant="outline">{tag}</Badge>
-              )) : []}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: item.author || "",
                 right: item.date || ""
@@ -557,9 +554,7 @@ function ListView({
             <RecordListItem
           key={item.id}
               title={item.title}
-              primaryMetadata={item.tags ? item.tags.map((tag: string) => (
-                <Badge key={tag} variant="outline">{tag}</Badge>
-              )) : []}
+              primaryMetadata={[]}
               secondaryMetadata={{
                 left: item.author || "",
                 right: item.date || ""

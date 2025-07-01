@@ -363,7 +363,7 @@ export function MasterDrawer({
                         {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
                         <span>{tab.label}</span>
                         {tab.count !== null && (
-                          <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                          <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
                             {tab.count}
                           </Badge>
                         )}
@@ -687,7 +687,7 @@ export function MasterDrawer({
                       {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
                       <span>{tab.label}</span>
                       {tab.count !== null && (
-                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs">
+                        <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
                           {tab.count}
                         </Badge>
                       )}

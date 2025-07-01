@@ -321,11 +321,293 @@ function getLiabilityTabData(activeTab: string, liability: Liability) {
       return [
         {
           id: 1,
-          title: "Refinancing opportunity",
+          title: "Debt Management Strategy Review",
           date: "1 week ago",
           author: "Michael Chen",
-          content: `Potential to refinance ${liability.name} at lower rate.`,
-          tags: ["Refinancing", "Cost Savings"],
+          content: `Liability Analysis - ${liability.name}
+
+Executive Summary:
+This memorandum provides a comprehensive review of the ${liability.name} facility and recommendations for optimizing our debt structure within the family office portfolio.
+
+Current Facility Details:
+• Liability: ${liability.name}
+• Type: ${liability.type}
+• Current Balance: ${liability.currentBalance}
+• Interest Rate: ${liability.interestRate}
+• Maturity Date: ${liability.maturityDate}
+• Lender: ${liability.lender}
+• Entity: ${liability.entity}
+
+Market Analysis:
+The current interest rate environment presents opportunities for refinancing consideration:
+• Federal Reserve Rate: 5.50% (as of January 2025)
+• Prime Rate: 8.50%
+• Our Current Rate: ${liability.interestRate} (${parseFloat(liability.interestRate) < 5.0 ? "Below market - favorable" : parseFloat(liability.interestRate) > 6.0 ? "Above market - consider refinancing" : "At market"})
+
+Refinancing Opportunity Assessment:
+1. Current Market Rates:
+   - Similar facilities: 4.75% - 5.50%
+   - Our relationship pricing potential: 4.50% - 5.25%
+   - Estimated annual savings: $125,000 - $180,000
+
+2. Refinancing Costs:
+   - Prepayment penalty: 2% of outstanding balance
+   - Legal and closing costs: $45,000 - $65,000
+   - Break-even period: 14-18 months
+
+3. Alternative Structures:
+   - Interest-only period to improve cash flow
+   - Floating rate with cap protection
+   - Partial prepayment to reduce exposure
+
+Cash Flow Impact:
+• Current Monthly Payment: ${liability.paymentAmount}
+• Projected with Refinancing: ${liability.paymentAmount.replace(/\d+,\d+/, (match) => {
+  const amount = parseInt(match.replace(",", ""));
+  return Math.round(amount * 0.85).toLocaleString();
+})}
+• Monthly Cash Flow Improvement: ~15%
+
+Strategic Considerations:
+1. Portfolio Leverage:
+   - Current debt/asset ratio: 32%
+   - Target range: 30-35%
+   - This facility represents 18% of total debt
+
+2. Interest Rate Risk:
+   - Fixed rate protects against rising rates
+   - Consider partial hedge if moving to floating
+   - Duration matching with asset portfolio
+
+3. Entity Structure:
+   - Current entity (${liability.entity}) appropriate
+   - No tax optimization opportunities identified
+   - Cross-default provisions reviewed and acceptable
+
+Covenant Compliance:
+✓ Debt Service Coverage Ratio: 2.8x (Required: 1.5x)
+✓ Loan-to-Value: 65% (Maximum: 75%)
+✓ Liquidity Covenant: $50M+ (Required: $25M)
+✓ No technical defaults or waivers required
+
+Lender Relationship:
+• ${liability.lender} - 12-year relationship
+• Other facilities: $35M total exposure
+• Recent interactions positive
+• Willing to discuss improved terms
+
+Recommendations:
+1. IMMEDIATE: Initiate refinancing discussions with ${liability.lender}
+2. Get competing term sheets from 2-3 banks
+3. Target 50-75 bps rate reduction minimum
+4. Extend maturity by 2-3 years if possible
+5. Maintain strong banking relationships
+
+Risk Factors:
+• Interest rate volatility
+• Potential covenant tightening
+• Refinancing market conditions
+• Prepayment penalty economics
+
+Next Steps:
+1. Schedule meeting with ${liability.lender} relationship manager
+2. Prepare refinancing package (financials, projections)
+3. Engage legal counsel for document review
+4. Model various scenarios for IC presentation
+5. Target closing within 60-90 days
+
+This liability is well-managed but presents optimization opportunity in current market.`,
+          tags: ["Refinancing", "Cost Savings", "Debt Management", "Strategic Review"],
+        },
+        {
+          id: 2,
+          title: "Annual Lender Meeting Notes",
+          date: "1 month ago",
+          author: "Jessica Martinez",
+          content: `Annual Review Meeting - ${liability.lender}
+
+Date: December 10, 2024
+Attendees: Family Office CFO, Treasurer, ${liability.lender} Relationship Team
+Location: Lender's Executive Conference Room
+
+Meeting Purpose:
+Annual relationship review and discussion of facility terms, performance, and future opportunities.
+
+Key Discussion Points:
+
+1. Relationship Overview:
+   • Total exposure: $45M across 3 facilities
+   • 12-year relationship history
+   • No defaults or covenant breaches
+   • Consistently meets all payment obligations
+
+2. Facility Performance - ${liability.name}:
+   • Outstanding Balance: ${liability.currentBalance}
+   • Payment History: Perfect - no late payments
+   • Current Rate: ${liability.interestRate}
+   • Maturity: ${liability.maturityDate}
+
+3. Financial Update Provided:
+   • Family Office AUM: $485M (up 12% YoY)
+   • Liquidity Position: Strong ($75M+ available)
+   • Debt/Asset Ratio: 32% (conservative)
+   • Investment Performance: +15.3% YTD
+
+4. Lender Feedback:
+   "One of our strongest relationships. The family office demonstrates exceptional financial management and transparency. Credit committee views very favorably."
+
+5. Opportunities Discussed:
+
+   a) Rate Reduction:
+      - Lender open to repricing discussion
+      - Potential for 25-50 bps reduction
+      - Requires formal request and updated financials
+
+   b) New Facilities:
+      - Pre-approved for additional $25M
+      - Acquisition financing available
+      - Specialized lending for art/collectibles
+
+   c) Treasury Services:
+      - Enhanced cash management platform
+      - Foreign exchange services
+      - Wealth management integration
+
+6. Market Intelligence Shared:
+   • Other family offices refinancing at 4.50-5.25%
+   • Strong appetite for family office lending
+   • ESG-linked pricing becoming available
+   • Expect continued rate volatility in 2025
+
+7. Covenant Discussion:
+   • All covenants currently met with significant cushion
+   • Lender willing to relax certain restrictions
+   • Streamlined reporting requirements offered
+   • Quarterly financials sufficient (vs monthly)
+
+8. Relationship Enhancements:
+   • Invitation to exclusive economic forums
+   • Access to lender's research platform
+   • Introduction to private banking team
+   • Co-investment opportunities notification
+
+Action Items from Meeting:
+
+1. For Family Office:
+   ✓ Provide updated financial package (by Dec 31)
+   ✓ Submit formal rate reduction request
+   ✓ Consider consolidating smaller facilities
+   ✓ Explore ESG-linked pricing structure
+
+2. For Lender:
+   ✓ Prepare term sheet for rate reduction
+   ✓ Arrange treasury platform demo
+   ✓ Schedule private banking introduction
+   ✓ Provide market comparables analysis
+
+Key Takeaways:
+• Excellent relationship standing
+• Clear path to improved pricing
+• Additional credit available if needed
+• Lender values the relationship highly
+
+Next Meeting: March 2025 (Quarterly Check-in)
+
+Overall Assessment: VERY POSITIVE
+The lender relationship remains strong with immediate opportunities for cost savings and service enhancements. Recommend pursuing rate reduction in Q1 2025.`,
+          tags: ["Lender Meeting", "Relationship", "Annual Review"],
+        },
+        {
+          id: 3,
+          title: "Payment Optimization Analysis",
+          date: "2 months ago",
+          author: "Robert Kim",
+          content: `Payment Strategy Optimization - ${liability.name}
+
+Analysis Date: November 15, 2024
+Current Payment: ${liability.paymentAmount}
+Payment Frequency: Monthly
+
+Executive Summary:
+This analysis explores opportunities to optimize payment strategy for ${liability.name} to improve cash flow management and reduce total interest expense.
+
+Current Payment Structure:
+• Monthly Payment: ${liability.paymentAmount}
+• Principal Portion: ~75% of payment
+• Interest Portion: ~25% of payment
+• Remaining Term: ${Math.floor(Math.random() * 10 + 5)} years
+• Total Interest Remaining: $${Math.floor(Math.random() * 500 + 200)}K
+
+Optimization Strategies Analyzed:
+
+1. Accelerated Payment Schedule:
+   Option A: Bi-weekly payments
+   - Annual Savings: $45,000 in interest
+   - Term Reduction: 2.5 years
+   - Cash Flow Impact: Minimal
+   
+   Option B: 10% increased monthly payment
+   - Annual Savings: $62,000 in interest
+   - Term Reduction: 3.8 years
+   - Cash Flow Impact: Moderate
+
+2. Lump Sum Principal Reductions:
+   - Annual bonus payment of $500K
+   - Interest savings: $125K over life
+   - Preserves monthly cash flow
+   - Aligns with distribution timing
+
+3. Refinancing vs. Paydown Analysis:
+   - Refinancing saves more if rate reduction >75 bps
+   - Paydown better if staying < 5 years
+   - Hybrid approach may be optimal
+
+Cash Flow Considerations:
+• Current monthly obligations: $${Math.floor(Math.random() * 200 + 100)}K total
+• Available for acceleration: $${Math.floor(Math.random() * 100 + 50)}K/month
+• Seasonal variation in cash flows noted
+• Maintain 6-month reserve requirement
+
+Investment Opportunity Cost:
+• Debt Rate: ${liability.interestRate}
+• Expected Portfolio Return: 8-10%
+• After-tax analysis favors investment over paydown
+• Consider risk-adjusted returns
+
+Tax Implications:
+• Interest deductibility at 37% bracket
+• Effective after-tax rate: ${(parseFloat(liability.interestRate) * 0.63).toFixed(2)}%
+• State tax considerations included
+• No change to entity structure recommended
+
+Stress Testing Results:
+Scenario 1: Rates increase 200 bps
+- Current structure: No impact (fixed rate)
+- Maintains payment stability
+
+Scenario 2: Cash flow reduction 30%
+- Current payments sustainable
+- Acceleration strategies can be paused
+
+Scenario 3: Investment losses 20%
+- Debt coverage ratios remain strong
+- No covenant concerns
+
+Recommendations:
+1. MAINTAIN current payment schedule
+2. IMPLEMENT annual lump sum strategy
+3. MONITOR refinancing opportunities
+4. REVISIT if rates drop below 4.50%
+
+Implementation Plan:
+• Continue standard monthly payments
+• Schedule annual principal payment for January
+• Set rate alert for refinancing trigger
+• Review quarterly with treasury team
+
+Conclusion:
+Current payment strategy is appropriate given market conditions and family office objectives. Opportunistic refinancing remains the best optimization path.`,
+          tags: ["Payment Strategy", "Optimization", "Cash Flow"],
         },
       ]
     case "meetings":
@@ -502,7 +784,7 @@ function LiabilityCompanyContent({ liability }: { liability: Liability }) {
               <CardDescription className="mt-1">Financial Institution • {liability.type}</CardDescription>
               <div className="mt-3 flex items-center gap-4">
                 <Badge variant="outline">Lender</Badge>
-                <Badge variant="outline" className={getStatusColor(liability.status)}>
+                <Badge variant="outline" className="capitalize">
                   {liability.status}
                 </Badge>
                 <span className="text-sm text-muted-foreground">Relationship since 2018</span>
@@ -645,7 +927,7 @@ const columns: ColumnDef<Liability>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Liability Name
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />
@@ -701,7 +983,7 @@ const columns: ColumnDef<Liability>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge className={`text-xs ${getStatusColor(row.original.status)}`}>{row.original.status}</Badge>
+      <Badge variant="outline" className="text-xs capitalize">{row.original.status}</Badge>
     ),
   },
   {

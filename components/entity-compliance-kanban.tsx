@@ -234,14 +234,14 @@ function ComplianceItemCard({ item }: { item: ComplianceItem }) {
   // Move state hooks outside of detailsPanel
   const [openSections, setOpenSections] = React.useState<{
     details: boolean;
+    filing: boolean;
     entity: boolean;
-    documents: boolean;
-    related: boolean;
+    status: boolean;
   }>({
     details: true, // Details expanded by default
+    filing: false,
     entity: false,
-    documents: false,
-    related: false,
+    status: false,
   });
 
   // Add state for showing all values
@@ -250,7 +250,7 @@ function ComplianceItemCard({ item }: { item: ComplianceItem }) {
   // Create details panel function
   const detailsPanel = (isFullScreen = false) => {
     // Toggle function for collapsible sections
-    const toggleSection = (section: 'details' | 'entity' | 'documents' | 'related') => {
+    const toggleSection = (section: 'details' | 'filing' | 'entity' | 'status') => {
       setOpenSections(prev => ({
         ...prev,
         [section]: !prev[section],
@@ -362,17 +362,17 @@ function ComplianceItemCard({ item }: { item: ComplianceItem }) {
           <div key={index} className="flex items-center">
             <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
             {field.isLink ? (
-              <p className="text-sm text-blue-600 flex-1">{field.value}</p>
+              <p className="text-sm text-blue-600 cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
             ) : (
-              <p className="text-sm flex-1">{field.value}</p>
+              <p className="text-sm cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
             )}
           </div>
         ))}
         {showAllButton && (
-          <div className="flex items-center mt-2">
+          <div className="flex items-center mt-2 ml-2">
             <Button 
               variant="link" 
-              className="h-auto p-0 text-xs text-blue-600 ml-2"
+              className="h-auto p-0 text-xs text-blue-600"
               onClick={() => setShowingAllValues(true)}
             >
               Show all
@@ -495,7 +495,7 @@ function ComplianceItemCard({ item }: { item: ComplianceItem }) {
                 {/* Section Header */}
                 <button 
                   onClick={() => toggleSection(section.id as 'details' | 'filing' | 'entity' | 'status')}
-                  className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+                  className={`w-full flex items-center justify-between p-3 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
                 >
                   <div className="flex items-center">
                     <Icon className="h-4 w-4 text-muted-foreground ml-2" />
@@ -636,7 +636,7 @@ function ComplianceItemCard({ item }: { item: ComplianceItem }) {
                 <span>{item.jurisdiction}</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
-                <Badge variant={item.priority === "High" ? "destructive" : item.priority === "Medium" ? "default" : "secondary"} className="h-5 px-2 text-xs">
+                <Badge variant="outline" className="h-5 px-2 text-xs capitalize">
                   {item.priority} Priority
                 </Badge>
               </div>
@@ -854,7 +854,7 @@ function DroppableColumn({ stage, items }: {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700 flex items-center justify-center">
               {items.length}
             </Badge>
           </div>

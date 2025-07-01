@@ -46,6 +46,7 @@ import { UnifiedTaskTable } from "./shared/unified-task-table"
 import { NoteContent } from "@/components/shared/note-content"
 import { FileContent } from "@/components/shared/file-content"
 import { TypableArea } from "@/components/typable-area"
+import { formatDate } from "@/lib/utils"
 
 // Task data - extended from investment tab but across all objects
 const tasksData = [
@@ -493,7 +494,7 @@ export function TasksTable() {
                               </div>
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <CalendarIcon className="h-3 w-3" />
-                                {new Date(st.dueDate).toLocaleDateString()}
+                                {formatDate(new Date(st.dueDate))}
                               </div>
                               <span className="text-xs text-muted-foreground">
                                 {st.priority}

@@ -538,13 +538,8 @@ function MeetingCard({
 
     // Special handling for priority
     if (attribute.id === "priority") {
-      const priorityColors = {
-        High: "bg-red-100 text-red-800",
-        Medium: "bg-yellow-100 text-yellow-800",
-        Low: "bg-green-100 text-green-800",
-      }
       return (
-        <Badge className={`text-xs ${priorityColors[value as keyof typeof priorityColors] || "bg-gray-100"}`}>
+        <Badge variant="outline" className="text-xs capitalize">
           {value}
         </Badge>
       )
@@ -702,7 +697,7 @@ function DroppableColumn({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700 flex items-center justify-center">
               {meetings.length}
             </Badge>
           </div>

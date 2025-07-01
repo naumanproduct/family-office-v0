@@ -334,17 +334,17 @@ function TaxDocumentCard({ document }: { document: TaxDocument }) {
           <div key={index} className="flex items-center">
             <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
             {field.isLink ? (
-              <p className="text-sm text-blue-600 flex-1">{field.value}</p>
+              <p className="text-sm text-blue-600 cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
             ) : (
-              <p className="text-sm flex-1">{field.value}</p>
+              <p className="text-sm cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
             )}
           </div>
         ))}
         {showAllButton && (
-          <div className="flex items-center mt-2">
+          <div className="flex items-center mt-2 ml-2">
             <Button 
               variant="link" 
-              className="h-auto p-0 text-xs text-blue-600 ml-2"
+              className="h-auto p-0 text-xs text-blue-600"
               onClick={() => setShowingAllValues(true)}
             >
               Show all
@@ -467,7 +467,7 @@ function TaxDocumentCard({ document }: { document: TaxDocument }) {
                 {/* Section Header */}
                 <button 
                   onClick={() => toggleSection(section.id as 'details' | 'documentInfo' | 'entityInfo' | 'statusInfo')}
-                  className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+                  className={`w-full flex items-center justify-between p-3 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
                 >
                   <div className="flex items-center">
                     <Icon className="h-4 w-4 text-muted-foreground ml-2" />
@@ -800,7 +800,7 @@ function DroppableColumn({ stage, documents }: {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700 flex items-center justify-center">
               {documents.length}
             </Badge>
           </div>

@@ -50,7 +50,7 @@ import { generateTaskActivities } from "@/components/shared/activity-generators"
 import { AIAssistantSection } from "@/components/shared/ai-output-section"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
-import { Combobox, type ComboboxOption } from "@/components/ui/combobox"
+import { formatDate } from "@/lib/utils"
 
 interface TaskDetailsViewProps {
   task: any
@@ -89,7 +89,7 @@ export function TaskDetailsView({
     priority: task.priority || "High",
     status: task.status || "In Progress",
     assignee: task.assignee || "John Smith",
-    dueDate: task.dueDate || "",
+    dueDate: task.dueDate || "2023-05-25",
   })
 
   // Get the tasks context for updating task status
@@ -201,22 +201,6 @@ export function TaskDetailsView({
   const [notesViewMode, setNotesViewMode] = React.useState<"card" | "list" | "table">("list")
   const [filesViewMode, setFilesViewMode] = React.useState<"card" | "list" | "table">("list")
 
-  // Priority options for combobox
-  const priorityOptions: ComboboxOption[] = [
-    { value: "high", label: "High" },
-    { value: "medium", label: "Medium" },
-    { value: "low", label: "Low" },
-  ]
-
-  // Status options for combobox
-  const statusOptions: ComboboxOption[] = [
-    { value: "pending", label: "Pending" },
-    { value: "in-progress", label: "In Progress" },
-    { value: "review", label: "Review" },
-    { value: "completed", label: "Completed" },
-    { value: "cancelled", label: "Cancelled" },
-  ]
-
   const getPriorityColor = (priority: string) => {
     switch (priority.toLowerCase()) {
       case "critical":
@@ -246,23 +230,20 @@ export function TaskDetailsView({
     }
   }
 
-  // Helper function to format date as relative time
-  const formatRelativeTime = (date: string | Date) => {
+  const getRelativeTimeFromNow = (date: Date) => {
     const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+    
+    // After 2 months, display the date
     const then = new Date(date);
-    const diffInMs = now.getTime() - then.getTime();
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInHours / 24);
-
-    if (diffInHours < 1) {
-      return "Just now";
-    } else if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
-    } else if (diffInDays < 30) {
-      return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
-    } else {
-      return then.toLocaleDateString();
-    }
+    return formatDate(then);
   }
 
   const handleFieldEdit = (field: string, value: string) => {
@@ -399,12 +380,12 @@ export function TaskDetailsView({
         <div className="rounded-lg border border-muted overflow-hidden">
           <button
             onClick={() => toggleSection('subtasks')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors group/section"
+            className="flex items-center gap-3 w-full px-4 py-3 text-left transition-colors group/section"
           >
             {openSections.subtasks ? (
-              <ChevronDownIcon className="h-4 w-4 text-muted-foreground" />
+              <ChevronDownIcon className="h-4 w-4 text-muted-foreground transition-transform" />
             ) : (
-              <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
+              <ChevronRightIcon className="h-4 w-4 text-muted-foreground transition-transform" />
             )}
             <CheckSquareIcon className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Subtasks ({subtasks.length})</span>
@@ -523,7 +504,7 @@ export function TaskDetailsView({
                           
                           {/* Right side: due date */}
                           <div className="text-xs text-muted-foreground">
-                            {formatRelativeTime(subtask.dueDate)}
+                            {getRelativeTimeFromNow(new Date(subtask.dueDate))}
                           </div>
                         </div>
                       </div>
@@ -685,7 +666,7 @@ export function TaskDetailsView({
                 <p className="text-sm text-muted-foreground">Transaction Type: Capital Call</p>
                 <p className="text-sm text-muted-foreground">Call Number: #1</p>
                 <p className="text-sm text-muted-foreground">Amount: $2,500,000</p>
-                <p className="text-sm text-muted-foreground">Effective Date: {new Date().toLocaleDateString()}</p>
+                <p className="text-sm text-muted-foreground">Effective Date: {formatDate(new Date())}</p>
                 <p className="text-sm text-muted-foreground">Reference: CC-GF3-001</p>
               </div>
               <div className="border-b pb-3">
@@ -693,7 +674,7 @@ export function TaskDetailsView({
                 <p className="text-sm text-muted-foreground">Transaction Type: Capital Call</p>
                 <p className="text-sm text-muted-foreground">Call Number: #1</p>
                 <p className="text-sm text-muted-foreground">Amount: $2,000,000</p>
-                <p className="text-sm text-muted-foreground">Effective Date: {new Date().toLocaleDateString()}</p>
+                <p className="text-sm text-muted-foreground">Effective Date: {formatDate(new Date())}</p>
                 <p className="text-sm text-muted-foreground">Reference: CC-GF3-001</p>
               </div>
               <p className="text-sm text-muted-foreground italic">[Continue for all LPs...]</p>
@@ -821,79 +802,22 @@ export function TaskDetailsView({
         {
           label: "Description",
           value: fieldValues.description,
-          editable: true,
-          fieldType: "textarea",
-          onChange: (value) => {
-            setFieldValues(prev => ({ ...prev, description: value }))
-            handleFieldEdit("description", value)
-          }
         },
         {
           label: "Priority",
-          value: fieldValues.priority.toLowerCase(),
-          editable: true,
-          fieldType: "combobox",
-          options: priorityOptions,
-          onChange: (value) => {
-            const displayValue = value.charAt(0).toUpperCase() + value.slice(1)
-            setFieldValues(prev => ({ ...prev, priority: displayValue }))
-            handleFieldEdit("priority", value)
-          },
-          formatDisplay: (value) => {
-            const displayValue = value ? value.charAt(0).toUpperCase() + value.slice(1) : ""
-            return (
-              <span className={`text-sm ${
-                value === "high" ? "text-red-600" : 
-                value === "medium" ? "text-yellow-600" : 
-                "text-green-600"
-              }`}>{displayValue}</span>
-            )
-          }
+          value: <span className="text-sm capitalize">{fieldValues.priority}</span>
         },
         {
           label: "Status",
-          value: fieldValues.status.toLowerCase().replace(" ", "-"),
-          editable: true,
-          fieldType: "combobox",
-          options: statusOptions,
-          onChange: (value) => {
-            const displayValue = value.split("-").map((word: string) => 
-              word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(" ")
-            setFieldValues(prev => ({ ...prev, status: displayValue }))
-            handleFieldEdit("status", value)
-          },
-          formatDisplay: (value) => {
-            const displayValue = value ? value.split("-").map((word: string) => 
-              word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(" ") : ""
-            return (
-              <span className={`text-sm ${
-                value === "completed" ? "text-green-600" : 
-                "text-muted-foreground"
-              }`}>{displayValue}</span>
-            )
-          }
+          value: <span className="text-sm capitalize">{fieldValues.status}</span>
         },
         {
           label: "Assignee",
           value: fieldValues.assignee,
-          editable: true,
-          fieldType: "text",
-          onChange: (value) => {
-            setFieldValues(prev => ({ ...prev, assignee: value }))
-            handleFieldEdit("assignee", value)
-          }
         },
         {
           label: "Due Date",
           value: fieldValues.dueDate,
-          editable: true,
-          fieldType: "date",
-          onChange: (value) => {
-            setFieldValues(prev => ({ ...prev, dueDate: value }))
-            handleFieldEdit("dueDate", value)
-          }
         },
         {
           label: "Related to",
@@ -977,7 +901,7 @@ export function TaskDetailsView({
       const transformedNotes = notes.map(note => ({
         ...note,
         author: note.author || "Unknown",
-        date: note.date || note.lastModified || (note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : "Unknown"),
+        date: note.date || note.lastModified || (note.updatedAt ? formatDate(new Date(note.updatedAt)) : "Unknown"),
       }));
       
       return (
@@ -1009,7 +933,7 @@ export function TaskDetailsView({
         ...file,
         name: file.name || file.fileName || file.title,
         uploadedBy: file.uploadedBy || "Unknown",
-        uploadedDate: file.uploadedDate || (file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Unknown"),
+        uploadedDate: file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : "Unknown"),
         size: file.size || file.fileSize || "Unknown",
       }));
       

@@ -198,7 +198,164 @@ function AssetNameCell({ asset }: { asset: Asset }) {
         ]
       case "notes":
         return [
-          { id: 1, title: "Catch-up call summary", author: "Analyst", date: "Yesterday", content: "Discussed KPIs…" },
+          { id: 1, title: "Investment Committee Review", author: "Sarah Johnson", date: "Yesterday", topic: "Investment Committee Review", content: `Investment Review - TechFlow Ventures Series C
+
+Meeting Date: January 14, 2025
+Participants: Investment Committee, Fund Manager, Legal Counsel
+
+Executive Summary:
+The Investment Committee conducted a comprehensive review of our Series C investment in TechFlow Ventures. The company continues to demonstrate strong fundamentals with 85% YoY revenue growth and expanding market share in the enterprise automation sector.
+
+Key Performance Metrics:
+• Revenue Run Rate: $48M ARR (up from $26M at time of investment)
+• Gross Margins: 78% (industry-leading for SaaS)
+• Customer Retention: 98% net revenue retention
+• Cash Burn: $2.1M/month (18 months runway)
+• Team Growth: 145 FTEs (up from 87 at investment)
+
+Portfolio Allocation Analysis:
+Our $15M Series C investment represents 12.5% ownership on a fully diluted basis. This positions us as the second-largest institutional investor after Apex Capital Partners. The investment aligns with our technology sector allocation target of 35-40% of total portfolio.
+
+Valuation Considerations:
+• Current valuation: $450M (3x multiple from our entry)
+• Comparable public companies trading at 8-12x revenue
+• Secondary market interest at $500-550M valuation
+• Next round (Series D) expected at $800M-1B valuation
+
+Risk Assessment:
+1. Customer Concentration: Top 10 customers represent 42% of revenue (down from 58%)
+2. Competition: Microsoft and Salesforce entering adjacent markets
+3. Regulatory: Potential data privacy regulations could impact growth
+4. Key Person Risk: CTO departure could affect product roadmap
+
+Strategic Recommendations:
+1. Maintain position through Series D (no pro-rata beyond $5M)
+2. Explore secondary sale of 20% of position at current valuations
+3. Introduce company to our network for enterprise sales opportunities
+4. Board seat designation to be reviewed at next funding round
+
+Follow-up Actions:
+• Schedule quarterly business review with CEO (February 15)
+• Legal review of amended shareholder agreements
+• Update valuation model with Q4 financials
+• Coordinate with tax team on potential secondary sale implications
+
+Next Review Date: April 2025 (post-Series D announcement)` },
+          { id: 2, title: "Quarterly Valuation Update", author: "Michael Chen", date: "Last week", topic: "Quarterly Valuation Update", content: `Valuation Memorandum - TechFlow Ventures Series C
+
+Date: January 7, 2025
+Prepared by: Valuation Committee
+Asset: TechFlow Ventures Series C Investment
+
+Valuation Summary:
+We have completed our quarterly fair value assessment of the TechFlow Ventures investment. Based on multiple valuation methodologies and recent market comparables, we recommend maintaining the current carrying value of $45.2M, representing a 3.01x multiple on our invested capital.
+
+Valuation Methodology:
+1. Revenue Multiple Approach:
+   - Current ARR: $48M
+   - Applied Multiple: 9.5x (based on public SaaS comparables)
+   - Implied Valuation: $456M
+   - Our Share (12.5%): $57M
+
+2. Recent Transaction Method:
+   - Last round valuation: $450M (6 months ago)
+   - No material adverse changes
+   - Market conditions remain favorable
+   - Our Share: $56.25M
+
+3. DCF Analysis:
+   - 5-year projection with 35% revenue CAGR
+   - Terminal value at 25x FCF
+   - WACC: 18%
+   - Our Share NPV: $52M
+
+4. Secondary Market Activity:
+   - Recent secondary trades at $500-520M valuation
+   - Limited liquidity discount applied (15%)
+   - Adjusted value: $53-55M
+
+Weighted Average Fair Value: $54.8M
+Conservative Adjustment Factor: 0.825
+Final Carrying Value: $45.2M
+
+Key Assumptions:
+• Continued revenue growth of 75%+ for next 12 months
+• No significant customer churn
+• Successful Series D raising within 9 months
+• Maintained gross margins above 75%
+
+Sensitivity Analysis:
+• Bull Case (+20% revenue): $58M value
+• Base Case: $45.2M value
+• Bear Case (-20% revenue): $32M value
+
+Market Comparables:
+• Automation Anywhere: 11.2x revenue
+• UiPath: 8.5x revenue
+• Workato: 12x revenue (private)
+• Zapier: 15x revenue (private)
+
+Recommendation:
+Maintain current mark at $45.2M. The conservative discount reflects:
+1. Private market illiquidity
+2. Concentration risk in enterprise segment
+3. Potential market correction in growth valuations
+
+Next valuation review scheduled for March 31, 2025.` },
+          { id: 3, title: "Due Diligence Summary", author: "Jessica Martinez", date: "2 months ago", topic: "Due Diligence Summary", content: `Series C Investment - Final Due Diligence Report
+
+Investment: TechFlow Ventures Series C
+Amount: $15M
+Date: November 2024
+
+Technology Due Diligence:
+Our technical team conducted a comprehensive review of TechFlow's platform architecture, codebase, and infrastructure. The platform demonstrates enterprise-grade scalability with a modern microservices architecture built on AWS. Code quality scores in the 90th percentile, with strong documentation and testing coverage (87% automated test coverage).
+
+Key technical strengths:
+• Multi-tenant SaaS architecture with strong data isolation
+• API-first design enabling seamless integrations
+• Advanced ML/AI capabilities for workflow optimization
+• SOC 2 Type II and ISO 27001 certifications
+• 99.99% uptime SLA consistently achieved
+
+Financial Due Diligence:
+Ernst & Young conducted a detailed financial audit covering the past 3 years. All findings were satisfactory with no material issues identified. Revenue recognition practices align with ASC 606 standards. The company maintains strong financial controls with monthly board reporting.
+
+Key financial metrics validated:
+• Revenue growth: 127% CAGR over 3 years
+• Gross margins improving from 68% to 78%
+• CAC payback period: 14 months
+• LTV/CAC ratio: 4.2x
+• Net cash burn reducing quarter-over-quarter
+
+Legal Due Diligence:
+Kirkland & Ellis reviewed all material contracts, IP portfolio, and corporate structure. The company owns all core IP with 12 patents filed (3 granted). No ongoing litigation or regulatory issues. Clean cap table with proper 83(b) elections for all founders and early employees.
+
+Customer Due Diligence:
+We conducted reference calls with 15 enterprise customers including 3 Fortune 500 companies. Net Promoter Score of 72 (excellent for B2B SaaS). Customers consistently praised the platform's ease of use, reliability, and ROI. Average customer sees 40% productivity improvement within 6 months.
+
+Management Team Assessment:
+The leadership team combines strong technical expertise with proven execution ability. CEO previously scaled a SaaS company to $100M ARR and successful exit. CTO from Google with deep AI/ML expertise. CFO brings public company experience from ServiceNow. Cultural assessment shows strong alignment with portfolio values.
+
+Market Analysis:
+The workflow automation market is projected to reach $35B by 2028 (22% CAGR). TechFlow's enterprise focus and vertical-specific solutions position them well against horizontal players. Their platform approach creates strong competitive moats and expansion opportunities.
+
+Investment Thesis Validation:
+✓ Large and growing market opportunity
+✓ Differentiated product with strong competitive advantages
+✓ Proven business model with attractive unit economics
+✓ Exceptional team with relevant experience
+✓ Clear path to $100M ARR and beyond
+✓ Multiple exit opportunities (IPO or strategic acquisition)
+
+Risk Mitigation:
+• Board observer rights secured
+• Information rights including monthly financials
+• Pro-rata rights for future rounds
+• Protective provisions on key decisions
+• Anti-dilution protection (weighted average)
+
+Recommendation: PROCEED with $15M investment at $450M pre-money valuation.` },
         ]
       case "meetings":
         return [
@@ -305,8 +462,7 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
         header: "Status",
         cell: ({ row }) => {
           const status = row.original.status
-          const statusColor = getStatusColor(status)
-          return <Badge className={statusColor}>{status}</Badge>
+          return <Badge variant="outline" className="capitalize">{status}</Badge>
         },
       },
       {

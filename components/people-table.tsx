@@ -882,10 +882,275 @@ function getContactTabData(activeTab: string, contact: Contact) {
       return [
         {
           id: 1,
-          title: "Investment thesis review",
+          title: "Relationship Overview",
           date: "3 days ago",
           author: "Emily Davis",
-          topic: `Strong performance in ${contact.company} sector. Key growth drivers remain intact.`,
+          topic: `Strategic relationship assessment for ${contact.firstName} ${contact.lastName}`,
+          content: `Contact Profile - ${contact.firstName} ${contact.lastName}
+
+Position: ${contact.jobTitle} at ${contact.company}
+Relationship Status: ${contact.connectionStrength} Connection
+Primary Contact: ${contact.internalOwner || "Unassigned"}
+Last Interaction: ${contact.lastInteraction}
+
+Executive Summary:
+${contact.firstName} ${contact.lastName} serves as a key relationship for our family office operations. As ${contact.jobTitle} at ${contact.company}, they provide valuable insights into ${contact.company}'s strategic direction and have been instrumental in facilitating investment opportunities.
+
+Relationship History:
+• First Contact: ${contact.introducedBy ? `Introduced by ${contact.introducedBy}` : "Direct outreach"} (2022)
+• Total Interactions: 47 touchpoints over 24 months
+• Meeting Frequency: Quarterly formal meetings, monthly informal check-ins
+• Response Time: Typically responds within 24 hours
+
+Professional Background:
+${contact.firstName} brings over 15 years of experience in the ${contact.jobTitle.includes("CEO") ? "executive leadership" : contact.jobTitle.includes("CFO") ? "financial management" : "industry"}. Previous roles include:
+- ${contact.jobTitle} at Current Company (2020-Present)
+- Senior positions at Fortune 500 companies
+- Board positions on 3 technology companies
+- MBA from Wharton, BS from MIT
+
+Investment Relevance:
+1. Deal Flow Source:
+   - Introduced 5 investment opportunities (2 closed)
+   - Total deal value introduced: $85M
+   - Success rate: 40% (above average)
+
+2. Portfolio Support:
+   - Advisor to 2 portfolio companies
+   - Facilitated 3 strategic partnerships
+   - Customer introductions resulting in $5M+ revenue
+
+3. Market Intelligence:
+   - Regular insights on ${contact.company} sector trends
+   - Early warning on market shifts
+   - Competitive intelligence sharing
+
+Communication Preferences:
+• Preferred Channel: ${contact.email.includes("gmail") ? "Personal email" : "Business email"}
+• Best Meeting Times: Mornings (8-10 AM EST)
+• Topics of Interest: Innovation, sustainability, market dynamics
+• Communication Style: Direct, data-driven, appreciates brevity
+
+Key Relationships:
+- Spouse: Active in philanthropy (potential co-investment interest)
+- Network: Connected to 15+ relevant executives in our focus sectors
+- Affiliations: Member of YPO, serves on 2 nonprofit boards
+
+Personal Interests:
+• Passionate about climate technology
+• Active angel investor ($2-5M annually)
+• Golf enthusiast (member at Pine Valley)
+• Art collector (contemporary focus)
+
+Recent Developments:
+1. Promoted to ${contact.jobTitle} (if applicable)
+2. Leading company's expansion into new markets
+3. Speaking at upcoming industry conference
+4. Exploring personal investment opportunities
+
+Relationship Maintenance:
+✓ Quarterly lunch meetings scheduled
+✓ Birthday noted (send gift)
+✓ Holiday card list inclusion
+✓ Conference co-attendance planned
+✓ Introduction to other family members scheduled
+
+Next Steps:
+1. Schedule Q1 2025 meeting to discuss new fund
+2. Invite to annual family office conference
+3. Explore co-investment in climate tech deal
+4. Facilitate introduction to portfolio CEO
+5. Send market research report of interest
+
+Notes:
+- Prefers in-person meetings over video calls
+- Appreciates follow-up within 48 hours
+- Values confidentiality highly
+- Interested in educational opportunities for children
+- Considering board positions post-retirement
+
+This relationship continues to be highly valuable for deal flow, market intelligence, and portfolio support. Maintain regular engagement and explore deepening the relationship through co-investment opportunities.`,
+        },
+        {
+          id: 2,
+          title: "Meeting Preparation Brief",
+          date: "1 week ago",
+          author: "Michael Chen",
+          topic: `Q1 2025 quarterly review preparation with ${contact.firstName}`,
+          content: `Meeting Brief - ${contact.firstName} ${contact.lastName}
+
+Date: January 8, 2025
+Purpose: Quarterly Relationship Review
+Location: The Yale Club, NYC
+
+Meeting Objectives:
+1. Review Q4 2024 investment performance
+2. Discuss Series D opportunity in portfolio company
+3. Explore co-investment in sustainable infrastructure
+4. Update on family office initiatives
+
+Background Context:
+Last meeting (October 2024) focused on:
+- Exit strategy for mature investments
+- Tax optimization strategies
+- Next generation involvement
+
+Key Updates Since Last Meeting:
+• Portfolio Performance: +15.3% YTD
+• Successful exit from Tech Investment II (3.5x return)
+• Launched sustainable investment initiative
+• Added 2 new family members to investment committee
+
+Discussion Points:
+
+1. Investment Updates:
+   - Portfolio company ${contact.company} raised Series C at $500M valuation
+   - Our position increased in value by 125%
+   - Exit opportunities emerging for 2 holdings
+   - New fund formation for AI/ML investments
+
+2. Collaboration Opportunities:
+   - ${contact.firstName}'s interest in climate tech aligns with new fund
+   - Potential advisory role in portfolio company
+   - Speaking opportunity at our annual conference
+   - Co-investment structure proposals
+
+3. Market Perspectives:
+   - Get insights on ${contact.company} sector outlook
+   - Discuss regulatory changes impact
+   - Review competitive landscape shifts
+   - Explore emerging technology trends
+
+4. Personal Updates:
+   - Congratulate on recent board appointment
+   - Discuss succession planning thoughts
+   - Family office services expansion
+   - Educational trust opportunities
+
+Materials to Share:
+✓ Q4 2024 Performance Report
+✓ New Fund Prospectus
+✓ Co-investment Term Sheet Template
+✓ Annual Conference Invitation
+
+Sensitive Topics to Avoid:
+- Recent competitor's legal issues
+- Specific returns of other LPs
+- Ongoing litigation matters
+
+Follow-up Actions Planned:
+1. Send meeting summary within 24 hours
+2. Schedule follow-up call for deal specifics
+3. Introduce to relevant portfolio CEOs
+4. Provide requested market research
+
+Gift/Gesture:
+Book: "The Intelligent Investor" 75th Anniversary Edition (noted interest in classic investment literature)
+
+Relationship Value Score: 9/10
+Strategic Importance: HIGH
+Engagement Level: VERY ACTIVE`,
+        },
+        {
+          id: 3,
+          title: "Due Diligence Reference Check",
+          date: "2 weeks ago",
+          author: "Jessica Martinez",
+          topic: `Board appointment reference check for ${contact.firstName} ${contact.lastName}`,
+          content: `Reference Check Summary - ${contact.firstName} ${contact.lastName}
+
+Date: January 2, 2025
+Context: Due diligence for potential board appointment
+Conducted by: External advisory firm
+
+Executive Summary:
+${contact.firstName} ${contact.lastName} received uniformly positive feedback across all reference checks. Highly recommended for board positions and strategic advisory roles.
+
+References Contacted:
+1. Former CEO - Tech Unicorn
+2. Current Board Chair - Public Company
+3. Investment Partner - Top Tier VC
+4. Long-term Business Associate
+5. Nonprofit Board Member
+
+Key Findings:
+
+Professional Competencies:
+• Strategic Thinking: "Exceptional ability to see around corners" - Ref #1
+• Financial Acumen: "Deep understanding of complex financial structures" - Ref #3
+• Leadership: "Natural leader who builds consensus effectively" - Ref #2
+• Industry Knowledge: "One of the most connected people in the sector" - Ref #4
+• Governance: "Exemplary board member, always prepared" - Ref #2
+
+Character Assessment:
+✓ Integrity: "Highest ethical standards, never compromises" - All refs
+✓ Reliability: "If ${contact.firstName} commits, it's done" - Ref #1
+✓ Judgment: "Sound decision-maker, especially under pressure" - Ref #3
+✓ Discretion: "Absolutely trustworthy with sensitive information" - Ref #5
+
+Working Style:
+- Collaborative but decisive when needed
+- Data-driven approach to decision making
+- Excellent communicator across all levels
+- Mentors junior team members actively
+- Balances detail orientation with big picture
+
+Value-Add Capabilities:
+1. Network Access:
+   - "Opens doors at the highest levels" - Ref #1
+   - Facilitated $50M+ in business development
+   - Connected companies to key customers/partners
+
+2. Strategic Guidance:
+   - Helped navigate 3 successful exits
+   - Advised on major pivots and transformations
+   - Strong pattern recognition across industries
+
+3. Crisis Management:
+   - "Calm under pressure, great in crisis" - Ref #2
+   - Led company through COVID challenges
+   - Managed sensitive PR situations effectively
+
+Areas of Expertise:
+• M&A transactions and integration
+• International expansion strategies
+• Digital transformation initiatives
+• Governance and compliance
+• Talent development and succession
+
+Potential Considerations:
+- High demand for time (selective about commitments)
+- Prefers quality over quantity in board seats
+- Direct communication style (some may find blunt)
+- High expectations for management teams
+
+Board Performance History:
+Current Boards: 3 (1 public, 2 private)
+Past Boards: 7 (4 successful exits)
+Committee Experience: Audit, Compensation, Governance
+Time Commitment: Exceptional attendance record
+
+Compensation Expectations:
+- Market rate for board positions
+- Open to equity participation
+- Values long-term alignment
+- Philanthropic interest (may donate fees)
+
+Cultural Fit Assessment:
+✓ Aligns with family office values
+✓ Long-term orientation
+✓ Relationship-focused approach
+✓ Discretion and confidentiality
+✓ Multi-generational perspective
+
+Recommendation:
+HIGHLY RECOMMENDED for board positions, advisory roles, or deeper partnership opportunities. ${contact.firstName} would add significant value to any governance structure or strategic initiative.
+
+Next Steps:
+1. Proceed with board appointment discussions
+2. Explore additional collaboration opportunities
+3. Consider for other portfolio company boards
+4. Maintain regular engagement schedule`,
         },
       ]
     case "meetings":
@@ -935,7 +1200,7 @@ const columns: ColumnDef<Contact>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Name
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />

@@ -44,9 +44,9 @@ export function MasterDetailsPanel({
                   <div className="flex-1">
                     <Label className="text-xs text-muted-foreground">{field.label}</Label>
                     {field.isLink ? (
-                      <p className="text-sm text-blue-600">{field.value}</p>
+                      <p className="text-sm text-blue-600 cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors inline-block">{field.value}</p>
                     ) : (
-                      <p className="text-sm">{field.value}</p>
+                      <p className="text-sm cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors inline-block">{field.value}</p>
                     )}
                   </div>
                 </div>

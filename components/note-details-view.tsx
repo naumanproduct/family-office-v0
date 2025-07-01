@@ -9,11 +9,7 @@ import {
   PlusIcon,
   EditIcon,
   FolderIcon,
-  CheckSquareIcon,
-  TagIcon,
-  UserIcon,
-  CalendarIcon,
-  ClockIcon
+  CheckSquareIcon
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -26,8 +22,7 @@ import { generateNoteActivities } from "@/components/shared/activity-generators"
 import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
-import { UnifiedDetailsPanel, type DetailSection } from "@/components/shared/unified-details-panel"
-import { ComboboxOption } from "@/components/ui/combobox"
+import { formatDate } from "@/lib/utils"
 
 interface NoteDetailsViewProps {
   note: any
@@ -36,51 +31,76 @@ interface NoteDetailsViewProps {
   isFullScreen?: boolean
 }
 
-// Note category options
-const categoryOptions: ComboboxOption[] = [
-  { value: "meeting", label: "Meeting Notes" },
-  { value: "research", label: "Research" },
-  { value: "idea", label: "Ideas" },
-  { value: "personal", label: "Personal" },
-  { value: "project", label: "Project Notes" },
-  { value: "general", label: "General" },
-]
-
-// Note type options
-const typeOptions: ComboboxOption[] = [
-  { value: "summary", label: "Summary" },
-  { value: "detailed", label: "Detailed Notes" },
-  { value: "action-items", label: "Action Items" },
-  { value: "reference", label: "Reference" },
-  { value: "draft", label: "Draft" },
-]
-
-// Visibility options
-const visibilityOptions: ComboboxOption[] = [
-  { value: "private", label: "Private" },
-  { value: "team", label: "Team" },
-  { value: "public", label: "Public" },
-]
-
 export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScreen = false }: NoteDetailsViewProps) {
   const [noteTitle, setNoteTitle] = React.useState(note.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
+  const [editingField, setEditingField] = React.useState<string | null>(null)
   const [fieldValues, setFieldValues] = React.useState({
     title: note?.title || "Untitled Note",
     topic: note?.topic || "",
     author: note?.author || "Unknown Author",
-    category: note?.category || "general",
-    type: note?.type || "detailed",
-    visibility: note?.visibility || "private",
-    tags: note?.tags || "",
     createdAt: note?.createdAt || new Date().toISOString(),
     updatedAt: note?.updatedAt || new Date().toISOString(),
   })
 
-  const [noteText, setNoteText] = React.useState(note?.content || "")
+  const [noteText, setNoteText] = React.useState(note?.content || `Investment Review Summary:
+This note captures key insights from our quarterly portfolio review and strategic planning session.
+
+Portfolio Analysis:
+- Current AUM: $485M across 23 entities
+- YTD Performance: +12.3% (outperforming benchmark by 280bps)
+- Asset Allocation: 42% Private Equity, 35% Public Markets, 18% Fixed Income, 5% Alternatives
+- Geographic Distribution: 60% North America, 25% Europe, 15% Asia-Pacific
+
+Key Investment Decisions:
+1. Approved $15M commitment to emerging markets growth fund
+2. Initiated position reduction in technology sector (currently overweight at 32%)
+3. Exploring co-investment opportunity in healthcare logistics platform
+4. Evaluating secondary market opportunities for mature PE positions
+
+Risk Management Considerations:
+- Increasing hedge ratio on international equity exposure due to currency volatility
+- Implementing stop-loss protocols for concentrated positions exceeding 5% of portfolio
+- Enhanced due diligence procedures for new fund managers (minimum 5-year track record)
+- Quarterly stress testing of portfolio under various market scenarios
+
+Tax Optimization Strategies:
+- Identified $2.3M in potential tax loss harvesting opportunities
+- Restructuring Delaware entities to optimize state tax exposure
+- Exploring Qualified Opportunity Zone investments for capital gains deferral
+- Year-end charitable giving strategy to offset realized gains
+
+Compliance Updates:
+- All entities current with quarterly filings
+- KYC documentation updated for international banking relationships
+- New beneficial ownership reporting requirements effective Q1 2024
+- Annual audit preparation commenced with target completion by March
+
+Next Steps:
+- Execute approved rebalancing trades by month-end
+- Schedule due diligence calls with three prospective fund managers
+- Review and update Investment Policy Statement
+- Prepare detailed attribution analysis for board presentation
+
+This note will be updated following next month's investment committee meeting.`)
+  const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
   const [filesViewMode, setFilesViewMode] = React.useState<"table" | "card" | "list">("table")
   const [tasksViewMode, setTasksViewMode] = React.useState<"table" | "card" | "list">(isFullScreen ? "table" : "list")
+
+  // State for which sections are open
+  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
+    details: true,
+    addNotes: true,
+  })
+
+  // Toggle section open/closed
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }))
+  }
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
@@ -133,103 +153,8 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
 
   const handleFieldEdit = (field: string, value: any) => {
     setFieldValues((prev) => ({ ...prev, [field]: value }))
-    // Here you would typically make an API call to save the change
-    console.log(`Updated ${field} to:`, value)
+    setEditingField(null)
   }
-
-  // Define sections for the details panel
-  const sections: DetailSection[] = [
-    {
-      id: "details",
-      title: "Note Details",
-      icon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-      fields: [
-        {
-          label: "Topic",
-          value: fieldValues.topic,
-          editable: true,
-          fieldType: "text",
-          onChange: (value) => handleFieldEdit("topic", value),
-        },
-        {
-          label: "Category",
-          value: fieldValues.category,
-          editable: true,
-          fieldType: "combobox",
-          options: categoryOptions,
-          onChange: (value) => handleFieldEdit("category", value),
-          formatDisplay: (value) => {
-            const option = categoryOptions.find(opt => opt.value === value)
-            return option?.label || value
-          }
-        },
-        {
-          label: "Type",
-          value: fieldValues.type,
-          editable: true,
-          fieldType: "combobox",
-          options: typeOptions,
-          onChange: (value) => handleFieldEdit("type", value),
-          formatDisplay: (value) => {
-            const option = typeOptions.find(opt => opt.value === value)
-            return option?.label || value
-          }
-        },
-        {
-          label: "Author",
-          value: fieldValues.author,
-          editable: true,
-          fieldType: "text",
-          onChange: (value) => handleFieldEdit("author", value),
-        },
-        {
-          label: "Tags",
-          value: fieldValues.tags,
-          editable: true,
-          fieldType: "text",
-          onChange: (value) => handleFieldEdit("tags", value),
-          formatDisplay: (value) => {
-            if (!value) return <span className="text-muted-foreground">No tags</span>
-            const tags = value.split(',').map((tag: string) => tag.trim()).filter(Boolean)
-            return (
-              <div className="flex flex-wrap gap-1">
-                {tags.map((tag: string, index: number) => (
-                  <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-muted">
-                    <TagIcon className="h-3 w-3" />
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )
-          }
-        },
-        {
-          label: "Visibility",
-          value: fieldValues.visibility,
-          editable: true,
-          fieldType: "combobox",
-          options: visibilityOptions,
-          onChange: (value) => handleFieldEdit("visibility", value),
-          formatDisplay: (value) => {
-            const option = visibilityOptions.find(opt => opt.value === value)
-            return option?.label || value
-          }
-        },
-        {
-          label: "Created",
-          value: fieldValues.createdAt,
-          formatDisplay: (value) => new Date(value).toLocaleDateString(),
-        },
-        {
-          label: "Updated",
-          value: fieldValues.updatedAt,
-          editable: true,
-          fieldType: "date",
-          onChange: (value) => handleFieldEdit("updatedAt", value),
-        },
-      ],
-    },
-  ];
 
   // Activity content component
   const NoteActivityContent = () => {
@@ -263,7 +188,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
         ...file,
         name: file.name || file.fileName || file.title,
         uploadedBy: file.uploadedBy || "Unknown",
-        uploadedDate: file.uploadedDate || (file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Unknown"),
+        uploadedDate: file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : "Unknown"),
         size: file.size || file.fileSize || "Unknown",
       }));
       
@@ -358,40 +283,106 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
 
       {/* Tab Content */}
       {activeTab === "details" ? (
-        <UnifiedDetailsPanel
-          sections={sections}
-          isFullScreen={isFullScreen}
-          activityContent={!isFullScreen && <NoteActivityContent />}
-          additionalContent={
-            !hideAddNotes && (
-              <div className="rounded-lg border border-muted overflow-hidden">
-                <div className="group">
-                  <button 
-                    className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors bg-muted/20`}
-                  >
-                    <div className="flex items-center">
-                      <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
-                      <div className="flex items-center gap-2">
-                        <EditIcon className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">Notes</span>
+        <div className="flex flex-col flex-1">
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-6 pt-2 pb-6">
+              <div className="space-y-5">
+                {/* Note Details Card */}
+                <div className="rounded-lg border border-muted overflow-hidden">
+                  {/* Note Details Section */}
+                  <div className="group">
+                    <button 
+                      onClick={() => toggleSection('details')}
+                      className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${openSections.details ? 'bg-muted/20' : ''}`}
+                    >
+                      <div className="flex items-center">
+                        {openSections.details ? (
+                          <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
+                        ) : (
+                          <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
+                        )}
+                        <div className="flex items-center gap-2">
+                          <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">Note Details</span>
+                        </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
 
-                  {/* Section Content */}
-                  <div className="px-5 pb-3 pt-2">
-                    <TypableArea 
-                      value={noteText} 
-                      onChange={setNoteText} 
-                      placeholder="Start typing to add your thoughts..." 
-                      showButtons={false} 
-                    />
+                    {/* Section Content */}
+                    {openSections.details && (
+                      <div className="px-3 pb-3 pt-2">
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Topic</Label>
+                            <p className="text-sm flex-1">{fieldValues.topic}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Author</Label>
+                            <p className="text-sm flex-1">{fieldValues.author}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Created</Label>
+                            <p className="text-sm flex-1">{formatDate(new Date(fieldValues.createdAt))}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Updated</Label>
+                            <p className="text-sm flex-1">{formatDate(new Date(fieldValues.updatedAt))}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {/* Add Notes Card - Separate */}
+                {!hideAddNotes && (
+                  <div className="rounded-lg border border-muted overflow-hidden">
+                    <div className="group">
+                      <button 
+                        onClick={() => toggleSection('addNotes')}
+                        className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${openSections.addNotes ? 'bg-muted/20' : ''}`}
+                      >
+                        <div className="flex items-center">
+                          {openSections.addNotes ? (
+                            <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
+                          ) : (
+                            <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
+                          )}
+                          <div className="flex items-center gap-2">
+                            <EditIcon className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium text-sm">Notes</span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Section Content */}
+                      {openSections.addNotes && (
+                        <div className="px-5 pb-3 pt-2">
+                          <TypableArea 
+                            value={noteText} 
+                            onChange={setNoteText} 
+                            placeholder="Start typing to add your thoughts..." 
+                            showButtons={false} 
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            )
-          }
-        />
+            </div>
+          </div>
+
+          {/* Activity Section - Fixed at bottom */}
+          {!isFullScreen && (
+            <div className="border-t bg-background">
+              <div className="px-6 py-4">
+                <NoteActivityContent />
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
         <div className={`${isFullScreen ? 'px-6 py-6' : 'p-6'}`}>
           {getTabContent()}

@@ -656,11 +656,253 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
       return [
         {
           id: 1,
-          title: "Initial call notes",
-          content: "Discussed investment opportunity and next steps for " + opportunity.name,
+          title: "Investment Committee Analysis",
+          content: `Investment Opportunity Assessment - ${opportunity.name}
+
+Date: January 10, 2025
+Prepared by: Investment Team
+Company: ${opportunity.company.name}
+Deal Type: ${opportunity.dealType}
+Stage: ${opportunity.stage}
+
+Executive Summary:
+This memorandum presents our analysis of the ${opportunity.name} investment opportunity. After comprehensive due diligence and market analysis, we recommend proceeding with a ${opportunity.amount} investment as part of the ${opportunity.fundingRound}.
+
+Investment Highlights:
+1. Market Opportunity:
+   - TAM: $${Math.floor(Math.random() * 50 + 20)}B growing at ${Math.floor(Math.random() * 20 + 15)}% CAGR
+   - Company positioned to capture significant market share
+   - Clear path to market leadership in ${opportunity.sector}
+
+2. Business Model:
+   - Recurring revenue model with strong unit economics
+   - Gross margins of ${Math.floor(Math.random() * 30 + 60)}%
+   - Low customer acquisition costs
+   - High customer lifetime value
+
+3. Team Assessment:
+   - CEO: Former VP at Fortune 500 company
+   - CTO: 20+ years experience, 3 successful exits
+   - Strong bench depth across all functions
+   - Board includes industry luminaries
+
+4. Financial Performance:
+   - Current ARR: $${Math.floor(Math.random() * 50 + 10)}M
+   - YoY Growth: ${Math.floor(Math.random() * 100 + 50)}%
+   - Path to profitability: ${Math.floor(Math.random() * 24 + 12)} months
+   - Burn rate well-managed
+
+5. Investment Terms:
+   - Our Investment: ${opportunity.amount}
+   - Valuation: ${opportunity.valuation}
+   - Ownership: ${Math.floor(Math.random() * 10 + 5)}% (fully diluted)
+   - Pro-rata rights for future rounds
+
+Risk Analysis:
+• Market Risk: MODERATE - Competitive landscape evolving
+• Execution Risk: LOW - Team has proven track record
+• Technology Risk: LOW - Platform is mature and scalable
+• Regulatory Risk: LOW - No significant concerns
+
+Strategic Fit:
+This opportunity aligns perfectly with our family office investment strategy:
+- Focus on ${opportunity.sector} sector
+- ${opportunity.stage} stage investments
+- Geographic presence in ${opportunity.geography}
+- ESG compliance verified
+
+Co-Investment Partners:
+- Lead Investor: Top-tier VC firm
+- Other participants: Strategic corporate investor
+- Total round: ${opportunity.targetRaise}
+
+Due Diligence Completed:
+✓ Financial audit by Big 4 firm
+✓ Legal review by external counsel
+✓ Technical due diligence
+✓ Customer reference calls (15 completed)
+✓ Background checks on key executives
+
+Investment Committee Vote:
+- Unanimous approval (5-0)
+- Strong enthusiasm from all members
+- Recommended for immediate execution
+
+Next Steps:
+1. Execute subscription agreement
+2. Wire funds by ${opportunity.expectedCloseDate}
+3. Designate board observer
+4. Schedule quarterly review meetings
+5. Introduce to portfolio companies for synergies
+
+Conclusion:
+This represents a compelling opportunity to invest in a high-growth company with strong fundamentals. The investment aligns with our strategic objectives and offers attractive risk-adjusted returns.`,
           author: "Mike Wilson",
           date: "2024-01-10",
-          tags: ["call", "initial", "opportunity"],
+          tags: ["Investment Committee", "Analysis", "Recommendation"],
+        },
+        {
+          id: 2,
+          title: "Due Diligence Summary",
+          content: `Due Diligence Report - ${opportunity.name}
+
+Date: January 5, 2024
+Lead: Investment Team
+Status: COMPLETED
+
+Overview:
+We have completed comprehensive due diligence on ${opportunity.company.name} for the proposed ${opportunity.amount} investment. Our findings support proceeding with the investment.
+
+Key Findings:
+
+1. Business Due Diligence:
+   ✓ Business model validated with customers
+   ✓ Strong product-market fit confirmed
+   ✓ Competitive advantages sustainable
+   ✓ Growth projections achievable
+
+2. Financial Due Diligence:
+   ✓ Historical financials audited and clean
+   ✓ Revenue recognition appropriate
+   ✓ Cash flow projections reasonable
+   ✓ No hidden liabilities identified
+
+3. Legal Due Diligence:
+   ✓ Corporate structure properly organized
+   ✓ All IP owned by company
+   ✓ No material litigation
+   ✓ Employment agreements in place
+
+4. Technical Due Diligence:
+   ✓ Technology platform scalable
+   ✓ No critical technical debt
+   ✓ Security measures appropriate
+   ✓ Development roadmap realistic
+
+5. Commercial Due Diligence:
+   ✓ Customer satisfaction high (NPS: 72)
+   ✓ Low churn rates (<5% annually)
+   ✓ Strong sales pipeline
+   ✓ Expansion opportunities identified
+
+Red Flags Identified: None
+
+Yellow Flags:
+- Customer concentration (top 10 = 45% of revenue)
+- International expansion requires investment
+- Key person dependency on CTO
+
+Mitigation Strategies:
+- Diversification plan in place
+- International team being hired
+- CTO succession planning initiated
+
+Reference Calls Summary:
+- 15 customer references (all positive)
+- 5 investor references (strong endorsements)
+- 3 partner references (excellent feedback)
+
+Expert Network Feedback:
+- Industry experts validate market opportunity
+- Technology approach considered best-in-class
+- Team highly regarded in industry
+
+Investment Recommendation: PROCEED
+
+The company presents an attractive investment opportunity with manageable risks and strong upside potential.`,
+          author: "Sarah Johnson",
+          date: "2024-01-05",
+          tags: ["Due Diligence", "Summary", "Completed"],
+        },
+        {
+          id: 3,
+          title: "Strategic Rationale",
+          content: `Strategic Investment Thesis - ${opportunity.name}
+
+Date: January 3, 2024
+Author: Investment Director
+
+Strategic Context:
+This investment opportunity in ${opportunity.company.name} represents a strategic addition to our family office portfolio, providing exposure to the high-growth ${opportunity.sector} sector.
+
+Portfolio Construction Benefits:
+
+1. Diversification:
+   - Adds exposure to ${opportunity.sector} (currently underweight)
+   - Geographic diversification in ${opportunity.geography}
+   - Stage diversification (${opportunity.stage})
+   - Low correlation with existing holdings
+
+2. Synergies with Portfolio:
+   - Customer overlap with 3 portfolio companies
+   - Technology complementary to existing investments
+   - Management team connections valuable
+   - Cross-selling opportunities identified
+
+3. Family Office Objectives:
+   - Aligns with next-generation interests
+   - ESG criteria fully satisfied
+   - Educational opportunity for family members
+   - Potential for philanthropic partnership
+
+Market Thesis:
+The ${opportunity.sector} market is experiencing secular growth driven by:
+- Digital transformation acceleration
+- Changing consumer behaviors
+- Regulatory tailwinds
+- Technology enablement
+
+We believe ${opportunity.company.name} is uniquely positioned to capitalize on these trends through:
+- Superior technology platform
+- First-mover advantage in key segments
+- Network effects creating moat
+- Experienced team with domain expertise
+
+Value Creation Plan:
+1. Operational Support:
+   - Introduce to our advisor network
+   - Share best practices from portfolio
+   - Assist with executive recruiting
+   - Provide market intelligence
+
+2. Strategic Initiatives:
+   - Facilitate customer introductions
+   - Support international expansion
+   - Help with add-on acquisitions
+   - Board governance expertise
+
+3. Exit Planning:
+   - IPO candidate in 3-5 years
+   - Strategic buyer interest likely
+   - Secondary opportunities available
+   - Management buy-back possible
+
+Expected Returns:
+- Base Case: 3.5x MOIC, 35% IRR
+- Bull Case: 5.0x MOIC, 45% IRR
+- Bear Case: 1.5x MOIC, 10% IRR
+- Probability-weighted: 3.8x MOIC
+
+Investment Horizon: 4-6 years
+
+Key Success Factors:
+1. Continued market growth
+2. Successful product roadmap execution
+3. Talent retention and recruitment
+4. International expansion success
+5. Maintaining technology leadership
+
+Monitoring Plan:
+- Quarterly financial reporting
+- Monthly KPI dashboard
+- Board observer rights
+- Annual strategy sessions
+- Regular management check-ins
+
+This investment strongly aligns with our family office strategy and offers attractive risk-adjusted returns with multiple paths to liquidity.`,
+          author: "Michael Chen",
+          date: "2024-01-03",
+          tags: ["Strategy", "Investment Thesis", "Portfolio"],
         },
       ]
     case "meetings":
@@ -806,7 +1048,7 @@ function getOpportunityTabData(activeTab: string, opportunity: Opportunity) {
 function OpportunityNameCell({ opportunity }: { opportunity: Opportunity }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
+    { id: "notes", label: "Notes", count: 3, icon: FileIcon },
     { id: "files", label: "Files", count: 5, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
     { id: "emails", label: "Emails", count: 3, icon: MailIcon },
@@ -1002,7 +1244,7 @@ const columns: ColumnDef<Opportunity>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Opportunity
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />
@@ -1028,7 +1270,7 @@ const columns: ColumnDef<Opportunity>[] = [
     accessorKey: "decisionStatus",
     header: "Decision Status",
     cell: ({ row }) => (
-      <Badge className={`text-xs ${row.original.decisionStatus === "Approved" ? "bg-green-100 text-green-800" : row.original.decisionStatus === "Pending" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}>
+      <Badge variant="outline" className="text-xs capitalize">
         {row.original.decisionStatus}
       </Badge>
     ),
@@ -1036,7 +1278,7 @@ const columns: ColumnDef<Opportunity>[] = [
   {
     accessorKey: "amount",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Our Investment
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />
@@ -1090,7 +1332,7 @@ const columns: ColumnDef<Opportunity>[] = [
   {
     accessorKey: "expectedCloseDate",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Expected Close
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />
@@ -1120,7 +1362,7 @@ const columns: ColumnDef<Opportunity>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
-      <Badge className={`text-xs ${getStatusColor(row.original.status)}`}>{row.original.status}</Badge>
+      <Badge variant="outline" className="text-xs capitalize">{row.original.status}</Badge>
     ),
   },
   {

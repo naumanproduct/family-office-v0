@@ -4,21 +4,12 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ChevronRight, ChevronDown, ExternalLinkIcon, UnlinkIcon } from "lucide-react"
-import { EditableField, type FieldType } from "@/components/shared/editable-field"
-import { ComboboxOption } from "@/components/ui/combobox"
+import { ChevronRight, ChevronDown, ExternalLinkIcon, UnlinkIcon, ChevronUp } from "lucide-react"
 
 export interface DetailField {
   label: string
   value: React.ReactNode
   isLink?: boolean
-  editable?: boolean
-  fieldType?: FieldType
-  options?: ComboboxOption[]
-  onChange?: (value: any) => void
-  formatDisplay?: (value: any) => React.ReactNode
-  minDate?: Date
-  maxDate?: Date
 }
 
 export interface SectionData {
@@ -106,35 +97,25 @@ export function UnifiedDetailsPanel({
         {fieldsToShow.map((field, index) => (
           <div key={index} className="flex items-center">
             <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
-            <div className="flex-1">
-              {field.editable && field.fieldType ? (
-                <EditableField
-                  value={field.value}
-                  onChange={field.onChange || (() => {})}
-                  type={field.fieldType}
-                  options={field.options}
-                  formatDisplay={field.formatDisplay}
-                  minDate={field.minDate}
-                  maxDate={field.maxDate}
-                />
-              ) : field.isLink ? (
-                <p className="text-sm text-blue-600">{field.value}</p>
-              ) : (
-                <p className="text-sm">{field.value}</p>
-              )}
-            </div>
+            {field.isLink ? (
+              <p className="text-sm text-blue-600 cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
+            ) : (
+              <p className="text-sm cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
+            )}
           </div>
         ))}
-        
         {showAllButton && fields.length > 7 && (
-          <div className="flex items-center mt-2">
-            <Button 
-              variant="link" 
-              className="h-auto p-0 text-xs text-blue-600 ml-2"
-              onClick={() => toggleShowAllValues(sectionId)}
+          <div className="flex items-center mt-2 ml-2">
+            <button
+              onClick={() => setShowingAllValues(prev => ({ ...prev, [sectionId]: !prev[sectionId] }))}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
-              {showingAllValues[sectionId] ? "Show less" : "Show all"}
-            </Button>
+              {showingAllValues[sectionId] ? (
+                <>Show less <ChevronUp className="h-3 w-3" /></>
+              ) : (
+                <>Show more <ChevronDown className="h-3 w-3" /></>
+              )}
+            </button>
           </div>
         )}
       </div>
@@ -197,7 +178,7 @@ export function UnifiedDetailsPanel({
                   <div className="group">
                     <button 
                       onClick={() => toggleSection(section.id)}
-                      className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
+                      className={`w-full flex items-center justify-between p-3 transition-colors ${isOpen ? 'bg-muted/20' : ''}`}
                     >
                       <div className="flex items-center">
                         {isOpen ? (

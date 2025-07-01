@@ -144,19 +144,12 @@ function TableView({
                 )}
               </TableCell>
               <TableCell>
-                <span className={`text-sm ${
-                  item.status.toLowerCase() === "completed" ? "text-green-600" : 
-                  "text-muted-foreground"
-                }`}>
+                <span className="text-sm capitalize">
                   {item.status}
                 </span>
               </TableCell>
               <TableCell>
-                <span className={`text-sm ${
-                  item.priority === "High" ? "text-red-600" : 
-                  item.priority === "Medium" ? "text-yellow-600" : 
-                  "text-green-600"
-                }`}>
+                <span className="text-sm capitalize">
                   {item.priority}
                 </span>
               </TableCell>

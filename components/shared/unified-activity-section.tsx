@@ -173,11 +173,9 @@ export function UnifiedActivitySection({
         <div className="flex items-center justify-between mb-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 px-2 hover:bg-muted">
-                <span className="text-sm font-medium">
-                  {activityFilter === "all" ? "All Activity" : "Comments"}
-                </span>
-                <ChevronDownIcon className="ml-1 h-4 w-4" />
+              <Button variant="ghost" size="sm" className="h-8 px-2">
+                <ChevronDownIcon className="h-4 w-4 mr-1" />
+                {activityFilter === "all" ? "All Activity" : "Comments"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">

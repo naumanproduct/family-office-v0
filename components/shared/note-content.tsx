@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { RecordListItem } from "@/components/shared/record-list-item"
 import { RecordCard } from "@/components/shared/record-card"
+import { formatDate } from "@/lib/utils"
 
 // Define the Note type without priority
 type Note = {
@@ -871,7 +872,7 @@ The committee unanimously agreed to proceed with due diligence, with Sarah Johns
                   </TableCell>
                   <TableCell className="font-medium text-sm">{note.title}</TableCell>
                   <TableCell className="text-sm">{note.author}</TableCell>
-                  <TableCell className="text-sm">{note.date || new Date(note.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-sm">{note.date || formatDate(new Date(note.createdAt))}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -909,7 +910,7 @@ The committee unanimously agreed to proceed with due diligence, with Sarah Johns
               primaryMetadata={[]}
               secondaryMetadata={{
                 left: note.author || "",
-                right: note.date || new Date(note.createdAt).toLocaleDateString()
+                right: note.date || formatDate(new Date(note.createdAt))
               }}
               onClick={() => handleNoteSelect(note)}
               actions={[
@@ -932,7 +933,7 @@ The committee unanimously agreed to proceed with due diligence, with Sarah Johns
               primaryMetadata={[]}
               secondaryMetadata={{
                 left: note.author || "",
-                right: note.date || new Date(note.createdAt).toLocaleDateString()
+                right: note.date || formatDate(new Date(note.createdAt))
               }}
               onClick={() => handleNoteSelect(note)}
               actions={[

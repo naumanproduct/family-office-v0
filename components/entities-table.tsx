@@ -70,6 +70,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { formatDate } from "@/lib/utils"
 
 // Import the AddEntityDialog
 import { AddEntityDialog } from "./add-entity-dialog"
@@ -379,246 +380,273 @@ function getEntityTabData(activeTab: string, entity: Entity) {
       return [
         {
           id: 1,
-          title: "Initial call notes",
-          content: "Discussed investment opportunity and next steps for " + entity.entityName,
-          author: "Mike Wilson",
-          date: "2024-01-10",
-          tags: ["call", "initial", "opportunity"],
+          title: "Entity Structure Review",
+          date: "Yesterday",
+          author: "Legal Team",
+          topic: "Entity Structure Review",
+          content: `Entity Analysis - ${entity.entityName}
+
+Meeting Date: January 29, 2025
+Participants: Legal Team, Tax Advisory, Compliance
+
+Executive Summary:
+This memorandum provides a comprehensive review of ${entity.entityName} structure and recommendations for optimization within the family office framework.
+
+Entity Details:
+• Name: ${entity.entityName}
+• Type: ${entity.entityType}
+• Jurisdiction: ${entity.jurisdiction}
+• Purpose: ${entity.rolePurpose}
+• Status: ${entity.status}
+• Ownership: ${entity.ownershipPercent ? entity.ownershipPercent + '%' : 'N/A'}
+• Parent Entity: ${entity.parentEntity || 'None'}
+
+Structural Analysis:
+1. Current Structure Assessment:
+   - Entity properly domiciled in ${entity.jurisdiction}
+   - Corporate formalities maintained
+   - Governance structure appropriate
+   - Ownership chain clearly documented
+
+2. Tax Efficiency Review:
+   - Current structure optimized for tax efficiency
+   - Pass-through taxation benefits utilized
+   - No adverse tax consequences identified
+   - International tax treaties applicable
+
+3. Regulatory Compliance:
+   ✓ All annual filings current
+   ✓ Registered agent active
+   ✓ Business licenses maintained
+   ✓ Financial reporting compliant
+
+Risk Assessment:
+• Structural Risk: LOW - Well-organized structure
+• Tax Risk: LOW - Compliant with regulations
+• Operational Risk: MODERATE - Key person dependency
+• Reputational Risk: LOW - Clean compliance record
+
+Optimization Opportunities:
+1. Consider converting to Series LLC for subsidiaries
+2. Implement management agreement for efficiency
+3. Explore offshore structuring for international assets
+4. Consolidate inactive entities to reduce costs
+
+Asset Protection Features:
+• Limited liability protection intact
+• Charging order protection (LLC)
+• Asset segregation properly maintained
+• Insurance coverage adequate
+
+Governance Recommendations:
+1. Update operating agreement annually
+2. Document all major decisions
+3. Maintain corporate minute book
+4. Regular compliance calendar review
+
+Financial Considerations:
+• Annual maintenance cost: $${Math.floor(Math.random() * 20 + 5)}K
+• Potential tax savings: $${Math.floor(Math.random() * 100 + 50)}K
+• Administrative burden: Moderate
+• ROI on structure: Positive
+
+Next Steps:
+1. Schedule annual entity review (Q2 2025)
+2. Update beneficial ownership information
+3. Review management structure
+4. Consider subsidiary consolidation
+
+This entity structure remains appropriate for its intended purpose with minor optimization opportunities available.`,
+          tags: ["Structure Review", "Legal", "Compliance"],
+        },
+        {
+          id: 2,
+          title: "Annual Compliance Checklist",
+          date: "Last week",
+          author: "Compliance Officer",
+          topic: "Annual Compliance Checklist",
+          content: `${entity.entityName} - Annual Compliance Review
+
+Review Date: January 22, 2025
+Entity: ${entity.entityName}
+Type: ${entity.entityType}
+Jurisdiction: ${entity.jurisdiction}
+
+Compliance Status Overview:
+All required filings and compliance obligations for ${entity.entityName} have been reviewed. The entity is currently in good standing with all relevant authorities.
+
+Annual Filing Requirements:
+☑ State Annual Report - Filed (Due: ${entity.jurisdiction === 'Delaware' ? 'March 1' : 'Varies'})
+☑ Registered Agent - Current (Next renewal: December 31, 2025)
+☑ Business License - Active (Renewal: June 30, 2025)
+☐ Franchise Tax - Pending (Due: June 1, 2025)
+☑ Federal Tax Return - On schedule
+☑ State Tax Return - On schedule
+
+Corporate Governance:
+☑ Annual Meeting - Held January 15, 2025
+☑ Board Resolutions - Documented
+☑ Minute Book - Updated
+☑ Stock/Membership Ledger - Current
+☑ Operating Agreement - Reviewed
+
+Regulatory Compliance:
+☑ FinCEN Beneficial Ownership - Filed
+☑ Foreign Entity Registration - Current (if applicable)
+☑ DBA/Trade Names - Active
+☑ EIN Documentation - On file
+☑ State Tax ID - Active
+
+Banking & Financial:
+☑ Bank Resolutions - Updated
+☑ Signatory Cards - Current
+☑ Credit Facilities - Reviewed
+☑ Financial Statements - Prepared
+
+Insurance Review:
+☑ D&O Insurance - Active ($${Math.floor(Math.random() * 10 + 5)}M coverage)
+☑ General Liability - Current
+☑ Property Insurance - Adequate
+☑ Cyber Insurance - In place
+
+Key Dates for 2025:
+• March 1: Delaware Annual Report
+• March 15: Federal Tax Filing
+• June 1: Franchise Tax Payment
+• June 30: Business License Renewal
+• December 31: Registered Agent Renewal
+
+Recommendations:
+1. Schedule Q2 compliance review
+2. Update beneficial ownership if changes occur
+3. Review D&O insurance limits
+4. Consider consolidating filing dates
+
+The entity remains in full compliance with all applicable requirements.`,
+          tags: ["Compliance", "Annual Review", "Checklist"],
+        },
+        {
+          id: 3,
+          title: "Investment Authority Memo",
+          date: "2 weeks ago",
+          author: "Investment Committee",
+          topic: "Investment Authority Memo",
+          content: `Investment Authority Documentation - ${entity.entityName}
+
+Date: January 15, 2025
+Entity: ${entity.entityName}
+Manager: ${entity.managerController}
+
+Purpose:
+This memorandum documents the investment authority and guidelines for ${entity.entityName} as approved by the Investment Committee.
+
+Entity Investment Profile:
+• Entity Type: ${entity.entityType}
+• Investment Purpose: ${entity.rolePurpose}
+• Risk Profile: Moderate to Aggressive
+• Investment Horizon: Long-term (10+ years)
+• Liquidity Needs: Low to Moderate
+
+Authorized Investment Categories:
+1. Public Equities: Up to 60% of portfolio
+2. Private Equity: Up to 40% of portfolio
+3. Real Estate: Up to 30% of portfolio
+4. Fixed Income: Up to 20% of portfolio
+5. Alternative Investments: Up to 25% of portfolio
+6. Cash & Equivalents: Minimum 5%
+
+Investment Authority Limits:
+• ${entity.managerController} Authority:
+  - Single investment: Up to $${Math.floor(Math.random() * 5 + 1)}M
+  - Annual aggregate: Up to $${Math.floor(Math.random() * 20 + 10)}M
+  - Requires IC approval above limits
+
+• Investment Committee Authority:
+  - Single investment: Up to $${Math.floor(Math.random() * 20 + 10)}M
+  - No annual limit
+  - Board approval required above $${Math.floor(Math.random() * 50 + 25)}M
+
+Restricted Investments:
+✗ Margin trading or leverage beyond 2:1
+✗ Cryptocurrency exceeding 5% of portfolio
+✗ Single position exceeding 15% of portfolio
+✗ Related party transactions without approval
+✗ Speculative derivatives
+
+Investment Process:
+1. Investment Sourcing
+   - Manager identifies opportunities
+   - Initial screening performed
+   - Preliminary due diligence
+
+2. Investment Analysis
+   - Full due diligence required
+   - Investment memo preparation
+   - Risk assessment completion
+
+3. Approval Process
+   - Manager approval (within limits)
+   - IC review for larger investments
+   - Board notification quarterly
+
+Performance Benchmarks:
+• Absolute Return Target: 12% annually
+• Relative Benchmark: S&P 500 + 200bps
+• Risk-Adjusted: Sharpe Ratio > 1.0
+• Liquidity: 20% within 30 days
+
+Reporting Requirements:
+• Monthly: Position summary to Manager
+• Quarterly: Performance report to IC
+• Annually: Comprehensive review to Board
+
+This authority is effective immediately and remains in force until modified by the Investment Committee.`,
+          tags: ["Investment Authority", "Guidelines", "Policy"],
         },
       ]
     case "meetings":
       return [
         {
           id: 1,
-          title: "Investment Committee Meeting",
-          date: "2024-02-10",
-          time: "10:00 AM",
-          attendees: ["John Smith", "Sarah Johnson", "Mike Wilson"],
-          status: "Scheduled",
-        },
-        {
-          id: 2,
-          title: "Due Diligence Review",
-          date: "2024-02-15",
+          title: "Annual Entity Review",
+          date: "Next month",
           time: "2:00 PM",
-          attendees: ["Jessica Martinez", "Sarah Johnson"],
+          attendees: ["Legal", "Tax Advisory"],
           status: "Scheduled",
-        },
-        {
-          id: 3,
-          title: "Management Presentation",
-          date: "2024-02-20",
-          time: "9:00 AM",
-          attendees: ["Management Team", "Investment Committee"],
-          status: "Pending",
-        },
-        {
-          id: 4,
-          title: "Final Investment Decision",
-          date: "2024-02-25",
-          time: "11:00 AM",
-          attendees: ["Investment Committee"],
-          status: "Pending",
         },
       ]
     case "files":
       return [
         {
           id: 1,
-          name: "Investment Memorandum.pdf",
-          size: "2.4 MB",
-          type: "PDF",
-          uploadedDate: "2024-01-15",
-          uploadedBy: "John Smith",
+          name: "Operating_Agreement.pdf",
+          size: "1.5 MB",
+          uploadedBy: "Legal Team",
+          uploadedDate: "6 months ago",
+          type: "pdf",
         },
         {
           id: 2,
-          name: "Financial Statements Q4.xlsx",
-          size: "1.1 MB",
-          type: "Excel",
-          uploadedDate: "2024-01-20",
-          uploadedBy: "Sarah Johnson",
-        },
-        {
-          id: 3,
-          name: "Due Diligence Checklist.docx",
-          size: "850 KB",
-          type: "Word",
-          uploadedDate: "2024-01-25",
-          uploadedBy: "Mike Wilson",
-        },
-        {
-          id: 4,
-          name: "Market Analysis Report.pdf",
+          name: "Tax_Returns_2023.pdf",
           size: "3.2 MB",
-          type: "PDF",
-          uploadedDate: "2024-02-01",
-          uploadedBy: "Analysis Team",
-        },
-        {
-          id: 5,
-          name: "Legal Documents.zip",
-          size: "5.8 MB",
-          type: "Archive",
-          uploadedDate: "2024-02-05",
-          uploadedBy: "Jessica Martinez",
+          uploadedBy: "Tax Advisory",
+          uploadedDate: "1 year ago",
+          type: "pdf",
         },
       ]
     case "team":
       return [
         {
           id: 1,
-          name: "John Smith",
-          role: "Investment Manager",
-          email: "john.smith@company.com",
+          name: entity.managerController,
+          role: "Manager",
+          email: `${entity.managerController.toLowerCase().replace(' ', '.')}@company.com`,
           phone: "+1 (555) 123-4567",
-        },
-        {
-          id: 2,
-          name: "Sarah Johnson",
-          role: "Senior Analyst",
-          email: "sarah.johnson@company.com",
-          phone: "+1 (555) 234-5678",
-        },
-        {
-          id: 3,
-          name: "Mike Wilson",
-          role: "Investment Director",
-          email: "mike.wilson@company.com",
-          phone: "+1 (555) 345-6789",
-        },
-        {
-          id: 4,
-          name: "Emily Davis",
-          role: "Research Analyst",
-          email: "emily.davis@company.com",
-          phone: "+1 (555) 456-7890",
-        },
-        {
-          id: 5,
-          name: "David Brown",
-          role: "Investment Associate",
-          email: "david.brown@company.com",
-          phone: "+1 (555) 567-8901",
-        },
-        {
-          id: 6,
-          name: "Lisa Garcia",
-          role: "Operations Manager",
-          email: "lisa.garcia@company.com",
-          phone: "+1 (555) 678-9012",
-        },
-      ]
-    case "company":
-      return [
-        {
-          id: 1,
-          name: entity.entityName,
-          type: entity.entityType,
-          description: "Company information and details",
-          website: "https://company.com",
-          industry: "Various",
-          location: entity.jurisdiction,
         },
       ]
     default:
       return []
   }
-}
-
-function EntityNameCell({ entity }: { entity: Entity }) {
-  const tabs = [
-    { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
-    { id: "files", label: "Files", count: 5, icon: FileTextIcon },
-    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
-    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
-    { id: "meetings", label: "Meetings", count: 4, icon: CalendarIcon },
-    { id: "team", label: "People", count: 6, icon: UsersIcon },
-    { id: "company", label: "Company", count: null, icon: BuildingIcon },
-  ]
-
-  const renderTabContent = (
-    activeTab: string,
-    viewMode: "card" | "list" | "table",
-    setSelectedTask?: (task: any) => void,
-    setSelectedNote?: (note: any) => void,
-    setSelectedMeeting?: (meeting: any) => void,
-    setSelectedEmail?: (email: any) => void,
-  ) => {
-    if (activeTab === "details") {
-      return <EntityDetailsPanel entity={entity} isFullScreen={false} />
-    }
-
-    // For other tabs, return generic content similar to the dashboard
-    const data = getEntityTabData(activeTab, entity)
-
-    if (viewMode === "table") {
-      return (
-        <TableView
-          data={data}
-          activeTab={activeTab}
-          onTaskClick={setSelectedTask}
-          onNoteClick={setSelectedNote}
-          onMeetingClick={setSelectedMeeting}
-          onEmailClick={setSelectedEmail}
-        />
-      )
-    }
-
-    if (viewMode === "card") {
-      return (
-        <CardView
-          data={data}
-          activeTab={activeTab}
-          onTaskClick={setSelectedTask}
-          onNoteClick={setSelectedNote}
-          onMeetingClick={setSelectedMeeting}
-          onEmailClick={setSelectedEmail}
-        />
-      )
-    }
-
-    return (
-      <ListView
-        data={data}
-        activeTab={activeTab}
-        onTaskClick={setSelectedTask}
-        onNoteClick={setSelectedNote}
-        onMeetingClick={setSelectedMeeting}
-        onEmailClick={setSelectedEmail}
-      />
-    )
-  }
-
-  const renderDetailsPanel = (isFullScreen = false) => {
-    return <EntityDetailsPanel entity={entity} isFullScreen={isFullScreen} />
-  }
-
-  const customActions: React.ReactNode[] = []
-
-  return (
-    <MasterDrawer
-      trigger={
-        <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium">
-              {entity.entityName.charAt(0)}
-            </div>
-            <span className="font-medium">{entity.entityName}</span>
-          </div>
-        </Button>
-      }
-      title={entity.entityName}
-      recordType="Entities"
-      subtitle={`${entity.entityType} • ${entity.jurisdiction}`}
-      tabs={tabs}
-      detailsPanel={renderDetailsPanel}
-      customActions={customActions}
-    >
-      {renderTabContent}
-    </MasterDrawer>
-  )
 }
 
 function EntityActivityContent() {
@@ -627,25 +655,19 @@ function EntityActivityContent() {
 }
 
 function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; isFullScreen?: boolean }) {
-  // Mock data for related items
   const relatedData = {
     companies: [
-      { id: 1, name: "Portfolio Holdings Inc", type: "Portfolio Company" },
-      { id: 2, name: "Tech Ventures LLC", type: "Operating Company" },
-    ],
-    people: [
-      { id: 1, name: entity.managerController, role: "Manager" },
-      { id: 2, name: "Jane Smith", role: "Director" },
-    ],
-    entities: entity.parentEntity 
-      ? [
-          { id: 1, name: entity.parentEntity, type: "Parent Entity" },
-          { id: 2, name: "Investment Holdings LLC", type: "Subsidiary" },
-        ] 
-      : [
           { id: 1, name: "Investment Holdings LLC", type: "Subsidiary" },
           { id: 2, name: "Operations Entity Corp", type: "Related Entity" },
         ],
+    people: [
+      { id: 1, name: entity.managerController, role: "Manager" },
+      { id: 2, name: "Legal Advisor", role: "Counsel" },
+    ],
+    entities: [
+      { id: 1, name: entity.parentEntity || "Parent Holdings", type: "Parent" },
+      { id: 2, name: "Sister Entity LLC", type: "Related" },
+    ],
     investments: [
       { id: 1, name: "Tech Investments LP", type: "Investment Vehicle" },
       { id: 2, name: "Growth Fund Series A", type: "Fund Investment" },
@@ -684,7 +706,7 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
     },
     {
       label: "Date Formed",
-      value: new Date(entity.dateFormed).toLocaleDateString(),
+      value: formatDate(entity.dateFormed),
     },
   ];
   
@@ -702,7 +724,7 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
     },
     {
       label: "Last Modified",
-      value: new Date(entity.lastModified).toLocaleDateString(),
+      value: formatDate(entity.lastModified),
     },
     {
       label: "Linked Documents",
@@ -757,11 +779,62 @@ function EntityDetailsPanel({ entity, isFullScreen = false }: { entity: Entity; 
   );
 }
 
+function EntityNameCell({ entity }: { entity: Entity }) {
+  const tabs = [
+    { id: "details", label: "Details", count: null, icon: LandmarkIcon },
+    { id: "notes", label: "Notes", count: 3, icon: FileIcon },
+    { id: "files", label: "Files", count: 2, icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", count: 2, icon: CheckCircleIcon },
+    { id: "emails", label: "Emails", count: 3, icon: MailIcon },
+    { id: "meetings", label: "Meetings", count: 1, icon: CalendarIcon },
+    { id: "team", label: "People", count: 1, icon: UsersIcon },
+  ]
+
+  const renderTabContent = (
+    activeTab: string,
+    viewMode: "card" | "list" | "table",
+    setSelectedTask?: (task: any) => void,
+    setSelectedNote?: (note: any) => void,
+    setSelectedMeeting?: (meeting: any) => void,
+    setSelectedEmail?: (email: any) => void,
+  ) => {
+    if (activeTab === "details") {
+      return <EntityDetailsPanel entity={entity} isFullScreen={false} />
+    }
+    const data = getEntityTabData(activeTab, entity)
+    return (
+      <TabContentRenderer activeTab={activeTab} viewMode={viewMode} data={data} onTaskClick={setSelectedTask} onNoteClick={setSelectedNote} onMeetingClick={setSelectedMeeting} onEmailClick={setSelectedEmail} />
+    )
+  }
+
+  return (
+    <MasterDrawer
+      trigger={
+        <Button variant="link" className="w-fit px-0 text-left text-foreground h-auto">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium">
+              {entity.entityName.charAt(0)}
+            </div>
+            <span className="font-medium">{entity.entityName}</span>
+          </div>
+        </Button>
+      }
+      title={entity.entityName}
+      recordType="Entity"
+      subtitle={`${entity.entityType} • ${entity.jurisdiction}`}
+      tabs={tabs}
+      detailsPanel={(isFullScreen) => <EntityDetailsPanel entity={entity} isFullScreen={isFullScreen} />}
+    >
+      {renderTabContent}
+    </MasterDrawer>
+  )
+}
+
 const columns: ColumnDef<Entity>[] = [
   {
     accessorKey: "entityName",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Entity Name
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />
@@ -791,7 +864,7 @@ const columns: ColumnDef<Entity>[] = [
   {
     accessorKey: "ownershipPercent",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Ownership %
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />
@@ -817,7 +890,7 @@ const columns: ColumnDef<Entity>[] = [
   {
     accessorKey: "dateFormed",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 px-2">
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
         Date Formed
         {column.getIsSorted() === "asc" ? (
           <SortAscIcon className="ml-2 h-3 w-3" />
@@ -826,7 +899,7 @@ const columns: ColumnDef<Entity>[] = [
         ) : null}
       </Button>
     ),
-    cell: ({ row }) => <span className="text-sm">{new Date(row.original.dateFormed).toLocaleDateString()}</span>,
+    cell: ({ row }) => <span className="text-sm">{formatDate(row.original.dateFormed)}</span>,
   },
   {
     accessorKey: "status",
@@ -842,7 +915,7 @@ const columns: ColumnDef<Entity>[] = [
     accessorKey: "lastModified",
     header: "Last Modified",
     cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">{new Date(row.original.lastModified).toLocaleDateString()}</span>
+      <span className="text-sm text-muted-foreground">{formatDate(row.original.lastModified)}</span>
     ),
   },
   {

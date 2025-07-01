@@ -139,7 +139,7 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   // State for which sections are open
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
     details: true,
-    attachments: false,
+    attachments: true,
     threads: true,
   })
 

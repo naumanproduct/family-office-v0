@@ -50,6 +50,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input"
 import { buildWorkflowDetailsPanel } from "@/components/shared/workflow-details-helper";
 import { MasterDrawer } from "@/components/master-drawer"
+import { formatDate } from "@/lib/utils"
 
 // Default stages if no config provided
 const defaultStages = [
@@ -160,9 +161,9 @@ function OpportunityCard({
               </div>
               <div className="flex justify-between">
                 <span>Close Date:</span>
-                <span className="font-medium text-foreground">
-                  {new Date(opportunity.expectedClose).toLocaleDateString()}
-                </span>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {formatDate(opportunity.expectedCloseDate)}
+                </div>
               </div>
             </div>
           </div>
@@ -347,7 +348,9 @@ function OpportunityDrawerContent({ opportunity }: { opportunity: Opportunity })
                     <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                     <div className="flex-1">
                       <Label className="text-xs text-muted-foreground">Expected Close</Label>
-                      <p className="text-sm">{opportunity.expectedClose}</p>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {formatDate(opportunity.expectedCloseDate)}
+                      </div>
                     </div>
                   </div>
 
@@ -397,7 +400,7 @@ function DroppableColumn({ stage, opportunities }: { stage: { id: string; name: 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h3 className="font-semibold text-sm text-gray-900">{stage.name}</h3>
-            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700">
+            <Badge variant="secondary" className="h-5 w-5 rounded-full p-0 text-xs bg-white/80 text-gray-700 flex items-center justify-center">
               {opportunities.length}
             </Badge>
           </div>
