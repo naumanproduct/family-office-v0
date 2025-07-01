@@ -952,43 +952,17 @@ Sarah`,
                 {/* Notes content - editable for Note type */}
                 {localActiveTab === "notes" && recordType === "Note" && (
                   <div className="space-y-5">
-                    <div className="rounded-lg border border-muted overflow-hidden">
-                      <div className="group">
-                        <button 
-                          onClick={() => setOpenSections(prev => ({ ...prev, notes: !prev.notes }))}
-                          className={`w-full flex items-center justify-between p-3 hover:bg-muted/20 transition-colors ${openSections.notes ? 'bg-muted/20' : ''}`}
-                        >
-                          <div className="flex items-center">
-                            {openSections.notes ? (
-                              <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
-                            ) : (
-                              <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
-                            )}
-                            <div className="flex items-center gap-2">
-                              <EditIcon className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium text-sm">Notes</span>
-                            </div>
-                          </div>
-                        </button>
-
-                        {/* Section Content */}
-                        {openSections.notes && (
-                          <div className="px-5 pb-3 pt-2">
-                            <TypableArea 
-                              value={record?.content || ''} 
-                              onChange={(value) => {
-                                // Update the note content
-                                if (record) {
-                                  record.content = value;
-                                }
-                              }} 
-                              placeholder="Start typing to add your thoughts..." 
-                              showButtons={false}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <TypableArea 
+                      value={record?.content || ''} 
+                      onChange={(value) => {
+                        // Update the note content
+                        if (record) {
+                          record.content = value;
+                        }
+                      }} 
+                      placeholder="Start typing to add your thoughts..." 
+                      showButtons={false}
+                    />
                   </div>
                 )}
                 
