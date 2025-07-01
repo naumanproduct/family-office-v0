@@ -727,7 +727,17 @@ export function MasterDrawer({
               </div>
             )}
             {!selectedTask && !selectedNote && !selectedEmail && !selectedMeeting && activeTab === "details" && (
-              renderTabContent(activeTab, viewMode, false)
+              <div className="p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Details</h3>
+                  <div className="flex items-center gap-2">
+                    {/* No actions for details tab */}
+                  </div>
+                </div>
+                <div className="-mx-6">
+                  {renderTabContent(activeTab, viewMode, false)}
+                </div>
+              </div>
             )}
             {(selectedTask || selectedNote || selectedEmail || selectedMeeting) && renderTabContent(activeTab, viewMode, false)}
           </div>

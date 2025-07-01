@@ -29,9 +29,10 @@ interface NoteDetailsViewProps {
   onBack: () => void
   hideAddNotes?: boolean
   isFullScreen?: boolean
+  onTabChange?: (tab: string) => void
 }
 
-export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScreen = false }: NoteDetailsViewProps) {
+export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScreen = false, onTabChange }: NoteDetailsViewProps) {
   const [noteTitle, setNoteTitle] = React.useState(note.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
@@ -214,6 +215,13 @@ This note will be updated following next month's investment committee meeting.`)
     }
     return null;
   };
+
+  // Call onTabChange when tab changes
+  React.useEffect(() => {
+    if (onTabChange) {
+      onTabChange(activeTab)
+    }
+  }, [activeTab, onTabChange])
 
   return (
     <div className="flex flex-col flex-1">
