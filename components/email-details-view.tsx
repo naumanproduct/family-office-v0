@@ -28,6 +28,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 
 // Attachment component to reduce main component complexity
 function EmailAttachment({ attachment, index }: { attachment: any; index: number }) {
@@ -592,6 +594,18 @@ Sarah`,
               </div>
             </div>
           )}
+        </div>
+
+        {/* Activity Section */}
+        <div className="mt-4">
+          <UnifiedActivitySection 
+            activities={generateWorkflowActivities()} 
+            showHeader={true}
+            onCommentSubmit={(comment) => {
+              console.log("Adding comment:", comment)
+              // Handle comment submission
+            }}
+          />
         </div>
       </div>
     </div>

@@ -26,6 +26,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
+import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
+import { generateWorkflowActivities } from "@/components/shared/activity-generators"
 
 interface MeetingDetailsViewProps {
   meeting: any
@@ -415,6 +417,18 @@ Next meeting scheduled for January 15, 2024.`)
               />
             </div>
           )}
+        </div>
+
+        {/* Activity Section */}
+        <div className="mt-4">
+          <UnifiedActivitySection 
+            activities={generateWorkflowActivities()} 
+            showHeader={true}
+            onCommentSubmit={(comment) => {
+              console.log("Adding comment:", comment)
+              // Handle comment submission
+            }}
+          />
         </div>
       </div>
     </div>
