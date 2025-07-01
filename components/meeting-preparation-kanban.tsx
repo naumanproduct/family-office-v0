@@ -603,20 +603,33 @@ function MeetingCard({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-2">
-              {attributes.map((attribute) => {
-                const Icon = getAttributeIcon(attribute.type, attribute.id)
-                const value = (meeting as any)[attribute.id]
+              {attributes
+                .slice(0, 3) // Show only first 3 attributes
+                .map((attribute) => {
+                  const Icon = getAttributeIcon(attribute.type, attribute.id)
+                  const value = (meeting as any)[attribute.id]
 
-                if (!value || attribute.id === "contactName" || attribute.id === "company") return null
+                  if (!value || attribute.id === "contactName" || attribute.id === "company") return null
 
-                return (
-                  <div key={attribute.id} className="flex items-center gap-2 text-xs">
-                    <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                    <span className="text-gray-500 truncate">{attribute.name}:</span>
-                    <span className="truncate">{renderAttributeValue(attribute, value)}</span>
-                  </div>
-                )
-              })}
+                  return (
+                    <div key={attribute.id} className="flex items-center gap-2 text-xs">
+                      <Icon className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                      <span className="text-gray-500 truncate">{attribute.name}:</span>
+                      <span className="truncate">{renderAttributeValue(attribute, value)}</span>
+                    </div>
+                  )
+                })}
+              {attributes.filter(attr => {
+                const value = (meeting as any)[attr.id]
+                return value && attr.id !== "contactName" && attr.id !== "company"
+              }).length > 3 && (
+                <div className="text-xs text-gray-400 pl-5">
+                  +{attributes.filter(attr => {
+                    const value = (meeting as any)[attr.id]
+                    return value && attr.id !== "contactName" && attr.id !== "company"
+                  }).length - 3} more
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

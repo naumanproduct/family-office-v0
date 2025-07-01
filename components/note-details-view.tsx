@@ -269,27 +269,13 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
                 { label: "Created", value: formatDate(new Date(fieldValues.createdAt)) },
                 { label: "Updated", value: formatDate(new Date(fieldValues.updatedAt)) }
               ],
-              // Add mock data for related sections
-              companies: [
-                { id: 1, name: "TechFlow Inc", type: "Investment Target", date: "2 days ago" },
-                { id: 2, name: "Global Ventures", type: "Co-investor", date: "1 week ago" }
-              ],
-              people: [
-                { id: 1, name: "Sarah Johnson", role: "Investment Manager", date: "2 hours ago" },
-                { id: 2, name: "Michael Chen", role: "Analyst", date: "Yesterday" }
-              ],
-              entities: [
-                { id: 1, name: "Johnson Family Trust", type: "Trust", date: "3 days ago" },
-                { id: 2, name: "Tech Investment LLC", type: "LLC", date: "1 week ago" }
-              ],
-              investments: [
-                { id: 1, name: "Series B - TechFlow", amount: "$10M", date: "Pending" },
-                { id: 2, name: "Growth Fund III", amount: "$50M", date: "Active" }
-              ],
-              opportunities: [
-                { id: 1, name: "SaaS Platform Acquisition", status: "Due Diligence", date: "In Progress" },
-                { id: 2, name: "Healthcare Tech Investment", status: "Evaluating", date: "Q1 2024" }
-              ]
+              // Remove all related sections for notes
+              companies: [],
+              people: [],
+              entities: [],
+              investments: [],
+              opportunities: [],
+              hideWhenEmpty: true
             })}
             activityContent={<NoteActivityContent />}
             isFullScreen={isFullScreen}

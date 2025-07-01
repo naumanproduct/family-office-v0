@@ -18,6 +18,7 @@ import {
   ChevronDown,
   FileIcon,
   CheckCircleIcon,
+  ChevronUp,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -104,9 +105,22 @@ Next meeting scheduled for January 15, 2024.`)
     notes: true,
   })
 
+  // State for showing all field values
+  const [showingAllValues, setShowingAllValues] = React.useState<Record<string, boolean>>({
+    details: false,
+  })
+
   // Toggle section open/closed
   const toggleSection = (sectionId: string) => {
     setOpenSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }))
+  }
+
+  // Toggle showing all values for a section
+  const toggleShowAllValues = (sectionId: string) => {
+    setShowingAllValues(prev => ({
       ...prev,
       [sectionId]: !prev[sectionId]
     }))
@@ -215,6 +229,27 @@ Next meeting scheduled for January 15, 2024.`)
     )
   }
 
+  // Define all meeting fields
+  const allMeetingFields = [
+    { field: "description", icon: FileTextIcon, label: "Description", isTextarea: true },
+    { field: "startTime", icon: ClockIcon, label: "Start Time" },
+    { field: "endTime", icon: ClockIcon, label: "End Time" },
+    { field: "location", icon: MapPinIcon, label: "Location" },
+    { field: "organizer", icon: UserIcon, label: "Organizer" },
+    { field: "attendees", icon: UsersIcon, label: "Attendees" },
+    { field: "meetingType", icon: VideoIcon, label: "Type" },
+    { field: "status", icon: CalendarIcon, label: "Status", isBadge: true },
+    { field: "recurring", icon: RepeatIcon, label: "Recurring" },
+    { field: "reminder", icon: BellIcon, label: "Reminder" },
+    { field: "visibility", icon: EyeIcon, label: "Visibility" },
+    { field: "showAs", icon: CalendarCheckIcon, label: "Show As" },
+  ]
+
+  // Determine which fields to show based on showingAllValues state
+  const fieldsToShow = showingAllValues.details 
+    ? allMeetingFields 
+    : allMeetingFields.slice(0, 7)
+
   return (
     <div className="flex flex-col flex-1">
       {/* Meeting Header - Only show when not in fullscreen mode */}
@@ -301,91 +336,31 @@ Next meeting scheduled for January 15, 2024.`)
           {openSections.details && (
             <div className="px-4 pb-4 pt-1">
               <div className="space-y-3">
-                {renderEditableField(
-                  "description",
-                  fieldValues.description,
-                  <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Description",
-                  false,
-                  true,
-                )}
-
-                {renderEditableField(
-                  "startTime",
-                  fieldValues.startTime,
-                  <ClockIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Start Time",
-                )}
-
-                {renderEditableField(
-                  "endTime",
-                  fieldValues.endTime,
-                  <ClockIcon className="h-4 w-4 text-muted-foreground" />,
-                  "End Time",
-                )}
-
-                {renderEditableField(
-                  "location",
-                  fieldValues.location,
-                  <MapPinIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Location",
-                )}
-
-                {renderEditableField(
-                  "organizer",
-                  fieldValues.organizer,
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Organizer",
-                )}
-
-                {renderEditableField(
-                  "attendees",
-                  fieldValues.attendees,
-                  <UsersIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Attendees",
-                )}
-
-                {renderEditableField(
-                  "meetingType",
-                  fieldValues.meetingType,
-                  <VideoIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Type",
-                )}
-
-                {renderEditableField(
-                  "status",
-                  fieldValues.status,
-                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Status",
-                  true,
-                )}
-
-                {renderEditableField(
-                  "recurring",
-                  fieldValues.recurring,
-                  <RepeatIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Recurring",
-                )}
-
-                {renderEditableField(
-                  "reminder",
-                  fieldValues.reminder,
-                  <BellIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Reminder",
-                )}
-
-                {renderEditableField(
-                  "visibility",
-                  fieldValues.visibility,
-                  <EyeIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Visibility",
-                )}
-
-                {renderEditableField(
-                  "showAs",
-                  fieldValues.showAs,
-                  <CalendarCheckIcon className="h-4 w-4 text-muted-foreground" />,
-                  "Show As",
+                {fieldsToShow.map((fieldConfig) => {
+                  const Icon = fieldConfig.icon
+                  return renderEditableField(
+                    fieldConfig.field,
+                    fieldValues[fieldConfig.field as keyof typeof fieldValues] as string,
+                    <Icon className="h-4 w-4 text-muted-foreground" />,
+                    fieldConfig.label,
+                    fieldConfig.isBadge || false,
+                    fieldConfig.isTextarea || false,
+                  )
+                })}
+                
+                {allMeetingFields.length > 7 && (
+                  <div className="flex items-center mt-2 ml-6">
+                    <button
+                      onClick={() => toggleShowAllValues('details')}
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                    >
+                      {showingAllValues.details ? (
+                        <>Show less <ChevronUp className="h-3 w-3" /></>
+                      ) : (
+                        <>Show more <ChevronDown className="h-3 w-3" /></>
+                      )}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
