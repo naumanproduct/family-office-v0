@@ -796,25 +796,23 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
               )}
 
               {activeTab === "attributes" && (
-                <div className="flex flex-col h-full">
-                  <div className="p-6">
-                    <div className="mb-6">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold">Card Fields</h3>
-                        <Badge variant="secondary">
-                          {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {config.attributes.length > 0
-                          ? "Drag to reorder how they appear on cards"
-                          : "Add fields to display on your cards"}
-                      </p>
+                <div className="p-6">
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">Card Fields</h3>
+                      <Badge variant="secondary">
+                        {config.attributes.length} field{config.attributes.length !== 1 ? "s" : ""}
+                      </Badge>
                     </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {config.attributes.length > 0
+                        ? "Drag to reorder how they appear on cards"
+                        : "Add fields to display on your cards"}
+                    </p>
                   </div>
 
                   {/* Selected Fields List */}
-                  <div className="px-6 flex-1 overflow-auto">
+                  <div>
                     {config.attributes.length > 0 ? (
                       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleAttributeDragEnd}>
                         <SortableContext
@@ -853,7 +851,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                   </div>
 
                   {/* Add Field Section - matches drawer pattern */}
-                  <div className="border-t mt-auto">
+                  <div className="mt-6">
                     <div
                       className={`p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors ${
                         showAddFields ? "bg-muted/50" : ""
