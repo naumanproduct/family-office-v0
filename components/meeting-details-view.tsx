@@ -16,6 +16,8 @@ import {
   CalendarCheckIcon,
   ChevronRight,
   ChevronDown,
+  FileIcon,
+  CheckCircleIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -89,9 +91,12 @@ Action Items:
 
 Next meeting scheduled for January 15, 2024.`)
   
-  // Define tabs
+  // Define tabs - updated to include Notes, Files, Tasks
   const tabs = [
-    { id: "details", label: "Details", icon: FileTextIcon }
+    { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "notes", label: "Notes", icon: FileIcon },
+    { id: "files", label: "Files", icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", icon: CheckCircleIcon },
   ]
   
   // State for which sections are open

@@ -136,8 +136,28 @@ export function MasterDrawer({
       baseTabs = [activityTab, ...baseTabs]
     }
     
+    // Additional tabs based on record type
+    if (recordType === "Task") {
+      baseTabs.push({ id: "tasks", label: "Subtasks", icon: CheckCircleIcon, count: null }) // Moved to 2nd position after Activity
+      baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
+      baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
+    } else if (recordType === "Note") {
+      baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null }) // For editing the note
+      baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
+      baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
+    } else if (recordType === "Meeting") {
+      baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
+      baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
+      baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
+    } else if (recordType === "Email") {
+      baseTabs.push({ id: "threads", label: "Email Threads", icon: MessageSquareIcon, count: null }) // Email threads moved to tab
+      baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
+      baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
+      baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
+    }
+    
     return baseTabs
-  }, [tabs, shouldAddActivityTab])
+  }, [tabs, shouldAddActivityTab, recordType])
 
   // Exclude specific tab ids across all drawers
   const excludedTabIds = ["contacts", "people", "team", "company"]
@@ -388,20 +408,22 @@ export function MasterDrawer({
       
       // Additional tabs based on record type
       if (recordType === "Task") {
-        baseTabs.push({ id: "tasks", label: "Subtasks", icon: CheckCircleIcon }) // Moved to 2nd position after Activity
-        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon })
-        baseTabs.push({ id: "files", label: "Files", icon: FileIcon })
+        baseTabs.push({ id: "tasks", label: "Subtasks", icon: CheckCircleIcon, count: null }) // Moved to 2nd position after Activity
+        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
+        baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
       } else if (recordType === "Note") {
-        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon }) // For editing the note
-        baseTabs.push({ id: "files", label: "Files", icon: FileIcon })
-        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon })
+        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null }) // For editing the note
+        baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
+        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
       } else if (recordType === "Meeting") {
-        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon })
-        baseTabs.push({ id: "files", label: "Files", icon: FileIcon })
-        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon })
+        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
+        baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
+        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
       } else if (recordType === "Email") {
-        baseTabs.push({ id: "threads", label: "Email Threads", icon: MessageSquareIcon }) // Email threads moved to tab
-        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon })
+        baseTabs.push({ id: "threads", label: "Email Threads", icon: MessageSquareIcon, count: null }) // Email threads moved to tab
+        baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
+        baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
+        baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
       }
       
       return baseTabs
