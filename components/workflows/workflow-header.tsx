@@ -746,11 +746,11 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                       title: "Workflow Statistics",
                       icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
                       fields: [
-                        { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span> },
-                        { label: "Card Fields", value: `${config.attributes.length} fields configured` },
-                        { label: "Stages", value: `${config.stages.length} stages configured` },
-                        { label: "Created", value: "January 15, 2024" },
-                        { label: "Last Modified", value: "Today" },
+                        { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span>, isEditable: false },
+                        { label: "Card Fields", value: `${config.attributes.length} fields configured`, isEditable: false },
+                        { label: "Stages", value: `${config.stages.length} stages configured`, isEditable: false },
+                        { label: "Created", value: "January 15, 2024", isEditable: false },
+                        { label: "Last Modified", value: "Today", isEditable: false },
                       ],
                     },
                     {

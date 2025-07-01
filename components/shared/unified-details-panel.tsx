@@ -10,6 +10,7 @@ export interface DetailField {
   label: string
   value: React.ReactNode
   isLink?: boolean
+  isEditable?: boolean
 }
 
 export interface SectionData {
@@ -94,16 +95,19 @@ export function UnifiedDetailsPanel({
     
     return (
       <div className="space-y-3">
-        {fieldsToShow.map((field, index) => (
-          <div key={index} className="flex items-center">
-            <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
-            {field.isLink ? (
-              <p className="flex-1 text-sm text-blue-600 cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
-            ) : (
-              <p className="flex-1 text-sm cursor-pointer hover:bg-muted/50 px-2 py-0.5 rounded transition-colors">{field.value}</p>
-            )}
-          </div>
-        ))}
+        {fieldsToShow.map((field, index) => {
+          const isEditable = field.isEditable !== false; // Default to true if not specified
+          return (
+            <div key={index} className="flex items-center">
+              <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
+              {field.isLink ? (
+                <p className={`flex-1 text-sm text-blue-600 ${isEditable ? 'cursor-pointer hover:bg-muted/50' : ''} px-2 py-0.5 rounded transition-colors`}>{field.value}</p>
+              ) : (
+                <p className={`flex-1 text-sm ${isEditable ? 'cursor-pointer hover:bg-muted/50' : ''} px-2 py-0.5 rounded transition-colors`}>{field.value}</p>
+              )}
+            </div>
+          );
+        })}
         {showAllButton && fields.length > 7 && (
           <div className="flex items-center mt-2 ml-2">
             <button
