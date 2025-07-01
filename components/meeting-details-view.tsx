@@ -34,6 +34,7 @@ export function MeetingDetailsView({ meeting, onBack }: MeetingDetailsViewProps)
   const [meetingTitle, setMeetingTitle] = React.useState(meeting.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [editingField, setEditingField] = React.useState<string | null>(null)
+  const [activeTab, setActiveTab] = React.useState("details")
   const [fieldValues, setFieldValues] = React.useState({
     description: meeting?.description || meeting?.agenda || "",
     location: meeting?.location || "",
@@ -86,6 +87,11 @@ Action Items:
 - Update investment policy statement to reflect ESG criteria
 
 Next meeting scheduled for January 15, 2024.`)
+  
+  // Define tabs
+  const tabs = [
+    { id: "details", label: "Details", icon: CalendarIcon }
+  ]
   
   // State for which sections are open
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
@@ -239,6 +245,30 @@ Next meeting scheduled for January 15, 2024.`)
               </h2>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b bg-background px-6 py-1">
+        <div className="flex gap-6 overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+                {activeTab === tab.id && (
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 

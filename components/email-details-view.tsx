@@ -135,6 +135,12 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [replyText, setReplyText] = React.useState("")
   const [isReplying, setIsReplying] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState("details")
+  
+  // Define tabs
+  const tabs = [
+    { id: "details", label: "Details", icon: MailIcon }
+  ]
   
   // State for which sections are open
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
@@ -287,6 +293,30 @@ Sarah`,
               </h2>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b bg-background px-6 py-1">
+        <div className="flex gap-6 overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                  activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+                {activeTab === tab.id && (
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 

@@ -104,8 +104,8 @@ This note will be updated following next month's investment committee meeting.`)
 
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
-    { id: "tasks", label: "Tasks", icon: CheckSquareIcon },
-    { id: "files", label: "Files", icon: FolderIcon }
+    { id: "files", label: "Files", icon: FolderIcon },
+    { id: "tasks", label: "Tasks", icon: CheckSquareIcon }
   ]
 
   // Mock activities for activity section
