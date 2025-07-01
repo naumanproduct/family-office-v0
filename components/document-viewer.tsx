@@ -27,6 +27,9 @@ import {
   CalendarIcon,
   MoreHorizontalIcon,
   EyeIcon,
+  ChevronRightIcon,
+  PanelRightCloseIcon,
+  PanelRightOpenIcon,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -65,6 +68,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
   const [isFullScreen, setIsFullScreen] = React.useState(startInFullScreen)
   const [activeTab, setActiveTab] = React.useState("details")
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = React.useState(false)
   
   // Reset to startInFullScreen when opening
   React.useEffect(() => {
@@ -96,6 +100,23 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
       }
     }
   }, [isFullScreen, onOpenChange])
+  
+  // Cmd/Ctrl+B handler for toggling right panel in fullscreen
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isFullScreen && (event.metaKey || event.ctrlKey) && event.key === 'b') {
+        event.preventDefault()
+        setIsRightPanelCollapsed(prev => !prev)
+      }
+    }
+
+    if (isFullScreen) {
+      document.addEventListener("keydown", handleKeyDown)
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown)
+      }
+    }
+  }, [isFullScreen])
   
   // Lock body scroll when full screen is active
   React.useEffect(() => {
@@ -550,14 +571,29 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
           </div>
 
           {/* Full Screen Content - Two Column Layout */}
-          <div className="flex h-[calc(100%-73px)]">
+          <div className="flex h-[calc(100%-73px)] relative">
             {/* Left Panel - Document Preview */}
             <div className="flex-1 overflow-y-auto">
               <FilePreview file={file} />
             </div>
 
+            {/* Collapse/Expand Button on Divider */}
+            <div className="relative">
+              <button
+                onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+                className={`absolute ${isRightPanelCollapsed ? '-left-4' : 'left-0'} top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 flex h-7 w-7 items-center justify-center rounded-full border bg-background shadow-md hover:bg-accent transition-all`}
+                title={isRightPanelCollapsed ? "Show details panel (⌘B)" : "Hide details panel (⌘B)"}
+              >
+                {isRightPanelCollapsed ? (
+                  <PanelRightOpenIcon className="h-4 w-4" />
+                ) : (
+                  <PanelRightCloseIcon className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
             {/* Right Panel - Details (same width as drawer to prevent jumping) */}
-            <div className="w-[672px] border-l bg-background flex flex-col">
+            <div className={`${isRightPanelCollapsed ? 'w-0' : 'w-[672px]'} border-l bg-background flex flex-col transition-all duration-300 overflow-hidden`}>
               {/* Record Header */}
               <div className="border-b bg-background px-6 py-2">
                 <div className="flex items-center gap-3">
