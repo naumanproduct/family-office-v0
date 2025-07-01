@@ -11,8 +11,6 @@ import {
   InfoIcon,
   SendIcon,
   InboxIcon,
-  ReplyIcon,
-  ForwardIcon,
   DownloadIcon,
   ChevronRight,
   ChevronDown,
@@ -167,8 +165,6 @@ export function EmailDetailsView({ email, onBack }: EmailDetailsViewProps) {
   const [emailSubject, setEmailSubject] = React.useState(email?.subject || "No Subject")
   const [isEditingSubject, setIsEditingSubject] = React.useState(false)
   const [editingField, setEditingField] = React.useState<string | null>(null)
-  const [replyText, setReplyText] = React.useState("")
-  const [isReplying, setIsReplying] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
   const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
   
@@ -536,61 +532,6 @@ Sarah`,
                       </div>
                     )
                   })}
-              </div>
-
-              {/* Reply section */}
-              <div className="mt-6 space-y-4">
-                <div className="flex items-center gap-2">
-                  {!isReplying ? (
-                    <>
-                      <Button variant="outline" size="sm" className="h-8" onClick={() => setIsReplying(true)}>
-                        <ReplyIcon className="h-3 w-3 mr-2" />
-                        Reply
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-8">
-                        <ForwardIcon className="h-3 w-3 mr-2" />
-                        Forward
-                      </Button>
-                    </>
-                  ) : (
-                    <h4 className="text-sm font-medium">Reply</h4>
-                  )}
-                </div>
-
-                {isReplying && (
-                  <div className="rounded-lg border border-muted p-4 bg-background">
-                    <div className="mb-2 flex justify-between">
-                      <div>
-                        <p className="text-sm">
-                          <span className="text-muted-foreground">To:</span> {fieldValues.from}
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setIsReplying(false)}>
-                        Cancel
-                      </Button>
-                    </div>
-
-                    <Textarea
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Type your reply here..."
-                      className="min-h-[120px] text-sm"
-                    />
-
-                    <div className="mt-3 flex justify-between">
-                      <div className="flex gap-2">
-                        <Button size="sm">
-                          <SendIcon className="h-3 w-3 mr-2" />
-                          Send
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <PaperclipIcon className="h-3 w-3 mr-2" />
-                          Attach
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}
