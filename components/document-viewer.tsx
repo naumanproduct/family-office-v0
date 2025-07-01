@@ -566,11 +566,6 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold">{file ? (file.title || file.name || "Untitled") : "Untitled"}</h2>
-                    {file && file.fileType && (
-                      <p className="text-sm text-muted-foreground">
-                        {(file.fileType || file.type || "FILE").toUpperCase()}
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
