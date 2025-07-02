@@ -452,6 +452,13 @@ export function MasterCreationDialog({
                     .filter((t) => t.isCustom)
                     .map((type) => renderTypeCard(type))}
 
+                  {/* Show heading only if there are non-custom types */}
+                  {typesState.filter((t) => !t.isCustom && `${t.name} ${t.description}`.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 && (
+                    <h3 className="text-sm font-medium text-muted-foreground mt-4 mb-3">
+                      {recordType === "File" ? "Import from" : "Templates"}
+                    </h3>
+                  )}
+
                   {/* Other templates */}
                   {typesState
                     .filter((t) =>

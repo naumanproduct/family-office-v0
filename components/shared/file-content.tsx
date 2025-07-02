@@ -729,54 +729,6 @@ export function FileContent({
           <Input type="search" placeholder="Search files..." className="w-full bg-background pl-8" />
         </div>
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8">
-                <SortAscIcon className="mr-2 h-3.5 w-3.5" />
-                Sort
-                <ChevronDownIcon className="ml-2 h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>Date (newest first)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Date (oldest first)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Name (A-Z)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Name (Z-A)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>File Size (largest first)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>File Size (smallest first)</DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8">
-                <TagIcon className="mr-2 h-3.5 w-3.5" />
-                Filter
-                <ChevronDownIcon className="ml-2 h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Filter by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs">Category</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem>Legal</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Financial</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Due Diligence</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Proposal</DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs">File Type</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem>PDF</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>DOCX</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>XLSX</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>PPTX</DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-xs">Status</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem>Final</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Draft</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Under Review</DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
           <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />
           <Button size="sm" onClick={() => setIsAddFileSheetOpen(true)}>
             <PlusIcon className="mr-2 h-4 w-4" />
@@ -804,7 +756,7 @@ export function FileContent({
                 return (
                   <TableRow 
                     key={file.id} 
-                    className={`cursor-pointer hover:bg-muted/50 ${isUploading ? 'opacity-60' : ''}`} 
+                    className={`group cursor-pointer hover:bg-muted/50 ${isUploading ? 'opacity-60' : ''}`} 
                     onClick={() => !isUploading && handleFileSelect(file)}
                   >
                     <TableCell className="w-12">
@@ -814,21 +766,20 @@ export function FileContent({
                       <div className="flex items-center gap-2">
                         <span>{file.name || file.title}</span>
                         {isUploading && (
-                          <span className="text-xs text-muted-foreground">(Uploading...)</span>
+                          <>
+                            <LoaderIcon className="h-3 w-3 animate-spin text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">(Uploading...)</span>
+                          </>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="text-sm">{file.uploadedBy}</TableCell>
                     <TableCell className="text-sm">{file.uploadedDate || formatDate(new Date(file.uploadedAt))}</TableCell>
                     <TableCell>
-                      {isUploading ? (
-                        <div className="flex items-center justify-center h-8 w-8">
-                          <LoaderIcon className="h-4 w-4 animate-spin text-muted-foreground" />
-                        </div>
-                      ) : (
+                      {!isUploading && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                               <MoreVerticalIcon className="h-4 w-4" />
                               <span className="sr-only">Open menu</span>
                             </Button>
@@ -863,7 +814,17 @@ export function FileContent({
             return (
               <RecordListItem
                 key={file.id}
-                title={`${file.name || file.title}${isUploading ? ' (Uploading...)' : ''}`}
+                title={
+                  <div className="flex items-center gap-2">
+                    <span className={isUploading ? 'opacity-60' : ''}>{file.name || file.title}</span>
+                    {isUploading && (
+                      <>
+                        <LoaderIcon className="h-3 w-3 animate-spin text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">(Uploading...)</span>
+                      </>
+                    )}
+                  </div>
+                }
                 primaryMetadata={[]}
                 secondaryMetadata={{
                   left: file.uploadedBy,
@@ -875,7 +836,7 @@ export function FileContent({
                   { label: "Download", onClick: () => {} },
                   { label: "Delete", onClick: () => {}, variant: "destructive" as const },
                 ]}
-                leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
+                leadingElement={<FileTextIcon className={`h-4 w-4 text-muted-foreground ${isUploading ? 'opacity-60' : ''}`} />}
               />
             )
           })}
@@ -890,7 +851,17 @@ export function FileContent({
             return (
               <RecordCard
                 key={file.id}
-                title={`${file.name || file.title}${isUploading ? ' (Uploading...)' : ''}`}
+                title={
+                  <div className="flex items-center gap-2">
+                    <span className={isUploading ? 'opacity-60' : ''}>{file.name || file.title}</span>
+                    {isUploading && (
+                      <>
+                        <LoaderIcon className="h-3 w-3 animate-spin text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">(Uploading...)</span>
+                      </>
+                    )}
+                  </div>
+                }
                 primaryMetadata={[]}
                 secondaryMetadata={{
                   left: file.uploadedBy,
@@ -902,7 +873,7 @@ export function FileContent({
                   { label: "Download", onClick: () => {} },
                   { label: "Delete", onClick: () => {}, variant: "destructive" as const },
                 ]}
-                leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
+                leadingElement={<FileTextIcon className={`h-4 w-4 text-muted-foreground ${isUploading ? 'opacity-60' : ''}`} />}
               />
             )
           })}

@@ -3,20 +3,24 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
-
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { ChevronLeftIcon, MoreHorizontal, Edit, Copy, Trash2, PlusIcon } from "lucide-react"
+import { MasterCreationDialog } from "./master-creation-dialog"
 import { TaskCreator } from "./task-creator"
 
-const taskTemplates = [
+// Convert task templates to MasterCreationDialog types format
+const taskTypes = [
+  {
+    id: "from-scratch",
+    name: "Start from Scratch",
+    description: "Create a custom task tailored to your specific needs",
+    category: "Custom",
+    isCustom: true,
+  },
   {
     id: "capital-call-processing",
     name: "Capital Call Processing",
     description:
       "Complete capital call workflow including investor notifications, document preparation, and fund collection",
+    category: "Templates",
     subtasks: [
       {
         title: "Prepare capital call notice",
@@ -49,6 +53,7 @@ const taskTemplates = [
     id: "k1-processing",
     name: "K-1 Processing",
     description: "Annual K-1 tax document preparation and distribution workflow for fund investors",
+    category: "Templates",
     subtasks: [
       {
         title: "Gather tax information",
@@ -71,6 +76,7 @@ const taskTemplates = [
     name: "Quarterly Report Processing",
     description:
       "Comprehensive quarterly reporting workflow including performance analysis and investor communications",
+    category: "Templates",
     subtasks: [
       {
         title: "Collect portfolio data",
@@ -94,6 +100,17 @@ const taskTemplates = [
   },
 ]
 
+// Dummy form fields for MasterCreationDialog (won't be shown as we'll close immediately)
+const taskFormFields = [
+  {
+    id: "title",
+    label: "Title",
+    type: "text" as const,
+    placeholder: "Task title",
+    required: true,
+  },
+]
+
 interface TaskTemplateDialogProps {
   isOpen: boolean
   onClose: () => void
@@ -104,165 +121,45 @@ export function TaskTemplateDialog({ isOpen, onClose }: TaskTemplateDialogProps)
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
   const [editingTemplate, setEditingTemplate] = useState<any>(null)
 
-  const handleTemplateSelect = (template: any) => {
-    setSelectedTemplate(template)
-    setEditingTemplate(null)
-    setIsCreatorOpen(true)
-    onClose()
-  }
-
-  const handleStartFromScratch = () => {
-    setSelectedTemplate(null)
-    setEditingTemplate(null)
-    setIsCreatorOpen(true)
-    onClose()
-  }
-
-  const handleEditTemplate = (template: any, e: React.MouseEvent) => {
-    e.stopPropagation()
-    setEditingTemplate(template)
-    setSelectedTemplate(template)
-    setIsCreatorOpen(true)
-    onClose()
-  }
-
-  const handleDuplicateTemplate = (template: any, e: React.MouseEvent) => {
-    e.stopPropagation()
-    // Create a copy with a new ID and modified name
-    const duplicatedTemplate = {
-      ...template,
-      id: `${template.id}-copy-${Date.now()}`,
-      name: `${template.name} (Copy)`,
+  const handleTypeSelect = (type: any) => {
+    if (type.id === "from-scratch") {
+      setSelectedTemplate(null)
+      setEditingTemplate(null)
+    } else {
+      // Find the full template data
+      const template = taskTypes.find(t => t.id === type.id)
+      setSelectedTemplate(template)
+      setEditingTemplate(null)
     }
-    setSelectedTemplate(duplicatedTemplate)
-    setEditingTemplate(null)
     setIsCreatorOpen(true)
     onClose()
+    
+    // Return empty object to prevent form from showing
+    return {}
   }
 
-  const handleDeleteTemplate = (template: any, e: React.MouseEvent) => {
-    e.stopPropagation()
-    // This would typically show a confirmation dialog and then delete
-    console.log("Delete template:", template.id)
-  }
-
-  const handleSaveTask = (task: any) => {
-    // This would typically save to your backend
-    console.log("Saving task:", task)
-    // You could add the task to your tasks list or refresh the data
+  const handleSaveTask = (data: any) => {
+    // This won't be called as we're using custom TaskCreator
+    console.log("Saving task:", data)
   }
 
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent side="right" className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <ChevronLeftIcon className="h-4 w-4" />
-              </Button>
-              <Badge variant="outline" className="bg-background">
-                Task Template
-              </Badge>
-            </div>
-          </div>
-
-          {/* Record Header */}
-          <div className="border-b bg-background px-6 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                T
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold">Choose a Task Template</h2>
-                <p className="text-sm text-muted-foreground">
-                  Select a pre-built template to get started quickly, or create a task from scratch.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="space-y-4">
-              {/* Start from Scratch Option */}
-              <div
-                className="group rounded-lg border border-border bg-card transition-all duration-200 hover:shadow-sm cursor-pointer"
-                onClick={handleStartFromScratch}
-              >
-                <div className="flex items-center space-x-3 p-4">
-                  <div className="h-8 w-8 rounded-full bg-purple-100 text-purple-800 flex items-center justify-center flex-shrink-0">
-                    <PlusIcon className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-card-foreground">Start from Scratch</div>
-                    <div className="text-xs text-muted-foreground">
-                      Create a custom task tailored to your specific needs
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Template Options */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground">Templates</h3>
-                {taskTemplates.map((template) => (
-                  <div
-                    key={template.id}
-                    className="group rounded-lg border border-border bg-card transition-all duration-200 hover:shadow-sm cursor-pointer relative"
-                    onClick={() => handleTemplateSelect(template)}
-                  >
-                    <div className="flex items-center space-x-3 p-4">
-                      <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center flex-shrink-0">
-                        <PlusIcon className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-card-foreground">{template.name}</div>
-                        <div className="text-xs text-muted-foreground">{template.description}</div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {template.subtasks.length} subtasks
-                        </div>
-                      </div>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={(e) => handleEditTemplate(template, e)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit Template
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => handleDuplicateTemplate(template, e)}>
-                              <Copy className="mr-2 h-4 w-4" />
-                              Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => handleDeleteTemplate(template, e)}
-                              className="text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <MasterCreationDialog
+        isOpen={isOpen}
+        onClose={onClose}
+        onSave={handleSaveTask}
+        title="Choose a Task Template"
+        description="Select a pre-built template to get started quickly, or create a task from scratch."
+        recordType="Task"
+        avatarLetter="T"
+        avatarColor="bg-primary"
+        types={taskTypes}
+        typeSelectionTitle="Task Template"
+        formFields={taskFormFields}
+        requiredFields={["title"]}
+        onTypeSelect={handleTypeSelect}
+      />
 
       <TaskCreator
         isOpen={isCreatorOpen}
@@ -271,7 +168,10 @@ export function TaskTemplateDialog({ isOpen, onClose }: TaskTemplateDialogProps)
           setSelectedTemplate(null)
           setEditingTemplate(null)
         }}
-        onSave={handleSaveTask}
+        onSave={(task: any) => {
+          console.log("Saving task:", task)
+          // Add your save logic here
+        }}
         existingTemplate={selectedTemplate}
         isEditingTemplate={!!editingTemplate}
       />

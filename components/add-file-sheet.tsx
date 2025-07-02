@@ -39,31 +39,32 @@ const fileTypes = [
     id: "local",
     name: "My Computer",
     description: "Upload files from your device.",
-    category: "Sources",
+    category: "Local",
+    isCustom: true,
   },
   {
     id: "box",
     name: "Box",
     description: "Import files from your Box account.",
-    category: "Sources",
+    category: "Integrations",
   },
   {
     id: "dropbox",
     name: "Dropbox",
     description: "Import files from your Dropbox account.",
-    category: "Sources",
+    category: "Integrations",
   },
   {
     id: "google-drive",
     name: "Google Drive",
     description: "Import files from your Google Drive account.",
-    category: "Sources",
+    category: "Integrations",
   },
   {
     id: "onedrive",
     name: "OneDrive",
     description: "Import files from your OneDrive account.",
-    category: "Sources",
+    category: "Integrations",
   },
 ]
 
@@ -297,7 +298,7 @@ export function AddFileSheet({ open, onOpenChange, onSubmit }: AddFileSheetProps
       avatarLetter="F"
       avatarColor="bg-blue-600"
       types={fileTypes}
-      typeSelectionTitle="Select File Source"
+      typeSelectionTitle="Choose File Source"
       formFields={fileFormFields}
       formHeaderContent={filesTableContent}
       requiredFields={[]}

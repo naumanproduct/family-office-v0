@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { WorkflowCreator } from "./workflow-creator"
+import { WorkflowTemplateDialog } from "./workflow-template-dialog"
 import { useRouter } from "next/navigation"
 
 // Sample workflows data
@@ -218,15 +218,11 @@ export function WorkflowManagement() {
         </div>
       </CardContent>
 
-      <WorkflowCreator
-        isOpen={isCreatorOpen}
-        onClose={() => {
-          setIsCreatorOpen(false)
-          setEditingWorkflow(null)
-        }}
-        onSave={handleSaveWorkflow}
-        existingWorkflow={editingWorkflow}
-      />
+      {/* Add Workflow Dialog */}
+      <WorkflowTemplateDialog isOpen={isCreatorOpen} onClose={() => {
+        setIsCreatorOpen(false)
+        setEditingWorkflow(null)
+      }} />
     </Card>
   )
 }

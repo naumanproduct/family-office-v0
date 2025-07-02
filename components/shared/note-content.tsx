@@ -823,23 +823,6 @@ The committee unanimously agreed to proceed with due diligence, with Sarah Johns
           <Input type="search" placeholder="Search notes..." className="w-full bg-background pl-8" />
         </div>
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8">
-                <SortAscIcon className="mr-2 h-3.5 w-3.5" />
-                Sort
-                <ChevronDownIcon className="ml-2 h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>Date (newest first)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Date (oldest first)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Title (A-Z)</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Title (Z-A)</DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
           <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />
           <Button size="sm" onClick={createNewNote}>
             <PlusIcon className="mr-2 h-4 w-4" />
@@ -864,7 +847,7 @@ The committee unanimously agreed to proceed with due diligence, with Sarah Johns
               {notes.map((note) => (
                 <TableRow 
                   key={note.id} 
-                  className="cursor-pointer hover:bg-muted/50" 
+                  className="group cursor-pointer hover:bg-muted/50" 
                   onClick={() => handleNoteSelect(note)}
                 >
                   <TableCell className="w-12">
@@ -876,10 +859,10 @@ The committee unanimously agreed to proceed with due diligence, with Sarah Johns
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                              <MoreVerticalIcon className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                          <MoreVerticalIcon className="h-4 w-4" />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={(e) => {
