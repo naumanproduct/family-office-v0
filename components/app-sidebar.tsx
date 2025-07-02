@@ -53,6 +53,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { WorkflowTemplateDialog } from "./workflows/workflow-template-dialog"
 import { SettingsModal } from "./settings-modal"
+import { GlobalSearchCommand } from "./global-search-command"
 
 const data = {
   user: {
@@ -108,7 +109,7 @@ const data = {
         },
         {
           title: "People",
-          url: "/contacts",
+          url: "/people",
           icon: UsersIcon,
         },
       ],
@@ -172,7 +173,7 @@ const data = {
     },
     {
       title: "Search",
-      url: "#",
+      action: "search",
       icon: SearchIcon,
     },
   ],
@@ -185,6 +186,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   
   // Always start with the same value on server and client to avoid hydration mismatch
   const [selectedEntity, setSelectedEntity] = useState("Gekko Family Office")
@@ -199,11 +201,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }, [])
 
+  // Add keyboard shortcut for search (Cmd+K or Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault()
+        setIsSearchOpen(true)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
+
   const handleNavAction = (item: any) => {
     if (item.url) {
       handleNavigation(item.url)
     } else if (item.action === "settings") {
       setIsSettingsModalOpen(true)
+    } else if (item.action === "search") {
+      setIsSearchOpen(true)
     }
   }
 
@@ -338,7 +357,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {data.navSecondary.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
-                    tooltip={item.title}
+                    tooltip={item.title === "Search" ? "Search (⌘K)" : item.title}
                     onClick={() => handleNavAction(item)}
                     className="cursor-pointer"
                   >
@@ -356,6 +375,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <WorkflowTemplateDialog isOpen={isTemplateDialogOpen} onClose={() => setIsTemplateDialogOpen(false)} />
       <SettingsModal open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen} />
+      <GlobalSearchCommand open={isSearchOpen} onOpenChange={setIsSearchOpen} />
     </Sidebar>
   )
 }
