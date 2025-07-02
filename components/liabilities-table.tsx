@@ -1229,68 +1229,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
         </Card>
       </div>
 
-      {/* Recent Data Changes - Styled like Activity feed */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium">Recent Data Changes</h3>
-          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-            View full audit log
-          </Button>
-        </div>
-        <UnifiedActivitySection 
-          activities={[
-            {
-              id: 1,
-              type: "data_sync",
-              actor: "Addepar",
-              action: "updated",
-              target: "Current Balance",
-              objectType: "field",
-              timestamp: "2 hours ago",
-              date: "2025-01-30",
-              details: {
-                previousValue: "$12,500,000",
-                newValue: "$12,485,320",
-                source: "Automated sync",
-                variance: "-0.12%"
-              }
-            },
-            {
-              id: 2,
-              type: "document_upload",
-              actor: "System",
-              action: "extracted data from",
-              target: "Q4_2024_Loan_Statement.pdf",
-              objectType: "document",
-              timestamp: "1 week ago",
-              date: "2025-01-23",
-              details: {
-                fieldsExtracted: ["Prepayment Penalty"],
-                extractionMethod: "Manual upload",
-                confidence: "verified"
-              }
-            },
-            {
-              id: 3,
-              type: "conflict_detected",
-              actor: "System",
-              action: "detected conflict in",
-              target: "Current Balance",
-              objectType: "field",
-              timestamp: "4 days ago",
-              date: "2025-01-26",
-              details: {
-                conflictingSources: ["Addepar", "Northern Trust", "NetSuite"],
-                status: "Pending review",
-                variance: "3 systems reporting different values"
-              }
-            }
-          ]}
-          showHeader={false}
-        />
-      </div>
-
-      {/* Connected Data Sources - Moved to bottom */}
+      {/* Connected Data Sources */}
       <div>
         <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
         <div className="grid grid-cols-2 gap-3">
@@ -1314,6 +1253,70 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
               </div>
             </Card>
           ))}
+        </div>
+      </div>
+
+      {/* Recent Data Changes - Styled like Activity feed with proper spacing */}
+      <div className="mt-8 -mx-6 border-t bg-background">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium">Recent Data Changes</h3>
+            <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+              View full audit log
+            </Button>
+          </div>
+          <UnifiedActivitySection 
+            activities={[
+              {
+                id: 1,
+                type: "data_sync",
+                actor: "Addepar",
+                action: "updated",
+                target: "Current Balance",
+                objectType: "field",
+                timestamp: "2 hours ago",
+                date: "2025-01-30",
+                details: {
+                  previousValue: "$12,500,000",
+                  newValue: "$12,485,320",
+                  source: "Automated sync",
+                  variance: "-0.12%"
+                }
+              },
+              {
+                id: 2,
+                type: "document_upload",
+                actor: "System",
+                action: "extracted data from",
+                target: "Q4_2024_Loan_Statement.pdf",
+                objectType: "document",
+                timestamp: "1 week ago",
+                date: "2025-01-23",
+                details: {
+                  fieldsExtracted: ["Prepayment Penalty"],
+                  extractionMethod: "Manual upload",
+                  confidence: "verified"
+                }
+              },
+              {
+                id: 3,
+                type: "conflict_detected",
+                actor: "System",
+                action: "detected conflict in",
+                target: "Current Balance",
+                objectType: "field",
+                timestamp: "4 days ago",
+                date: "2025-01-26",
+                details: {
+                  conflictingSources: ["Addepar", "Northern Trust", "NetSuite"],
+                  status: "Pending review",
+                  variance: "3 systems reporting different values"
+                }
+              }
+            ]}
+            showHeader={false}
+            onCommentSubmit={undefined}
+          />
         </div>
       </div>
     </div>

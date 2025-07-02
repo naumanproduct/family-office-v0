@@ -1181,68 +1181,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
         </Card>
       </div>
 
-      {/* Recent Data Changes - Styled like Activity feed */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium">Recent Data Changes</h3>
-          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-            View full audit log
-          </Button>
-        </div>
-        <UnifiedActivitySection 
-          activities={[
-            {
-              id: 1,
-              type: "data_sync",
-              actor: "Addepar",
-              action: "updated",
-              target: "Current Value",
-              objectType: "field",
-              timestamp: "2 hours ago",
-              date: "2025-01-30",
-              details: {
-                previousValue: "$22,200,000",
-                newValue: "$22,150,000",
-                source: "Automated sync",
-                variance: "-0.23%"
-              }
-            },
-            {
-              id: 2,
-              type: "document_upload",
-              actor: "System",
-              action: "processed",
-              target: "Q4 2024 statement",
-              objectType: "document",
-              timestamp: "1 week ago",
-              date: "2025-01-23",
-              details: {
-                fieldsUpdated: ["NAV", "Unfunded Commitment"],
-                extractionMethod: "Document upload",
-                confidence: "verified"
-              }
-            },
-            {
-              id: 3,
-              type: "calculation",
-              actor: "System",
-              action: "recalculated",
-              target: "IRR and Multiple",
-              objectType: "metrics",
-              timestamp: "2 hours ago",
-              date: "2025-01-30",
-              details: {
-                calculationMethod: "Based on latest cash flows",
-                newIRR: "18.5%",
-                newMultiple: "2.48x"
-              }
-            }
-          ]}
-          showHeader={false}
-        />
-      </div>
-
-      {/* Connected Data Sources - Moved to bottom */}
+      {/* Connected Data Sources */}
       <div>
         <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
         <div className="grid grid-cols-2 gap-3">
@@ -1266,6 +1205,70 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
               </div>
             </Card>
           ))}
+        </div>
+      </div>
+
+      {/* Recent Data Changes - Styled like Activity feed with proper spacing */}
+      <div className="mt-8 -mx-6 border-t bg-background">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium">Recent Data Changes</h3>
+            <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+              View full audit log
+            </Button>
+          </div>
+          <UnifiedActivitySection 
+            activities={[
+              {
+                id: 1,
+                type: "data_sync",
+                actor: "Addepar",
+                action: "updated",
+                target: "Current Value",
+                objectType: "field",
+                timestamp: "2 hours ago",
+                date: "2025-01-30",
+                details: {
+                  previousValue: "$22,200,000",
+                  newValue: "$22,150,000",
+                  source: "Automated sync",
+                  variance: "-0.23%"
+                }
+              },
+              {
+                id: 2,
+                type: "document_upload",
+                actor: "System",
+                action: "processed",
+                target: "Q4 2024 statement",
+                objectType: "document",
+                timestamp: "1 week ago",
+                date: "2025-01-23",
+                details: {
+                  fieldsUpdated: ["NAV", "Unfunded Commitment"],
+                  extractionMethod: "Document upload",
+                  confidence: "verified"
+                }
+              },
+              {
+                id: 3,
+                type: "calculation",
+                actor: "System",
+                action: "recalculated",
+                target: "IRR and Multiple",
+                objectType: "metrics",
+                timestamp: "2 hours ago",
+                date: "2025-01-30",
+                details: {
+                  calculationMethod: "Based on latest cash flows",
+                  newIRR: "18.5%",
+                  newMultiple: "2.48x"
+                }
+              }
+            ]}
+            showHeader={false}
+            onCommentSubmit={undefined}
+          />
         </div>
       </div>
     </div>
