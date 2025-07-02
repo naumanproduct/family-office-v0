@@ -41,6 +41,7 @@ import {
   GitCompareIcon,
   DatabaseIcon,
   TrendingDownIcon,
+  InfoIcon,
 } from "lucide-react"
 import { z } from "zod"
 import {
@@ -54,6 +55,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -915,88 +917,13 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
   // Mock external data sources - in production, this would come from your data layer
   const externalDataSources = [
     {
-      id: "addepar",
-      name: "Addepar",
-      type: "Portfolio Management",
-      lastSync: "2 hours ago",
-      status: "synced",
-      fieldsCount: 4,
-      fields: [
-        { 
-          fieldName: "Current Balance", 
-          value: "$12,485,320", 
-          lastUpdated: "2025-01-30 14:23:00",
-          confidence: "high",
-          variance: "-0.12%",
-          variantFromInternal: "$15,000"
-        },
-        { 
-          fieldName: "Interest Rate", 
-          value: "5.25%", 
-          lastUpdated: "2025-01-30 14:23:00",
-          confidence: "high",
-          variance: undefined,
-          variantFromInternal: undefined
-        },
-        { 
-          fieldName: "Monthly Payment", 
-          value: "$85,420", 
-          lastUpdated: "2025-01-30 14:23:00",
-          confidence: "calculated",
-          variance: undefined,
-          variantFromInternal: undefined
-        },
-        { 
-          fieldName: "Remaining Term", 
-          value: "18 months", 
-          lastUpdated: "2025-01-30 14:23:00",
-          confidence: "calculated",
-          variance: undefined,
-          variantFromInternal: undefined
-        }
-      ]
-    },
-    {
-      id: "netsuite",
-      name: "NetSuite",
-      type: "Accounting",
-      lastSync: "Yesterday",
+      id: "1",
+      name: "Banking Portal",
+      type: "API",
+      lastSync: "2025-01-27 09:00:00",
       status: "synced",
       fieldsCount: 3,
-      fields: [
-        { 
-          fieldName: "Current Balance", 
-          value: "$12,500,320", 
-          lastUpdated: "2025-01-29 18:00:00",
-          confidence: "high",
-          variance: "+0.12%",
-          variantFromInternal: undefined
-        },
-        { 
-          fieldName: "Principal Balance", 
-          value: "$12,000,000", 
-          lastUpdated: "2025-01-29 18:00:00",
-          confidence: "verified",
-          variance: undefined,
-          variantFromInternal: undefined
-        },
-        { 
-          fieldName: "Accrued Interest", 
-          value: "$500,320", 
-          lastUpdated: "2025-01-29 18:00:00",
-          confidence: "high",
-          variance: undefined,
-          variantFromInternal: undefined
-        }
-      ]
-    },
-    {
-      id: "bank-portal",
-      name: "Bank Portal",
-      type: "Lender Portal",
-      lastSync: "3 days ago",
-      status: "pending",
-      fieldsCount: 3,
+      refreshCadence: "Daily",
       fields: [
         { 
           fieldName: "Current Balance", 
@@ -1004,7 +931,9 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
           lastUpdated: "2025-01-27 09:00:00",
           confidence: "medium",
           variance: "-0.08%",
-          variantFromInternal: "$10,320"
+          variantFromInternal: "$10,320",
+          currency: "USD",
+          derivedFrom: "current_balance in Banking Portal"
         },
         { 
           fieldName: "Next Payment Due", 
@@ -1012,7 +941,9 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
           lastUpdated: "2025-01-27 09:00:00",
           confidence: "high",
           variance: undefined,
-          variantFromInternal: undefined
+          variantFromInternal: undefined,
+          currency: "USD",
+          derivedFrom: "payment_schedule in Banking Portal"
         },
         { 
           fieldName: "Credit Line Available", 
@@ -1020,17 +951,21 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
           lastUpdated: "2025-01-27 09:00:00",
           confidence: "high",
           variance: undefined,
-          variantFromInternal: undefined
+          variantFromInternal: undefined,
+          currency: "USD",
+          derivedFrom: "available_credit in Banking Portal"
         }
       ]
     },
     {
-      id: "loan-docs",
+      id: "2",
       name: "Loan Documents",
-      type: "Document Extract",
-      lastSync: "2 weeks ago",
+      type: "Document",
+      lastSync: "2025-01-15 00:00:00",
       status: "manual",
       fieldsCount: 2,
+      refreshCadence: "As Updated",
+      sourceFormat: "PDF",
       fields: [
         { 
           fieldName: "Original Amount", 
@@ -1040,7 +975,9 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
           variance: undefined,
           variantFromInternal: undefined,
           documentName: "Credit_Agreement_2024.pdf",
-          pageNumber: 1
+          pageNumber: 1,
+          currency: "USD",
+          lastOverride: "John Doe, 2025-01-16"
         },
         { 
           fieldName: "Maturity Date", 
@@ -1099,6 +1036,11 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
       variance?: string
       documentName?: string
       pageNumber?: number
+      refreshCadence?: string
+      lastOverride?: string
+      currency?: string
+      derivedFrom?: string
+      sourceFormat?: string
     }>> = {}
 
     externalDataSources.forEach(source => {
@@ -1114,7 +1056,12 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
           confidence: field.confidence,
           variance: field.variance,
           documentName: field.documentName,
-          pageNumber: field.pageNumber
+          pageNumber: field.pageNumber,
+          refreshCadence: source.refreshCadence || (source.type === "API" ? "Daily" : "Monthly"),
+          currency: field.currency || "USD",
+          sourceFormat: source.type === "Document" ? "PDF" : source.type,
+          derivedFrom: field.derivedFrom || (source.type === "API" ? `${field.fieldName.toLowerCase().replace(/\s/g, '_')} in ${source.name}` : undefined),
+          lastOverride: field.lastOverride
         })
       })
     })
@@ -1137,6 +1084,11 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
     variance?: string
     documentName?: string
     pageNumber?: number
+    refreshCadence?: string
+    lastOverride?: string
+    currency?: string
+    derivedFrom?: string
+    sourceFormat?: string
   }>) => {
     // If user has selected a specific source for this field, use that
     if (selectedSources[fieldName]) {
@@ -1375,19 +1327,83 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                               </div>
                                             </>
                                           )}
+                                          <div className="text-xs">
+                                            <span className="font-medium">Format:</span>
+                                          </div>
+                                          <div className="text-xs">
+                                            {truthValue.sourceFormat || truthValue.sourceType || "API"}
+                                          </div>
+                                          <div className="text-xs">
+                                            <span className="font-medium">Refresh:</span>
+                                          </div>
+                                          <div className="text-xs">
+                                            {truthValue.refreshCadence || "Daily"}
+                                          </div>
+                                          {truthValue.lastOverride && (
+                                            <>
+                                              <div className="text-xs">
+                                                <span className="font-medium">Last Override:</span>
+                                              </div>
+                                              <div className="text-xs">
+                                                {truthValue.lastOverride}
+                                              </div>
+                                            </>
+                                          )}
+                                          {truthValue.currency && (
+                                            <>
+                                              <div className="text-xs">
+                                                <span className="font-medium">Currency:</span>
+                                              </div>
+                                              <div className="text-xs">
+                                                {truthValue.currency}
+                                              </div>
+                                            </>
+                                          )}
+                                          {truthValue.derivedFrom && (
+                                            <>
+                                              <div className="text-xs">
+                                                <span className="font-medium">Derived From:</span>
+                                              </div>
+                                              <div className="text-xs">
+                                                {truthValue.derivedFrom}
+                                              </div>
+                                            </>
+                                          )}
                                           {truthValue.documentName && (
                                             <>
                                               <div className="text-xs">
                                                 <span className="font-medium">Document:</span>
                                               </div>
                                               <div className="text-xs">
-                                                Statement (p.{truthValue.pageNumber})
+                                                {truthValue.documentName} (p.{truthValue.pageNumber})
                                               </div>
                                             </>
                                           )}
                                         </div>
                                       ),
-                                      right: getConfidenceBadge(truthValue.confidence)
+                                      right: (
+                                        <div className="flex flex-col items-end gap-1">
+                                          {getConfidenceBadge(truthValue.confidence)}
+                                          <TooltipProvider>
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <Button variant="ghost" size="sm" className="h-5 px-1">
+                                                  <InfoIcon className="h-3 w-3 text-muted-foreground" />
+                                                </Button>
+                                              </TooltipTrigger>
+                                              <TooltipContent>
+                                                <p className="text-xs">
+                                                  {truthValue.confidence === "verified" && "Verified = manually confirmed by a team member"}
+                                                  {truthValue.confidence === "high" && "High = recent, consistent, and from preferred source"}
+                                                  {truthValue.confidence === "medium" && "Medium = relatively recent but from secondary source"}
+                                                  {truthValue.confidence === "low" && "Low = outdated or from less reliable source"}
+                                                  {truthValue.confidence === "calculated" && "Calculated = derived from other values"}
+                                                </p>
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          </TooltipProvider>
+                                        </div>
+                                      )
                                     }}
                                   />
                                 </div>
@@ -1396,38 +1412,64 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                 {sources.length > 1 && (
                                   <div className="space-y-3">
                                     <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All Sources</div>
-                                                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        {sources.map((source, idx) => {
-                                          const isActive = source.source === truthValue.source;
-                                          return (
-                                            <RecordCard
-                                              key={idx}
-                                              title={(
-                                                <div className="flex items-center gap-2">
-                                                  <span>{source.value}</span>
-                                                  {getConfidenceBadge(source.confidence)}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                      {sources.map((source, idx) => {
+                                        const isActive = source.source === truthValue.source;
+                                        return (
+                                          <RecordCard
+                                            key={idx}
+                                            title={source.source}
+                                            primaryMetadata={[]}
+                                            secondaryMetadata={{
+                                              left: (
+                                                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                                  <div className="text-xs">
+                                                    <span className="font-medium">Value:</span>
+                                                  </div>
+                                                  <div className="text-xs">
+                                                    {source.value}
+                                                  </div>
+                                                  <div className="text-xs">
+                                                    <span className="font-medium">Updated:</span>
+                                                  </div>
+                                                  <div className="text-xs">
+                                                    {new Date(source.lastUpdated).toLocaleDateString()}
+                                                  </div>
+                                                  {source.variance && (
+                                                    <>
+                                                      <div className="text-xs">
+                                                        <span className="font-medium">Variance:</span>
+                                                      </div>
+                                                      <div className="text-xs">
+                                                        {source.variance}
+                                                      </div>
+                                                    </>
+                                                  )}
+                                                  <div className="text-xs">
+                                                    <span className="font-medium">Format:</span>
+                                                  </div>
+                                                  <div className="text-xs">
+                                                    {source.sourceFormat || source.sourceType || "API"}
+                                                  </div>
                                                 </div>
-                                              )}
-                                              primaryMetadata={[]}
-                                              secondaryMetadata={{
-                                                left: source.source,
-                                                right: new Date(source.lastUpdated).toLocaleDateString()
-                                              }}
-                                              actions={[
-                                                isActive 
-                                                  ? { label: "Selected Value Source", onClick: () => {} }
-                                                  : { 
-                                                      label: "Use This Value", 
-                                                      onClick: (e) => {
-                                                        e.stopPropagation();
-                                                        setSourceForField(fieldName, source.source);
-                                                      } 
-                                                    },
-                                                { label: "View Details", onClick: (e) => e.stopPropagation() }
-                                              ]}
-                                            />
-                                          );
-                                        })}
+                                              ),
+                                              right: getConfidenceBadge(source.confidence)
+                                            }}
+                                            actions={[
+                                              isActive 
+                                                ? { label: "Selected Value Source", onClick: () => {} }
+                                                : { 
+                                                    label: "Use This Value", 
+                                                    onClick: (e) => {
+                                                      e.stopPropagation();
+                                                      setSourceForField(fieldName, source.source);
+                                                    } 
+                                                  },
+                                              { label: "View Details", onClick: (e) => e.stopPropagation() }
+                                            ]}
+                                          />
+                                        );
+                                      })}
                                     </div>
                                   </div>
                                 )}
