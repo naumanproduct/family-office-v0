@@ -1227,8 +1227,8 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[30%]">Field</TableHead>
-                    <TableHead className="w-[30%]">Internal Value</TableHead>
-                    <TableHead className="w-[40%]">External Value</TableHead>
+                    <TableHead className="w-[30%]">System Value</TableHead>
+                    <TableHead className="w-[40%]">Current Value</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1284,9 +1284,9 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>Accept external</DropdownMenuItem>
-                                    <DropdownMenuItem>Keep internal</DropdownMenuItem>
-                                    <DropdownMenuItem>Flag for review</DropdownMenuItem>
+                                    <DropdownMenuItem>Update System Value</DropdownMenuItem>
+                                    <DropdownMenuItem>Keep Current Value</DropdownMenuItem>
+                                    <DropdownMenuItem>Flag for Review</DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </div>
