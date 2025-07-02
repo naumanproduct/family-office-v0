@@ -3,7 +3,7 @@ import { useState } from "react"
 import {
   CalendarIcon,
   ChevronDownIcon,
-  DotIcon as DotsHorizontalIcon,
+  MoreVerticalIcon,
   SearchIcon,
   SortAscIcon,
   TagIcon,
@@ -20,6 +20,7 @@ import {
   MessageSquareIcon,
   MailIcon,
   FolderIcon,
+  LoaderIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -576,6 +577,8 @@ export function FileContent({
   const [fileData, setFileData] = useState(initialData)
   const [selectedFile, setSelectedFile] = useState<any>(null)
   const [isDocumentViewerOpen, setIsDocumentViewerOpen] = useState(false)
+  // Add loading states for files
+  const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set())
 
   // Define tabs for the MasterDrawer
   const fileTabs = [
@@ -595,26 +598,79 @@ export function FileContent({
   }
 
   const handleFileUpload = (uploadData: FileFormData) => {
-    // Create a new file object with the provided data and some defaults
-    const newFile = {
-      id: `file-${Date.now()}`,
-      title: uploadData.name || `New ${uploadData.fileType || 'File'}`,
-      name: uploadData.name || `file-${Date.now()}.pdf`,
+    // If there are multiple files, process them all
+    const filesToProcess = uploadData.files || [];
+    
+    if (filesToProcess.length === 0) {
+      // Fallback to single file creation if no files array
+      const newFile = {
+        id: `file-${Date.now()}`,
+        title: uploadData.name || `New ${uploadData.fileType || 'File'}`,
+        name: uploadData.name || `file-${Date.now()}.pdf`,
+        description: uploadData.description || "",
+        fileName: uploadData.name || `file-${Date.now()}.pdf`,
+        fileSize: "1.2 MB", // Mock size
+        uploadedAt: new Date().toISOString(),
+        uploadedBy: "Current User",
+        fileType: uploadData.fileType || "document",
+        type: uploadData.fileType || "document",
+        category: uploadData.category || "Other",
+        tags: uploadData.tags ? uploadData.tags.split(",").map(tag => tag.trim()) : [],
+        status: uploadData.status || "Draft",
+      }
+      
+      // Add file with loading state
+      setFileData([newFile, ...fileData])
+      setUploadingFiles(new Set([newFile.id]))
+      
+      // Simulate upload completion after 2 seconds
+      setTimeout(() => {
+        setUploadingFiles(prev => {
+          const next = new Set(prev)
+          next.delete(newFile.id)
+          return next
+        })
+      }, 2000)
+      
+      return
+    }
+    
+    // Process multiple files
+    const newFiles = filesToProcess.map((file, index) => ({
+      id: `file-${Date.now()}-${index}`,
+      title: file.name || `New File ${index + 1}`,
+      name: file.name,
       description: uploadData.description || "",
-      fileName: uploadData.name || `file-${Date.now()}.pdf`,
-      fileSize: "1.2 MB", // Mock size
+      fileName: file.name,
+      fileSize: file.size || "Unknown",
       uploadedAt: new Date().toISOString(),
       uploadedBy: "Current User",
-      fileType: uploadData.fileType || "document",
-      type: uploadData.fileType || "document",
+      fileType: file.type || "document",
+      type: file.type || "document",
       category: uploadData.category || "Other",
       tags: uploadData.tags ? uploadData.tags.split(",").map(tag => tag.trim()) : [],
       status: uploadData.status || "Draft",
-    }
-
-    // Add the new file to the data
-    setFileData([newFile, ...fileData])
-    console.log("File uploaded:", newFile)
+    }))
+    
+    // Add all files to the data with loading states
+    setFileData([...newFiles, ...fileData])
+    
+    // Mark all new files as uploading
+    const newUploadingIds = new Set(newFiles.map(f => f.id))
+    setUploadingFiles(newUploadingIds)
+    
+    // Simulate staggered upload completion
+    newFiles.forEach((file, index) => {
+      setTimeout(() => {
+        setUploadingFiles(prev => {
+          const next = new Set(prev)
+          next.delete(file.id)
+          return next
+        })
+      }, 1500 + (index * 500)) // Stagger uploads by 500ms each
+    })
+    
+    console.log("Files uploaded:", newFiles)
   }
 
   // Function to render tab content for the MasterDrawer
@@ -742,41 +798,58 @@ export function FileContent({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {fileData.map((file) => (
-                <TableRow 
-                  key={file.id} 
-                  className="cursor-pointer hover:bg-muted/50" 
-                  onClick={() => handleFileSelect(file)}
-                >
-                  <TableCell className="w-12">
-                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                  </TableCell>
-                  <TableCell className="font-medium text-sm">{file.name || file.title}</TableCell>
-                  <TableCell className="text-sm">{file.uploadedBy}</TableCell>
-                  <TableCell className="text-sm">{file.uploadedDate || formatDate(new Date(file.uploadedAt))}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                          <DotsHorizontalIcon className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={(e) => {
-                          e.stopPropagation();
-                          handleFileSelect(file);
-                        }}>
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Download</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {fileData.map((file) => {
+                const isUploading = uploadingFiles.has(file.id)
+                
+                return (
+                  <TableRow 
+                    key={file.id} 
+                    className={`cursor-pointer hover:bg-muted/50 ${isUploading ? 'opacity-60' : ''}`} 
+                    onClick={() => !isUploading && handleFileSelect(file)}
+                  >
+                    <TableCell className="w-12">
+                      <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                    </TableCell>
+                    <TableCell className="font-medium text-sm">
+                      <div className="flex items-center gap-2">
+                        <span>{file.name || file.title}</span>
+                        {isUploading && (
+                          <span className="text-xs text-muted-foreground">(Uploading...)</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">{file.uploadedBy}</TableCell>
+                    <TableCell className="text-sm">{file.uploadedDate || formatDate(new Date(file.uploadedAt))}</TableCell>
+                    <TableCell>
+                      {isUploading ? (
+                        <div className="flex items-center justify-center h-8 w-8">
+                          <LoaderIcon className="h-4 w-4 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                              <MoreVerticalIcon className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleFileSelect(file);
+                            }}>
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Download</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </div>
@@ -784,47 +857,55 @@ export function FileContent({
 
       {viewMode === "list" && (
         <div className="divide-y">
-          {fileData.map((file) => (
-            <RecordListItem
-              key={file.id}
-              title={file.name || file.title}
-              primaryMetadata={[]}
-              secondaryMetadata={{
-                left: file.uploadedBy,
-                right: file.uploadedDate || file.date
-              }}
-              onClick={() => handleFileSelect(file)}
-              actions={[
-                { label: "View", onClick: () => handleFileSelect(file) },
-                { label: "Download", onClick: () => {} },
-                { label: "Delete", onClick: () => {}, variant: "destructive" as const },
-              ]}
-              leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
-            />
-          ))}
+          {fileData.map((file) => {
+            const isUploading = uploadingFiles.has(file.id)
+            
+            return (
+              <RecordListItem
+                key={file.id}
+                title={`${file.name || file.title}${isUploading ? ' (Uploading...)' : ''}`}
+                primaryMetadata={[]}
+                secondaryMetadata={{
+                  left: file.uploadedBy,
+                  right: file.uploadedDate || file.date
+                }}
+                onClick={() => !isUploading && handleFileSelect(file)}
+                actions={isUploading ? [] : [
+                  { label: "View", onClick: () => handleFileSelect(file) },
+                  { label: "Download", onClick: () => {} },
+                  { label: "Delete", onClick: () => {}, variant: "destructive" as const },
+                ]}
+                leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
+              />
+            )
+          })}
         </div>
       )}
 
       {viewMode === "card" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {fileData.map((file) => (
-            <RecordCard
-              key={file.id}
-              title={file.name || file.title}
-              primaryMetadata={[]}
-              secondaryMetadata={{
-                left: file.uploadedBy,
-                right: file.uploadedDate || file.date
-              }}
-              onClick={() => handleFileSelect(file)}
-              actions={[
-                { label: "View", onClick: () => handleFileSelect(file) },
-                { label: "Download", onClick: () => {} },
-                { label: "Delete", onClick: () => {}, variant: "destructive" as const },
-              ]}
-              leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
-            />
-          ))}
+          {fileData.map((file) => {
+            const isUploading = uploadingFiles.has(file.id)
+            
+            return (
+              <RecordCard
+                key={file.id}
+                title={`${file.name || file.title}${isUploading ? ' (Uploading...)' : ''}`}
+                primaryMetadata={[]}
+                secondaryMetadata={{
+                  left: file.uploadedBy,
+                  right: file.uploadedDate || file.date
+                }}
+                onClick={() => !isUploading && handleFileSelect(file)}
+                actions={isUploading ? [] : [
+                  { label: "View", onClick: () => handleFileSelect(file) },
+                  { label: "Download", onClick: () => {} },
+                  { label: "Delete", onClick: () => {}, variant: "destructive" as const },
+                ]}
+                leadingElement={<FileTextIcon className="h-4 w-4 text-muted-foreground" />}
+              />
+            )
+          })}
         </div>
       )}
 

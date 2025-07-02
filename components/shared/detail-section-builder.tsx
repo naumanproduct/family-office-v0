@@ -74,7 +74,7 @@ export function buildStandardDetailSections({
     },
     {
       id: "opportunities",
-      title: "Related Opportunities",
+      title: "Opportunities",
       icon: <TrendingUpIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: { items: opportunities },
       hideWhenEmpty,

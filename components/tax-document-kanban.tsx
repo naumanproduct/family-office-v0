@@ -410,7 +410,7 @@ function TaxDocumentCard({ document }: { document: TaxDocument }) {
       },
       {
         id: 'entityInfo',
-        title: 'Related Entities',
+                  title: 'Entities',
         icon: BuildingIcon,
         content: <ItemsSection items={relatedData.entityInfo} />,
         count: relatedData.entityInfo.length
@@ -771,7 +771,7 @@ function TaxDocumentDetails({ document, isFullScreen }: { document: TaxDocument;
           <p className="text-sm">{document.notes}</p>
         </div>
         <div className="space-y-2">
-          <h3 className="text-sm font-medium">Related Entities</h3>
+                          <h3 className="text-sm font-medium">Entities</h3>
           <div className="flex flex-wrap gap-2">
             {document.relatedEntities?.map((entity, index) => (
               <Badge key={index} variant="outline">

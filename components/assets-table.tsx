@@ -740,6 +740,28 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
     },
   ]
 
+  // Mock investments based on the asset
+  const investments = [
+    {
+      id: 1,
+      name: asset.name,
+      amount: asset.currentValue,
+      status: asset.status,
+    },
+    {
+      id: 2,
+      name: `${asset.sector} Co-Investment`,
+      amount: "$5.2M",
+      status: "Active",
+    },
+    {
+      id: 3,
+      name: `${asset.category} Follow-on`,
+      amount: "$3.8M",
+      status: "Pending",
+    },
+  ]
+
   const sections = buildStandardDetailSections({
     infoTitle: "Asset Information",
     infoIcon: <BarChartIcon className="h-4 w-4 text-muted-foreground" />,
@@ -747,7 +769,7 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
     companies,
     people: relatedData.people,
     entities: relatedData.entities,
-    investments: [],
+    investments,
     opportunities: relatedData.opportunities,
   })
 

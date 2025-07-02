@@ -439,7 +439,7 @@ function ComplianceItemCard({ item }: { item: ComplianceItem }) {
       },
       {
         id: 'entity',
-        title: 'Related Entities',
+                  title: 'Entities',
         icon: BuildingIcon,
         content: <ItemsSection items={relatedData.entityInfo} />,
         count: relatedData.entityInfo.length
@@ -813,7 +813,7 @@ function ComplianceItemDetails({ item, isFullScreen }: { item: ComplianceItem; i
           <p className="text-sm">{item.notes}</p>
         </div>
         <div className="space-y-2">
-          <h3 className="text-sm font-medium">Related Entities</h3>
+                          <h3 className="text-sm font-medium">Entities</h3>
           <div className="flex flex-wrap gap-2">
             {item.relatedEntities?.map((entity, index) => (
               <Badge key={index} variant="outline">

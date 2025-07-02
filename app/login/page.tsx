@@ -10,7 +10,7 @@ export default function LoginPage() {
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <BuildingIcon className="size-5" />
           </div>
-          <span className="text-xl font-semibold">Family Office</span>
+          <span className="text-xl font-semibold">Gekko Family Office</span>
         </a>
         <LoginForm />
       </div>

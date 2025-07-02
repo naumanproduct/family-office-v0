@@ -215,7 +215,7 @@ export default function Home() {
             <div className="flex items-center justify-between mb-12">
               <div>
                 <h1 className="text-3xl font-semibold tracking-tight text-foreground">{getTimeBasedGreeting()}, Gordon</h1>
-                <p className="text-muted-foreground mt-1">Here's your family office overview</p>
+                <p className="text-muted-foreground mt-1">Here's your Gekko Family Office overview</p>
               </div>
               
               <DropdownMenu>

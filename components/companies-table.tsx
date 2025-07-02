@@ -1111,6 +1111,11 @@ function CompanyActivityContent({ company }: { company: Company }) {
 function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Company; isFullScreen?: boolean }) {
   // Mock data for related items
   const relatedData = {
+    companies: [
+      { id: 1, name: "TechFlow Subsidiary Inc.", type: "Subsidiary" },
+      { id: 2, name: "Strategic Partner Corp", type: "Partner" },
+      { id: 3, name: "Parent Holdings LLC", type: "Parent Company" },
+    ],
     investments: [
       { id: 1, name: "Series C Investment", type: "Lead Investor" },
       { id: 2, name: "Strategic Partnership", type: "Co-investor" },
@@ -1249,8 +1254,16 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
       hideWhenEmpty: true,
     },
     {
+      id: "Companies",
+      title: "Companies",
+      icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
+      sectionData: {
+        items: relatedData.companies
+      },
+    },
+    {
       id: "People",
-      title: "Key People",
+      title: "People",
       icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
         items: relatedData.people
@@ -1266,7 +1279,7 @@ function CompanyDetailsPanel({ company, isFullScreen = false }: { company: Compa
     },
     {
       id: "Entities",
-      title: "Related Entities",
+      title: "Entities",
       icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
         items: relatedData.entities

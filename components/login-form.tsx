@@ -27,7 +27,7 @@ export function LoginForm({
     
     // Simulate login delay - accepts any credentials
     setTimeout(() => {
-      router.push("/")
+      router.push("/loading-auth")
     }, 1000)
   }
 
@@ -36,7 +36,7 @@ export function LoginForm({
     
     // Simulate social login - always succeeds
     setTimeout(() => {
-      router.push("/")
+      router.push("/loading-auth")
     }, 1000)
   }
 
@@ -44,7 +44,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome to your Family Office</CardTitle>
+          <CardTitle className="text-xl">Welcome</CardTitle>
           <CardDescription>
             Sign in to access your portfolio and investments
           </CardDescription>

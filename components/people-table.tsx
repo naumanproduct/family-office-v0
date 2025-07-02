@@ -710,7 +710,7 @@ function ContactDetailsPanel({ contact, isFullScreen = false }: { contact: Conta
     },
     {
       id: "people",
-      title: "Related People",
+      title: "People",
       icon: <UsersIcon className="h-4 w-4 text-muted-foreground" />,
       sectionData: {
         items: relatedData.people
@@ -1324,7 +1324,7 @@ const columns: ColumnDef<Contact>[] = [
     cell: ({ row }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+          <Button variant="ghost" className="flex h-8 w-8 p-0 data-[state=open]:bg-muted opacity-0 group-hover:opacity-100 transition-opacity">
             <MoreVerticalIcon className="h-4 w-4" />
             <span className="sr-only">Open menu</span>
           </Button>
@@ -1494,7 +1494,7 @@ export function PeopleTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="h-12 cursor-pointer hover:bg-muted/50"
+                  className="group h-12 cursor-pointer hover:bg-muted/50"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="py-2">

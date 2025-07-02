@@ -3,7 +3,7 @@ import { useState } from "react"
 import {
   CalendarIcon,
   ChevronDownIcon,
-  DotIcon as DotsHorizontalIcon,
+  MoreVerticalIcon,
   SearchIcon,
   SortAscIcon,
   TagIcon,
@@ -876,10 +876,10 @@ The committee unanimously agreed to proceed with due diligence, with Sarah Johns
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                          <DotsHorizontalIcon className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                              <MoreVerticalIcon className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={(e) => {
