@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronDownIcon, ColumnsIcon, FilterIcon, PlusIcon, SearchIcon, ChevronRightIcon, GitCompareIcon, DatabaseIcon, ClockIcon, InfoIcon } from "lucide-react"
+import { ChevronDownIcon, ColumnsIcon, FilterIcon, PlusIcon, SearchIcon, ChevronRightIcon, GitCompareIcon, DatabaseIcon, ClockIcon } from "lucide-react"
 import { z } from "zod"
 import {
   DndContext,
@@ -26,31 +26,28 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
-  Badge,
-  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuDraggableItem,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui"
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AddAssetDialog } from "./add-asset-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { FileTextIcon,
   FileIcon, MailIcon, CheckCircleIcon, StickyNoteIcon, CalendarIcon, FolderIcon, UsersIcon, BuildingIcon, LandmarkIcon, BarChartIcon, TrendingUpIcon, TrendingDownIcon } from "lucide-react"
-import { TabContentRenderer } from "./shared/tab-content-renderer"
-import { UnifiedDetailsPanel } from "./shared/unified-details-panel"
-import { buildStandardDetailSections } from "./shared/detail-section-builder"
-import { UnifiedActivitySection, type ActivityItem } from "./shared/unified-activity-section"
-import { generateInvestmentActivities } from "./shared/activity-generators"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
+import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
+import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
+import { generateInvestmentActivities } from "@/components/shared/activity-generators"
 import { Card, CardContent, CardHeader, CardDescription, CardFooter, CardTitle } from "@/components/ui/card"
 import { MoreVerticalIcon } from "lucide-react"
 import { RecordCard } from "./shared/record-card"
@@ -865,98 +862,142 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
   // Mock external data sources for assets - in production, this would come from your data layer
   const externalDataSources = [
     {
-      id: "1",
+      id: "addepar",
       name: "Addepar",
-      type: "API",
-      lastSync: "2024-06-30 08:30:00",
+      type: "Portfolio Management",
+      lastSync: "2 hours ago",
       status: "synced",
-      fieldsCount: 5,
-      refreshCadence: "Daily",
+      fieldsCount: 4,
       fields: [
         { 
           fieldName: "Current Value", 
-          value: "$1,250,000", 
-          lastUpdated: "2024-06-30 08:30:00",
+          value: "$22,150,000", 
+          lastUpdated: "2025-01-30 14:23:00",
           confidence: "high",
           variance: "-0.23%",
-          variantFromInternal: "0%",
-          currency: "USD",
-          derivedFrom: "nav_value in Addepar"
-        },
-        { 
-          fieldName: "Cost Basis", 
-          value: "$1,000,000", 
-          lastUpdated: "2024-06-30 08:30:00",
-          confidence: "high",
-          variance: "0%",
-          variantFromInternal: "0%",
-          currency: "USD",
-          derivedFrom: "cost_basis in Addepar"
+          variantFromInternal: "$50,000"
         },
         { 
           fieldName: "Unrealized Gain", 
-          value: "$250,000", 
-          lastUpdated: "2024-06-30 08:30:00",
-          confidence: "calculated",
-          variance: "-1.2%",
-          variantFromInternal: "0%",
-          currency: "USD",
-          derivedFrom: "Calculated from Current Value - Cost Basis"
+          value: "$7,150,000", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
         },
         { 
           fieldName: "IRR", 
-          value: "8.2%", 
-          lastUpdated: "2024-06-30 08:30:00",
-          confidence: "medium",
-          variance: "+0.3%",
-          variantFromInternal: undefined,
-          currency: "USD",
-          derivedFrom: "irr_calc in Addepar"
+          value: "18.5%", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "calculated",
+          variance: undefined,
+          variantFromInternal: undefined
         },
         { 
-          fieldName: "Vintage Year", 
-          value: "2020", 
-          lastUpdated: "2024-06-30 08:30:00",
-          confidence: "high",
+          fieldName: "Multiple", 
+          value: "2.48x", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "calculated",
           variance: undefined,
-          variantFromInternal: undefined,
-          currency: "USD",
-          derivedFrom: "vintage_year in Addepar"
+          variantFromInternal: undefined
         }
       ]
     },
     {
-      id: "2",
-      name: "Capital Account Statement",
-      type: "Document",
-      lastSync: "2024-01-15 14:22:00",
+      id: "netsuite",
+      name: "NetSuite",
+      type: "Accounting",
+      lastSync: "Yesterday",
       status: "synced",
-      fieldsCount: 3,
-      refreshCadence: "Quarterly",
-      sourceFormat: "PDF",
+      fieldsCount: 4,
       fields: [
         { 
           fieldName: "Current Value", 
-          value: "$1,253,000", 
-          lastUpdated: "2024-01-15 14:22:00",
-          confidence: "verified",
-          variance: undefined,
-          variantFromInternal: undefined,
-          documentName: "Q4_2024_Capital_Account_Statement.pdf",
-          pageNumber: 1,
-          currency: "USD",
-          lastOverride: "Jane Smith, 2024-01-16"
+          value: "$22,200,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: "+0.23%",
+          variantFromInternal: undefined
         },
         { 
-          fieldName: "Unrealized Gain", 
-          value: "$253,000", 
-          lastUpdated: "2024-01-15 14:22:00",
+          fieldName: "Cost Basis", 
+          value: "$15,000,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Distributions YTD", 
+          value: "$850,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Capital Calls YTD", 
+          value: "$2,100,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "northern-trust",
+      name: "Northern Trust",
+      type: "Custodian",
+      lastSync: "4 days ago",
+      status: "pending",
+      fieldsCount: 2,
+      fields: [
+        { 
+          fieldName: "Current Value", 
+          value: "$22,180,000", 
+          lastUpdated: "2025-01-26 09:00:00",
+          confidence: "medium",
+          variance: "+0.14%",
+          variantFromInternal: "$30,000"
+        },
+        { 
+          fieldName: "Account Balance", 
+          value: "$22,180,000", 
+          lastUpdated: "2025-01-26 09:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "fund-admin",
+      name: "Fund Administrator",
+      type: "Fund Admin Portal",
+      lastSync: "1 week ago",
+      status: "manual",
+      fieldsCount: 3,
+      fields: [
+        { 
+          fieldName: "NAV", 
+          value: "$22,200,000", 
+          lastUpdated: "2024-12-31 00:00:00",
           confidence: "verified",
           variance: undefined,
           variantFromInternal: undefined,
           documentName: "Q4_2024_Capital_Account_Statement.pdf",
-          pageNumber: 1,
-          currency: "USD"
+          pageNumber: 1
+        },
+        { 
+          fieldName: "Unfunded Commitment", 
+          value: "$10,000,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "Q4_2024_Capital_Account_Statement.pdf",
+          pageNumber: 1
         },
         { 
           fieldName: "Partnership %", 
@@ -966,8 +1007,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
           variance: undefined,
           variantFromInternal: undefined,
           documentName: "Q4_2024_Capital_Account_Statement.pdf",
-          pageNumber: 2,
-          currency: "USD"
+          pageNumber: 2
         }
       ]
     }
@@ -1016,11 +1056,6 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
       variance?: string
       documentName?: string
       pageNumber?: number
-      refreshCadence?: string
-      lastOverride?: string
-      currency?: string
-      derivedFrom?: string
-      sourceFormat?: string
     }>> = {}
 
     externalDataSources.forEach(source => {
@@ -1036,12 +1071,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
           confidence: field.confidence,
           variance: field.variance,
           documentName: field.documentName,
-          pageNumber: field.pageNumber,
-          refreshCadence: source.refreshCadence || (source.type === "API" ? "Daily" : "Monthly"),
-          currency: field.currency || "USD",
-          sourceFormat: source.type === "Document" ? "PDF" : source.type,
-          derivedFrom: field.derivedFrom || (source.type === "API" ? `${field.fieldName.toLowerCase().replace(/\s/g, '_')} in ${source.name}` : undefined),
-          lastOverride: field.lastOverride
+          pageNumber: field.pageNumber
         })
       })
     })
@@ -1064,11 +1094,6 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
     variance?: string
     documentName?: string
     pageNumber?: number
-    refreshCadence?: string
-    lastOverride?: string
-    currency?: string
-    derivedFrom?: string
-    sourceFormat?: string
   }>) => {
     // If user has selected a specific source for this field, use that
     if (selectedSources[fieldName]) {
@@ -1273,185 +1298,80 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                           <TableRow>
                             <TableCell colSpan={3} className="bg-muted/20 border-t-0 py-4">
                               <div className="space-y-4">
-                                {/* Primary source metadata */}
+                                {/* All Sources */}
                                 <div className="space-y-3">
-                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                    {sources.length > 1 ? "Selected Value Source" : "Source Details"}
-                                  </div>
-                                  <RecordCard
-                                    title={truthValue.source}
-                                    primaryMetadata={[]}
-                                    secondaryMetadata={{
-                                      left: (
-                                        <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                                          <div className="text-xs">
-                                            <span className="font-medium">Value:</span>
-                                          </div>
-                                          <div className="text-xs">
-                                            {truthValue.value}
-                                          </div>
-                                          <div className="text-xs">
-                                            <span className="font-medium">Updated:</span>
-                                          </div>
-                                          <div className="text-xs">
-                                            {new Date(truthValue.lastUpdated).toLocaleDateString()}
-                                          </div>
-                                          {truthValue.variance && (
-                                            <>
-                                              <div className="text-xs">
-                                                <span className="font-medium">Variance:</span>
-                                              </div>
-                                              <div className="text-xs">
-                                                {truthValue.variance}
-                                              </div>
-                                            </>
-                                          )}
-                                          <div className="text-xs">
-                                            <span className="font-medium">Format:</span>
-                                          </div>
-                                          <div className="text-xs">
-                                            {truthValue.sourceFormat || truthValue.sourceType || "API"}
-                                          </div>
-                                          <div className="text-xs">
-                                            <span className="font-medium">Refresh:</span>
-                                          </div>
-                                          <div className="text-xs">
-                                            {truthValue.refreshCadence || "Daily"}
-                                          </div>
-                                          {truthValue.lastOverride && (
-                                            <>
-                                              <div className="text-xs">
-                                                <span className="font-medium">Last Override:</span>
-                                              </div>
-                                              <div className="text-xs">
-                                                {truthValue.lastOverride}
-                                              </div>
-                                            </>
-                                          )}
-                                          {truthValue.currency && (
-                                            <>
-                                              <div className="text-xs">
-                                                <span className="font-medium">Currency:</span>
-                                              </div>
-                                              <div className="text-xs">
-                                                {truthValue.currency}
-                                              </div>
-                                            </>
-                                          )}
-                                          {truthValue.derivedFrom && (
-                                            <>
-                                              <div className="text-xs">
-                                                <span className="font-medium">Derived From:</span>
-                                              </div>
-                                              <div className="text-xs">
-                                                {truthValue.derivedFrom}
-                                              </div>
-                                            </>
-                                          )}
-                                          {truthValue.documentName && (
-                                            <>
-                                              <div className="text-xs">
-                                                <span className="font-medium">Document:</span>
-                                              </div>
-                                              <div className="text-xs">
-                                                {truthValue.documentName} (p.{truthValue.pageNumber})
-                                              </div>
-                                            </>
-                                          )}
-                                        </div>
-                                      ),
-                                      right: (
-                                        <div className="flex flex-col items-end gap-1">
-                                          {getConfidenceBadge(truthValue.confidence)}
-                                          <TooltipProvider>
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="sm" className="h-5 px-1">
-                                                  <InfoIcon className="h-3 w-3 text-muted-foreground" />
-                                                </Button>
-                                              </TooltipTrigger>
-                                              <TooltipContent>
-                                                <p className="text-xs">
-                                                  {truthValue.confidence === "verified" && "Verified = manually confirmed by a team member"}
-                                                  {truthValue.confidence === "high" && "High = recent, consistent, and from preferred source"}
-                                                  {truthValue.confidence === "medium" && "Medium = relatively recent but from secondary source"}
-                                                  {truthValue.confidence === "low" && "Low = outdated or from less reliable source"}
-                                                  {truthValue.confidence === "calculated" && "Calculated = derived from other values"}
-                                                </p>
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          </TooltipProvider>
-                                        </div>
-                                      )
-                                    }}
-                                  />
-                                </div>
-                                
-                                {/* All sources if there are multiple */}
-                                {sources.length > 1 && (
-                                  <div className="space-y-3">
-                                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All Sources</div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                      {sources.map((source, idx) => {
-                                        const isActive = source.source === truthValue.source;
-                                        return (
-                                          <RecordCard
-                                            key={idx}
-                                            title={source.source}
-                                            primaryMetadata={[]}
-                                            secondaryMetadata={{
-                                              left: (
-                                                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                                                  <div className="text-xs">
-                                                    <span className="font-medium">Value:</span>
-                                                  </div>
-                                                  <div className="text-xs">
-                                                    {source.value}
-                                                  </div>
-                                                  <div className="text-xs">
-                                                    <span className="font-medium">Updated:</span>
-                                                  </div>
-                                                  <div className="text-xs">
-                                                    {new Date(source.lastUpdated).toLocaleDateString()}
-                                                  </div>
-                                                  {source.variance && (
-                                                    <>
-                                                      <div className="text-xs">
-                                                        <span className="font-medium">Variance:</span>
-                                                      </div>
-                                                      <div className="text-xs">
-                                                        {source.variance}
-                                                      </div>
-                                                    </>
-                                                  )}
-                                                  <div className="text-xs">
-                                                    <span className="font-medium">Format:</span>
-                                                  </div>
-                                                  <div className="text-xs">
-                                                    {source.sourceFormat || source.sourceType || "API"}
-                                                  </div>
+                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All Sources</div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    {sources.map((source, idx) => {
+                                      const isActive = source.source === truthValue.source;
+                                      return (
+                                        <RecordCard
+                                          key={idx}
+                                          title={source.source}
+                                          primaryMetadata={[
+                                            isActive && (
+                                              <Badge key="active" className="bg-black text-white hover:bg-black/90 text-xs">
+                                                Active
+                                              </Badge>
+                                            ),
+                                            getConfidenceBadge(source.confidence)
+                                          ].filter(Boolean)}
+                                          secondaryMetadata={{
+                                            left: (
+                                              <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                                                <div className="text-xs">
+                                                  <span className="font-medium">Value:</span>
                                                 </div>
-                                              ),
-                                              right: getConfidenceBadge(source.confidence)
-                                            }}
-                                            actions={[
-                                              isActive 
-                                                ? { label: "Selected Value Source", onClick: () => {} }
-                                                : { 
-                                                    label: "Use This Value", 
-                                                    onClick: (e) => {
-                                                      e.stopPropagation();
-                                                      setSourceForField(fieldName, source.source);
-                                                    } 
-                                                  },
-                                              { label: "View Details", onClick: (e) => e.stopPropagation() }
-                                            ]}
-                                          />
-                                        );
-                                      })}
-                                    </div>
+                                                <div className="text-xs">
+                                                  {source.value}
+                                                </div>
+                                                <div className="text-xs">
+                                                  <span className="font-medium">Updated:</span>
+                                                </div>
+                                                <div className="text-xs">
+                                                  {new Date(source.lastUpdated).toLocaleDateString()}
+                                                </div>
+                                                {source.variance && (
+                                                  <>
+                                                    <div className="text-xs">
+                                                      <span className="font-medium">Variance:</span>
+                                                    </div>
+                                                    <div className="text-xs">
+                                                      {source.variance}
+                                                    </div>
+                                                  </>
+                                                )}
+                                                {source.documentName && (
+                                                  <>
+                                                    <div className="text-xs">
+                                                      <span className="font-medium">Document:</span>
+                                                    </div>
+                                                    <div className="text-xs">
+                                                      Statement (p.{source.pageNumber})
+                                                    </div>
+                                                  </>
+                                                )}
+                                              </div>
+                                            ),
+                                            right: ""
+                                          }}
+                                          actions={[
+                                            isActive 
+                                              ? { label: "Current Active Source", onClick: () => {} }
+                                              : { 
+                                                  label: "Use This Value", 
+                                                  onClick: (e) => {
+                                                    e.stopPropagation();
+                                                    setSourceForField(fieldName, source.source);
+                                                  } 
+                                                },
+                                            { label: "View Details", onClick: (e) => e.stopPropagation() }
+                                          ]}
+                                        />
+                                      );
+                                    })}
                                   </div>
-                                )}
+                                </div>
                               </div>
                             </TableCell>
                           </TableRow>
