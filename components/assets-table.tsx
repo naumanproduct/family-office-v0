@@ -1282,54 +1282,54 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                             <TableCell colSpan={3} className="bg-muted/20 border-t-0 py-4">
                               <div className="space-y-4">
                                 {/* Primary source metadata */}
-                                <RecordCard
-                                  title={(
-                                    <div className="flex items-center gap-2">
-                                      <span>Active Source</span>
-                                      <Badge variant="secondary" className="text-xs">Selected</Badge>
-                                    </div>
-                                  )}
-                                  primaryMetadata={[]}
-                                  secondaryMetadata={{
-                                    left: (
-                                      <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                                        <div className="text-xs">
-                                          <span className="font-medium">Source:</span>
+                                <div className="space-y-3">
+                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                    {sources.length > 1 ? "Current Value Source" : "Source Details"}
+                                  </div>
+                                  <RecordCard
+                                    title={truthValue.source}
+                                    primaryMetadata={[]}
+                                    secondaryMetadata={{
+                                      left: (
+                                        <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                                          <div className="text-xs">
+                                            <span className="font-medium">Value:</span>
+                                          </div>
+                                          <div className="text-xs">
+                                            {truthValue.value}
+                                          </div>
+                                          <div className="text-xs">
+                                            <span className="font-medium">Updated:</span>
+                                          </div>
+                                          <div className="text-xs">
+                                            {new Date(truthValue.lastUpdated).toLocaleDateString()}
+                                          </div>
+                                          {truthValue.variance && (
+                                            <>
+                                              <div className="text-xs">
+                                                <span className="font-medium">Variance:</span>
+                                              </div>
+                                              <div className="text-xs">
+                                                {truthValue.variance}
+                                              </div>
+                                            </>
+                                          )}
+                                          {truthValue.documentName && (
+                                            <>
+                                              <div className="text-xs">
+                                                <span className="font-medium">Document:</span>
+                                              </div>
+                                              <div className="text-xs">
+                                                Statement (p.{truthValue.pageNumber})
+                                              </div>
+                                            </>
+                                          )}
                                         </div>
-                                        <div className="text-xs">
-                                          {truthValue.source}
-                                        </div>
-                                        <div className="text-xs">
-                                          <span className="font-medium">Updated:</span>
-                                        </div>
-                                        <div className="text-xs">
-                                          {new Date(truthValue.lastUpdated).toLocaleDateString()}
-                                        </div>
-                                        {truthValue.variance && (
-                                          <>
-                                            <div className="text-xs">
-                                              <span className="font-medium">Variance:</span>
-                                            </div>
-                                            <div className="text-xs">
-                                              {truthValue.variance}
-                                            </div>
-                                          </>
-                                        )}
-                                        {truthValue.documentName && (
-                                          <>
-                                            <div className="text-xs">
-                                              <span className="font-medium">Document:</span>
-                                            </div>
-                                            <div className="text-xs">
-                                              Statement (p.{truthValue.pageNumber})
-                                            </div>
-                                          </>
-                                        )}
-                                      </div>
-                                    ),
-                                    right: ""
-                                  }}
-                                />
+                                      ),
+                                      right: getConfidenceBadge(truthValue.confidence)
+                                    }}
+                                  />
+                                </div>
                                 
                                 {/* All sources if there are multiple */}
                                 {sources.length > 1 && (
@@ -1345,9 +1345,6 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                                                 <div className="flex items-center gap-2">
                                                   <span>{source.value}</span>
                                                   {getConfidenceBadge(source.confidence)}
-                                                  {isActive && (
-                                                    <Badge variant="secondary" className="text-xs ml-auto">Active</Badge>
-                                                  )}
                                                 </div>
                                               )}
                                               primaryMetadata={[]}
@@ -1357,8 +1354,8 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                                               }}
                                               actions={[
                                                 isActive 
-                                                  ? { label: "Current Source", onClick: () => {} }
-                                                  : { label: "Use This", onClick: () => {} },
+                                                  ? { label: "Current Value Source", onClick: () => {} }
+                                                  : { label: "Use This Value", onClick: () => {} },
                                                 { label: "View Details", onClick: () => {} }
                                               ]}
                                             />
