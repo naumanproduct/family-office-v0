@@ -1297,7 +1297,7 @@ const columns: ColumnDef<Opportunity>[] = [
   },
   {
     accessorKey: "minCommitment",
-    header: "Min Commitment",
+    header: "Minimum Commitment",
     cell: ({ row }) => <span className="text-sm">{row.original.minCommitment}</span>,
   },
   {
@@ -1309,11 +1309,6 @@ const columns: ColumnDef<Opportunity>[] = [
     accessorKey: "company",
     header: "Company",
     cell: ({ row }) => <span className="text-sm font-medium">{row.original.company.name}</span>,
-  },
-  {
-    accessorKey: "companyType",
-    header: "Company Type",
-    cell: ({ row }) => <span className="text-sm">{row.original.company.type}</span>,
   },
   {
     accessorKey: "sourcedBy",
@@ -1331,6 +1326,18 @@ const columns: ColumnDef<Opportunity>[] = [
     cell: ({ row }) => <span className="text-sm font-medium">{row.original.internalOwner}</span>,
   },
   {
+    accessorKey: "contact",
+    header: "Contact",
+    cell: ({ row }) => <span className="text-sm">{`${row.original.contact.name} - ${row.original.contact.role}`}</span>,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "legalEntity",
+    header: "Legal Entity",
+    cell: ({ row }) => <span className="text-sm">{`${row.original.legalEntity.name} (${row.original.legalEntity.type})`}</span>,
+    enableHiding: true,
+  },
+  {
     accessorKey: "expectedCloseDate",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
@@ -1345,6 +1352,16 @@ const columns: ColumnDef<Opportunity>[] = [
     cell: ({ row }) => <span className="text-sm">{row.original.expectedCloseDate}</span>,
   },
   {
+    accessorKey: "probability",
+    header: "Probability",
+    cell: ({ row }) => <span className="text-sm">{row.original.probability}%</span>,
+  },
+  {
+    accessorKey: "fundingRound",
+    header: "Funding Round",
+    cell: ({ row }) => <span className="text-sm">{row.original.fundingRound}</span>,
+  },
+  {
     accessorKey: "sector",
     header: "Sector",
     cell: ({ row }) => <span className="text-sm">{row.original.sector}</span>,
@@ -1355,16 +1372,22 @@ const columns: ColumnDef<Opportunity>[] = [
     cell: ({ row }) => <span className="text-sm">{row.original.geography}</span>,
   },
   {
-    accessorKey: "lastActivity",
-    header: "Last Activity",
-    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastActivity}</span>,
-  },
-  {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
       <Badge variant="outline" className="text-xs capitalize">{row.original.status}</Badge>
     ),
+  },
+  {
+    accessorKey: "lastActivity",
+    header: "Last Activity",
+    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastActivity}</span>,
+  },
+  {
+    accessorKey: "description",
+    header: "Description",
+    cell: ({ row }) => <span className="text-sm">{row.original.description}</span>,
+    enableHiding: true,
   },
   {
     id: "actions",
@@ -1391,7 +1414,11 @@ const columns: ColumnDef<Opportunity>[] = [
 export function OpportunitiesTable() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+    contact: false,
+    legalEntity: false,
+    description: false,
+  })
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [addOpportunityOpen, setAddOpportunityOpen] = React.useState(false)
   const [columnOrder, setColumnOrder] = React.useState<string[]>([])

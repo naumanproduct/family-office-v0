@@ -438,8 +438,24 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
         header: "Type",
       },
       {
+        accessorKey: "category",
+        header: "Category",
+      },
+      {
+        accessorKey: "entity",
+        header: "Entity",
+      },
+      {
+        accessorKey: "acquisitionDate",
+        header: "Acquisition Date",
+      },
+      {
         accessorKey: "currentValue",
         header: "Current Value",
+      },
+      {
+        accessorKey: "originalCost",
+        header: "Original Cost",
       },
       {
         accessorKey: "unrealizedGain",
@@ -460,22 +476,6 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
         },
       },
       {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-          const status = row.original.status
-          return <Badge variant="outline" className="capitalize">{status}</Badge>
-        },
-      },
-      {
-        accessorKey: "entity",
-        header: "Entity",
-      },
-      {
-        accessorKey: "acquisitionDate",
-        header: "Acquisition Date",
-      },
-      {
         accessorKey: "lastValuation",
         header: "Last Valuation",
       },
@@ -488,12 +488,12 @@ export function AssetsTable({ onAssetClick }: AssetsTableProps) {
         header: "Geography",
       },
       {
-        accessorKey: "category",
-        header: "Category",
-      },
-      {
-        accessorKey: "originalCost",
-        header: "Original Cost",
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+          const status = row.original.status
+          return <Badge variant="outline" className="capitalize">{status}</Badge>
+        },
       },
     ],
     onSortingChange: setSorting,

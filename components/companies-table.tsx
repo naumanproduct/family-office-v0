@@ -1324,11 +1324,6 @@ const columns: ColumnDef<Company>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => <span className="text-sm">{row.original.type || "-"}</span>,
-  },
-  {
     accessorKey: "industry",
     header: "Industry",
     cell: ({ row }) => <span className="text-sm">{row.original.industry}</span>,
@@ -1337,6 +1332,40 @@ const columns: ColumnDef<Company>[] = [
     accessorKey: "stage",
     header: "Stage",
     cell: ({ row }) => <span className="text-sm">{row.original.stage}</span>,
+  },
+  {
+    accessorKey: "website",
+    header: "Website",
+    cell: ({ row }) => (
+      <a
+        href={`https://${row.original.website}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm text-blue-600 hover:underline"
+      >
+        {row.original.website}
+      </a>
+    ),
+  },
+  {
+    accessorKey: "location",
+    header: "Location",
+    cell: ({ row }) => <span className="text-sm">{row.original.location}</span>,
+  },
+  {
+    accessorKey: "revenue",
+    header: "Revenue",
+    cell: ({ row }) => <span className="text-sm font-medium">{row.original.revenue}</span>,
+  },
+  {
+    accessorKey: "employees",
+    header: "Employees",
+    cell: ({ row }) => <span className="text-sm">{row.original.employees}</span>,
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => <span className="text-sm">{row.original.type || "-"}</span>,
   },
   {
     accessorKey: "associatedPeople",
@@ -1393,35 +1422,6 @@ const columns: ColumnDef<Company>[] = [
         )}
       </div>
     ),
-  },
-  {
-    accessorKey: "revenue",
-    header: "Revenue",
-    cell: ({ row }) => <span className="text-sm font-medium">{row.original.revenue}</span>,
-  },
-  {
-    accessorKey: "employees",
-    header: "Employees",
-    cell: ({ row }) => <span className="text-sm">{row.original.employees}</span>,
-  },
-  {
-    accessorKey: "website",
-    header: "Website",
-    cell: ({ row }) => (
-      <a
-        href={`https://${row.original.website}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-sm text-blue-600 hover:underline"
-      >
-        {row.original.website}
-      </a>
-    ),
-  },
-  {
-    accessorKey: "location",
-    header: "Location",
-    cell: ({ row }) => <span className="text-sm">{row.original.location}</span>,
   },
   {
     accessorKey: "internalOwner",

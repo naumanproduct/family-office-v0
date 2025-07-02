@@ -1215,9 +1215,30 @@ const columns: ColumnDef<Contact>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => <span className="text-sm">{row.original.type || "-"}</span>,
+    accessorKey: "firstName",
+    header: "First Name",
+    cell: ({ row }) => <span className="text-sm">{row.original.firstName}</span>,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "lastName", 
+    header: "Last Name",
+    cell: ({ row }) => <span className="text-sm">{row.original.lastName}</span>,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "email",
+    header: "Email",
+    cell: ({ row }) => (
+      <a href={`mailto:${row.original.email}`} className="text-sm text-blue-600 hover:underline">
+        {row.original.email}
+      </a>
+    ),
+  },
+  {
+    accessorKey: "phone",
+    header: "Phone",
+    cell: ({ row }) => <span className="text-sm">{row.original.phone}</span>,
   },
   {
     accessorKey: "jobTitle",
@@ -1228,6 +1249,37 @@ const columns: ColumnDef<Contact>[] = [
     accessorKey: "company",
     header: "Company",
     cell: ({ row }) => <span className="text-sm font-medium">{row.original.company}</span>,
+  },
+  {
+    accessorKey: "location",
+    header: "Location",
+    cell: ({ row }) => <span className="text-sm">{row.original.location}</span>,
+  },
+  {
+    accessorKey: "bio",
+    header: "Bio",
+    cell: ({ row }) => <span className="text-sm">{row.original.bio}</span>,
+    enableHiding: true,
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => <span className="text-sm">{row.original.status}</span>,
+  },
+  {
+    accessorKey: "lastInteraction",
+    header: "Last Interaction",
+    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastInteraction}</span>,
+  },
+  {
+    accessorKey: "connectionStrength",
+    header: "Connection",
+    cell: ({ row }) => <span className="text-sm">{row.original.connectionStrength}</span>,
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => <span className="text-sm">{row.original.type || "-"}</span>,
   },
   {
     accessorKey: "associatedEntities",
@@ -1258,43 +1310,6 @@ const columns: ColumnDef<Contact>[] = [
     ),
   },
   {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => (
-      <a href={`mailto:${row.original.email}`} className="text-sm text-blue-600 hover:underline">
-        {row.original.email}
-      </a>
-    ),
-  },
-  {
-    accessorKey: "phone",
-    header: "Phone",
-    cell: ({ row }) => <span className="text-sm">{row.original.phone}</span>,
-  },
-  {
-    accessorKey: "linkedin",
-    header: "LinkedIn",
-    cell: ({ row }) => (
-      row.original.linkedin ? (
-        <a
-          href={`https://linkedin.com/in/${row.original.linkedin}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-blue-600 hover:underline"
-        >
-          {row.original.linkedin}
-        </a>
-      ) : (
-        <span className="text-sm">-</span>
-      )
-    ),
-  },
-  {
-    accessorKey: "location",
-    header: "Location",
-    cell: ({ row }) => <span className="text-sm">{row.original.location}</span>,
-  },
-  {
     accessorKey: "internalOwner",
     header: "Internal Owner",
     cell: ({ row }) => <span className="text-sm">{row.original.internalOwner || "-"}</span>,
@@ -1303,21 +1318,6 @@ const columns: ColumnDef<Contact>[] = [
     accessorKey: "introducedBy",
     header: "Introduced By",
     cell: ({ row }) => <span className="text-sm">{row.original.introducedBy || "-"}</span>,
-  },
-  {
-    accessorKey: "lastInteraction",
-    header: "Last Interaction",
-    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastInteraction}</span>,
-  },
-  {
-    accessorKey: "connectionStrength",
-    header: "Connection",
-    cell: ({ row }) => <span className="text-sm">{row.original.connectionStrength}</span>,
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => <span className="text-sm">{row.original.status}</span>,
   },
   {
     id: "actions",
@@ -1344,7 +1344,11 @@ const columns: ColumnDef<Contact>[] = [
 export function PeopleTable() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+    firstName: false,
+    lastName: false,
+    bio: false,
+  })
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [addPersonOpen, setAddPersonOpen] = React.useState(false)
   const [columnOrder, setColumnOrder] = React.useState<string[]>([])

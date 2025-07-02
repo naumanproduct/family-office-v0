@@ -849,18 +849,42 @@ const columns: ColumnDef<Entity>[] = [
   },
   {
     accessorKey: "entityType",
-    header: "Type",
+    header: "Entity Type",
     cell: ({ row }) => <span className="text-sm">{row.original.entityType}</span>,
   },
   {
     accessorKey: "rolePurpose",
-    header: "Purpose",
+    header: "Role / Purpose",
     cell: ({ row }) => <span className="text-sm">{row.original.rolePurpose}</span>,
   },
   {
     accessorKey: "jurisdiction",
     header: "Jurisdiction",
     cell: ({ row }) => <span className="text-sm">{row.original.jurisdiction}</span>,
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => <span className="text-sm">{row.original.status}</span>,
+  },
+  {
+    accessorKey: "managerController",
+    header: "Manager / Controller",
+    cell: ({ row }) => <span className="text-sm">{row.original.managerController}</span>,
+  },
+  {
+    accessorKey: "dateFormed",
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
+        Date Formed
+        {column.getIsSorted() === "asc" ? (
+          <SortAscIcon className="ml-2 h-3 w-3" />
+        ) : column.getIsSorted() === "desc" ? (
+          <SortDescIcon className="ml-2 h-3 w-3" />
+        ) : null}
+      </Button>
+    ),
+    cell: ({ row }) => <span className="text-sm">{formatDate(row.original.dateFormed)}</span>,
   },
   {
     accessorKey: "ownershipPercent",
@@ -884,40 +908,22 @@ const columns: ColumnDef<Entity>[] = [
     cell: ({ row }) => <span className="text-sm">{row.original.parentEntity || "—"}</span>,
   },
   {
-    accessorKey: "managerController",
-    header: "Manager",
-    cell: ({ row }) => <span className="text-sm">{row.original.managerController}</span>,
-  },
-  {
-    accessorKey: "dateFormed",
-    header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="h-8 -ml-2 px-2">
-        Date Formed
-        {column.getIsSorted() === "asc" ? (
-          <SortAscIcon className="ml-2 h-3 w-3" />
-        ) : column.getIsSorted() === "desc" ? (
-          <SortDescIcon className="ml-2 h-3 w-3" />
-        ) : null}
-      </Button>
-    ),
-    cell: ({ row }) => <span className="text-sm">{formatDate(row.original.dateFormed)}</span>,
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => <span className="text-sm">{row.original.status}</span>,
-  },
-  {
-    accessorKey: "linkedDocs",
-    header: "Documents",
-    cell: ({ row }) => <span className="text-sm">{row.original.linkedDocs}</span>,
-  },
-  {
     accessorKey: "lastModified",
     header: "Last Modified",
     cell: ({ row }) => (
       <span className="text-sm text-muted-foreground">{formatDate(row.original.lastModified)}</span>
     ),
+  },
+  {
+    accessorKey: "linkedDocs",
+    header: "Linked Documents",
+    cell: ({ row }) => <span className="text-sm">{row.original.linkedDocs}</span>,
+  },
+  {
+    accessorKey: "notes",
+    header: "Notes",
+    cell: ({ row }) => <span className="text-sm">{row.original.notes}</span>,
+    enableHiding: true,
   },
   {
     id: "actions",
@@ -944,7 +950,9 @@ const columns: ColumnDef<Entity>[] = [
 export function EntitiesTable() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+    notes: false,
+  })
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [addEntityOpen, setAddEntityOpen] = React.useState(false)
   const [columnOrder, setColumnOrder] = React.useState<string[]>([])

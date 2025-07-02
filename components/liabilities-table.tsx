@@ -940,6 +940,11 @@ const columns: ColumnDef<Liability>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => <span className="text-sm">{row.original.type}</span>,
+  },
+  {
     accessorKey: "category",
     header: "Category",
     cell: ({ row }) => <span className="text-sm">{row.original.category}</span>,
@@ -948,6 +953,11 @@ const columns: ColumnDef<Liability>[] = [
     accessorKey: "currentBalance",
     header: "Current Balance",
     cell: ({ row }) => <span className="text-sm font-medium">{row.original.currentBalance}</span>,
+  },
+  {
+    accessorKey: "originalAmount",
+    header: "Original Amount",
+    cell: ({ row }) => <span className="text-sm">{row.original.originalAmount}</span>,
   },
   {
     accessorKey: "interestRate",
@@ -960,24 +970,14 @@ const columns: ColumnDef<Liability>[] = [
     cell: ({ row }) => <span className="text-sm">{row.original.maturityDate}</span>,
   },
   {
-    accessorKey: "nextPayment",
-    header: "Next Payment",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-sm">{row.original.nextPayment}</p>
-        <p className="text-xs text-muted-foreground">{row.original.paymentAmount}</p>
-      </div>
-    ),
+    accessorKey: "lender",
+    header: "Lender",
+    cell: ({ row }) => <span className="text-sm">{row.original.lender}</span>,
   },
   {
     accessorKey: "entity",
     header: "Entity",
     cell: ({ row }) => <span className="text-sm">{row.original.entity}</span>,
-  },
-  {
-    accessorKey: "lender",
-    header: "Lender",
-    cell: ({ row }) => <span className="text-sm">{row.original.lender}</span>,
   },
   {
     accessorKey: "status",
