@@ -1326,54 +1326,88 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                             <TableCell colSpan={3} className="bg-muted/20 border-t-0 py-4">
                               <div className="space-y-4">
                                 {/* Primary source metadata */}
-                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                  <div className="flex items-center gap-1">
-                                    <span className="font-medium">Source:</span>
-                                    <span>{truthValue.source}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <span className="font-medium">Updated:</span>
-                                    <span>{new Date(truthValue.lastUpdated).toLocaleDateString()}</span>
-                                  </div>
-                                  {truthValue.documentName && (
-                                    <div className="flex items-center gap-1">
-                                      <span className="font-medium">Document:</span>
-                                      <span>Statement (p.{truthValue.pageNumber})</span>
+                                <RecordCard
+                                  title={(
+                                    <div className="flex items-center gap-2">
+                                      <span>Active Source</span>
+                                      <Badge variant="secondary" className="text-xs">Selected</Badge>
                                     </div>
                                   )}
-                                  {truthValue.variance && (
-                                    <div className="flex items-center gap-1">
-                                      <span className="font-medium">Variance:</span>
-                                      <span>{truthValue.variance}</span>
-                                    </div>
-                                  )}
-                                </div>
+                                  primaryMetadata={[]}
+                                  secondaryMetadata={{
+                                    left: (
+                                      <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                                        <div className="text-xs">
+                                          <span className="font-medium">Source:</span>
+                                        </div>
+                                        <div className="text-xs">
+                                          {truthValue.source}
+                                        </div>
+                                        <div className="text-xs">
+                                          <span className="font-medium">Updated:</span>
+                                        </div>
+                                        <div className="text-xs">
+                                          {new Date(truthValue.lastUpdated).toLocaleDateString()}
+                                        </div>
+                                        {truthValue.variance && (
+                                          <>
+                                            <div className="text-xs">
+                                              <span className="font-medium">Variance:</span>
+                                            </div>
+                                            <div className="text-xs">
+                                              {truthValue.variance}
+                                            </div>
+                                          </>
+                                        )}
+                                        {truthValue.documentName && (
+                                          <>
+                                            <div className="text-xs">
+                                              <span className="font-medium">Document:</span>
+                                            </div>
+                                            <div className="text-xs">
+                                              Statement (p.{truthValue.pageNumber})
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                    ),
+                                    right: ""
+                                  }}
+                                />
                                 
                                 {/* All sources if there are multiple */}
                                 {sources.length > 1 && (
                                   <div className="space-y-3">
                                     <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All Sources</div>
                                                                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        {sources.map((source, idx) => (
-                                          <RecordCard
-                                            key={idx}
-                                            title={(
-                                              <div className="flex items-center gap-2">
-                                                <span>{source.value}</span>
-                                                {getConfidenceBadge(source.confidence)}
-                                              </div>
-                                            )}
-                                            primaryMetadata={[]}
-                                            secondaryMetadata={{
-                                              left: source.source,
-                                              right: new Date(source.lastUpdated).toLocaleDateString()
-                                            }}
-                                            actions={[
-                                              { label: "Use This", onClick: () => {} },
-                                              { label: "View Details", onClick: () => {} }
-                                            ]}
-                                          />
-                                        ))}
+                                        {sources.map((source, idx) => {
+                                          const isActive = source.source === truthValue.source;
+                                          return (
+                                            <RecordCard
+                                              key={idx}
+                                              title={(
+                                                <div className="flex items-center gap-2">
+                                                  <span>{source.value}</span>
+                                                  {getConfidenceBadge(source.confidence)}
+                                                  {isActive && (
+                                                    <Badge variant="secondary" className="text-xs ml-auto">Active</Badge>
+                                                  )}
+                                                </div>
+                                              )}
+                                              primaryMetadata={[]}
+                                              secondaryMetadata={{
+                                                left: source.source,
+                                                right: new Date(source.lastUpdated).toLocaleDateString()
+                                              }}
+                                              actions={[
+                                                isActive 
+                                                  ? { label: "Current Source", onClick: () => {} }
+                                                  : { label: "Use This", onClick: () => {} },
+                                                { label: "View Details", onClick: () => {} }
+                                              ]}
+                                            />
+                                          );
+                                        })}
                                     </div>
                                   </div>
                                 )}
