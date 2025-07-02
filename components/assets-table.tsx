@@ -50,6 +50,7 @@ import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/u
 import { generateInvestmentActivities } from "@/components/shared/activity-generators"
 import { Card, CardContent, CardHeader, CardDescription, CardFooter, CardTitle } from "@/components/ui/card"
 import { MoreVerticalIcon } from "lucide-react"
+import { RecordCard } from "./shared/record-card"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -1310,28 +1311,26 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                                     <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All Sources</div>
                                     <div className="grid gap-2">
                                       {sources.map((source, idx) => (
-                                        <div key={idx} className="flex items-center justify-between bg-background rounded-lg border px-3 py-2">
-                                          <div className="flex items-center gap-3">
-                                            <div className="flex items-center gap-2">
-                                              <span className="font-medium text-sm">{source.value}</span>
-                                              {getConfidenceBadge(source.confidence)}
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">
-                                              <span className="font-medium">{source.source}</span>
-                                              <span className="mx-1">•</span>
-                                              <span>{new Date(source.lastUpdated).toLocaleDateString()}</span>
-                                              {source.documentName && (
-                                                <>
-                                                  <span className="mx-1">•</span>
-                                                  <span>Doc (p.{source.pageNumber})</span>
-                                                </>
-                                              )}
-                                            </div>
-                                          </div>
-                                          <Button variant="ghost" size="sm" className="h-7 text-xs">
-                                            Use This
-                                          </Button>
-                                        </div>
+                                        <RecordCard
+                                          key={idx}
+                                          title={source.value}
+                                          primaryMetadata={[getConfidenceBadge(source.confidence)]}
+                                          secondaryMetadata={{
+                                            left: (
+                                              <div className="flex items-center gap-1">
+                                                <span className="font-medium">{source.source}</span>
+                                                {source.documentName && (
+                                                  <span className="ml-1">• Doc (p.{source.pageNumber})</span>
+                                                )}
+                                              </div>
+                                            ),
+                                            right: new Date(source.lastUpdated).toLocaleDateString()
+                                          }}
+                                          actions={[
+                                            { label: "Use This", onClick: () => {} },
+                                            { label: "View Details", onClick: () => {} }
+                                          ]}
+                                        />
                                       ))}
                                     </div>
                                   </div>
