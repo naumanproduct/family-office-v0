@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronDownIcon, ColumnsIcon, FilterIcon, PlusIcon, SearchIcon } from "lucide-react"
+import { ChevronDownIcon, ColumnsIcon, FilterIcon, PlusIcon, SearchIcon, ChevronRightIcon, GitCompareIcon, DatabaseIcon, ClockIcon } from "lucide-react"
 import { z } from "zod"
 import {
   DndContext,
@@ -42,13 +42,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AddAssetDialog } from "./add-asset-dialog"
 import { MasterDrawer } from "./master-drawer"
 import { FileTextIcon,
-  FileIcon, MailIcon, CheckCircleIcon, StickyNoteIcon, CalendarIcon, FolderIcon, UsersIcon, BuildingIcon, LandmarkIcon, BarChartIcon, TrendingUpIcon } from "lucide-react"
+  FileIcon, MailIcon, CheckCircleIcon, StickyNoteIcon, CalendarIcon, FolderIcon, UsersIcon, BuildingIcon, LandmarkIcon, BarChartIcon, TrendingUpIcon, TrendingDownIcon } from "lucide-react"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
 import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 import { generateInvestmentActivities } from "@/components/shared/activity-generators"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardDescription, CardFooter, CardTitle } from "@/components/ui/card"
 import { MoreVerticalIcon } from "lucide-react"
 
 export const assetSchema = z.object({
@@ -817,6 +817,36 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
 }
 
 function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
+  // State for collapsible sections
+  const [openSections, setOpenSections] = React.useState({
+    fieldComparison: true,
+    dataSources: true, // Expanded by default
+  })
+
+  // State for expanded rows to show conflicting values
+  const [expandedRows, setExpandedRows] = React.useState<Set<string>>(new Set())
+
+  // Toggle function for collapsible sections
+  const toggleSection = (section: 'fieldComparison' | 'dataSources') => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }))
+  }
+
+  // Toggle expanded row
+  const toggleRowExpansion = (fieldName: string) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(fieldName)) {
+        newSet.delete(fieldName)
+      } else {
+        newSet.add(fieldName)
+      }
+      return newSet
+    })
+  }
+
   // Mock external data sources for assets - in production, this would come from your data layer
   const externalDataSources = [
     {
@@ -825,6 +855,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
       type: "Portfolio Management",
       lastSync: "2 hours ago",
       status: "synced",
+      fieldsCount: 4,
       fields: [
         { 
           fieldName: "Current Value", 
@@ -866,6 +897,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
       type: "Accounting",
       lastSync: "Yesterday",
       status: "synced",
+      fieldsCount: 4,
       fields: [
         { 
           fieldName: "Current Value", 
@@ -907,6 +939,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
       type: "Custodian",
       lastSync: "4 days ago",
       status: "pending",
+      fieldsCount: 2,
       fields: [
         { 
           fieldName: "Current Value", 
@@ -932,6 +965,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
       type: "Fund Admin Portal",
       lastSync: "1 week ago",
       status: "manual",
+      fieldsCount: 3,
       fields: [
         { 
           fieldName: "NAV", 
@@ -985,21 +1019,21 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
   const getConfidenceBadge = (confidence: string) => {
     switch (confidence) {
       case "high":
-        return <Badge variant="outline" className="text-green-600 border-green-200">High Confidence</Badge>
+        return <Badge variant="outline" className="text-green-600 border-green-200 text-xs">High</Badge>
       case "medium":
-        return <Badge variant="outline" className="text-yellow-600 border-yellow-200">Medium Confidence</Badge>
+        return <Badge variant="outline" className="text-yellow-600 border-yellow-200 text-xs">Medium</Badge>
       case "low":
-        return <Badge variant="outline" className="text-red-600 border-red-200">Low Confidence</Badge>
+        return <Badge variant="outline" className="text-red-600 border-red-200 text-xs">Low</Badge>
       case "verified":
-        return <Badge variant="outline" className="text-blue-600 border-blue-200">Verified</Badge>
+        return <Badge variant="outline" className="text-blue-600 border-blue-200 text-xs">Verified</Badge>
       case "calculated":
-        return <Badge variant="outline" className="text-purple-600 border-purple-200">Calculated</Badge>
+        return <Badge variant="outline" className="text-purple-600 border-purple-200 text-xs">Calculated</Badge>
       default:
         return null
     }
   }
 
-  // Group fields by field name to show conflicts
+  // Group ALL fields by field name to show complete comparison
   const fieldComparison = React.useMemo(() => {
     const comparison: Record<string, Array<{
       source: string
@@ -1033,250 +1067,414 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
     return comparison
   }, [externalDataSources])
 
+  // Count conflicts for the badge
+  const conflictCount = Object.values(fieldComparison).filter(sources => {
+    return sources.length > 1 && new Set(sources.map(s => s.value)).size > 1
+  }).length
+
+  // Get the "truth" value for a field (highest priority source)
+  const getTruthValue = (sources: Array<{
+    source: string
+    sourceType: string
+    value: string
+    lastUpdated: string
+    confidence: string
+    variance?: string
+    documentName?: string
+    pageNumber?: number
+  }>) => {
+    // Priority order: verified > high > medium > low, then by recency
+    const priorityOrder = { verified: 4, high: 3, medium: 2, low: 1, calculated: 2 }
+    
+    return sources.sort((a, b) => {
+      const aPriority = priorityOrder[a.confidence as keyof typeof priorityOrder] || 0
+      const bPriority = priorityOrder[b.confidence as keyof typeof priorityOrder] || 0
+      
+      if (aPriority !== bPriority) {
+        return bPriority - aPriority
+      }
+      
+      // If same priority, sort by recency
+      return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+    })[0]
+  }
+
   return (
     <div className="space-y-6">
-      {/* Data Quality Insights - Moved to top */}
-      <div>
-        <h3 className="text-sm font-medium mb-3">Data Quality Insights</h3>
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                <span className="text-green-600 text-sm font-medium">88%</span>
-              </div>
-              <span className="text-sm font-medium">Data Completeness</span>
+      {/* Data Quality Insights - Match SectionCards styling */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="@container/card">
+          <CardHeader className="relative">
+            <CardDescription>Data Completeness</CardDescription>
+            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+              88%
+            </CardTitle>
+            <div className="absolute right-4 top-4">
+              <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                <TrendingUpIcon className="size-3" />
+                +2%
+              </Badge>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Most required fields have recent values
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                <span className="text-yellow-600 text-sm font-medium">1</span>
-              </div>
-              <span className="text-sm font-medium">Active Conflicts</span>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-1 text-sm">
+            <div className="line-clamp-1 flex gap-2 font-medium">
+              Most fields populated <TrendingUpIcon className="size-4" />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Current Value varies by 0.23% across systems
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-blue-600 text-sm font-medium">30d</span>
-              </div>
-              <span className="text-sm font-medium">NAV Age</span>
+            <div className="text-muted-foreground">
+              Recent values available
             </div>
-            <p className="text-xs text-muted-foreground">
-              Last official NAV from Q4 2024 statement
-            </p>
-          </Card>
-        </div>
-      </div>
-
-      {/* Field Comparison Table */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium">Field Comparison</h3>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              <div className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></div>
-              Conflicts: 1
-            </Badge>
-            <Button variant="outline" size="sm" className="h-7 text-xs">
-              Export Report
-            </Button>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
         
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[200px]">Field</TableHead>
-                <TableHead>Internal Value</TableHead>
-                <TableHead>External Values</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Object.entries(fieldComparison).map(([fieldName, sources]) => {
-                const hasConflict = sources.length > 1 && 
-                  new Set(sources.map(s => s.value)).size > 1
-
-                return (
-                  <TableRow key={fieldName} className={hasConflict ? "bg-yellow-50/50" : ""}>
-                    <TableCell className="font-medium text-sm">
-                      <div className="flex items-center gap-2">
-                        {fieldName}
-                        {hasConflict && (
-                          <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-200">
-                            Conflict
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {/* Show internal value - in this mock, we use the asset data */}
-                      {fieldName === "Current Value" && asset.currentValue}
-                      {fieldName === "Cost Basis" && asset.originalCost}
-                      {fieldName === "Unrealized Gain" && asset.unrealizedGain}
-                      {!["Current Value", "Cost Basis", "Unrealized Gain"].includes(fieldName) && "—"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-2">
-                        {sources.map((source, idx) => (
-                          <div key={idx} className="flex items-start gap-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">{source.value}</span>
-                                {source.variance && (
-                                  <span className="text-xs text-muted-foreground">
-                                    ({source.variance})
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs text-muted-foreground">
-                                  {source.source} • {new Date(source.lastUpdated).toLocaleDateString()}
-                                </span>
-                                {getConfidenceBadge(source.confidence)}
-                              </div>
-                              {source.documentName && (
-                                <div className="mt-1">
-                                  <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-                                    View in {source.documentName} (p.{source.pageNumber})
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                            <MoreVerticalIcon className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Accept external value</DropdownMenuItem>
-                          <DropdownMenuItem>Keep internal value</DropdownMenuItem>
-                          <DropdownMenuItem>View history</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>Flag for review</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+        <Card className="@container/card">
+          <CardHeader className="relative">
+            <CardDescription>Active Conflicts</CardDescription>
+            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+              {conflictCount}
+            </CardTitle>
+            <div className="absolute right-4 top-4">
+              <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                {conflictCount > 0 ? (
+                  <TrendingUpIcon className="size-3" />
+                ) : (
+                  <TrendingDownIcon className="size-3" />
+                )}
+                {conflictCount > 0 ? `+${conflictCount}` : '0'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-1 text-sm">
+            <div className="line-clamp-1 flex gap-2 font-medium">
+              {conflictCount > 0 ? "Values vary across systems" : "All systems aligned"} 
+              {conflictCount > 0 ? <TrendingUpIcon className="size-4" /> : <TrendingDownIcon className="size-4" />}
+            </div>
+            <div className="text-muted-foreground">
+              {conflictCount > 0 ? "Review required" : "No conflicts detected"}
+            </div>
+          </CardFooter>
+        </Card>
+        
+        <Card className="@container/card">
+          <CardHeader className="relative">
+            <CardDescription>NAV Age</CardDescription>
+            <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
+              30d
+            </CardTitle>
+            <div className="absolute right-4 top-4">
+              <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
+                <TrendingUpIcon className="size-3" />
+                Q4
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-1 text-sm">
+            <div className="line-clamp-1 flex gap-2 font-medium">
+              Last official NAV <TrendingUpIcon className="size-4" />
+            </div>
+            <div className="text-muted-foreground">
+              Q4 2024 statement
+            </div>
+          </CardFooter>
         </Card>
       </div>
 
-      {/* Connected Data Sources */}
-      <div>
-        <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {externalDataSources.map((source) => (
-            <Card key={source.id} className="p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-medium text-sm">{source.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{source.type}</p>
-                  <p className="text-xs text-muted-foreground mt-2">Last sync: {source.lastSync}</p>
-                </div>
-                <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
-                  {source.status}
-                </Badge>
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">{source.fields.length} fields</span>
-                <Button variant="ghost" size="sm" className="h-7 text-xs">
-                  Sync Now
-                </Button>
-              </div>
+      {/* Field Comparison Table - Collapsible - Show truth values with expandable conflicts */}
+      <div className="rounded-lg border border-muted overflow-hidden">
+        <button 
+          onClick={() => toggleSection('fieldComparison')}
+          className={`w-full flex items-center justify-between p-3 transition-colors ${openSections.fieldComparison ? 'bg-muted/20' : ''}`}
+        >
+          <div className="flex items-center">
+            {openSections.fieldComparison ? (
+              <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
+            ) : (
+              <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
+            )}
+            <div className="flex items-center gap-2">
+              <GitCompareIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium text-sm">Field Comparison</span>
+            </div>
+          </div>
+          {conflictCount > 0 && (
+            <Badge variant="outline" className="text-xs">
+              <div className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></div>
+              {conflictCount} conflict{conflictCount !== 1 ? 's' : ''}
+            </Badge>
+          )}
+        </button>
+        {openSections.fieldComparison && (
+          <div className="px-3 pb-3 pt-2">
+            <Card>
+              <Table className="table-fixed w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[30%]">Field</TableHead>
+                    <TableHead className="w-[30%]">Internal Value</TableHead>
+                    <TableHead className="w-[40%]">External Value</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Object.entries(fieldComparison).map(([fieldName, sources]) => {
+                    const hasConflict = sources.length > 1 && 
+                      new Set(sources.map(s => s.value)).size > 1
+                    const truthValue = getTruthValue(sources)
+                    const isExpanded = expandedRows.has(fieldName)
+
+                    return (
+                      <React.Fragment key={fieldName}>
+                        <TableRow 
+                          className={`group hover:bg-muted/50 cursor-pointer ${hasConflict ? "bg-yellow-50/30" : ""}`}
+                          onClick={() => toggleRowExpansion(fieldName)}
+                        >
+                          <TableCell className="py-4 truncate">
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center">
+                                {isExpanded ? (
+                                  <ChevronDownIcon className="h-3 w-3 text-muted-foreground" />
+                                ) : (
+                                  <ChevronRightIcon className="h-3 w-3 text-muted-foreground" />
+                                )}
+                              </div>
+                              <span className="font-medium text-sm truncate">{fieldName}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4 truncate">
+                            <div className="font-medium text-sm truncate">
+                              {/* Show internal value - in this mock, we use the asset data */}
+                              {fieldName === "Current Value" && asset.currentValue}
+                              {fieldName === "Cost Basis" && asset.originalCost}
+                              {fieldName === "Unrealized Gain" && asset.unrealizedGain}
+                              {!["Current Value", "Cost Basis", "Unrealized Gain"].includes(fieldName) && "—"}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4 truncate">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm truncate">{truthValue.value}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {getConfidenceBadge(truthValue.confidence)}
+                                {hasConflict && (
+                                  <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-200">
+                                    Conflict
+                                  </Badge>
+                                )}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <MoreVerticalIcon className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem>Accept external</DropdownMenuItem>
+                                    <DropdownMenuItem>Keep internal</DropdownMenuItem>
+                                    <DropdownMenuItem>Flag for review</DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        {/* Expanded state showing metadata and all source values */}
+                        {isExpanded && (
+                          <TableRow>
+                            <TableCell colSpan={3} className="bg-muted/20 border-t-0 py-4">
+                              <div className="space-y-4">
+                                {/* Primary source metadata */}
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-medium">Source:</span>
+                                    <span>{truthValue.source}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-medium">Updated:</span>
+                                    <span>{new Date(truthValue.lastUpdated).toLocaleDateString()}</span>
+                                  </div>
+                                  {truthValue.documentName && (
+                                    <div className="flex items-center gap-1">
+                                      <span className="font-medium">Document:</span>
+                                      <span>Statement (p.{truthValue.pageNumber})</span>
+                                    </div>
+                                  )}
+                                  {truthValue.variance && (
+                                    <div className="flex items-center gap-1">
+                                      <span className="font-medium">Variance:</span>
+                                      <span>{truthValue.variance}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* All sources if there are multiple */}
+                                {sources.length > 1 && (
+                                  <div className="space-y-3">
+                                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All Sources</div>
+                                    <div className="grid gap-2">
+                                      {sources.map((source, idx) => (
+                                        <div key={idx} className="flex items-center justify-between bg-background rounded-lg border px-3 py-2">
+                                          <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-medium text-sm">{source.value}</span>
+                                              {getConfidenceBadge(source.confidence)}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                              <span className="font-medium">{source.source}</span>
+                                              <span className="mx-1">•</span>
+                                              <span>{new Date(source.lastUpdated).toLocaleDateString()}</span>
+                                              {source.documentName && (
+                                                <>
+                                                  <span className="mx-1">•</span>
+                                                  <span>Doc (p.{source.pageNumber})</span>
+                                                </>
+                                              )}
+                                            </div>
+                                          </div>
+                                          <Button variant="ghost" size="sm" className="h-7 text-xs">
+                                            Use This
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    )
+                  })}
+                </TableBody>
+              </Table>
             </Card>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Recent Data Changes - Styled like Activity feed with proper spacing */}
-      <div className="mt-8 -mx-6 border-t bg-background">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium">Recent Data Changes</h3>
-            <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
-              View full audit log
-            </Button>
+      {/* Connected Data Sources - Collapsible - Expanded by default */}
+      <div className="rounded-lg border border-muted overflow-hidden">
+        <button 
+          onClick={() => toggleSection('dataSources')}
+          className={`w-full flex items-center justify-between p-3 transition-colors ${openSections.dataSources ? 'bg-muted/20' : ''}`}
+        >
+          <div className="flex items-center">
+            {openSections.dataSources ? (
+              <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
+            ) : (
+              <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" /> 
+            )}
+            <div className="flex items-center gap-2">
+              <DatabaseIcon className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium text-sm">Connected Data Sources</span>
+            </div>
           </div>
-          <UnifiedActivitySection 
-            activities={[
-              {
-                id: 1,
-                type: "data_sync",
-                actor: "Addepar",
-                action: "updated",
-                target: "Current Value",
-                objectType: "field",
-                timestamp: "2 hours ago",
-                date: "2025-01-30",
-                details: {
-                  previousValue: "$22,200,000",
-                  newValue: "$22,150,000",
-                  source: "Automated sync",
-                  variance: "-0.23%"
-                }
-              },
-              {
-                id: 2,
-                type: "document_upload",
-                actor: "System",
-                action: "processed",
-                target: "Q4 2024 statement",
-                objectType: "document",
-                timestamp: "1 week ago",
-                date: "2025-01-23",
-                details: {
-                  fieldsUpdated: ["NAV", "Unfunded Commitment"],
-                  extractionMethod: "Document upload",
-                  confidence: "verified"
-                }
-              },
-              {
-                id: 3,
-                type: "calculation",
-                actor: "System",
-                action: "recalculated",
-                target: "IRR and Multiple",
-                objectType: "metrics",
-                timestamp: "2 hours ago",
-                date: "2025-01-30",
-                details: {
-                  calculationMethod: "Based on latest cash flows",
-                  newIRR: "18.5%",
-                  newMultiple: "2.48x"
-                }
-              }
-            ]}
-            showHeader={true}
-            customFilterOptions={[
-              { value: "all", label: "All Changes" },
-              { value: "data_sync", label: "Updated" },
-              { value: "document_upload", label: "Processed" },
-              { value: "calculation", label: "Recalculated" },
-              { value: "conflict_detected", label: "Conflicts" },
-              { value: "sync", label: "Synced" }
-            ]}
-          />
+        </button>
+        {openSections.dataSources && (
+          <div className="px-3 pb-3 pt-2">
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Source</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Last Sync</TableHead>
+                    <TableHead>Fields</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {externalDataSources.map((source) => (
+                    <TableRow key={source.id}>
+                      <TableCell className="font-medium text-sm">{source.name}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{source.type}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
+                          {source.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{source.lastSync}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{source.fieldsCount} fields</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs">
+                          Sync
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        )}
+      </div>
+
+      {/* Recent Data Changes - No container, direct content */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium">Recent Data Changes</h3>
+          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+            View full audit log
+          </Button>
         </div>
+        <UnifiedActivitySection 
+          activities={[
+            {
+              id: 1,
+              type: "data_sync",
+              actor: "Addepar",
+              action: "updated",
+              target: "Current Value",
+              objectType: "field",
+              timestamp: "2 hours ago",
+              date: "2025-01-30",
+              details: {
+                previousValue: "$22,200,000",
+                newValue: "$22,150,000",
+                source: "Automated sync",
+                variance: "-0.23%"
+              }
+            },
+            {
+              id: 2,
+              type: "document_upload",
+              actor: "System",
+              action: "processed",
+              target: "Q4 2024 statement",
+              objectType: "document",
+              timestamp: "1 week ago",
+              date: "2025-01-23",
+              details: {
+                fieldsUpdated: ["NAV", "Unfunded Commitment"],
+                extractionMethod: "Document upload",
+                confidence: "verified"
+              }
+            },
+            {
+              id: 3,
+              type: "calculation",
+              actor: "System",
+              action: "recalculated",
+              target: "IRR and Multiple",
+              objectType: "metrics",
+              timestamp: "2 hours ago",
+              date: "2025-01-30",
+              details: {
+                calculationMethod: "Based on latest cash flows",
+                newIRR: "18.5%",
+                newMultiple: "2.48x"
+              }
+            }
+          ]}
+          showHeader={true}
+          customFilterOptions={[
+            { value: "all", label: "All Changes" },
+            { value: "data_sync", label: "Updated" },
+            { value: "document_upload", label: "Processed" },
+            { value: "calculation", label: "Recalculated" },
+            { value: "conflict_detected", label: "Conflicts" },
+            { value: "sync", label: "Synced" }
+          ]}
+        />
       </div>
     </div>
   )

@@ -513,7 +513,7 @@ export function MasterDrawer({
                   </h3>
                   <div className="flex items-center gap-2">
                     {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
-                    {activeTab !== "activity" && activeTab !== "details" && (
+                    {activeTab !== "activity" && activeTab !== "details" && activeTab !== "external-data" && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4" />
                         Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
@@ -813,7 +813,7 @@ export function MasterDrawer({
   }
 
   // We will use this conditional check for both instances of ViewModeSelector
-  const shouldShowViewSelector = !(activeTab === "activity" || activeTab === "details")
+  const shouldShowViewSelector = !(activeTab === "activity" || activeTab === "details" || activeTab === "external-data")
 
   // Show record fullscreen if requested
   if (recordFullscreen.type && recordFullscreen.record) {
@@ -1009,7 +1009,7 @@ export function MasterDrawer({
                   </h3>
                   <div className="flex items-center gap-2">
                     {shouldShowViewSelector && <ViewModeSelector viewMode={viewMode} onViewModeChange={setViewMode} />}
-                    {activeTab !== "activity" && activeTab !== "details" && (
+                    {activeTab !== "activity" && activeTab !== "details" && activeTab !== "external-data" && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4" />
                         Add {activeTab === "team" ? "person" : activeTab.slice(0, -1)}
