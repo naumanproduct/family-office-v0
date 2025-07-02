@@ -1271,7 +1271,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                   <TableRow>
                     <TableHead className="w-[30%]">Field</TableHead>
                     <TableHead className="w-[30%]">System Value</TableHead>
-                    <TableHead className="w-[40%]">Current Value</TableHead>
+                    <TableHead className="w-[40%]">Selected Value</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1329,7 +1329,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
                                     <DropdownMenuItem>Update System Value</DropdownMenuItem>
-                                    <DropdownMenuItem>Keep Current Value</DropdownMenuItem>
+                                    <DropdownMenuItem>Keep Selected Value</DropdownMenuItem>
                                     <DropdownMenuItem>Flag for Review</DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -1345,7 +1345,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                 {/* Primary source metadata */}
                                 <div className="space-y-3">
                                   <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                    {sources.length > 1 ? "Current Value Source" : "Source Details"}
+                                    {sources.length > 1 ? "Selected Value Source" : "Source Details"}
                                   </div>
                                   <RecordCard
                                     title={truthValue.source}
@@ -1415,7 +1415,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                               }}
                                               actions={[
                                                 isActive 
-                                                  ? { label: "Current Value Source", onClick: () => {} }
+                                                  ? { label: "Selected Value Source", onClick: () => {} }
                                                   : { 
                                                       label: "Use This Value", 
                                                       onClick: (e) => {
