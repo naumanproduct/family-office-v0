@@ -826,6 +826,9 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
 
   // State for expanded rows to show conflicting values
   const [expandedRows, setExpandedRows] = React.useState<Set<string>>(new Set())
+  
+  // State to track selected source for each field
+  const [selectedSources, setSelectedSources] = React.useState<Record<string, string>>({})
 
   // Toggle function for collapsible sections
   const toggleSection = (section: 'fieldComparison' | 'dataSources') => {
@@ -846,6 +849,14 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
       }
       return newSet
     })
+  }
+  
+  // Set a specific source as the current value source for a field
+  const setSourceForField = (fieldName: string, sourceName: string) => {
+    setSelectedSources(prev => ({
+      ...prev,
+      [fieldName]: sourceName
+    }))
   }
 
   // Mock external data sources for assets - in production, this would come from your data layer
@@ -1073,8 +1084,8 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
     return sources.length > 1 && new Set(sources.map(s => s.value)).size > 1
   }).length
 
-  // Get the "truth" value for a field (highest priority source)
-  const getTruthValue = (sources: Array<{
+  // Get the "truth" value for a field (highest priority source or user-selected)
+  const getTruthValue = (fieldName: string, sources: Array<{
     source: string
     sourceType: string
     value: string
@@ -1084,7 +1095,13 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
     documentName?: string
     pageNumber?: number
   }>) => {
-    // Priority order: verified > high > medium > low, then by recency
+    // If user has selected a specific source for this field, use that
+    if (selectedSources[fieldName]) {
+      const userSelected = sources.find(s => s.source === selectedSources[fieldName])
+      if (userSelected) return userSelected
+    }
+    
+    // Otherwise use priority order: verified > high > medium > low, then by recency
     const priorityOrder = { verified: 4, high: 3, medium: 2, low: 1, calculated: 2 }
     
     return sources.sort((a, b) => {
@@ -1218,7 +1235,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                   {Object.entries(fieldComparison).map(([fieldName, sources]) => {
                     const hasConflict = sources.length > 1 && 
                       new Set(sources.map(s => s.value)).size > 1
-                    const truthValue = getTruthValue(sources)
+                    const truthValue = getTruthValue(fieldName, sources)
                     const isExpanded = expandedRows.has(fieldName)
 
                     return (
@@ -1355,8 +1372,14 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                                               actions={[
                                                 isActive 
                                                   ? { label: "Current Value Source", onClick: () => {} }
-                                                  : { label: "Use This Value", onClick: () => {} },
-                                                { label: "View Details", onClick: () => {} }
+                                                  : { 
+                                                      label: "Use This Value", 
+                                                      onClick: (e) => {
+                                                        e.stopPropagation();
+                                                        setSourceForField(fieldName, source.source);
+                                                      } 
+                                                    },
+                                                { label: "View Details", onClick: (e) => e.stopPropagation() }
                                               ]}
                                             />
                                           );
