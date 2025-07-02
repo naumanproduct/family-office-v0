@@ -1353,29 +1353,27 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                 {sources.length > 1 && (
                                   <div className="space-y-3">
                                     <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All Sources</div>
-                                    <div className="grid gap-2">
-                                      {sources.map((source, idx) => (
-                                        <RecordCard
-                                          key={idx}
-                                          title={source.value}
-                                          primaryMetadata={[getConfidenceBadge(source.confidence)]}
-                                          secondaryMetadata={{
-                                            left: (
-                                              <div className="flex items-center gap-1">
-                                                <span className="font-medium">{source.source}</span>
-                                                {source.documentName && (
-                                                  <span className="ml-1">• Doc (p.{source.pageNumber})</span>
-                                                )}
+                                                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        {sources.map((source, idx) => (
+                                          <RecordCard
+                                            key={idx}
+                                            title={(
+                                              <div className="flex items-center gap-2">
+                                                <span>{source.value}</span>
+                                                {getConfidenceBadge(source.confidence)}
                                               </div>
-                                            ),
-                                            right: new Date(source.lastUpdated).toLocaleDateString()
-                                          }}
-                                          actions={[
-                                            { label: "Use This", onClick: () => {} },
-                                            { label: "View Details", onClick: () => {} }
-                                          ]}
-                                        />
-                                      ))}
+                                            )}
+                                            primaryMetadata={[]}
+                                            secondaryMetadata={{
+                                              left: source.source,
+                                              right: new Date(source.lastUpdated).toLocaleDateString()
+                                            }}
+                                            actions={[
+                                              { label: "Use This", onClick: () => {} },
+                                              { label: "View Details", onClick: () => {} }
+                                            ]}
+                                          />
+                                        ))}
                                     </div>
                                   </div>
                                 )}
