@@ -191,47 +191,49 @@ export function UnifiedActivitySection({
       )}
 
       {/* Slack-style comment input with increased spacing */}
-      <div className="px-3 pb-2">
-        {!isCommentExpanded ? (
-          <Input
-            placeholder="Add a comment..."
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            onFocus={handleCommentFocus}
-            className="h-9 text-sm border-muted focus:border-primary/50 transition-colors"
-          />
-        ) : (
-          <div className="space-y-2 animate-in slide-in-from-top-1 duration-200">
-            <Textarea
-              ref={textareaRef}
+      {onCommentSubmit && (
+        <div className="px-3 pb-2">
+          {!isCommentExpanded ? (
+            <Input
               placeholder="Add a comment..."
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="min-h-[80px] text-sm resize-none border-primary/50 focus:border-primary transition-colors"
-              autoFocus
+              onFocus={handleCommentFocus}
+              className="h-9 text-sm border-muted focus:border-primary/50 transition-colors"
             />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCommentCancel}
-                className="h-8 text-muted-foreground hover:text-foreground"
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleCommentSubmit}
-                disabled={!commentText.trim()}
-                className="h-8"
-              >
-                Comment
-              </Button>
+          ) : (
+            <div className="space-y-2 animate-in slide-in-from-top-1 duration-200">
+              <Textarea
+                ref={textareaRef}
+                placeholder="Add a comment..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="min-h-[80px] text-sm resize-none border-primary/50 focus:border-primary transition-colors"
+                autoFocus
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCommentCancel}
+                  className="h-8 text-muted-foreground hover:text-foreground"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleCommentSubmit}
+                  disabled={!commentText.trim()}
+                  className="h-8"
+                >
+                  Comment
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Activity stream with proper spacing */}
       <div className="space-y-0.5">

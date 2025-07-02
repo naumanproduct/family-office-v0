@@ -1267,7 +1267,6 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
               }
             ]}
             showHeader={false}
-            onCommentSubmit={undefined}
           />
         </div>
       </div>

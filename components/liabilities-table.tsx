@@ -1315,7 +1315,6 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
               }
             ]}
             showHeader={false}
-            onCommentSubmit={undefined}
           />
         </div>
       </div>
