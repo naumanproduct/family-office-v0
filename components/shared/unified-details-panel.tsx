@@ -59,17 +59,24 @@ export function UnifiedDetailsPanel({
 }: UnifiedDetailsPanelProps) {
   // State for which sections are open
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>(() => {
-    // Default to having the first section open
     const initialState: Record<string, boolean> = {};
-    if (sections.length > 0) {
-      initialState[sections[0].id] = true;
-    }
-    // Also open workflow-info by default if it exists
-    sections.forEach(section => {
-      if (section.id === 'workflow-info') {
+    if (isFullScreen) {
+      // Expand all sections by default in full screen view
+      sections.forEach(section => {
         initialState[section.id] = true;
+      });
+    } else {
+      // Default to having the first section open
+      if (sections.length > 0) {
+        initialState[sections[0].id] = true;
       }
-    });
+      // Also open workflow-info by default if it exists
+      sections.forEach(section => {
+        if (section.id === 'workflow-info') {
+          initialState[section.id] = true;
+        }
+      });
+    }
     return initialState;
   });
 

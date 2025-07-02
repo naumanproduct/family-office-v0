@@ -152,6 +152,22 @@ export const assetsData: Asset[] = [
     sector: "Clean Energy",
     geography: "Europe",
   },
+  {
+    id: 6,
+    name: "KKR North America Fund VII",
+    type: "Fund Investment",
+    category: "Private Equity",
+    currentValue: "$12.5M",
+    originalCost: "$10.0M",
+    unrealizedGain: "$2.5M",
+    percentageGain: 25.0,
+    acquisitionDate: "2020-03-15",
+    lastValuation: "2024-12-31",
+    entity: "Family Office Master Fund LP",
+    status: "Active",
+    sector: "Growth Companies",
+    geography: "North America",
+  },
 ]
 
 const getStatusColor = (status: string) => {
@@ -182,7 +198,7 @@ interface AssetsTableProps {
 function AssetNameCell({ asset }: { asset: Asset }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "external-data", label: "External Data", count: null, icon: FolderIcon },
+    { id: "external-data", label: "External Data", count: null, icon: DatabaseIcon },
     { id: "notes", label: "Notes", count: 3, icon: FileIcon },
     { id: "files", label: "Files", count: 1, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 1, icon: CheckCircleIcon },
@@ -192,6 +208,240 @@ function AssetNameCell({ asset }: { asset: Asset }) {
   ]
 
   const getAssetTabData = (activeTab: string) => {
+    // Provide specific data for KKR North America Fund VII
+    if (asset.name === "KKR North America Fund VII") {
+      switch (activeTab) {
+        case "tasks":
+          return [
+            { id: 1, title: "Q4 2024 Capital Account Review", priority: "High", status: "In Progress", assignee: "Sarah Chen", dueDate: "February 15, 2025" },
+            { id: 2, title: "Annual GP Meeting Preparation", priority: "Medium", status: "Pending", assignee: "Michael Torres", dueDate: "March 1, 2025" },
+            { id: 3, title: "Tax K-1 Processing", priority: "High", status: "Pending", assignee: "Tax Team", dueDate: "March 15, 2025" },
+            { id: 4, title: "Side Letter Amendment Review", priority: "Low", status: "Pending", assignee: "Legal Team", dueDate: "April 1, 2025" },
+          ]
+        case "emails":
+          return [
+            { id: 1, subject: "Q4 2024 Capital Account Statement Available", from: "ir@kkr.com", date: "January 25, 2025", status: "Read", preview: "Your Q4 2024 capital account statement is now available for download..." },
+            { id: 2, subject: "Portfolio Company Update - December 2024", from: "updates@kkr.com", date: "January 15, 2025", status: "Read", preview: "Monthly portfolio company performance highlights and key developments..." },
+            { id: 3, subject: "Capital Call Notice - Fund VII", from: "capitalcalls@kkr.com", date: "December 10, 2024", status: "Read", preview: "You are hereby notified of a capital call in the amount of $850,000..." },
+            { id: 4, subject: "Annual Meeting Invitation - March 2025", from: "events@kkr.com", date: "January 5, 2025", status: "Unread", preview: "You are cordially invited to KKR's Annual Limited Partner Meeting..." },
+          ]
+        case "notes":
+          return [
+            { 
+              id: 1, 
+              title: "KKR Fund VII Performance Review", 
+              author: "Investment Committee", 
+              date: "January 20, 2025", 
+              topic: "Performance Review", 
+              content: `KKR North America Fund VII - Annual Performance Review
+
+Review Date: January 20, 2025
+Participants: Investment Committee, Portfolio Team, External Consultant
+
+Executive Summary:
+Our investment in KKR North America Fund VII continues to perform in line with expectations. The fund is demonstrating strong execution against its investment thesis of North American growth companies, with a focus on technology-enabled businesses and market-leading companies.
+
+Key Performance Metrics (as of Q4 2024):
+• Fund Size: $19.0B (one of the largest buyout funds ever raised)
+• Our Commitment: $10.0M (representing 0.05% of fund)
+• Called Capital: $7.5M (75% of commitment called)
+• Current NAV: $12.5M (1.67x TVPI multiple)
+• Distributions Received: $1.5M (0.20x DPI multiple)  
+• Net IRR: 15.2% (vs 12-15% target)
+• Remaining Commitment: $2.5M
+
+Portfolio Construction & Strategy:
+The fund has deployed capital across 25+ platform investments, with an average equity check size of $750M. The portfolio is diversified across sectors including:
+• Technology & Software: 35%
+• Healthcare: 25% 
+• Consumer: 20%
+• Industrial & Services: 20%
+
+Notable portfolio companies include established market leaders with strong competitive positions and predictable cash flow generation. The GP's operational expertise and network continue to drive value creation initiatives.
+
+Performance Analysis:
+1. Multiple Expansion: Strong execution on revenue growth and margin improvement
+2. Market Leadership: Portfolio companies maintaining/gaining market share
+3. Operational Improvements: KKR's operational team driving efficiency gains
+4. Add-on Acquisitions: Successful bolt-on strategies across platforms
+
+Risk Assessment:
+• Vintage 2020: Benefited from favorable entry valuations pre-COVID
+• Interest Rate Environment: Portfolio companies managing through higher rates
+• Exit Environment: IPO market recovery supporting exit opportunities
+• Portfolio Maturity: Fund entering harvest phase (years 4-5)
+
+Comparative Analysis:
+The fund is performing within the top quartile of its peer group based on:
+• Cambridge Associates benchmarks
+• Preqin vintage 2020 large buyout fund data
+• Our internal benchmarking against similar vintage funds
+
+Strategic Considerations:
+1. Capital Management: Remaining commitment ($2.5M) expected to be called over next 12-18 months
+2. Distribution Timing: Anticipate increased distribution activity as fund matures
+3. Co-investment Opportunities: Continue to evaluate selective co-investment opportunities
+4. Follow-on Funds: KKR Fund VIII launched in 2024 - evaluate participation
+
+Recommendations:
+• MAINTAIN: Continue current investment allocation
+• MONITOR: Track distribution pacing and exit environment
+• EVALUATE: Consider KKR Fund VIII participation based on Fund VII performance
+• OPTIMIZE: Reinvestment strategy for upcoming distributions
+
+Next Review: April 2025 (post Q1 2025 reporting)` 
+            },
+            { 
+              id: 2, 
+              title: "GP Meeting Notes - March 2024", 
+              author: "Michael Torres", 
+              date: "March 15, 2024", 
+              topic: "GP Meeting", 
+              content: `KKR Annual Limited Partner Meeting - Key Takeaways
+
+Date: March 12-13, 2024
+Location: New York, NY
+Attendees: 150+ Limited Partners, KKR Leadership Team
+
+Meeting Highlights:
+
+Market Environment Update:
+• KKR positioned defensively given macro uncertainty
+• Focus on resilient business models with pricing power
+• Portfolio companies demonstrating operational resilience
+• Private credit becoming increasingly important strategy
+
+Fund VII Portfolio Update:
+• 23 platform investments completed (target: 25-30)
+• Average revenue growth: 12% across portfolio
+• EBITDA margin expansion: 150bps on average
+• 3 full exits completed (Envision Healthcare, Academy Sports, WebMD)
+
+Value Creation Initiatives:
+• Digital transformation programs across 80% of portfolio
+• ESG integration with measurable impact metrics
+• Talent development through KKR Capstone program
+• Supply chain optimization reducing costs by 3-5%
+
+Market Outlook:
+• Selective deployment given valuation environment
+• Focus on add-on acquisitions vs new platforms
+• Credit opportunities in dislocation markets
+• Geographic expansion in Europe and Asia
+
+Technology Transformation:
+• AI and automation adoption across portfolio
+• Data analytics driving operational improvements
+• Cybersecurity investments protecting assets
+• Digital customer engagement platforms
+
+Q&A Session Highlights:
+• Exit environment: Increased M&A activity expected in 2H 2024
+• Interest rates: Portfolio positioned for higher rate environment
+• Competition: Disciplined approach to competitive processes
+• ESG: Integration driving both impact and returns
+
+Action Items:
+• Follow up on co-investment pipeline review
+• Assess Fund VIII participation timeline
+• Evaluate sector-specific opportunities
+• Plan investor relations touchpoints` 
+            },
+            { 
+              id: 3, 
+              title: "Tax Implications Analysis", 
+              author: "Tax Advisory Team", 
+              date: "December 1, 2024", 
+              topic: "Tax Planning", 
+              content: `KKR Fund VII - Tax Structure and Implications Analysis
+
+Prepared by: Tax Advisory Team
+Date: December 1, 2024
+Purpose: Annual tax planning and structure optimization
+
+Fund Structure Overview:
+KKR North America Fund VII is structured as a Delaware limited partnership with:
+• GP: KKR Fund Holdings L.P.
+• Management Fee: 2.0% on committed capital (reducing to 1.5% post-investment period)
+• Carried Interest: 20% after 8% preferred return
+• Investment Period: 5 years (ended March 2025)
+
+Our Investment Structure:
+• Investing Entity: Family Office Master Fund LP
+• Investment Classification: Partnership interest
+• Tax Treatment: Pass-through taxation
+• State Jurisdiction: Delaware (no state income tax on fund)
+
+Current Tax Positions:
+1. Unrealized Gains: $2.5M (subject to potential tax on distributions)
+2. Capital Losses: None currently recognized
+3. Ordinary Income: Management fee deductions and interest income
+4. Foreign Tax Credits: Minimal (primarily US-focused fund)
+
+2024 Tax Implications:
+• K-1 Schedule received: January 31, 2025
+• Taxable Income: $125,000 (primarily from realized gains)
+• Management Fee Deduction: $200,000 (offset against other income)
+• Net Investment Income Tax: Applicable on distributions
+
+Distribution Tax Planning:
+Anticipated distributions in 2025-2027 will be treated as:
+• Return of Capital: First $10M (tax-free)
+• Capital Gains: Excess over cost basis (20% tax rate + 3.8% NIIT)
+• Estimated Tax Liability: $650,000 on $2.5M gain
+
+Optimization Strategies:
+1. Timing: Coordinate distributions with other portfolio losses
+2. Charitable Giving: Donate appreciated interests to reduce tax burden
+3. Estate Planning: Consider gift tax implications for next generation
+4. State Planning: Maintain favorable state residency for distributions
+
+UBTI Considerations:
+• Limited exposure given fund's investment strategy
+• Debt-financed distributions: Monitor leverage at portfolio company level
+• Blocked income: Minimal expected based on fund structure
+
+Recommendations:
+• Establish distribution reserve for tax obligations
+• Consider installment sale elections if available
+• Evaluate opportunity zone reinvestment options
+• Plan charitable giving strategy for tax-efficient distributions
+
+Next Steps:
+• Review 2024 K-1 upon receipt
+• Model distribution scenarios for 2025-2027
+• Coordinate with estate planning attorney
+• Update tax provision calculations` 
+            }
+          ]
+        case "meetings":
+          return [
+            { id: 1, title: "KKR Annual LP Meeting", date: "March 12, 2025", time: "9:00 AM EST", attendees: ["Investment Team", "KKR Leadership"], status: "Scheduled" },
+            { id: 2, title: "Fund VII Performance Review", date: "February 15, 2025", time: "2:00 PM EST", attendees: ["Investment Committee"], status: "Scheduled" },
+            { id: 3, title: "Tax Planning Session", date: "February 28, 2025", time: "10:00 AM EST", attendees: ["Tax Team", "External CPA"], status: "Scheduled" },
+            { id: 4, title: "Portfolio Company Deep Dive", date: "January 30, 2025", time: "3:00 PM EST", attendees: ["Portfolio Team"], status: "Completed" },
+          ]
+        case "files":
+          return [
+            { id: 1, name: "KKR_Fund_VII_Capital_Account_Q4_2024.pdf", uploadedBy: "IR Team", uploadedDate: "January 25, 2025", size: "2.4 MB", type: "PDF" },
+            { id: 2, name: "Limited_Partnership_Agreement.pdf", uploadedBy: "Legal Team", uploadedDate: "March 15, 2020", size: "15.8 MB", type: "PDF" },
+            { id: 3, name: "Annual_Report_2024.pdf", uploadedBy: "KKR", uploadedDate: "January 15, 2025", size: "8.2 MB", type: "PDF" },
+            { id: 4, name: "Side_Letter_Amendment_2024.pdf", uploadedBy: "Legal Team", uploadedDate: "September 12, 2024", size: "1.1 MB", type: "PDF" },
+            { id: 5, name: "Tax_K1_2024.pdf", uploadedBy: "Tax Team", uploadedDate: "January 31, 2025", size: "0.8 MB", type: "PDF" },
+          ]
+        case "team":
+          return [
+            { id: 1, name: "Sarah Chen", role: "Senior Investment Associate", email: "sarah.chen@familyoffice.com" },
+            { id: 2, name: "Michael Torres", role: "VP, Private Equity", email: "michael.torres@familyoffice.com" },
+            { id: 3, name: "Jennifer Walsh", role: "Investment Director", email: "jennifer.walsh@kkr.com" },
+            { id: 4, name: "David Kim", role: "Principal", email: "david.kim@kkr.com" },
+          ]
+        default:
+          return []
+      }
+    }
+
+    // Default data for other assets
     switch (activeTab) {
       case "tasks":
         return [
@@ -829,6 +1079,9 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
   
   // State to track selected source for each field
   const [selectedSources, setSelectedSources] = React.useState<Record<string, string>>({})
+  
+  // State to track expanded source details
+  const [expandedSource, setExpandedSource] = React.useState<string | null>(null)
 
   // Toggle function for collapsible sections
   const toggleSection = (section: 'fieldComparison' | 'dataSources') => {
@@ -860,7 +1113,309 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
   }
 
   // Mock external data sources for assets - in production, this would come from your data layer
-  const externalDataSources = [
+  // Special handling for Private Equity funds with PE-specific fields
+  const isPEFund = asset.name === "KKR North America Fund VII"
+  
+  const externalDataSources = isPEFund ? [
+    {
+      id: "kkr-investor-portal",
+      name: "KKR Investor Portal",
+      type: "GP Portal",
+      lastSync: "3 days ago",
+      status: "synced",
+      fieldsCount: 12,
+      fields: [
+        { 
+          fieldName: "Fund Name", 
+          value: "KKR North America Fund VII", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Fund Strategy", 
+          value: "Large Buyout", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Commitment Amount", 
+          value: "$10,000,000", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Called Capital", 
+          value: "$7,500,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Remaining Commitment", 
+          value: "$2,500,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "calculated",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Distributions Received", 
+          value: "$1,500,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Current NAV", 
+          value: "$12,500,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "TVPI Multiple", 
+          value: "1.67x", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "calculated",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "DPI Multiple", 
+          value: "0.20x", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "calculated",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "IRR to Date", 
+          value: "15.2%", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "calculated",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Vintage Year", 
+          value: "2020", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Fund Status", 
+          value: "Investment Period", 
+          lastUpdated: "2025-01-30 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "addepar-pe",
+      name: "Addepar",
+      type: "Portfolio Management",
+      lastSync: "1 day ago",
+      status: "synced",
+      fieldsCount: 8,
+      fields: [
+        { 
+          fieldName: "Current NAV", 
+          value: "$12,485,000", 
+          lastUpdated: "2025-01-29 14:23:00",
+          confidence: "high",
+          variance: "-0.12%",
+          variantFromInternal: "$15,000"
+        },
+        { 
+          fieldName: "Called Capital", 
+          value: "$7,500,000", 
+          lastUpdated: "2025-01-29 14:23:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Distributions Received", 
+          value: "$1,500,000", 
+          lastUpdated: "2025-01-29 14:23:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "TVPI Multiple", 
+          value: "1.66x", 
+          lastUpdated: "2025-01-29 14:23:00",
+          confidence: "calculated",
+          variance: "-0.6%",
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "IRR to Date", 
+          value: "15.1%", 
+          lastUpdated: "2025-01-29 14:23:00",
+          confidence: "calculated",
+          variance: "-0.7%",
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Fund Size", 
+          value: "$19,000,000,000", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Management Fee Rate", 
+          value: "2.0%", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Carried Interest Rate", 
+          value: "20.0%", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "netsuite-pe",
+      name: "NetSuite",
+      type: "Accounting",
+      lastSync: "2 days ago",
+      status: "synced",
+      fieldsCount: 6,
+      fields: [
+        { 
+          fieldName: "Current NAV", 
+          value: "$12,520,000", 
+          lastUpdated: "2025-01-28 18:00:00",
+          confidence: "high",
+          variance: "+0.16%",
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Called Capital", 
+          value: "$7,500,000", 
+          lastUpdated: "2025-01-28 18:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Commitment Amount", 
+          value: "$10,000,000", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Distributions Received", 
+          value: "$1,500,000", 
+          lastUpdated: "2024-12-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Management Fees Paid", 
+          value: "$950,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Investment Period End", 
+          value: "March 15, 2025", 
+          lastUpdated: "2020-03-15 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "capital-account-docs",
+      name: "Capital Account Statements",
+      type: "Document Extract",
+      lastSync: "1 week ago",
+      status: "manual",
+      fieldsCount: 5,
+      fields: [
+        { 
+          fieldName: "Current NAV", 
+          value: "$12,500,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "KKR_Fund_VII_Capital_Account_Q4_2024.pdf",
+          pageNumber: 1
+        },
+        { 
+          fieldName: "Called Capital", 
+          value: "$7,500,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "KKR_Fund_VII_Capital_Account_Q4_2024.pdf",
+          pageNumber: 1
+        },
+        { 
+          fieldName: "Unfunded Commitment", 
+          value: "$2,500,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "KKR_Fund_VII_Capital_Account_Q4_2024.pdf",
+          pageNumber: 1
+        },
+        { 
+          fieldName: "Partnership Percentage", 
+          value: "0.0526%", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "KKR_Fund_VII_Capital_Account_Q4_2024.pdf",
+          pageNumber: 2
+        },
+        { 
+          fieldName: "Cumulative Distributions", 
+          value: "$1,500,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "KKR_Fund_VII_Capital_Account_Q4_2024.pdf",
+          pageNumber: 3
+        }
+      ]
+    }
+  ] : [
     {
       id: "addepar",
       name: "Addepar",
@@ -1305,73 +1860,179 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                                     {sources.map((source, idx) => {
                                       const isActive = source.source === truthValue.source;
                                       return (
-                                        <RecordCard
-                                          key={idx}
-                                          title={source.source}
-                                          primaryMetadata={[
-                                            isActive && (
-                                              <Badge key="active" className="bg-black text-white hover:bg-black/90 text-xs">
-                                                Active
-                                              </Badge>
-                                            ),
-                                            getConfidenceBadge(source.confidence)
-                                          ].filter(Boolean)}
-                                          secondaryMetadata={{
-                                            left: (
-                                              <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                                                <div className="text-xs">
-                                                  <span className="font-medium">Value:</span>
-                                                </div>
-                                                <div className="text-xs">
-                                                  {source.value}
-                                                </div>
-                                                <div className="text-xs">
-                                                  <span className="font-medium">Updated:</span>
-                                                </div>
-                                                <div className="text-xs">
-                                                  {new Date(source.lastUpdated).toLocaleDateString()}
-                                                </div>
-                                                {source.variance && (
-                                                  <>
-                                                    <div className="text-xs">
-                                                      <span className="font-medium">Variance:</span>
+                                        <div key={idx}>
+                                          <Card className="group cursor-pointer hover:bg-muted/50 h-full">
+                                            <CardContent className="p-4">
+                                              <div className="flex gap-4">
+                                                <div className="flex-1">
+                                                  {/* Title row with actions dropdown */}
+                                                  <div className="flex items-start justify-between">
+                                                    <h3 className="font-medium text-sm">
+                                                      {source.source}
+                                                    </h3>
+                                                    
+                                                    <div className="flex items-center gap-1">
+                                                      <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          setExpandedSource(expandedSource === `${fieldName}-${idx}` ? null : `${fieldName}-${idx}`);
+                                                        }}
+                                                      >
+                                                        {expandedSource === `${fieldName}-${idx}` ? (
+                                                          <ChevronDownIcon className="h-4 w-4" />
+                                                        ) : (
+                                                          <ChevronRightIcon className="h-4 w-4" />
+                                                        )}
+                                                      </Button>
+                                                      
+                                                      <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <MoreVerticalIcon className="h-4 w-4" />
+                                                          </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                          {!isActive && (
+                                                            <DropdownMenuItem 
+                                                              onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSourceForField(fieldName, source.source);
+                                                              }}
+                                                            >
+                                                              Use This Value
+                                                            </DropdownMenuItem>
+                                                          )}
+                                                        </DropdownMenuContent>
+                                                      </DropdownMenu>
                                                     </div>
-                                                    <div className="text-xs">
-                                                      {source.variance}
+                                                  </div>
+                                                  
+                                                  {/* Primary metadata row (badges, status indicators) */}
+                                                  <div className="flex items-center gap-2 mt-1">
+                                                    {isActive && (
+                                                      <Badge className="bg-black text-white hover:bg-black/90 text-xs">
+                                                        Active
+                                                      </Badge>
+                                                    )}
+                                                    {getConfidenceBadge(source.confidence)}
+                                                  </div>
+                                                  
+                                                  {/* Secondary metadata row */}
+                                                  <div className="mt-2 text-xs text-muted-foreground">
+                                                    <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                                                      <div>
+                                                        <span className="font-medium">Value:</span>
+                                                      </div>
+                                                      <div>
+                                                        {source.value}
+                                                      </div>
+                                                      <div>
+                                                        <span className="font-medium">Updated:</span>
+                                                      </div>
+                                                      <div>
+                                                        {new Date(source.lastUpdated).toLocaleDateString()}
+                                                      </div>
+                                                      {source.variance && (
+                                                        <>
+                                                          <div>
+                                                            <span className="font-medium">Variance:</span>
+                                                          </div>
+                                                          <div>
+                                                            {source.variance}
+                                                          </div>
+                                                        </>
+                                                      )}
+                                                      {source.documentName && (
+                                                        <>
+                                                          <div>
+                                                            <span className="font-medium">Document:</span>
+                                                          </div>
+                                                          <div>
+                                                            Statement (p.{source.pageNumber})
+                                                          </div>
+                                                        </>
+                                                      )}
                                                     </div>
-                                                  </>
-                                                )}
-                                                {source.documentName && (
-                                                  <>
-                                                    <div className="text-xs">
-                                                      <span className="font-medium">Document:</span>
-                                                    </div>
-                                                    <div className="text-xs">
-                                                      Statement (p.{source.pageNumber})
-                                                    </div>
-                                                  </>
-                                                )}
+                                                  </div>
+                                                </div>
                                               </div>
-                                            ),
-                                            right: ""
-                                          }}
-                                          actions={[
-                                            isActive 
-                                              ? { label: "Current Active Source", onClick: () => {} }
-                                              : { 
-                                                  label: "Use This Value", 
-                                                  onClick: (e) => {
-                                                    e.stopPropagation();
-                                                    setSourceForField(fieldName, source.source);
-                                                  } 
-                                                },
-                                            { label: "View Details", onClick: (e) => e.stopPropagation() }
-                                          ]}
-                                        />
+                                            </CardContent>
+                                            
+                                            {/* Expanded Source Details */}
+                                            {expandedSource === `${fieldName}-${idx}` && (
+                                              <div className="border-t border-muted bg-muted/10 p-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                  <h4 className="text-sm font-medium text-foreground">Additional Details</h4>
+                                                  <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setExpandedSource(null);
+                                                    }}
+                                                    className="h-6 w-6 p-0"
+                                                  >
+                                                    ×
+                                                  </Button>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Source Format:</span>
+                                                  </div>
+                                                  <div>
+                                                    {source.documentName ? 'PDF Document' : 'API Integration'}
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Derived From:</span>
+                                                  </div>
+                                                  <div>
+                                                    {source.documentName 
+                                                      ? `Document field on page ${source.pageNumber}`
+                                                      : `API field: ${fieldName.toLowerCase().replace(' ', '_')}`
+                                                    }
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Last Manual Override:</span>
+                                                  </div>
+                                                  <div>
+                                                    None
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Currency:</span>
+                                                  </div>
+                                                  <div>
+                                                    USD
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Refresh Cadence:</span>
+                                                  </div>
+                                                  <div>
+                                                    {source.source === 'Addepar' ? 'Real-time' : 
+                                                     source.source === 'NetSuite' ? 'Daily' : 
+                                                     source.source === 'Northern Trust' ? 'Daily' :
+                                                     'Monthly'}
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Confidence Explanation:</span>
+                                                  </div>
+                                                  <div>
+                                                    {source.confidence === 'verified' ? 'Verified: Manual document review completed' :
+                                                     source.confidence === 'high' ? 'High: Recent sync from trusted source' :
+                                                     source.confidence === 'medium' ? 'Medium: Data is slightly stale' :
+                                                     'Calculated: Derived from multiple data points'}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </Card>
+                                        </div>
                                       );
                                     })}
                                   </div>
-                                </div>
+                                  </div>
                               </div>
                             </TableCell>
                           </TableRow>

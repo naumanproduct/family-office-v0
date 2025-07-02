@@ -883,6 +883,9 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
   // State to track selected source for each field
   const [selectedSources, setSelectedSources] = React.useState<Record<string, string>>({})
 
+  // State to track expanded source details
+  const [expandedSource, setExpandedSource] = React.useState<string | null>(null)
+
   // Toggle function for collapsible sections
   const toggleSection = (section: 'fieldComparison' | 'dataSources') => {
     setOpenSections(prev => ({
@@ -1349,73 +1352,179 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                     {sources.map((source, idx) => {
                                       const isActive = source.source === truthValue.source;
                                       return (
-                                        <RecordCard
-                                          key={idx}
-                                          title={source.source}
-                                          primaryMetadata={[
-                                            isActive && (
-                                              <Badge key="active" className="bg-black text-white hover:bg-black/90 text-xs">
-                                                Active
-                                              </Badge>
-                                            ),
-                                            getConfidenceBadge(source.confidence)
-                                          ].filter(Boolean)}
-                                          secondaryMetadata={{
-                                            left: (
-                                              <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                                                <div className="text-xs">
-                                                  <span className="font-medium">Value:</span>
-                                                </div>
-                                                <div className="text-xs">
-                                                  {source.value}
-                                                </div>
-                                                <div className="text-xs">
-                                                  <span className="font-medium">Updated:</span>
-                                                </div>
-                                                <div className="text-xs">
-                                                  {new Date(source.lastUpdated).toLocaleDateString()}
-                                                </div>
-                                                {source.variance && (
-                                                  <>
-                                                    <div className="text-xs">
-                                                      <span className="font-medium">Variance:</span>
-                                                    </div>
-                                                    <div className="text-xs">
-                                                      {source.variance}
-                                                    </div>
-                                                  </>
-                                                )}
-                                                {source.documentName && (
-                                                  <>
-                                                    <div className="text-xs">
-                                                      <span className="font-medium">Document:</span>
-                                                    </div>
-                                                    <div className="text-xs">
-                                                      Statement (p.{source.pageNumber})
-                                                    </div>
-                                                  </>
-                                                )}
-                                              </div>
-                                            ),
-                                            right: ""
-                                          }}
-                                          actions={[
-                                            isActive 
-                                              ? { label: "Current Active Source", onClick: () => {} }
-                                              : { 
-                                                  label: "Use This Value", 
-                                                  onClick: (e) => {
-                                                    e.stopPropagation();
-                                                    setSourceForField(fieldName, source.source);
-                                                  } 
-                                                },
-                                            { label: "View Details", onClick: (e) => e.stopPropagation() }
-                                          ]}
-                                        />
-                                      );
-                                    })}
+                                        <div key={idx}>
+                                          <Card className="group cursor-pointer hover:bg-muted/50 h-full">
+                                            <CardContent className="p-4">
+                                              <div className="flex gap-4">
+                                                <div className="flex-1">
+                                                  {/* Title row with actions dropdown */}
+                                                  <div className="flex items-start justify-between">
+                                                    <h3 className="font-medium text-sm">
+                                                      {source.source}
+                                                    </h3>
+                                                    
+                                                    <div className="flex items-center gap-1">
+                                                      <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          setExpandedSource(expandedSource === `${fieldName}-${idx}` ? null : `${fieldName}-${idx}`);
+                                                        }}
+                                                      >
+                                                        {expandedSource === `${fieldName}-${idx}` ? (
+                                                          <ChevronDownIcon className="h-4 w-4" />
+                                                        ) : (
+                                                          <ChevronRightIcon className="h-4 w-4" />
+                                                        )}
+                                                      </Button>
+                                                      
+                                                      <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <MoreVerticalIcon className="h-4 w-4" />
+                                                          </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                          {!isActive && (
+                                                            <DropdownMenuItem 
+                                                              onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSourceForField(fieldName, source.source);
+                                                              }}
+                                                            >
+                                                              Use This Value
+                                                            </DropdownMenuItem>
+                                                          )}
+                                                        </DropdownMenuContent>
+                                                      </DropdownMenu>
                                   </div>
+                                                  </div>
+                                                  
+                                                  {/* Primary metadata row (badges, status indicators) */}
+                                                  <div className="flex items-center gap-2 mt-1">
+                                                    {isActive && (
+                                                      <Badge className="bg-black text-white hover:bg-black/90 text-xs">
+                                                        Active
+                                                      </Badge>
+                                                    )}
+                                                    {getConfidenceBadge(source.confidence)}
+                                                  </div>
+                                                  
+                                                  {/* Secondary metadata row */}
+                                                  <div className="mt-2 text-xs text-muted-foreground">
+                                        <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                                                      <div>
+                                            <span className="font-medium">Value:</span>
+                                          </div>
+                                                      <div>
+                                                        {source.value}
+                                          </div>
+                                                      <div>
+                                            <span className="font-medium">Updated:</span>
+                                          </div>
+                                                      <div>
+                                                        {new Date(source.lastUpdated).toLocaleDateString()}
+                                          </div>
+                                                      {source.variance && (
+                                            <>
+                                                          <div>
+                                                <span className="font-medium">Variance:</span>
+                                              </div>
+                                                          <div>
+                                                            {source.variance}
+                                              </div>
+                                            </>
+                                          )}
+                                                      {source.documentName && (
+                                            <>
+                                                          <div>
+                                                <span className="font-medium">Document:</span>
+                                              </div>
+                                                          <div>
+                                                            Statement (p.{source.pageNumber})
+                                              </div>
+                                            </>
+                                          )}
+                                        </div>
                                 </div>
+                                                </div>
+                                              </div>
+                                            </CardContent>
+                                            
+                                            {/* Expanded Source Details */}
+                                            {expandedSource === `${fieldName}-${idx}` && (
+                                              <div className="border-t border-muted bg-muted/10 p-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                  <h4 className="text-sm font-medium text-foreground">Additional Details</h4>
+                                                  <Button 
+                                                    variant="ghost" 
+                                                    size="sm" 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                      setExpandedSource(null);
+                                                    }}
+                                                    className="h-6 w-6 p-0"
+                                                  >
+                                                    ×
+                                                  </Button>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Source Format:</span>
+                                                  </div>
+                                                  <div>
+                                                    {source.documentName ? 'PDF Document' : 'API Integration'}
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Derived From:</span>
+                                                  </div>
+                                                  <div>
+                                                    {source.documentName 
+                                                      ? `Document field on page ${source.pageNumber}`
+                                                      : `API field: ${fieldName.toLowerCase().replace(' ', '_')}`
+                                                    }
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Last Manual Override:</span>
+                                                  </div>
+                                                  <div>
+                                                    None
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Currency:</span>
+                                                  </div>
+                                                  <div>
+                                                    USD
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Refresh Cadence:</span>
+                                                  </div>
+                                                  <div>
+                                                    {source.source === 'Addepar' ? 'Real-time' : 
+                                                     source.source === 'NetSuite' ? 'Daily' : 
+                                                     source.source === 'Bank Portal' ? 'Daily' :
+                                                     'Monthly'}
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium text-muted-foreground">Confidence Explanation:</span>
+                                                  </div>
+                                                  <div>
+                                                    {source.confidence === 'verified' ? 'Verified: Manual document review completed' :
+                                                     source.confidence === 'high' ? 'High: Recent sync from trusted source' :
+                                                     source.confidence === 'medium' ? 'Medium: Data is slightly stale' :
+                                                     'Calculated: Derived from multiple data points'}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </Card>
+                                        </div>
+                                          );
+                                        })}
+                                    </div>
+                                  </div>
                               </div>
                             </TableCell>
                           </TableRow>
