@@ -30,6 +30,7 @@ import {
   ChevronRightIcon,
   PanelRightIcon,
 } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -556,15 +557,14 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                 <PrinterIcon className="h-4 w-4 mr-1" />
                 Print
               </Button>
+              <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
-                onClick={() => {
-                  setIsFullScreen(false)
-                  onOpenChange(false)
-                }}
+                onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+                title={isRightPanelCollapsed ? "Show details panel (⌘B)" : "Hide details panel (⌘B)"}
               >
-                <XIcon className="h-4 w-4" />
+                <PanelRightIcon className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -576,36 +576,11 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
               <FilePreview file={file} />
             </div>
 
-            {/* Show button when collapsed */}
-            {isRightPanelCollapsed && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-4 top-4 z-10 h-7 w-7"
-                onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
-                title="Show details panel (⌘B)"
-              >
-                <PanelRightIcon className="h-4 w-4" />
-                <span className="sr-only">Toggle Details Panel</span>
-              </Button>
-            )}
-
             {/* Right Panel - Details (same width as drawer to prevent jumping) */}
             <div className={`${isRightPanelCollapsed ? 'w-0' : 'w-[672px]'} border-l bg-background flex flex-col transition-all duration-300 overflow-hidden`}>
-              {/* Record Header with Panel Toggle */}
+              {/* Record Header */}
               <div className="border-b bg-background px-6 py-2">
                 <div className="flex items-center gap-3">
-                  {/* Panel Toggle - matching SidebarTrigger placement */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 -ml-1"
-                    onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
-                    title="Hide details panel (⌘B)"
-                  >
-                    <PanelRightIcon className="h-4 w-4" />
-                    <span className="sr-only">Toggle Details Panel</span>
-                  </Button>
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
                     {file && (file.title || file.name || "Untitled").charAt(0)}
                   </div>
