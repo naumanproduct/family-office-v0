@@ -55,7 +55,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core"
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -72,11 +72,11 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
-import { MasterDrawer } from "@/components/master-drawer"
+import { MasterDrawer } from "./master-drawer"
 import { AddLiabilityDialog } from "./add-liability-dialog"
-import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
-import { MasterDetailsPanel } from "@/components/shared/master-details-panel"
-import { UnifiedActivitySection, ActivityItem } from "@/components/shared/unified-activity-section"
+import { TabContentRenderer } from "./shared/tab-content-renderer"
+import { MasterDetailsPanel } from "./shared/master-details-panel"
+import { UnifiedActivitySection, ActivityItem } from "./shared/unified-activity-section"
 import { RecordCard } from "./shared/record-card"
 
 export const liabilitySchema = z.object({
