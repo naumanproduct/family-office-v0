@@ -1082,30 +1082,45 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
 
   return (
     <div className="space-y-6">
-      {/* Data Sources Overview */}
+      {/* Data Quality Insights - Moved to top */}
       <div>
-        <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {externalDataSources.map((source) => (
-            <Card key={source.id} className="p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-medium text-sm">{source.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{source.type}</p>
-                  <p className="text-xs text-muted-foreground mt-2">Last sync: {source.lastSync}</p>
-                </div>
-                <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
-                  {source.status}
-                </Badge>
+        <h3 className="text-sm font-medium mb-3">Data Quality Insights</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                <span className="text-green-600 text-sm font-medium">92%</span>
               </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">{source.fields.length} fields</span>
-                <Button variant="ghost" size="sm" className="h-7 text-xs">
-                  Sync Now
-                </Button>
+              <span className="text-sm font-medium">Data Completeness</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Most required fields have values from at least one source
+            </p>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                <span className="text-yellow-600 text-sm font-medium">1</span>
               </div>
-            </Card>
-          ))}
+              <span className="text-sm font-medium">Active Conflicts</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Current Balance shows variance across systems
+            </p>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="text-blue-600 text-sm font-medium">4d</span>
+              </div>
+              <span className="text-sm font-medium">Average Data Age</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Consider refreshing Northern Trust connection
+            </p>
+          </Card>
         </div>
       </div>
 
@@ -1214,49 +1229,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
         </Card>
       </div>
 
-      {/* Data Quality Insights */}
-      <div>
-        <h3 className="text-sm font-medium mb-3">Data Quality Insights</h3>
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                <span className="text-green-600 text-sm font-medium">92%</span>
-              </div>
-              <span className="text-sm font-medium">Data Completeness</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Most required fields have values from at least one source
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                <span className="text-yellow-600 text-sm font-medium">1</span>
-              </div>
-              <span className="text-sm font-medium">Active Conflicts</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Current Balance shows variance across systems
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-blue-600 text-sm font-medium">4d</span>
-              </div>
-              <span className="text-sm font-medium">Average Data Age</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Consider refreshing Northern Trust connection
-            </p>
-          </Card>
-        </div>
-      </div>
-
-      {/* Audit Trail */}
+      {/* Recent Data Changes - Styled like Activity feed */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium">Recent Data Changes</h3>
@@ -1264,39 +1237,84 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
             View full audit log
           </Button>
         </div>
-        <Card>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              <div className="p-3 flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5"></div>
-                <div className="flex-1">
-                  <p className="text-sm">Current Balance updated from Addepar</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    $12,500,000 → $12,485,320 • 2 hours ago • Automated sync
-                  </p>
+        <UnifiedActivitySection 
+          activities={[
+            {
+              id: 1,
+              type: "data_sync",
+              actor: "Addepar",
+              action: "updated",
+              target: "Current Balance",
+              objectType: "field",
+              timestamp: "2 hours ago",
+              date: "2025-01-30",
+              details: {
+                previousValue: "$12,500,000",
+                newValue: "$12,485,320",
+                source: "Automated sync",
+                variance: "-0.12%"
+              }
+            },
+            {
+              id: 2,
+              type: "document_upload",
+              actor: "System",
+              action: "extracted data from",
+              target: "Q4_2024_Loan_Statement.pdf",
+              objectType: "document",
+              timestamp: "1 week ago",
+              date: "2025-01-23",
+              details: {
+                fieldsExtracted: ["Prepayment Penalty"],
+                extractionMethod: "Manual upload",
+                confidence: "verified"
+              }
+            },
+            {
+              id: 3,
+              type: "conflict_detected",
+              actor: "System",
+              action: "detected conflict in",
+              target: "Current Balance",
+              objectType: "field",
+              timestamp: "4 days ago",
+              date: "2025-01-26",
+              details: {
+                conflictingSources: ["Addepar", "Northern Trust", "NetSuite"],
+                status: "Pending review",
+                variance: "3 systems reporting different values"
+              }
+            }
+          ]}
+          showHeader={false}
+        />
+      </div>
+
+      {/* Connected Data Sources - Moved to bottom */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {externalDataSources.map((source) => (
+            <Card key={source.id} className="p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-medium text-sm">{source.name}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">{source.type}</p>
+                  <p className="text-xs text-muted-foreground mt-2">Last sync: {source.lastSync}</p>
                 </div>
+                <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
+                  {source.status}
+                </Badge>
               </div>
-              <div className="p-3 flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5"></div>
-                <div className="flex-1">
-                  <p className="text-sm">New fields extracted from Q4 statement</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Added Prepayment Penalty • 1 week ago • Manual upload
-                  </p>
-                </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{source.fields.length} fields</span>
+                <Button variant="ghost" size="sm" className="h-7 text-xs">
+                  Sync Now
+                </Button>
               </div>
-              <div className="p-3 flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-yellow-500 mt-1.5"></div>
-                <div className="flex-1">
-                  <p className="text-sm">Conflict detected in Current Balance</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    3 systems reporting different values • 4 days ago • Pending review
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   )

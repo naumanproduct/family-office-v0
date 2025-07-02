@@ -242,7 +242,7 @@ export function UnifiedDetailsPanel({
         )}
 
         {/* Activity Section */}
-        {activityContent && (
+        {activityContent && !isFullScreen && (
           <div className="mt-8 -mx-6 border-t bg-background">
             <div className="px-6 py-4">
               {activityContent}

@@ -1035,30 +1035,45 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
 
   return (
     <div className="space-y-6">
-      {/* Data Sources Overview */}
+      {/* Data Quality Insights - Moved to top */}
       <div>
-        <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {externalDataSources.map((source) => (
-            <Card key={source.id} className="p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="font-medium text-sm">{source.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{source.type}</p>
-                  <p className="text-xs text-muted-foreground mt-2">Last sync: {source.lastSync}</p>
-                </div>
-                <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
-                  {source.status}
-                </Badge>
+        <h3 className="text-sm font-medium mb-3">Data Quality Insights</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                <span className="text-green-600 text-sm font-medium">88%</span>
               </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">{source.fields.length} fields</span>
-                <Button variant="ghost" size="sm" className="h-7 text-xs">
-                  Sync Now
-                </Button>
+              <span className="text-sm font-medium">Data Completeness</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Most required fields have recent values
+            </p>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                <span className="text-yellow-600 text-sm font-medium">1</span>
               </div>
-            </Card>
-          ))}
+              <span className="text-sm font-medium">Active Conflicts</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Current Value varies by 0.23% across systems
+            </p>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="text-blue-600 text-sm font-medium">30d</span>
+              </div>
+              <span className="text-sm font-medium">NAV Age</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Last official NAV from Q4 2024 statement
+            </p>
+          </Card>
         </div>
       </div>
 
@@ -1166,49 +1181,7 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
         </Card>
       </div>
 
-      {/* Data Quality Insights */}
-      <div>
-        <h3 className="text-sm font-medium mb-3">Data Quality Insights</h3>
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                <span className="text-green-600 text-sm font-medium">88%</span>
-              </div>
-              <span className="text-sm font-medium">Data Completeness</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Most required fields have recent values
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                <span className="text-yellow-600 text-sm font-medium">1</span>
-              </div>
-              <span className="text-sm font-medium">Active Conflicts</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Current Value varies by 0.23% across systems
-            </p>
-          </Card>
-          
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-blue-600 text-sm font-medium">30d</span>
-              </div>
-              <span className="text-sm font-medium">NAV Age</span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Last official NAV from Q4 2024 statement
-            </p>
-          </Card>
-        </div>
-      </div>
-
-      {/* Audit Trail */}
+      {/* Recent Data Changes - Styled like Activity feed */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium">Recent Data Changes</h3>
@@ -1216,39 +1189,84 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
             View full audit log
           </Button>
         </div>
-        <Card>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              <div className="p-3 flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5"></div>
-                <div className="flex-1">
-                  <p className="text-sm">Current Value updated from Addepar</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    $22,200,000 → $22,150,000 • 2 hours ago • Automated sync
-                  </p>
+        <UnifiedActivitySection 
+          activities={[
+            {
+              id: 1,
+              type: "data_sync",
+              actor: "Addepar",
+              action: "updated",
+              target: "Current Value",
+              objectType: "field",
+              timestamp: "2 hours ago",
+              date: "2025-01-30",
+              details: {
+                previousValue: "$22,200,000",
+                newValue: "$22,150,000",
+                source: "Automated sync",
+                variance: "-0.23%"
+              }
+            },
+            {
+              id: 2,
+              type: "document_upload",
+              actor: "System",
+              action: "processed",
+              target: "Q4 2024 statement",
+              objectType: "document",
+              timestamp: "1 week ago",
+              date: "2025-01-23",
+              details: {
+                fieldsUpdated: ["NAV", "Unfunded Commitment"],
+                extractionMethod: "Document upload",
+                confidence: "verified"
+              }
+            },
+            {
+              id: 3,
+              type: "calculation",
+              actor: "System",
+              action: "recalculated",
+              target: "IRR and Multiple",
+              objectType: "metrics",
+              timestamp: "2 hours ago",
+              date: "2025-01-30",
+              details: {
+                calculationMethod: "Based on latest cash flows",
+                newIRR: "18.5%",
+                newMultiple: "2.48x"
+              }
+            }
+          ]}
+          showHeader={false}
+        />
+      </div>
+
+      {/* Connected Data Sources - Moved to bottom */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {externalDataSources.map((source) => (
+            <Card key={source.id} className="p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-medium text-sm">{source.name}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">{source.type}</p>
+                  <p className="text-xs text-muted-foreground mt-2">Last sync: {source.lastSync}</p>
                 </div>
+                <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
+                  {source.status}
+                </Badge>
               </div>
-              <div className="p-3 flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5"></div>
-                <div className="flex-1">
-                  <p className="text-sm">Q4 2024 statement processed</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Updated NAV, Unfunded Commitment • 1 week ago • Document upload
-                  </p>
-                </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{source.fields.length} fields</span>
+                <Button variant="ghost" size="sm" className="h-7 text-xs">
+                  Sync Now
+                </Button>
               </div>
-              <div className="p-3 flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-purple-500 mt-1.5"></div>
-                <div className="flex-1">
-                  <p className="text-sm">IRR and Multiple recalculated</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Based on latest cash flows • 2 hours ago • System calculation
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   )
