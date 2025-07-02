@@ -128,7 +128,7 @@ export default function NotesClientPage() {
             </div>
 
             {/* Full Screen Content - Two Column Layout */}
-            <div className="flex h-[calc(100%-73px)]">
+            <div className="flex h-[calc(100%-73px)] relative z-[2]">
               {/* Left Panel - Details (Persistent) */}
               <div className="w-[672px] border-r bg-background overflow-y-auto">
                 {/* Record Header - no bottom border to align with tab line */}
