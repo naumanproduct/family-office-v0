@@ -192,12 +192,12 @@ const getStatusColor = (status: string) => {
 function LiabilityNameCell({ liability }: { liability: Liability }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
+    { id: "external-data", label: "External Data", count: null, icon: FolderIcon },
     { id: "notes", label: "Notes", count: 1, icon: FileIcon },
     { id: "files", label: "Files", count: 1, icon: FileTextIcon },
     { id: "tasks", label: "Tasks", count: 2, icon: ClockIcon },
     { id: "emails", label: "Emails", count: 1, icon: MailIcon },
     { id: "meetings", label: "Meetings", count: 1, icon: UsersIcon },
-    { id: "performance", label: "Performance", count: null, icon: TrendingUpIcon },
     { id: "company", label: "Company", count: null, icon: BuildingIcon },
   ]
 
@@ -217,8 +217,8 @@ function LiabilityNameCell({ liability }: { liability: Liability }) {
       return <LiabilityCompanyContent liability={liability} />
     }
 
-    if (activeTab === "performance") {
-      return <LiabilityPerformanceContent liability={liability} />
+    if (activeTab === "external-data") {
+      return <LiabilityExternalDataContent liability={liability} isFullScreen={false} />
     }
 
     // For other tabs, use TabContentRenderer instead of custom implementations
@@ -228,7 +228,7 @@ function LiabilityNameCell({ liability }: { liability: Liability }) {
     const customTabRenderers = {
       details: (isFullScreen = false) => <LiabilityDetailsPanel liability={liability} isFullScreen={isFullScreen} />,
       company: (isFullScreen = false) => <LiabilityCompanyContent liability={liability} />,
-      performance: (isFullScreen = false) => <LiabilityPerformanceContent liability={liability} />,
+      "external-data": (isFullScreen = false) => <LiabilityExternalDataContent liability={liability} isFullScreen={isFullScreen} />,
     }
 
     // Create a handler for "add" actions for empty states
@@ -865,57 +865,436 @@ function LiabilityCompanyContent({ liability }: { liability: Liability }) {
   )
 }
 
-function LiabilityPerformanceContent({ liability }: { liability: Liability }) {
+function LiabilityExternalDataContent({ liability, isFullScreen = false }: { liability: Liability; isFullScreen?: boolean }) {
+  // Mock external data sources - in production, this would come from your data layer
+  const externalDataSources = [
+    {
+      id: "addepar",
+      name: "Addepar",
+      type: "Portfolio Management",
+      lastSync: "2 hours ago",
+      status: "synced",
+      fields: [
+        { 
+          fieldName: "Current Balance", 
+          value: "$12,485,320", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "high",
+          variance: "-0.12%",
+          variantFromInternal: "$14,680"
+        },
+        { 
+          fieldName: "Interest Rate", 
+          value: "4.25%", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "high",
+          variance: "0%",
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Next Payment Date", 
+          value: "2024-08-15", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Payment Amount", 
+          value: "$44,270", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "netsuite",
+      name: "NetSuite",
+      type: "Accounting",
+      lastSync: "Yesterday",
+      status: "synced",
+      fields: [
+        { 
+          fieldName: "Current Balance", 
+          value: "$12,500,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Interest Expense YTD", 
+          value: "$318,750", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Principal Payments YTD", 
+          value: "$1,800,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Accrued Interest", 
+          value: "$14,680", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "northern-trust",
+      name: "Northern Trust",
+      type: "Custodian",
+      lastSync: "4 days ago",
+      status: "pending",
+      fields: [
+        { 
+          fieldName: "Current Balance", 
+          value: "$12,520,000", 
+          lastUpdated: "2025-01-26 09:00:00",
+          confidence: "medium",
+          variance: "+0.16%",
+          variantFromInternal: "$20,000"
+        },
+        { 
+          fieldName: "Collateral Value", 
+          value: "$45,200,000", 
+          lastUpdated: "2025-01-26 09:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "LTV Ratio", 
+          value: "27.7%", 
+          lastUpdated: "2025-01-26 09:00:00",
+          confidence: "calculated",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "pdf-extract",
+      name: "Loan Statement (PDF)",
+      type: "Document Extract",
+      lastSync: "1 week ago",
+      status: "manual",
+      fields: [
+        { 
+          fieldName: "Current Balance", 
+          value: "$12,500,000", 
+          lastUpdated: "2025-01-23 10:30:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "Q4_2024_Loan_Statement.pdf",
+          pageNumber: 2
+        },
+        { 
+          fieldName: "Prepayment Penalty", 
+          value: "2% of outstanding", 
+          lastUpdated: "2025-01-23 10:30:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "Q4_2024_Loan_Statement.pdf",
+          pageNumber: 5
+        }
+      ]
+    }
+  ]
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "synced":
+        return "default"
+      case "pending":
+        return "secondary"
+      case "error":
+        return "destructive"
+      case "manual":
+        return "outline"
+      default:
+        return "outline"
+    }
+  }
+
+  const getConfidenceBadge = (confidence: string) => {
+    switch (confidence) {
+      case "high":
+        return <Badge variant="outline" className="text-green-600 border-green-200">High Confidence</Badge>
+      case "medium":
+        return <Badge variant="outline" className="text-yellow-600 border-yellow-200">Medium Confidence</Badge>
+      case "low":
+        return <Badge variant="outline" className="text-red-600 border-red-200">Low Confidence</Badge>
+      case "verified":
+        return <Badge variant="outline" className="text-blue-600 border-blue-200">Verified</Badge>
+      case "calculated":
+        return <Badge variant="outline" className="text-purple-600 border-purple-200">Calculated</Badge>
+      default:
+        return null
+    }
+  }
+
+  // Group fields by field name to show conflicts
+  const fieldComparison = React.useMemo(() => {
+    const comparison: Record<string, Array<{
+      source: string
+      sourceType: string
+      value: string
+      lastUpdated: string
+      confidence: string
+      variance?: string
+      documentName?: string
+      pageNumber?: number
+    }>> = {}
+
+    externalDataSources.forEach(source => {
+      source.fields.forEach((field: any) => {
+        if (!comparison[field.fieldName]) {
+          comparison[field.fieldName] = []
+        }
+        comparison[field.fieldName].push({
+          source: source.name,
+          sourceType: source.type,
+          value: field.value,
+          lastUpdated: field.lastUpdated,
+          confidence: field.confidence,
+          variance: field.variance,
+          documentName: field.documentName,
+          pageNumber: field.pageNumber
+        })
+      })
+    })
+
+    return comparison
+  }, [externalDataSources])
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-end">
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            1Y
-          </Button>
-          <Button variant="outline" size="sm">
-            3Y
-          </Button>
-          <Button variant="outline" size="sm">
-            5Y
-          </Button>
-          <Button variant="outline" size="sm">
-            All
-          </Button>
+    <div className="space-y-6">
+      {/* Data Sources Overview */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {externalDataSources.map((source) => (
+            <Card key={source.id} className="p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-medium text-sm">{source.name}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">{source.type}</p>
+                  <p className="text-xs text-muted-foreground mt-2">Last sync: {source.lastSync}</p>
+                </div>
+                <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
+                  {source.status}
+                </Badge>
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{source.fields.length} fields</span>
+                <Button variant="ghost" size="sm" className="h-7 text-xs">
+                  Sync Now
+                </Button>
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
-      <Card>
-        <CardContent className="p-6">
-          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-            Payment history chart would appear here
+
+      {/* Field Comparison Table */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium">Field Comparison</h3>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              <div className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></div>
+              Conflicts: 1
+            </Badge>
+            <Button variant="outline" size="sm" className="h-7 text-xs">
+              Export Report
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-      <div className="grid grid-cols-3 gap-4">
+        </div>
+        
         <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Principal Paid</div>
-            <div className="text-2xl font-semibold">
-              $
-              {Math.round(
-                (Number.parseFloat(liability.originalAmount.replace(/[^0-9.]/g, "")) -
-                  Number.parseFloat(liability.currentBalance.replace(/[^0-9.]/g, ""))) /
-                  1000,
-              )}
-              k
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">Field</TableHead>
+                <TableHead>Internal Value</TableHead>
+                <TableHead>External Values</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Object.entries(fieldComparison).map(([fieldName, sources]) => {
+                const hasConflict = sources.length > 1 && 
+                  new Set(sources.map(s => s.value)).size > 1
+
+                return (
+                  <TableRow key={fieldName} className={hasConflict ? "bg-yellow-50/50" : ""}>
+                    <TableCell className="font-medium text-sm">
+                      <div className="flex items-center gap-2">
+                        {fieldName}
+                        {hasConflict && (
+                          <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-200">
+                            Conflict
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {/* Show internal value - in this mock, we use the liability data */}
+                      {fieldName === "Current Balance" && liability.currentBalance}
+                      {fieldName === "Interest Rate" && liability.interestRate}
+                      {fieldName === "Next Payment Date" && liability.nextPayment}
+                      {fieldName === "Payment Amount" && liability.paymentAmount}
+                      {!["Current Balance", "Interest Rate", "Next Payment Date", "Payment Amount"].includes(fieldName) && "—"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2">
+                        {sources.map((source, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">{source.value}</span>
+                                {source.variance && (
+                                  <span className="text-xs text-muted-foreground">
+                                    ({source.variance})
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-muted-foreground">
+                                  {source.source} • {new Date(source.lastUpdated).toLocaleDateString()}
+                                </span>
+                                {getConfidenceBadge(source.confidence)}
+                              </div>
+                              {source.documentName && (
+                                <div className="mt-1">
+                                  <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+                                    View in {source.documentName} (p.{source.pageNumber})
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <MoreVerticalIcon className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>Accept external value</DropdownMenuItem>
+                          <DropdownMenuItem>Keep internal value</DropdownMenuItem>
+                          <DropdownMenuItem>View history</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>Flag for review</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
+
+      {/* Data Quality Insights */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Data Quality Insights</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                <span className="text-green-600 text-sm font-medium">92%</span>
+              </div>
+              <span className="text-sm font-medium">Data Completeness</span>
             </div>
-          </CardContent>
-        </Card>
+            <p className="text-xs text-muted-foreground">
+              Most required fields have values from at least one source
+            </p>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                <span className="text-yellow-600 text-sm font-medium">1</span>
+              </div>
+              <span className="text-sm font-medium">Active Conflicts</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Current Balance shows variance across systems
+            </p>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="text-blue-600 text-sm font-medium">4d</span>
+              </div>
+              <span className="text-sm font-medium">Average Data Age</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Consider refreshing Northern Trust connection
+            </p>
+          </Card>
+        </div>
+      </div>
+
+      {/* Audit Trail */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium">Recent Data Changes</h3>
+          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+            View full audit log
+          </Button>
+        </div>
         <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Interest Paid YTD</div>
-            <div className="text-2xl font-semibold">$12.4k</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Payoff Progress</div>
-            <div className="text-2xl font-semibold">42%</div>
+          <CardContent className="p-0">
+            <div className="divide-y">
+              <div className="p-3 flex items-start gap-3">
+                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5"></div>
+                <div className="flex-1">
+                  <p className="text-sm">Current Balance updated from Addepar</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    $12,500,000 → $12,485,320 • 2 hours ago • Automated sync
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 flex items-start gap-3">
+                <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5"></div>
+                <div className="flex-1">
+                  <p className="text-sm">New fields extracted from Q4 statement</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Added Prepayment Penalty • 1 week ago • Manual upload
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 flex items-start gap-3">
+                <div className="h-2 w-2 rounded-full bg-yellow-500 mt-1.5"></div>
+                <div className="flex-1">
+                  <p className="text-sm">Conflict detected in Current Balance</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    3 systems reporting different values • 4 days ago • Pending review
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

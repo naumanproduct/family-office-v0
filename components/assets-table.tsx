@@ -48,6 +48,8 @@ import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
 import { UnifiedActivitySection, type ActivityItem } from "@/components/shared/unified-activity-section"
 import { generateInvestmentActivities } from "@/components/shared/activity-generators"
+import { Card, CardContent } from "@/components/ui/card"
+import { MoreVerticalIcon } from "lucide-react"
 
 export const assetSchema = z.object({
   id: z.number(),
@@ -179,12 +181,13 @@ interface AssetsTableProps {
 function AssetNameCell({ asset }: { asset: Asset }) {
   const tabs = [
     { id: "details", label: "Details", count: null, icon: FileTextIcon },
-    { id: "notes", label: "Notes", count: 1, icon: FileIcon },
-    { id: "files", label: "Files", count: 4, icon: FileTextIcon },
-    { id: "tasks", label: "Tasks", count: 3, icon: CheckCircleIcon },
-    { id: "emails", label: "Emails", count: 2, icon: MailIcon },
+    { id: "external-data", label: "External Data", count: null, icon: FolderIcon },
+    { id: "notes", label: "Notes", count: 3, icon: FileIcon },
+    { id: "files", label: "Files", count: 1, icon: FileTextIcon },
+    { id: "tasks", label: "Tasks", count: 1, icon: CheckCircleIcon },
+    { id: "emails", label: "Emails", count: 1, icon: MailIcon },
     { id: "meetings", label: "Meetings", count: 1, icon: CalendarIcon },
-    { id: "team", label: "People", count: 2, icon: UsersIcon },
+    { id: "team", label: "Team", count: 1, icon: UsersIcon },
   ]
 
   const getAssetTabData = (activeTab: string) => {
@@ -386,9 +389,37 @@ Recommendation: PROCEED with $15M investment at $450M pre-money valuation.` },
     if (activeTab === "details") {
       return <AssetDetailsPanel asset={asset} isFullScreen={false} />
     }
+    
+    if (activeTab === "external-data") {
+      return <AssetExternalDataContent asset={asset} />
+    }
+    
     const data = getAssetTabData(activeTab)
+    
+    // Create custom tab renderers for special tabs
+    const customTabRenderers = {
+      details: (isFullScreen = false) => <AssetDetailsPanel asset={asset} isFullScreen={isFullScreen} />,
+      "external-data": (isFullScreen = false) => <AssetExternalDataContent asset={asset} isFullScreen={isFullScreen} />,
+    }
+    
+    // Create a handler for "add" actions for empty states
+    const handleAdd = () => {
+      console.log(`Add new ${activeTab.slice(0, -1)} for ${asset.name}`)
+      // In a real implementation, this would open the appropriate modal or form
+    }
+    
     return (
-      <TabContentRenderer activeTab={activeTab} viewMode={viewMode} data={data} onTaskClick={setSelectedTask} onNoteClick={setSelectedNote} onMeetingClick={setSelectedMeeting} onEmailClick={setSelectedEmail} />
+      <TabContentRenderer 
+        activeTab={activeTab} 
+        viewMode={viewMode} 
+        data={data} 
+        customTabRenderers={customTabRenderers}
+        onTaskClick={setSelectedTask} 
+        onNoteClick={setSelectedNote} 
+        onMeetingClick={setSelectedMeeting} 
+        onEmailClick={setSelectedEmail}
+        onAdd={handleAdd}
+      />
     )
   }
 
@@ -782,5 +813,443 @@ function AssetDetailsPanel({ asset, isFullScreen = false }: { asset: Asset; isFu
       onUnlinkRecord={handleUnlinkRecord}
       activityContent={<UnifiedActivitySection activities={activities} />}
     />
+  )
+}
+
+function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asset; isFullScreen?: boolean }) {
+  // Mock external data sources for assets - in production, this would come from your data layer
+  const externalDataSources = [
+    {
+      id: "addepar",
+      name: "Addepar",
+      type: "Portfolio Management",
+      lastSync: "2 hours ago",
+      status: "synced",
+      fields: [
+        { 
+          fieldName: "Current Value", 
+          value: "$22,150,000", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "high",
+          variance: "-0.23%",
+          variantFromInternal: "$50,000"
+        },
+        { 
+          fieldName: "Unrealized Gain", 
+          value: "$7,150,000", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "IRR", 
+          value: "18.5%", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "calculated",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Multiple", 
+          value: "2.48x", 
+          lastUpdated: "2025-01-30 14:23:00",
+          confidence: "calculated",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "netsuite",
+      name: "NetSuite",
+      type: "Accounting",
+      lastSync: "Yesterday",
+      status: "synced",
+      fields: [
+        { 
+          fieldName: "Current Value", 
+          value: "$22,200,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: "+0.23%",
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Cost Basis", 
+          value: "$15,000,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Distributions YTD", 
+          value: "$850,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        },
+        { 
+          fieldName: "Capital Calls YTD", 
+          value: "$2,100,000", 
+          lastUpdated: "2025-01-29 18:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "northern-trust",
+      name: "Northern Trust",
+      type: "Custodian",
+      lastSync: "4 days ago",
+      status: "pending",
+      fields: [
+        { 
+          fieldName: "Current Value", 
+          value: "$22,180,000", 
+          lastUpdated: "2025-01-26 09:00:00",
+          confidence: "medium",
+          variance: "+0.14%",
+          variantFromInternal: "$30,000"
+        },
+        { 
+          fieldName: "Account Balance", 
+          value: "$22,180,000", 
+          lastUpdated: "2025-01-26 09:00:00",
+          confidence: "high",
+          variance: undefined,
+          variantFromInternal: undefined
+        }
+      ]
+    },
+    {
+      id: "fund-admin",
+      name: "Fund Administrator",
+      type: "Fund Admin Portal",
+      lastSync: "1 week ago",
+      status: "manual",
+      fields: [
+        { 
+          fieldName: "NAV", 
+          value: "$22,200,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "Q4_2024_Capital_Account_Statement.pdf",
+          pageNumber: 1
+        },
+        { 
+          fieldName: "Unfunded Commitment", 
+          value: "$10,000,000", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "Q4_2024_Capital_Account_Statement.pdf",
+          pageNumber: 1
+        },
+        { 
+          fieldName: "Partnership %", 
+          value: "12.5%", 
+          lastUpdated: "2024-12-31 00:00:00",
+          confidence: "verified",
+          variance: undefined,
+          variantFromInternal: undefined,
+          documentName: "Q4_2024_Capital_Account_Statement.pdf",
+          pageNumber: 2
+        }
+      ]
+    }
+  ]
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "synced":
+        return "default"
+      case "pending":
+        return "secondary"
+      case "error":
+        return "destructive"
+      case "manual":
+        return "outline"
+      default:
+        return "outline"
+    }
+  }
+
+  const getConfidenceBadge = (confidence: string) => {
+    switch (confidence) {
+      case "high":
+        return <Badge variant="outline" className="text-green-600 border-green-200">High Confidence</Badge>
+      case "medium":
+        return <Badge variant="outline" className="text-yellow-600 border-yellow-200">Medium Confidence</Badge>
+      case "low":
+        return <Badge variant="outline" className="text-red-600 border-red-200">Low Confidence</Badge>
+      case "verified":
+        return <Badge variant="outline" className="text-blue-600 border-blue-200">Verified</Badge>
+      case "calculated":
+        return <Badge variant="outline" className="text-purple-600 border-purple-200">Calculated</Badge>
+      default:
+        return null
+    }
+  }
+
+  // Group fields by field name to show conflicts
+  const fieldComparison = React.useMemo(() => {
+    const comparison: Record<string, Array<{
+      source: string
+      sourceType: string
+      value: string
+      lastUpdated: string
+      confidence: string
+      variance?: string
+      documentName?: string
+      pageNumber?: number
+    }>> = {}
+
+    externalDataSources.forEach(source => {
+      source.fields.forEach((field: any) => {
+        if (!comparison[field.fieldName]) {
+          comparison[field.fieldName] = []
+        }
+        comparison[field.fieldName].push({
+          source: source.name,
+          sourceType: source.type,
+          value: field.value,
+          lastUpdated: field.lastUpdated,
+          confidence: field.confidence,
+          variance: field.variance,
+          documentName: field.documentName,
+          pageNumber: field.pageNumber
+        })
+      })
+    })
+
+    return comparison
+  }, [externalDataSources])
+
+  return (
+    <div className="space-y-6">
+      {/* Data Sources Overview */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Connected Data Sources</h3>
+        <div className="grid grid-cols-2 gap-3">
+          {externalDataSources.map((source) => (
+            <Card key={source.id} className="p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-medium text-sm">{source.name}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">{source.type}</p>
+                  <p className="text-xs text-muted-foreground mt-2">Last sync: {source.lastSync}</p>
+                </div>
+                <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
+                  {source.status}
+                </Badge>
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{source.fields.length} fields</span>
+                <Button variant="ghost" size="sm" className="h-7 text-xs">
+                  Sync Now
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Field Comparison Table */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium">Field Comparison</h3>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              <div className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></div>
+              Conflicts: 1
+            </Badge>
+            <Button variant="outline" size="sm" className="h-7 text-xs">
+              Export Report
+            </Button>
+          </div>
+        </div>
+        
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">Field</TableHead>
+                <TableHead>Internal Value</TableHead>
+                <TableHead>External Values</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Object.entries(fieldComparison).map(([fieldName, sources]) => {
+                const hasConflict = sources.length > 1 && 
+                  new Set(sources.map(s => s.value)).size > 1
+
+                return (
+                  <TableRow key={fieldName} className={hasConflict ? "bg-yellow-50/50" : ""}>
+                    <TableCell className="font-medium text-sm">
+                      <div className="flex items-center gap-2">
+                        {fieldName}
+                        {hasConflict && (
+                          <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-200">
+                            Conflict
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {/* Show internal value - in this mock, we use the asset data */}
+                      {fieldName === "Current Value" && asset.currentValue}
+                      {fieldName === "Cost Basis" && asset.originalCost}
+                      {fieldName === "Unrealized Gain" && asset.unrealizedGain}
+                      {!["Current Value", "Cost Basis", "Unrealized Gain"].includes(fieldName) && "—"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2">
+                        {sources.map((source, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">{source.value}</span>
+                                {source.variance && (
+                                  <span className="text-xs text-muted-foreground">
+                                    ({source.variance})
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-muted-foreground">
+                                  {source.source} • {new Date(source.lastUpdated).toLocaleDateString()}
+                                </span>
+                                {getConfidenceBadge(source.confidence)}
+                              </div>
+                              {source.documentName && (
+                                <div className="mt-1">
+                                  <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+                                    View in {source.documentName} (p.{source.pageNumber})
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <MoreVerticalIcon className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>Accept external value</DropdownMenuItem>
+                          <DropdownMenuItem>Keep internal value</DropdownMenuItem>
+                          <DropdownMenuItem>View history</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>Flag for review</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
+
+      {/* Data Quality Insights */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Data Quality Insights</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                <span className="text-green-600 text-sm font-medium">88%</span>
+              </div>
+              <span className="text-sm font-medium">Data Completeness</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Most required fields have recent values
+            </p>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                <span className="text-yellow-600 text-sm font-medium">1</span>
+              </div>
+              <span className="text-sm font-medium">Active Conflicts</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Current Value varies by 0.23% across systems
+            </p>
+          </Card>
+          
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="text-blue-600 text-sm font-medium">30d</span>
+              </div>
+              <span className="text-sm font-medium">NAV Age</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Last official NAV from Q4 2024 statement
+            </p>
+          </Card>
+        </div>
+      </div>
+
+      {/* Audit Trail */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium">Recent Data Changes</h3>
+          <Button variant="link" className="h-auto p-0 text-xs text-blue-600">
+            View full audit log
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="p-0">
+            <div className="divide-y">
+              <div className="p-3 flex items-start gap-3">
+                <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5"></div>
+                <div className="flex-1">
+                  <p className="text-sm">Current Value updated from Addepar</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    $22,200,000 → $22,150,000 • 2 hours ago • Automated sync
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 flex items-start gap-3">
+                <div className="h-2 w-2 rounded-full bg-green-500 mt-1.5"></div>
+                <div className="flex-1">
+                  <p className="text-sm">Q4 2024 statement processed</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Updated NAV, Unfunded Commitment • 1 week ago • Document upload
+                  </p>
+                </div>
+              </div>
+              <div className="p-3 flex items-start gap-3">
+                <div className="h-2 w-2 rounded-full bg-purple-500 mt-1.5"></div>
+                <div className="flex-1">
+                  <p className="text-sm">IRR and Multiple recalculated</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Based on latest cash flows • 2 hours ago • System calculation
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   )
 }
