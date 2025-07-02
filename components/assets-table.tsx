@@ -1266,7 +1266,15 @@ function AssetExternalDataContent({ asset, isFullScreen = false }: { asset: Asse
                 }
               }
             ]}
-            showHeader={false}
+            showHeader={true}
+            customFilterOptions={[
+              { value: "all", label: "All Changes" },
+              { value: "data_sync", label: "Updated" },
+              { value: "document_upload", label: "Processed" },
+              { value: "calculation", label: "Recalculated" },
+              { value: "conflict_detected", label: "Conflicts" },
+              { value: "sync", label: "Synced" }
+            ]}
           />
         </div>
       </div>

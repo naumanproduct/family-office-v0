@@ -42,31 +42,47 @@ interface UnifiedActivitySectionProps {
   comments?: ActivityItem[]
   showHeader?: boolean
   onCommentSubmit?: (comment: string) => void
+  customFilterOptions?: Array<{ value: string; label: string }>
 }
 
 export function UnifiedActivitySection({ 
   activities, 
   comments = [],
   showHeader = true,
-  onCommentSubmit
+  onCommentSubmit,
+  customFilterOptions
 }: UnifiedActivitySectionProps) {
-  const [activityFilter, setActivityFilter] = React.useState<"all" | "comments">("all")
+  const [activityFilter, setActivityFilter] = React.useState<string>("all")
   const [commentText, setCommentText] = React.useState("")
   const [isCommentExpanded, setIsCommentExpanded] = React.useState(false)
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+
+  // Use custom filter options if provided, otherwise use default
+  const filterOptions = customFilterOptions || [
+    { value: "all", label: "All Activity" },
+    { value: "comments", label: "Comments" }
+  ]
+
+  // Get the current filter label
+  const currentFilterLabel = filterOptions.find(option => option.value === activityFilter)?.label || "All Activity"
 
   // Combine activities and comments if showing all
   const displayedActivities = React.useMemo(() => {
     if (activityFilter === "comments") {
       return comments
     }
-    // For "all", show both activities and comments, sorted by date
-    const allItems = [...activities, ...comments]
-    return allItems.sort((a, b) => {
-      const dateA = new Date(a.date || a.timestamp).getTime()
-      const dateB = new Date(b.date || b.timestamp).getTime()
-      return dateB - dateA // Most recent first
-    })
+    if (activityFilter === "all") {
+      // For "all", show both activities and comments, sorted by date
+      const allItems = [...activities, ...comments]
+      return allItems.sort((a, b) => {
+        const dateA = new Date(a.date || a.timestamp).getTime()
+        const dateB = new Date(b.date || b.timestamp).getTime()
+        return dateB - dateA // Most recent first
+      })
+    }
+    
+    // For custom filters, filter activities by type
+    return activities.filter(activity => activity.type === activityFilter)
   }, [activities, comments, activityFilter])
 
   const getInitials = (name: string) => {
@@ -175,16 +191,15 @@ export function UnifiedActivitySection({
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 px-2">
                 <ChevronDownIcon className="h-4 w-4 mr-1" />
-                {activityFilter === "all" ? "All Activity" : "Comments"}
+                {currentFilterLabel}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => setActivityFilter("all")}>
-                All Activity
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActivityFilter("comments")}>
-                Comments
-              </DropdownMenuItem>
+              {filterOptions.map((option) => (
+                <DropdownMenuItem key={option.value} onClick={() => setActivityFilter(option.value)}>
+                  {option.label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -1314,7 +1314,15 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                 }
               }
             ]}
-            showHeader={false}
+            showHeader={true}
+            customFilterOptions={[
+              { value: "all", label: "All Changes" },
+              { value: "data_sync", label: "Updated" },
+              { value: "document_upload", label: "Processed" },
+              { value: "conflict_detected", label: "Conflicts" },
+              { value: "calculation", label: "Recalculated" },
+              { value: "sync", label: "Synced" }
+            ]}
           />
         </div>
       </div>
