@@ -409,13 +409,8 @@ export function MasterDrawer({
         }} />
         
         <div className="fixed inset-4 z-[9999] bg-background rounded-xl shadow-xl overflow-hidden">
-          {/* Add blur overlay when any drawer is open in fullscreen mode */}
-          {(fullscreenSelectedTask || fullscreenSelectedNote || fullscreenSelectedMeeting || fullscreenSelectedEmail || fullscreenSelectedSubtask) && (
-            <div className="absolute inset-0 z-[1] bg-black/20 backdrop-blur-sm" />
-          )}
-          
           {/* Full Screen Header */}
-          <div className="flex items-center justify-between border-b bg-muted px-6 py-4 relative z-[2]">
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
@@ -461,7 +456,7 @@ export function MasterDrawer({
           </div>
 
           {/* Full Screen Content - Two Column Layout */}
-          <div className="flex h-[calc(100%-73px)] relative z-[2]">
+          <div className="flex h-[calc(100%-73px)]">
             {/* Left Panel - Details (Persistent) */}
             <div className="w-[672px] border-r bg-background overflow-y-auto">
               {/* Record Header - Always show original record info in left panel (no bottom border to align with tab line) */}

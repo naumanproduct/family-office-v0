@@ -184,16 +184,8 @@ const fileFormFields: FormField[] = [
   {
     id: "description",
     label: "Description",
-    type: "textarea",
+    type: "text",
     placeholder: "Enter file description",
-    rows: 3,
-  },
-  {
-    id: "category",
-    label: "Category",
-    type: "select",
-    placeholder: "Select category",
-    options: ["Legal", "Financial", "Due Diligence", "Marketing", "Agreements", "Other"],
   },
   {
     id: "relatedInvestment",
@@ -216,31 +208,14 @@ const fileFormFields: FormField[] = [
     placeholder: "Select entity",
     options: mockEntities.map(e => ({ value: e.value, label: e.label })),
   },
-  {
-    id: "tags",
-    label: "Tags",
-    type: "text",
-    placeholder: "Enter tags separated by commas",
-  },
-  {
-    id: "status",
-    label: "Status",
-    type: "select",
-    placeholder: "Select status",
-    options: ["Draft", "Under Review", "Final", "Approved"],
-    defaultValue: "Draft",
-  },
 ]
 
 export interface FileFormData {
   name?: string;
   description?: string;
-  category?: string;
   relatedInvestment?: string;
   relatedOpportunity?: string;
   relatedEntity?: string;
-  tags?: string;
-  status?: string;
   files?: File[];
   file?: File | null;
   source?: string;
@@ -282,7 +257,7 @@ export function AddFileSheet({ open, onOpenChange, onSubmit }: AddFileSheetProps
   // Files table to display in form header
   const filesTableContent = (
     <div className="mb-6">
-      <h3 className="text-sm font-medium mb-2">Selected Files</h3>
+      <h3 className="text-sm font-medium mb-2">{selectedFiles.length} Files selected</h3>
       <SelectedFilesTable files={selectedFiles} onRemoveFile={handleRemoveFile} />
     </div>
   );

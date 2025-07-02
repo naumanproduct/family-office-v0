@@ -490,7 +490,7 @@ export function MasterCreationDialog({
                   Back
                 </Button>
                 <Button onClick={handleSave} disabled={!isFormValid()}>
-                  Create {recordType}
+                  {recordType === "File" ? "Upload" : `Create ${recordType}`}
                 </Button>
               </div>
             </div>
