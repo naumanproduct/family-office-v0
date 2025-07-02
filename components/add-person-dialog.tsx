@@ -164,6 +164,49 @@ const personFormFields = [
     placeholder: "Brief biography or notes",
     rows: 4,
   },
+  {
+    id: "status",
+    label: "Status",
+    type: "select" as const,
+    placeholder: "Select status",
+    options: ["Active", "Inactive", "Prospective"],
+  },
+  {
+    id: "lastInteraction",
+    label: "Last Interaction",
+    type: "date" as const,
+  },
+  {
+    id: "connectionStrength",
+    label: "Connection Strength",
+    type: "select" as const,
+    placeholder: "Select connection strength",
+    options: ["Strong", "Medium", "Weak"],
+  },
+  {
+    id: "associatedEntities",
+    label: "Associated Entities",
+    type: "text" as const,
+    placeholder: "Enter entities separated by commas",
+  },
+  {
+    id: "relatedInvestments",
+    label: "Related Investments",
+    type: "text" as const,
+    placeholder: "Enter investments separated by commas",
+  },
+  {
+    id: "internalOwner",
+    label: "Internal Owner",
+    type: "text" as const,
+    placeholder: "Enter internal owner name",
+  },
+  {
+    id: "introducedBy",
+    label: "Introduced By",
+    type: "text" as const,
+    placeholder: "Enter introducer name",
+  },
 ]
 
 interface AddPersonDialogProps {

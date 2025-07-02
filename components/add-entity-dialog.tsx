@@ -135,6 +135,17 @@ const formFields = [
     options: ["Active", "Inactive", "Dissolved"],
   },
   {
+    id: "managerController",
+    label: "Manager / Controller",
+    type: "text" as const,
+    placeholder: "Manager or controller name",
+  },
+  {
+    id: "dateFormed",
+    label: "Date Formed",
+    type: "date" as const,
+  },
+  {
     id: "ownershipPercent",
     label: "Ownership %",
     type: "number" as const,
@@ -149,21 +160,15 @@ const formFields = [
     placeholder: "Parent entity name",
   },
   {
-    id: "managerController",
-    label: "Manager / Controller",
-    type: "text" as const,
-    placeholder: "Manager or controller name",
-  },
-  {
-    id: "dateFormed",
-    label: "Date Formed",
+    id: "lastModified",
+    label: "Last Modified",
     type: "date" as const,
   },
   {
-    id: "tags",
-    label: "Tags",
+    id: "linkedDocuments",
+    label: "Linked Documents",
     type: "text" as const,
-    placeholder: "Taxable, Onshore, Offshore (comma separated)",
+    placeholder: "Enter document names separated by commas",
     gridCols: 2,
   },
   {
