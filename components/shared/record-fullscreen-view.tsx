@@ -141,7 +141,6 @@ export function RecordFullscreenView({
       baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })
       baseTabs.push({ id: "files", label: "Files", icon: FileIcon, count: null })
       baseTabs.push({ id: "tasks", label: "Tasks", icon: CheckCircleIcon, count: null })
-      baseTabs.push({ id: "emails", label: "Emails", icon: MailIcon, count: null })
     } else if (recordType === "Email") {
       baseTabs.push({ id: "threads", label: "Email Threads", icon: MessageSquareIcon, count: null })
       baseTabs.push({ id: "notes", label: "Notes", icon: FileTextIcon, count: null })

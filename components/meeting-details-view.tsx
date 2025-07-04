@@ -19,6 +19,9 @@ import {
   FileIcon,
   CheckCircleIcon,
   ChevronUp,
+  PlusIcon,
+  FolderIcon,
+  CheckSquareIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -29,6 +32,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { TypableArea } from "@/components/typable-area"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { ViewModeSelector } from "@/components/shared/view-mode-selector"
+import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
+import { formatDate } from "@/lib/utils"
+import { getContextualFiles } from "@/components/shared/file-content"
+import { TaskDetailsView } from "@/components/task-details-view"
+import { NoteDetailsView } from "@/components/note-details-view"
 
 interface MeetingDetailsViewProps {
   meeting: any
@@ -41,6 +51,14 @@ export function MeetingDetailsView({ meeting, onBack, isFullScreen = false }: Me
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState("details")
+  const [filesViewMode, setFilesViewMode] = React.useState<"table" | "card" | "list">("table")
+  const [tasksViewMode, setTasksViewMode] = React.useState<"table" | "card" | "list">(isFullScreen ? "table" : "list")
+  const [notesViewMode, setNotesViewMode] = React.useState<"table" | "card" | "list">("list")
+  
+  // Add state for selected items
+  const [selectedTask, setSelectedTask] = React.useState<any>(null)
+  const [selectedNote, setSelectedNote] = React.useState<any>(null)
+
   const [fieldValues, setFieldValues] = React.useState({
     description: meeting?.description || meeting?.agenda || "",
     location: meeting?.location || "",
@@ -94,9 +112,12 @@ Action Items:
 
 Next meeting scheduled for January 15, 2024.`)
   
-  // Define tabs - only Details tab for meetings
+  // Define tabs - add Notes, Files, Tasks tabs after Details
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "notes", label: "Notes", icon: FileIcon },
+    { id: "files", label: "Files", icon: FolderIcon },
+    { id: "tasks", label: "Tasks", icon: CheckSquareIcon },
   ]
   
   // State for which sections are open
@@ -250,164 +271,324 @@ Next meeting scheduled for January 15, 2024.`)
     ? allMeetingFields 
     : allMeetingFields.slice(0, 7)
 
+  // Mock data for tasks related to this meeting
+  const mockTasks = [
+    {
+      id: 1,
+      title: "Rebalance fixed income allocation",
+      status: "In Progress",
+      priority: "High",
+      assignee: "Sarah Johnson",
+      dueDate: "2023-12-31",
+      description: "Adjust portfolio to reach 20% fixed income target allocation"
+    },
+    {
+      id: 2,
+      title: "Complete FinTech due diligence",
+      status: "To Do",
+      priority: "High",
+      assignee: "Michael Chen",
+      dueDate: "2024-01-10",
+      description: "Full due diligence on Series B FinTech opportunity ($5M allocation)"
+    },
+    {
+      id: 3,
+      title: "Schedule tax advisor meeting",
+      status: "To Do",
+      priority: "Medium",
+      assignee: "John Smith",
+      dueDate: "2024-01-05",
+      description: "Arrange meeting to discuss year-end tax strategies"
+    },
+    {
+      id: 4,
+      title: "Update investment policy statement",
+      status: "To Do",
+      priority: "Medium",
+      assignee: "Sarah Johnson",
+      dueDate: "2024-01-15",
+      description: "Incorporate ESG criteria into investment policy"
+    }
+  ]
+
+  // Mock data for meeting notes
+  const mockNotes = [
+    {
+      id: 1,
+      title: "Q4 2023 Investment Review Meeting Notes",
+      content: meetingNotes,
+      author: "Sarah Johnson",
+      createdAt: meeting?.startTime || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      topic: "Quarterly Review"
+    },
+    {
+      id: 2,
+      title: "Action Items Follow-up",
+      content: "Follow-up notes on action items from the quarterly review meeting...",
+      author: "Michael Chen",
+      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+      topic: "Action Items"
+    }
+  ]
+
   return (
     <div className="flex flex-col flex-1">
-      {/* Meeting Header - Only show when not in fullscreen mode */}
-      {!isFullScreen && (
-        <div className="border-b bg-background px-6 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <CalendarIcon className="h-4 w-4" />
-            </div>
-            <div className="flex-1">
-              {isEditingTitle ? (
-                <Input
-                  value={meetingTitle}
-                  onChange={(e) => setMeetingTitle(e.target.value)}
-                  onBlur={() => setIsEditingTitle(false)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setIsEditingTitle(false)
-                    }
-                    if (e.key === "Escape") {
-                      setMeetingTitle(meeting.title || "")
-                      setIsEditingTitle(false)
-                    }
-                  }}
-                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                  autoFocus
-                />
-              ) : (
-                <h2
-                  className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
-                  onClick={() => setIsEditingTitle(true)}
-                >
-                  {meetingTitle || "Untitled"}
-                </h2>
-              )}
-            </div>
-          </div>
-        </div>
+      {/* If a task is selected, show task details */}
+      {selectedTask && (
+        <TaskDetailsView 
+          task={selectedTask} 
+          onBack={() => setSelectedTask(null)} 
+          recordName={meetingTitle}
+          recordType="Meeting"
+          isInDrawer={true}
+        />
       )}
-
-      {/* Tabs - hide in fullscreen to avoid duplication */}
-      {!isFullScreen && (
-        <div className="border-b bg-background px-6 py-1">
-          <div className="flex gap-6 overflow-x-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
-                    activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {tab.label}
-                  {activeTab === tab.id && (
-                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        </div>
+      
+      {/* If a note is selected, show note details */}
+      {selectedNote && (
+        <NoteDetailsView 
+          note={selectedNote} 
+          onBack={() => setSelectedNote(null)}
+          hideAddNotes={true}
+        />
       )}
-
-      {/* Content with expandable sections */}
-      <div className="p-6 space-y-4 overflow-y-auto">
-        {/* Meeting Details Section */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          <button
-            onClick={() => toggleSection('details')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-          >
-            {openSections.details ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Meeting Information</span>
-          </button>
-          
-          {openSections.details && (
-            <div className="px-4 pb-4 pt-1">
-              <div className="space-y-3">
-                {fieldsToShow.map((fieldConfig) => {
-                  const Icon = fieldConfig.icon
-                  return renderEditableField(
-                    fieldConfig.field,
-                    fieldValues[fieldConfig.field as keyof typeof fieldValues] as string,
-                    <Icon className="h-4 w-4 text-muted-foreground" />,
-                    fieldConfig.label,
-                    fieldConfig.isBadge || false,
-                    fieldConfig.isTextarea || false,
-                  )
-                })}
-                
-                {allMeetingFields.length > 7 && (
-                  <div className="flex items-center mt-2 ml-6">
-                    <button
-                      onClick={() => toggleShowAllValues('details')}
-                      className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+      
+      {/* Only show meeting content if nothing is selected */}
+      {!selectedTask && !selectedNote && (
+        <>
+          {/* Meeting Header - Only show when not in fullscreen mode */}
+          {!isFullScreen && (
+            <div className="border-b bg-background px-6 py-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <CalendarIcon className="h-4 w-4" />
+                </div>
+                <div className="flex-1">
+                  {isEditingTitle ? (
+                    <Input
+                      value={meetingTitle}
+                      onChange={(e) => setMeetingTitle(e.target.value)}
+                      onBlur={() => setIsEditingTitle(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setIsEditingTitle(false)
+                        }
+                        if (e.key === "Escape") {
+                          setMeetingTitle(meeting.title || "")
+                          setIsEditingTitle(false)
+                        }
+                      }}
+                      className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                      autoFocus
+                    />
+                  ) : (
+                    <h2
+                      className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
+                      onClick={() => setIsEditingTitle(true)}
                     >
-                      {showingAllValues.details ? (
-                        <>Show less <ChevronUp className="h-3 w-3" /></>
-                      ) : (
-                        <>Show more <ChevronDown className="h-3 w-3" /></>
-                      )}
-                    </button>
-                  </div>
-                )}
+                      {meetingTitle || "Untitled"}
+                    </h2>
+                  )}
+                </div>
               </div>
             </div>
           )}
-        </div>
 
-        {/* Meeting Notes Section */}
-        <div className="rounded-lg border border-muted overflow-hidden">
-          <button
-            onClick={() => toggleSection('notes')}
-            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-          >
-            {openSections.notes ? (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-            <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Meeting Notes</span>
-          </button>
-          
-          {openSections.notes && (
-            <div className="px-4 pb-4 pt-1">
-              <TypableArea
-                value={meetingNotes}
-                onChange={setMeetingNotes}
-                placeholder="Add meeting notes..."
-                showButtons={false}
-              />
+          {/* Tabs - hide in fullscreen to avoid duplication */}
+          {!isFullScreen && (
+            <div className="border-b bg-background px-6 py-1">
+              <div className="flex gap-6 overflow-x-auto">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                        activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {tab.label}
+                      {activeTab === tab.id && (
+                        <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Activity Section */}
-        <div className="mt-8 -mx-6 border-t bg-background">
-          <div className="px-6 py-4">
-            <UnifiedActivitySection 
-              activities={generateWorkflowActivities()} 
-              showHeader={true}
-              onCommentSubmit={(comment) => {
-                console.log("Adding comment:", comment)
-                // Handle comment submission
-              }}
-            />
-          </div>
-        </div>
-      </div>
+          {/* Content based on active tab */}
+          {activeTab === "details" ? (
+            <div className="p-6 space-y-4 overflow-y-auto">
+              {/* Meeting Details Section */}
+              <div className="rounded-lg border border-muted overflow-hidden">
+                <button
+                  onClick={() => toggleSection('details')}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                >
+                  {openSections.details ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Meeting Information</span>
+                </button>
+                
+                {openSections.details && (
+                  <div className="px-4 pb-4 pt-1">
+                    <div className="space-y-3">
+                      {fieldsToShow.map((fieldConfig) => {
+                        const Icon = fieldConfig.icon
+                        return renderEditableField(
+                          fieldConfig.field,
+                          fieldValues[fieldConfig.field as keyof typeof fieldValues] as string,
+                          <Icon className="h-4 w-4 text-muted-foreground" />,
+                          fieldConfig.label,
+                          fieldConfig.isBadge || false,
+                          fieldConfig.isTextarea || false,
+                        )
+                      })}
+                      
+                      {allMeetingFields.length > 7 && (
+                        <div className="flex items-center mt-2 ml-6">
+                          <button
+                            onClick={() => toggleShowAllValues('details')}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                          >
+                            {showingAllValues.details ? (
+                              <>Show less <ChevronUp className="h-3 w-3" /></>
+                            ) : (
+                              <>Show more <ChevronDown className="h-3 w-3" /></>
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Meeting Notes Section */}
+              <div className="rounded-lg border border-muted overflow-hidden">
+                <button
+                  onClick={() => toggleSection('notes')}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                >
+                  {openSections.notes ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Meeting Notes</span>
+                </button>
+                
+                {openSections.notes && (
+                  <div className="px-4 pb-4 pt-1">
+                    <TypableArea
+                      value={meetingNotes}
+                      onChange={setMeetingNotes}
+                      placeholder="Add meeting notes..."
+                      showButtons={false}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Activity Section */}
+              <div className="mt-8 -mx-6 border-t bg-background">
+                <div className="px-6 py-4">
+                  <UnifiedActivitySection 
+                    activities={generateWorkflowActivities()} 
+                    showHeader={true}
+                    onCommentSubmit={(comment) => {
+                      console.log("Adding comment:", comment)
+                      // Handle comment submission
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "notes" ? (
+            <div className="p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Notes</h3>
+                <div className="flex items-center gap-2">
+                  <ViewModeSelector viewMode={notesViewMode} onViewModeChange={setNotesViewMode} />
+                  <Button variant="outline" size="sm" onClick={() => console.log("Add note")}>
+                    <PlusIcon className="h-4 w-4" />
+                    Add note
+                  </Button>
+                </div>
+              </div>
+              <TabContentRenderer
+                activeTab="notes"
+                viewMode={notesViewMode}
+                data={mockNotes}
+                onNoteClick={(note) => {
+                  setSelectedNote(note)
+                }}
+              />
+            </div>
+          ) : activeTab === "files" ? (
+            <div className="p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Files</h3>
+                <div className="flex items-center gap-2">
+                  <ViewModeSelector viewMode={filesViewMode} onViewModeChange={setFilesViewMode} />
+                  <Button variant="outline" size="sm" onClick={() => console.log("Add file")}>
+                    <PlusIcon className="h-4 w-4" />
+                    Add file
+                  </Button>
+                </div>
+              </div>
+              <TabContentRenderer
+                activeTab="files"
+                viewMode={filesViewMode}
+                data={getContextualFiles(meeting?.title).map(file => ({
+                  ...file,
+                  name: file.name || file.fileName || file.title,
+                  uploadedBy: file.uploadedBy || "Unknown",
+                  uploadedDate: file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : "Unknown"),
+                  size: file.size || file.fileSize || "Unknown",
+                }))}
+                onFileClick={(file) => {
+                  console.log("File clicked:", file)
+                  // In a real implementation, this would open/download the file
+                  // For now, we'll just log it
+                }}
+              />
+            </div>
+          ) : activeTab === "tasks" ? (
+            <div className="p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Tasks</h3>
+                <div className="flex items-center gap-2">
+                  <ViewModeSelector viewMode={tasksViewMode} onViewModeChange={setTasksViewMode} />
+                  <Button variant="outline" size="sm" onClick={() => console.log("Add task")}>
+                    <PlusIcon className="h-4 w-4" />
+                    Add task
+                  </Button>
+                </div>
+              </div>
+              <UnifiedTaskTable 
+                data={mockTasks} 
+                viewMode={tasksViewMode} 
+                isInDrawer={!isFullScreen}
+                onTaskClick={(task) => {
+                  setSelectedTask(task)
+                }}
+              />
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   )
 }

@@ -17,6 +17,9 @@ import {
   MessageSquareIcon,
   FileIcon,
   CheckCircleIcon,
+  PlusIcon,
+  FolderIcon,
+  CheckSquareIcon,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +31,13 @@ import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { UnifiedActivitySection } from "@/components/shared/unified-activity-section"
 import { generateWorkflowActivities } from "@/components/shared/activity-generators"
+import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { ViewModeSelector } from "@/components/shared/view-mode-selector"
+import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
+import { formatDate } from "@/lib/utils"
+import { getContextualFiles } from "@/components/shared/file-content"
+import { TaskDetailsView } from "@/components/task-details-view"
+import { NoteDetailsView } from "@/components/note-details-view"
 
 // Attachment component to reduce main component complexity
 function EmailAttachment({ attachment, index }: { attachment: any; index: number }) {
@@ -174,10 +184,21 @@ export function EmailDetailsView({ email, onBack, isFullScreen = false }: EmailD
   const [editingField, setEditingField] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState("details")
   const [expandedEmails, setExpandedEmails] = React.useState<Set<string>>(new Set())
+  const [filesViewMode, setFilesViewMode] = React.useState<"table" | "card" | "list">("table")
+  const [tasksViewMode, setTasksViewMode] = React.useState<"table" | "card" | "list">(isFullScreen ? "table" : "list")
+  const [notesViewMode, setNotesViewMode] = React.useState<"table" | "card" | "list">("list")
   
-  // Define tabs - only Details tab for emails
+  // Add state for selected items
+  const [selectedTask, setSelectedTask] = React.useState<any>(null)
+  const [selectedNote, setSelectedNote] = React.useState<any>(null)
+
+  // Define tabs - Details, Email Threads, Notes, Files, Tasks
   const tabs = [
     { id: "details", label: "Details", icon: FileTextIcon },
+    { id: "threads", label: "Email Threads", icon: MessageSquareIcon },
+    { id: "notes", label: "Notes", icon: FileIcon },
+    { id: "files", label: "Files", icon: FolderIcon },
+    { id: "tasks", label: "Tasks", icon: CheckSquareIcon },
   ]
   
   // State for which sections are open
@@ -296,281 +317,430 @@ Sarah`,
     setEditingField(null)
   }
 
+  // Mock data for tasks related to this email
+  const mockTasks = [
+    {
+      id: 1,
+      title: "Review proposal document",
+      status: "In Progress",
+      priority: "High",
+      assignee: "Sarah Johnson",
+      dueDate: "2023-06-15",
+      description: "Review the updated proposal document attached to this email"
+    },
+    {
+      id: 2,
+      title: "Schedule follow-up call",
+      status: "To Do",
+      priority: "Medium",
+      assignee: "John Doe",
+      dueDate: "2023-06-20",
+      description: "Schedule Thursday call to discuss testing phase timeline"
+    },
+    {
+      id: 3,
+      title: "Prepare change request process document",
+      status: "To Do",
+      priority: "Medium",
+      assignee: "Mike Wilson",
+      dueDate: "2023-06-18",
+      description: "Document the formal change request process for client"
+    }
+  ]
+
+  // Mock data for email notes
+  const mockNotes = [
+    {
+      id: 1,
+      title: "Proposal Review Notes",
+      content: "Key points from the proposal:\n- Timeline looks realistic\n- Budget breakdown is comprehensive\n- Testing phase needs more detail",
+      author: "Sarah Johnson",
+      createdAt: email?.sentAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      topic: "Proposal Review"
+    },
+    {
+      id: 2,
+      title: "Client Requirements",
+      content: "Client emphasized the importance of:\n1. Detailed testing timeline\n2. Clear change request process\n3. Regular progress updates",
+      author: "John Doe",
+      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+      topic: "Requirements"
+    }
+  ]
+
   return (
     <div className="flex flex-col flex-1">
-      {/* Email Header - Similar to the task header */}
-      {!isFullScreen && (
-        <div className="border-b bg-background px-6 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <MailIcon className="h-4 w-4" />
-            </div>
-            <div className="flex-1">
-              {isEditingSubject ? (
-                <Input
-                  value={emailSubject}
-                  onChange={(e) => setEmailSubject(e.target.value)}
-                  onBlur={() => setIsEditingSubject(false)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setIsEditingSubject(false)
-                    }
-                    if (e.key === "Escape") {
-                      setEmailSubject(email.subject || "No Subject")
-                      setIsEditingSubject(false)
-                    }
-                  }}
-                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-                  autoFocus
-                />
-              ) : (
-                <h2
-                  className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
-                  onClick={() => setIsEditingSubject(true)}
-                >
-                  {emailSubject || "No Subject"}
-                </h2>
-              )}
-            </div>
-          </div>
-        </div>
+      {/* If a task is selected, show task details */}
+      {selectedTask && (
+        <TaskDetailsView 
+          task={selectedTask} 
+          onBack={() => setSelectedTask(null)} 
+          recordName={emailSubject}
+          recordType="Email"
+          isInDrawer={true}
+        />
       )}
-
-      {/* Tabs */}
-      {!isFullScreen && (
-        <div className="border-b bg-background px-6 py-1">
-          <div className="flex gap-6 overflow-x-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
-                    activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {tab.label}
-                  {activeTab === tab.id && (
-                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        </div>
+      
+      {/* If a note is selected, show note details */}
+      {selectedNote && (
+        <NoteDetailsView 
+          note={selectedNote} 
+          onBack={() => setSelectedNote(null)}
+          hideAddNotes={true}
+        />
       )}
-
-      {/* Content with expandable sections */}
-      <div className={`${isFullScreen ? 'p-0' : 'p-6'} space-y-4 overflow-y-auto`}>
-        {/* Add wrapper div for padding in full screen mode */}
-        <div className={`${isFullScreen ? 'px-6 pt-6' : ''} space-y-4`}>
-          {/* Email Details Section */}
-          <div className="rounded-lg border border-muted overflow-hidden">
-            <button
-              onClick={() => toggleSection('details')}
-              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-            >
-              {openSections.details ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              )}
-              <MailIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Email Details</span>
-            </button>
-            
-            {openSections.details && (
-              <div className="px-4 pb-4 pt-1">
-                <div className="space-y-3">
-                  {/* From field */}
-                  <div className="flex items-start gap-2">
-                    <div className="mt-1">
-                      <SendIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start gap-4">
-                        <Label className="text-xs text-muted-foreground mt-1 w-16">From</Label>
-                        <div className="text-sm">{fieldValues.from}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Subject field */}
-                  <div className="flex items-start gap-2">
-                    <div className="mt-1">
-                      <MailIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start gap-4">
-                        <Label className="text-xs text-muted-foreground mt-1 w-16">Subject</Label>
-                        <div className="text-sm font-medium">{fieldValues.subject}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* To field */}
-                  <div className="flex items-start gap-2">
-                    <div className="mt-1">
-                      <InboxIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start gap-4">
-                        <Label className="text-xs text-muted-foreground mt-1 w-16">To</Label>
-                        <div className="text-sm">
-                          {Array.isArray(fieldValues.to) ? fieldValues.to.join(", ") : fieldValues.to}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CC field if present */}
-                  {fieldValues.cc && fieldValues.cc.length > 0 && (
-                    <div className="flex items-start gap-2">
-                      <div className="mt-1">
-                        <UserIcon className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-start gap-4">
-                          <Label className="text-xs text-muted-foreground mt-1 w-16">CC</Label>
-                          <div className="text-sm">
-                            {Array.isArray(fieldValues.cc) ? fieldValues.cc.join(", ") : fieldValues.cc}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+      
+      {/* Only show email content if nothing is selected */}
+      {!selectedTask && !selectedNote && (
+        <>
+          {/* Email Header - Similar to the task header */}
+          {!isFullScreen && (
+            <div className="border-b bg-background px-6 py-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <MailIcon className="h-4 w-4" />
+                </div>
+                <div className="flex-1">
+                  {isEditingSubject ? (
+                    <Input
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                      onBlur={() => setIsEditingSubject(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setIsEditingSubject(false)
+                        }
+                        if (e.key === "Escape") {
+                          setEmailSubject(email.subject || "No Subject")
+                          setIsEditingSubject(false)
+                        }
+                      }}
+                      className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                      autoFocus
+                    />
+                  ) : (
+                    <h2
+                      className="text-lg font-semibold cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded -ml-1"
+                      onClick={() => setIsEditingSubject(true)}
+                    >
+                      {emailSubject || "No Subject"}
+                    </h2>
                   )}
-
-                  {/* Sent date */}
-                  <div className="flex items-start gap-2">
-                    <div className="mt-1">
-                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-start gap-4">
-                        <Label className="text-xs text-muted-foreground mt-1 w-16">Sent</Label>
-                        <div className="text-sm">
-                          {(() => {
-                            const date = new Date(fieldValues.date)
-                            return date.toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric', 
-                              year: 'numeric' 
-                            }) + ', ' + date.toLocaleTimeString('en-US', { 
-                              hour: 'numeric', 
-                              minute: '2-digit',
-                              hour12: true 
-                            })
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Attachments Section */}
-          {fieldValues.attachments && fieldValues.attachments.length > 0 && (
-            <div className="rounded-lg border border-muted overflow-hidden">
-              <button
-                onClick={() => toggleSection('attachments')}
-                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-              >
-                {openSections.attachments ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                )}
-                <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Attachments ({fieldValues.attachments.length})</span>
-              </button>
-              
-              {openSections.attachments && (
-                <div className="px-4 pb-4 pt-1">
-                  <div className="space-y-2">
-                    {fieldValues.attachments.map((attachment: any, i: number) => (
-                      <EmailAttachment 
-                        key={i}
-                        attachment={attachment}
-                        index={i}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
-          {/* Email Thread Section - Hide in fullscreen mode */}
+          {/* Tabs */}
           {!isFullScreen && (
-            <div className="rounded-lg border border-muted overflow-hidden">
-              <button
-                onClick={() => toggleSection('threads')}
-                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-              >
-                {openSections.threads ? (
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                )}
-                <MessageSquareIcon className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Email Thread ({emailThread.length} messages)</span>
-              </button>
-              
-              {openSections.threads && (
-                <div className="px-4 pb-4 pt-1">
-                  <div className="space-y-4">
-                    {emailThread
-                      .slice()
-                      .reverse()
-                      .map((emailItem, index, reversedArray) => {
-                        // The most recent email is the last one in reversed array (originally first)
-                        const isLatest = index === reversedArray.length - 1
-                        const isExpanded = isLatest || expandedEmails.has(emailItem.id)
-                        
-                        return (
-                          <div key={emailItem.id}>
-                            <EmailContent 
-                              emailItem={emailItem}
-                              isExpanded={isExpanded}
-                              onToggle={() => {
-                                const newExpanded = new Set(expandedEmails)
-                                if (isExpanded && !isLatest) {
-                                  newExpanded.delete(emailItem.id)
-                                } else {
-                                  newExpanded.add(emailItem.id)
-                                }
-                                setExpandedEmails(newExpanded)
-                              }}
-                            />
-                            {index < reversedArray.length - 1 && <Separator className="my-4" />}
+            <div className="border-b bg-background px-6 py-1">
+              <div className="flex gap-6 overflow-x-auto">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative flex items-center gap-2 whitespace-nowrap py-2 text-sm font-medium transition-colors ${
+                        activeTab === tab.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {tab.label}
+                      {activeTab === tab.id && (
+                        <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary rounded-full"></span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Tab Content */}
+          {activeTab === "details" ? (
+            <div className={`${isFullScreen ? 'p-0' : 'p-6'} space-y-4 overflow-y-auto`}>
+              {/* Add wrapper div for padding in full screen mode */}
+              <div className={`${isFullScreen ? 'px-6 pt-6' : ''} space-y-4`}>
+                {/* Email Details Section */}
+                <div className="rounded-lg border border-muted overflow-hidden">
+                  <button
+                    onClick={() => toggleSection('details')}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                  >
+                    {openSections.details ? (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <MailIcon className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Email Details</span>
+                  </button>
+                  
+                  {openSections.details && (
+                    <div className="px-4 pb-4 pt-1">
+                      <div className="space-y-3">
+                        {/* From field */}
+                        <div className="flex items-start gap-2">
+                          <div className="mt-1">
+                            <SendIcon className="h-4 w-4 text-muted-foreground" />
                           </div>
-                        )
-                      })}
+                          <div className="flex-1">
+                            <div className="flex items-start gap-4">
+                              <Label className="text-xs text-muted-foreground mt-1 w-16">From</Label>
+                              <div className="text-sm">{fieldValues.from}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Subject field */}
+                        <div className="flex items-start gap-2">
+                          <div className="mt-1">
+                            <MailIcon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start gap-4">
+                              <Label className="text-xs text-muted-foreground mt-1 w-16">Subject</Label>
+                              <div className="text-sm font-medium">{fieldValues.subject}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* To field */}
+                        <div className="flex items-start gap-2">
+                          <div className="mt-1">
+                            <InboxIcon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start gap-4">
+                              <Label className="text-xs text-muted-foreground mt-1 w-16">To</Label>
+                              <div className="text-sm">
+                                {Array.isArray(fieldValues.to) ? fieldValues.to.join(", ") : fieldValues.to}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* CC field if present */}
+                        {fieldValues.cc && fieldValues.cc.length > 0 && (
+                          <div className="flex items-start gap-2">
+                            <div className="mt-1">
+                              <UserIcon className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-start gap-4">
+                                <Label className="text-xs text-muted-foreground mt-1 w-16">CC</Label>
+                                <div className="text-sm">
+                                  {Array.isArray(fieldValues.cc) ? fieldValues.cc.join(", ") : fieldValues.cc}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Sent date */}
+                        <div className="flex items-start gap-2">
+                          <div className="mt-1">
+                            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start gap-4">
+                              <Label className="text-xs text-muted-foreground mt-1 w-16">Sent</Label>
+                              <div className="text-sm">
+                                {(() => {
+                                  const date = new Date(fieldValues.date)
+                                  return date.toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric', 
+                                    year: 'numeric' 
+                                  }) + ', ' + date.toLocaleTimeString('en-US', { 
+                                    hour: 'numeric', 
+                                    minute: '2-digit',
+                                    hour12: true 
+                                  })
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Attachments Section */}
+                {fieldValues.attachments && fieldValues.attachments.length > 0 && (
+                  <div className="rounded-lg border border-muted overflow-hidden">
+                    <button
+                      onClick={() => toggleSection('attachments')}
+                      className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                    >
+                      {openSections.attachments ? (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <PaperclipIcon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Attachments ({fieldValues.attachments.length})</span>
+                    </button>
+                    
+                    {openSections.attachments && (
+                      <div className="px-4 pb-4 pt-1">
+                        <div className="space-y-2">
+                          {fieldValues.attachments.map((attachment: any, i: number) => (
+                            <EmailAttachment 
+                              key={i}
+                              attachment={attachment}
+                              index={i}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Activity Section - only show in details tab and not in fullscreen */}
+              {!isFullScreen && (
+                <div className="mt-8 -mx-6 border-t bg-background">
+                  <div className="px-6 py-4">
+                    <UnifiedActivitySection 
+                      activities={generateWorkflowActivities()} 
+                      showHeader={true}
+                      onCommentSubmit={(comment) => {
+                        console.log("Adding comment:", comment)
+                        // Handle comment submission
+                      }}
+                    />
                   </div>
                 </div>
               )}
             </div>
-          )}
-        </div>
-
-        {/* Activity Section */}
-        <div className={`${isFullScreen ? 'mt-8' : 'mt-8 -mx-6'} border-t bg-background`}>
-          <div className="px-6 py-4">
-            <UnifiedActivitySection 
-              activities={generateWorkflowActivities()} 
-              showHeader={true}
-              onCommentSubmit={(comment) => {
-                console.log("Adding comment:", comment)
-                // Handle comment submission
-              }}
-            />
-          </div>
-        </div>
-      </div>
+          ) : activeTab === "threads" ? (
+            <div className={`${isFullScreen ? 'p-0' : 'p-6'} space-y-4 overflow-y-auto`}>
+              {/* Email Thread Section */}
+              <div className={`${isFullScreen ? 'px-6 pt-6' : ''}`}>
+                <div className="rounded-lg border border-muted overflow-hidden">
+                  <button
+                    onClick={() => toggleSection('threads')}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                  >
+                    {openSections.threads ? (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <MessageSquareIcon className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Email Thread ({emailThread.length})</span>
+                  </button>
+                  
+                  {openSections.threads && (
+                    <div className="px-4 pb-4 pt-1">
+                      <div className="space-y-4">
+                        {emailThread.map((emailItem, index) => {
+                          const isExpanded = expandedEmails.has(emailItem.id)
+                          return (
+                            <div key={emailItem.id}>
+                              <EmailContent 
+                                emailItem={emailItem} 
+                                isExpanded={isExpanded}
+                                onToggle={() => {
+                                  const newExpanded = new Set(expandedEmails)
+                                  if (isExpanded) {
+                                    newExpanded.delete(emailItem.id)
+                                  } else {
+                                    newExpanded.add(emailItem.id)
+                                  }
+                                  setExpandedEmails(newExpanded)
+                                }}
+                              />
+                              {index < emailThread.length - 1 && <Separator className="my-4" />}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "notes" ? (
+            <div className="p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Notes</h3>
+                <div className="flex items-center gap-2">
+                  <ViewModeSelector viewMode={notesViewMode} onViewModeChange={setNotesViewMode} />
+                  <Button variant="outline" size="sm" onClick={() => console.log("Add note")}>
+                    <PlusIcon className="h-4 w-4" />
+                    Add note
+                  </Button>
+                </div>
+              </div>
+              <TabContentRenderer
+                activeTab="notes"
+                viewMode={notesViewMode}
+                data={mockNotes}
+                onNoteClick={(note) => {
+                  setSelectedNote(note)
+                }}
+              />
+            </div>
+          ) : activeTab === "files" ? (
+            <div className="p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Files</h3>
+                <div className="flex items-center gap-2">
+                  <ViewModeSelector viewMode={filesViewMode} onViewModeChange={setFilesViewMode} />
+                  <Button variant="outline" size="sm" onClick={() => console.log("Add file")}>
+                    <PlusIcon className="h-4 w-4" />
+                    Add file
+                  </Button>
+                </div>
+              </div>
+              <TabContentRenderer
+                activeTab="files"
+                viewMode={filesViewMode}
+                data={[...fieldValues.attachments, ...getContextualFiles(email?.subject)].map(file => ({
+                  ...file,
+                  name: file.name || file.fileName || file.title,
+                  uploadedBy: file.uploadedBy || fieldValues.from || "Unknown",
+                  uploadedDate: file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : formatDate(new Date(fieldValues.date))),
+                  size: file.size || file.fileSize || "Unknown",
+                }))}
+                onFileClick={(file) => {
+                  console.log("File clicked:", file)
+                  // In a real implementation, this would open/download the file
+                  // For now, we'll just log it
+                }}
+              />
+            </div>
+          ) : activeTab === "tasks" ? (
+            <div className="p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Tasks</h3>
+                <div className="flex items-center gap-2">
+                  <ViewModeSelector viewMode={tasksViewMode} onViewModeChange={setTasksViewMode} />
+                  <Button variant="outline" size="sm" onClick={() => console.log("Add task")}>
+                    <PlusIcon className="h-4 w-4" />
+                    Add task
+                  </Button>
+                </div>
+              </div>
+              <UnifiedTaskTable 
+                data={mockTasks} 
+                viewMode={tasksViewMode} 
+                isInDrawer={!isFullScreen}
+                onTaskClick={(task) => {
+                  setSelectedTask(task)
+                }}
+              />
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   )
 }
