@@ -69,6 +69,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { MasterDrawer } from "@/components/master-drawer"
 import { AddLiabilityDialog } from "./add-liability-dialog"
@@ -884,7 +885,13 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
   const [selectedSources, setSelectedSources] = React.useState<Record<string, string>>({})
 
   // State to track expanded source details
-  const [expandedSource, setExpandedSource] = React.useState<string | null>(null)
+  const [expandedSources, setExpandedSources] = React.useState<Set<string>>(new Set())
+  
+  // State to track manually verified sources
+  const [verifiedSources, setVerifiedSources] = React.useState<Set<string>>(new Set())
+  
+  // State to track flagged for review sources
+  const [flaggedSources, setFlaggedSources] = React.useState<Set<string>>(new Set())
 
   // Toggle function for collapsible sections
   const toggleSection = (section: 'fieldComparison' | 'dataSources') => {
@@ -1347,184 +1354,247 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                               <div className="space-y-4">
                                 {/* All Sources */}
                                 <div className="space-y-3">
-                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All Sources</div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{sources.length} Sources</div>
+                                  <div className="space-y-3">
                                     {sources.map((source, idx) => {
                                       const isActive = source.source === truthValue.source;
+                                      const isExpanded = expandedSources.has(`${fieldName}-${idx}`);
+                                      
                                       return (
-                                        <div key={idx}>
-                                          <Card className="group cursor-pointer hover:bg-muted/50 h-full">
-                                            <CardContent className="p-4">
-                                              <div className="flex gap-4">
-                                                <div className="flex-1">
-                                                  {/* Title row with actions dropdown */}
-                                                  <div className="flex items-start justify-between">
-                                                    <h3 className="font-medium text-sm">
-                                                      {source.source}
-                                                    </h3>
-                                                    
-                                                    <div className="flex items-center gap-1">
-                                                      <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                        onClick={(e) => {
-                                                          e.stopPropagation();
-                                                          setExpandedSource(expandedSource === `${fieldName}-${idx}` ? null : `${fieldName}-${idx}`);
-                                                        }}
-                                                      >
-                                                        {expandedSource === `${fieldName}-${idx}` ? (
-                                                          <ChevronDownIcon className="h-4 w-4" />
-                                                        ) : (
-                                                          <ChevronRightIcon className="h-4 w-4" />
-                                                        )}
-                                                      </Button>
-                                                      
-                                                      <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <MoreVerticalIcon className="h-4 w-4" />
-                                                          </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                          {!isActive && (
-                                                            <DropdownMenuItem 
-                                                              onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setSourceForField(fieldName, source.source);
-                                                              }}
-                                                            >
-                                                              Use This Value
-                                                            </DropdownMenuItem>
-                                                          )}
-                                                        </DropdownMenuContent>
-                                                      </DropdownMenu>
-                                  </div>
-                                                  </div>
-                                                  
-                                                  {/* Primary metadata row (badges, status indicators) */}
-                                                  <div className="flex items-center gap-2 mt-1">
-                                                    {isActive && (
-                                                      <Badge className="bg-black text-white hover:bg-black/90 text-xs">
-                                                        Active
-                                                      </Badge>
-                                                    )}
-                                                    {getConfidenceBadge(source.confidence)}
-                                                  </div>
-                                                  
-                                                  {/* Secondary metadata row */}
-                                                  <div className="mt-2 text-xs text-muted-foreground">
-                                        <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-                                                      <div>
-                                            <span className="font-medium">Value:</span>
-                                          </div>
-                                                      <div>
-                                                        {source.value}
-                                          </div>
-                                                      <div>
-                                            <span className="font-medium">Updated:</span>
-                                          </div>
-                                                      <div>
-                                                        {new Date(source.lastUpdated).toLocaleDateString()}
-                                          </div>
-                                                      {source.variance && (
-                                            <>
-                                                          <div>
-                                                <span className="font-medium">Variance:</span>
+                                        <div 
+                                          key={idx}
+                                          className={`group rounded-lg border bg-background p-4 hover:shadow-md transition-all cursor-pointer ${
+                                            isActive ? 'border-primary shadow-sm' : 'border-muted hover:border-muted-foreground'
+                                          }`}
+                                          onClick={() => {
+                                            setExpandedSources(prev => {
+                                              const newSet = new Set(prev);
+                                              if (newSet.has(`${fieldName}-${idx}`)) {
+                                                newSet.delete(`${fieldName}-${idx}`);
+                                              } else {
+                                                newSet.add(`${fieldName}-${idx}`);
+                                              }
+                                              return newSet;
+                                            });
+                                          }}
+                                        >
+                                          {/* Main card content */}
+                                          <div className="flex items-center justify-between">
+                                            {/* Left side - Key information */}
+                                            <div className="flex-1">
+                                              {/* Primary row - Value (hero element) */}
+                                              <div className="flex items-baseline gap-3 mb-2">
+                                                <span className="text-lg font-semibold text-foreground">
+                                                  {source.value}
+                                                </span>
+                                                {source.variance && (
+                                                  <span className={`text-sm font-medium ${
+                                                    source.variance.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                                                  }`}>
+                                                    {source.variance}
+                                                  </span>
+                                                )}
+                                                {isActive && (
+                                                  <Badge className="bg-primary text-primary-foreground text-xs">
+                                                    Selected
+                                                  </Badge>
+                                                )}
+                                                {verifiedSources.has(`${fieldName}-${source.source}`) && (
+                                                  <TooltipProvider>
+                                                    <Tooltip delayDuration={300}>
+                                                      <TooltipTrigger asChild>
+                                                        <Badge className="bg-blue-600 text-white text-xs">
+                                                          ✓ Verified
+                                                        </Badge>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent>
+                                                        <p>Manually verified by authorized personnel</p>
+                                                      </TooltipContent>
+                                                    </Tooltip>
+                                                  </TooltipProvider>
+                                                )}
+                                                {flaggedSources.has(`${fieldName}-${source.source}`) && (
+                                                  <TooltipProvider>
+                                                    <Tooltip delayDuration={300}>
+                                                      <TooltipTrigger asChild>
+                                                        <Badge className="bg-orange-600 text-white text-xs">
+                                                          ⚠ Review
+                                                        </Badge>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent>
+                                                        <p>Flagged for manual review</p>
+                                                      </TooltipContent>
+                                                    </Tooltip>
+                                                  </TooltipProvider>
+                                                )}
                                               </div>
-                                                          <div>
-                                                            {source.variance}
+                                              
+                                              {/* Secondary row - Source info */}
+                                              <div className="flex items-center gap-3 mb-1">
+                                                <span className="font-medium text-sm text-foreground">
+                                                  {source.source}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground">
+                                                  {source.sourceType}
+                                                </span>
+                                                <TooltipProvider>
+                                                  <Tooltip delayDuration={300}>
+                                                    <TooltipTrigger asChild>
+                                                      <div className="cursor-help">
+                                                        {getConfidenceBadge(source.confidence)}
+                                                      </div>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                      <p>
+                                                        {source.confidence === 'verified' ? 'Data manually reviewed and confirmed by fund administrator or authorized personnel' :
+                                                         source.confidence === 'high' ? 'Recent data from established financial institution or fund administrator with strong track record' :
+                                                         source.confidence === 'medium' ? 'Automated data from established source but may be delayed or require review' :
+                                                         source.confidence === 'calculated' ? 'System-calculated value based on verified inputs and established formulas' :
+                                                         'Data may be stale or from source requiring manual verification'}
+                                                      </p>
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                </TooltipProvider>
                                               </div>
-                                            </>
-                                          )}
-                                                      {source.documentName && (
-                                            <>
-                                                          <div>
-                                                <span className="font-medium">Document:</span>
+                                              
+                                              {/* Tertiary row - Meta info */}
+                                              <div className="text-xs text-muted-foreground">
+                                                Updated {new Date(source.lastUpdated).toLocaleDateString()}
+                                                {source.documentName && (
+                                                  <span> • From {source.documentName} (p.{source.pageNumber})</span>
+                                                )}
                                               </div>
-                                                          <div>
-                                                            Statement (p.{source.pageNumber})
+                                            </div>
+
+                                            {/* Right side - Actions */}
+                                            <div className="flex items-center gap-2 ml-4">
+                                              {/* Expand indicator */}
+                                              <div className="text-muted-foreground">
+                                                {isExpanded ? (
+                                                  <ChevronDownIcon className="h-4 w-4" />
+                                                ) : (
+                                                  <ChevronRightIcon className="h-4 w-4" />
+                                                )}
                                               </div>
-                                            </>
-                                          )}
-                                        </div>
-                                </div>
-                                                </div>
-                                              </div>
-                                            </CardContent>
-                                            
-                                            {/* Expanded Source Details */}
-                                            {expandedSource === `${fieldName}-${idx}` && (
-                                              <div className="border-t border-muted bg-muted/10 p-4">
-                                                <div className="flex items-center justify-between mb-3">
-                                                  <h4 className="text-sm font-medium text-foreground">Additional Details</h4>
+                                              
+                                              {/* Actions dropdown */}
+                                              <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
                                                   <Button 
                                                     variant="ghost" 
-                                                    size="sm" 
+                                                    size="icon" 
+                                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                                                     onClick={(e) => {
-                                                        e.stopPropagation();
-                                                      setExpandedSource(null);
+                                                      e.stopPropagation();
                                                     }}
-                                                    className="h-6 w-6 p-0"
                                                   >
-                                                    ×
+                                                    <MoreVerticalIcon className="h-4 w-4" />
                                                   </Button>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
-                                                  <div>
-                                                    <span className="font-medium text-muted-foreground">Source Format:</span>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                  {!isActive && (
+                                                    <DropdownMenuItem 
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSourceForField(fieldName, source.source);
+                                                      }}
+                                                    >
+                                                      Use This Value
+                                                    </DropdownMenuItem>
+                                                  )}
+                                                  <DropdownMenuItem
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      const sourceKey = `${fieldName}-${source.source}`;
+                                                      setVerifiedSources(prev => {
+                                                        const newSet = new Set(prev);
+                                                        if (newSet.has(sourceKey)) {
+                                                          newSet.delete(sourceKey);
+                                                        } else {
+                                                          newSet.add(sourceKey);
+                                                        }
+                                                        return newSet;
+                                                      });
+                                                    }}
+                                                  >
+                                                    {verifiedSources.has(`${fieldName}-${source.source}`) ? 'Remove Verification' : 'Mark as Verified'}
+                                                  </DropdownMenuItem>
+                                                  <DropdownMenuItem
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      const sourceKey = `${fieldName}-${source.source}`;
+                                                      setFlaggedSources(prev => {
+                                                        const newSet = new Set(prev);
+                                                        if (newSet.has(sourceKey)) {
+                                                          newSet.delete(sourceKey);
+                                                        } else {
+                                                          newSet.add(sourceKey);
+                                                        }
+                                                        return newSet;
+                                                      });
+                                                    }}
+                                                  >
+                                                    {flaggedSources.has(`${fieldName}-${source.source}`) ? 'Remove Flag' : 'Flag for Review'}
+                                                  </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                              </DropdownMenu>
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Expanded details */}
+                                          {isExpanded && (
+                                            <div className="mt-4 pt-4 border-t border-border">
+                                              <div className="space-y-3">
+                                                <h4 className="text-sm font-medium text-foreground mb-3">Source Details</h4>
+                                                
+                                                {/* Details in a more readable layout */}
+                                                <div className="space-y-2">
+                                                  <div className="flex justify-between">
+                                                    <span className="text-sm text-muted-foreground">Confidence Level</span>
+                                                    <span className="text-sm font-medium">{source.confidence}</span>
                                                   </div>
-                                                  <div>
-                                                    {source.documentName ? 'PDF Document' : 'API Integration'}
+                                                  <div className="flex justify-between">
+                                                    <span className="text-sm text-muted-foreground">Last Updated</span>
+                                                    <span className="text-sm font-medium">
+                                                      {new Date(source.lastUpdated).toLocaleDateString()} at {new Date(source.lastUpdated).toLocaleTimeString()}
+                                                    </span>
                                                   </div>
-                                                  <div>
-                                                    <span className="font-medium text-muted-foreground">Derived From:</span>
+                                                  <div className="flex justify-between">
+                                                    <span className="text-sm text-muted-foreground">Data Source</span>
+                                                    <span className="text-sm font-medium">
+                                                      {source.documentName ? 'PDF Document' : 'API Integration'}
+                                                    </span>
                                                   </div>
-                                                  <div>
-                                                    {source.documentName 
-                                                      ? `Document field on page ${source.pageNumber}`
-                                                      : `API field: ${fieldName.toLowerCase().replace(' ', '_')}`
-                                                    }
-                                                  </div>
-                                                  <div>
-                                                    <span className="font-medium text-muted-foreground">Last Manual Override:</span>
-                                                  </div>
-                                                  <div>
-                                                    None
-                                                  </div>
-                                                  <div>
-                                                    <span className="font-medium text-muted-foreground">Currency:</span>
-                                                  </div>
-                                                  <div>
-                                                    USD
-                                                  </div>
-                                                  <div>
-                                                    <span className="font-medium text-muted-foreground">Refresh Cadence:</span>
-                                                  </div>
-                                                  <div>
-                                                    {source.source === 'Addepar' ? 'Real-time' : 
-                                                     source.source === 'NetSuite' ? 'Daily' : 
-                                                     source.source === 'Bank Portal' ? 'Daily' :
-                                                     'Monthly'}
-                                                  </div>
-                                                  <div>
-                                                    <span className="font-medium text-muted-foreground">Confidence Explanation:</span>
-                                                  </div>
-                                                  <div>
-                                                    {source.confidence === 'verified' ? 'Verified: Manual document review completed' :
-                                                     source.confidence === 'high' ? 'High: Recent sync from trusted source' :
-                                                     source.confidence === 'medium' ? 'Medium: Data is slightly stale' :
-                                                     'Calculated: Derived from multiple data points'}
+                                                  {source.variance && (
+                                                    <div className="flex justify-between">
+                                                      <span className="text-sm text-muted-foreground">Variance from System</span>
+                                                      <span className="text-sm font-medium">{source.variance}</span>
+                                                    </div>
+                                                  )}
+                                                  {source.documentName && (
+                                                    <div className="flex justify-between">
+                                                      <span className="text-sm text-muted-foreground">Document Source</span>
+                                                      <span className="text-sm font-medium">{source.documentName} (p.{source.pageNumber})</span>
+                                                    </div>
+                                                  )}
+                                                  <div className="flex justify-between">
+                                                    <span className="text-sm text-muted-foreground">Refresh Cadence</span>
+                                                    <span className="text-sm font-medium">
+                                                      {source.source === 'Addepar' ? 'Real-time' : 
+                                                       source.source === 'NetSuite' ? 'Daily' : 
+                                                       source.source === 'Bank Portal' ? 'Daily' :
+                                                       'Monthly'}
+                                                    </span>
                                                   </div>
                                                 </div>
                                               </div>
-                                            )}
-                                          </Card>
+                                            </div>
+                                          )}
                                         </div>
-                                          );
-                                        })}
-                                    </div>
+                                      );
+                                    })}
                                   </div>
+                                </div>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -1933,3 +2003,4 @@ export function LiabilitiesTable() {
     </div>
   )
 }
+
