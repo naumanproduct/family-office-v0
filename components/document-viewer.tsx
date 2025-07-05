@@ -32,8 +32,6 @@ import {
   Maximize2Icon,
   ArrowLeftIcon,
   ChevronUpIcon,
-  TagIcon,
-  LinkIcon,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -517,248 +515,6 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
         ],
       },
       {
-        id: "metadata",
-        title: "Metadata",
-        icon: <TagIcon className="h-4 w-4 text-muted-foreground" />,
-        fields: [
-          { label: 'File Type', value: (file.fileType || file.type || 'FILE').toUpperCase() },
-          { label: 'Size', value: file.fileSize || file.size || 'Unknown' },
-          { label: 'Uploaded By', value: file.uploadedBy || 'Unknown' },
-          { label: 'Upload Date', value: file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : 'Unknown') },
-          { label: 'Tags', value: file.tags && Array.isArray(file.tags) && file.tags.length > 0 
-            ? file.tags.map((tag: string) => <Badge key={tag} variant="secondary" className="mr-1 text-xs">{tag}</Badge>) 
-            : 'No tags' },
-        ],
-      },
-      // Add Capital Call Information section if file is a capital call
-      ...(file.documentType === "capital_call" ? [{
-        id: 'capitalCall',
-        title: 'Capital Call Information',
-        icon: <DollarSignIcon className="h-4 w-4 text-muted-foreground" />,
-        fields: [
-          { 
-            label: 'Call Number', 
-            value: (
-              <AuditableField 
-                fieldName="Call Number"
-                className=""
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 1,
-                  confidence: "high",
-                  extractedText: "Capital Call Notice #4 - Fourth call for KKR North America Fund VII",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                #4
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Fund Name', 
-            value: (
-              <AuditableField 
-                fieldName="Fund Name"
-                className=""
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 1,
-                  confidence: "high",
-                  extractedText: "Fund Name: KKR North America Fund VII",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                {file.fund?.name || "KKR North America Fund VII"}
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Fund Strategy', 
-            value: (
-              <AuditableField 
-                fieldName="Fund Strategy"
-                className=""
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 1,
-                  confidence: "high",
-                  extractedText: "Fund Strategy: Large Buyout focused on North American mid-market companies",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                {file.fund?.strategy || "Large Buyout"}
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Total Call Amount', 
-            value: (
-              <AuditableField 
-                fieldName="Total Call Amount"
-                className="font-medium"
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 1,
-                  confidence: "high",
-                  extractedText: "Total capital call amount for all Limited Partners: $8,500,000",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                $8,500,000
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Your Commitment %', 
-            value: (
-              <AuditableField 
-                fieldName="Your Commitment %"
-                className=""
-                sources={[{
-                  documentName: "GF3-LPA-Final-Executed.pdf",
-                  pageNumber: 12,
-                  confidence: "high",
-                  extractedText: "Limited Partner commitment percentage: 2.35% of total fund commitments",
-                  sourceType: "document",
-                  lastUpdated: "2023-01-15T10:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                2.35%
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Your Call Amount', 
-            value: (
-              <AuditableField 
-                fieldName="Your Call Amount"
-                className="font-medium text-green-700"
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 1,
-                  confidence: "high",
-                  extractedText: "Your proportionate share of this capital call is $199,750 based on your commitment percentage of 2.35%",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                $199,750
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Due Date', 
-            value: (
-              <AuditableField 
-                fieldName="Due Date"
-                className="font-medium text-red-600"
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 1,
-                  confidence: "high",
-                  extractedText: "Capital call payment due date: November 15, 2023",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                November 15, 2023
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Notice Date', 
-            value: (
-              <AuditableField 
-                fieldName="Notice Date"
-                className=""
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 1,
-                  confidence: "high",
-                  extractedText: "Notice date: October 22, 2023",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                October 22, 2023
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Purpose', 
-            value: (
-              <AuditableField 
-                fieldName="Purpose"
-                className=""
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 1,
-                  confidence: "high",
-                  extractedText: "Purpose: Funding for the acquisition of TechVantage Solutions and related expenses",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                Funding for the acquisition of TechVantage Solutions and related expenses
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Wire Instructions', 
-            value: (
-              <AuditableField 
-                fieldName="Wire Instructions"
-                className=""
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 2,
-                  confidence: "high",
-                  extractedText: "Wire transfer to: First National Bank, Account: 12345678, Routing: 987654321, Reference: LP-23456-CC4",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                First National Bank, Account: 12345678, Routing: 987654321, Reference: LP-23456-CC4
-              </AuditableField>
-            )
-          },
-          { 
-            label: 'Contact', 
-            value: (
-              <AuditableField 
-                fieldName="Contact"
-                className=""
-                sources={[{
-                  documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
-                  pageNumber: 2,
-                  confidence: "high",
-                  extractedText: "For questions, contact: Sarah Johnson, Investor Relations, sjohnson@kkr.com, (212) 555-1234",
-                  sourceType: "document",
-                  lastUpdated: "2023-10-22T09:30:00Z"
-                }]}
-                onSourceClick={handleSourceClick}
-              >
-                Sarah Johnson, Investor Relations, sjohnson@kkr.com, (212) 555-1234
-              </AuditableField>
-            )
-          }
-        ]
-      }] : []),
-      {
         id: "companies",
         title: "Companies",
         icon: <BuildingIcon className="h-4 w-4 text-muted-foreground" />,
@@ -949,13 +705,13 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                         documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
                         pageNumber: 1,
                         confidence: "high",
-                        extractedText: "Purpose: Funding for the acquisition of TechVantage Solutions and related expenses",
+                        extractedText: "Purpose: TechVantage Solutions acquisition ($8.2M) plus general fund expenses ($0.3M)",
                         sourceType: "document",
                         lastUpdated: "2023-10-22T09:30:00Z"
                       }]}
                       onSourceClick={handleSourceClick}
                     >
-                      Funding for the acquisition of TechVantage Solutions and related expenses
+                      TechVantage Solutions acquisition ($8.2M) + Fund expenses ($0.3M)
                     </AuditableField>
                   </span>
                 </div>
@@ -989,13 +745,13 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                         documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
                         pageNumber: 2,
                         confidence: "high",
-                        extractedText: "Wire transfer to: First National Bank, Account: 12345678, Routing: 987654321, Reference: LP-23456-CC4",
+                        extractedText: "Wire transfer instructions: Chase Bank, Account Number: 4471234567",
                         sourceType: "document",
                         lastUpdated: "2023-10-22T09:30:00Z"
                       }]}
                       onSourceClick={handleSourceClick}
                     >
-                      First National Bank, Account: 12345678, Routing: 987654321, Reference: LP-23456-CC4
+                      Chase Bank - Account: 4471234567
                     </AuditableField>
                   </span>
                 </div>
@@ -1118,6 +874,369 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
             <UnifiedActivitySection activities={activities} />
           }
         />
+        
+        {/* Separate Capital Call Information Card with expand/collapse and focus mode */}
+        {file.documentType === "capital_call" && (
+          <div className="px-6 pb-6">
+            <div className="rounded-lg border border-muted overflow-hidden">
+              <button 
+                className="w-full flex items-center justify-between p-3 transition-colors bg-muted/20 group"
+                onClick={() => toggleSection('capitalCall')}
+              >
+                <div className="flex items-center">
+                  {openSections.capitalCall ? (
+                    <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
+                  ) : (
+                    <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" />
+                  )}
+                  <div className="flex items-center gap-2">
+                    <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium text-sm">Capital Call Information</span>
+                  </div>
+                </div>
+                
+                {/* Focus button in header row only */}
+                <Button
+                  variant="ghost" 
+                  size="icon"
+                  className="h-6 w-6 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCapitalCallFocused(true);
+                  }}
+                >
+                  <Maximize2Icon className="h-4 w-4" />
+                </Button>
+              </button>
+              
+              {openSections.capitalCall && (
+                <div className="px-3 pb-3 pt-2">
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Number</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Call Number"
+                          className=""
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Capital Call Notice #4 - Fourth call for KKR North America Fund VII",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                          onSourceClick={handleSourceClick}
+                        >
+                          #4
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Name</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Fund Name"
+                          className=""
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Fund Name: KKR North America Fund VII",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                          onSourceClick={handleSourceClick}
+                        >
+                          {file.fund?.name || "KKR North America Fund VII"}
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Strategy</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Fund Strategy"
+                          className=""
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Fund Strategy: Large Buyout focused on North American mid-market companies",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                          onSourceClick={handleSourceClick}
+                        >
+                          {file.fund?.strategy || "Large Buyout"}
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Total Call Amount</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Total Call Amount"
+                          className="font-medium"
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Total capital call amount for all Limited Partners: $8,500,000",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                      onSourceClick={handleSourceClick}
+                        >
+                          $8,500,000
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Commitment %</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Your Commitment %"
+                          className=""
+                          sources={[{
+                            documentName: "GF3-LPA-Final-Executed.pdf",
+                            pageNumber: 12,
+                            confidence: "high",
+                            extractedText: "Limited Partner commitment percentage: 2.35% of total fund commitments",
+                            sourceType: "document",
+                            lastUpdated: "2023-01-15T10:30:00Z"
+                          }]}
+                      onSourceClick={handleSourceClick}
+                        >
+                          2.35%
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Call Amount</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Your Call Amount"
+                          className="font-medium text-green-700"
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Your proportionate share of this capital call is $199,750 based on your commitment percentage of 2.35%",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                      onSourceClick={handleSourceClick}
+                        >
+                          $199,750
+                        </AuditableField>
+                      </span>
+                    </div>
+                    
+                    {showAllCapitalCallDetails && (
+                      <>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Due Date</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Due Date"
+                              className="font-medium text-red-600"
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "Capital call payment due date: November 15, 2023",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              November 15, 2023
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Purpose</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Call Purpose"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "Purpose: TechVantage Solutions acquisition ($8.2M) plus general fund expenses ($0.3M)",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              TechVantage Solutions acquisition ($8.2M) + Fund expenses ($0.3M)
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Settlement Date</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Settlement Date"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "Settlement date for capital call: November 20, 2023",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              November 20, 2023
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Wire Instructions</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Wire Instructions"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 2,
+                                confidence: "high",
+                                extractedText: "Wire transfer instructions: Chase Bank, Account Number: 4471234567",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              Chase Bank - Account: 4471234567
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Type</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Investment Type"
+                              className=""
+                              sources={[{
+                                documentName: "TechVantage-Investment-Memo-Final.pdf",
+                                pageNumber: 3,
+                                confidence: "high",
+                                extractedText: "Investment type: Platform Company Acquisition in technology sector",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-10T14:20:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              Platform Company Acquisition
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Stage</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Investment Stage"
+                              className=""
+                              sources={[{
+                                documentName: "TechVantage-Investment-Memo-Final.pdf",
+                                pageNumber: 3,
+                                confidence: "high",
+                                extractedText: "Investment stage: Growth Capital for expansion and market penetration",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-10T14:20:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              Growth Capital
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Currency</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Call Currency"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "All amounts are denominated in US Dollars (USD)",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              USD
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Management Fee</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Management Fee"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 2,
+                                confidence: "high",
+                                extractedText: "Management fee of $45,000 is included in this capital call",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              $45,000 (included in call)
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Reference Number</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Reference Number"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "Reference number for this capital call: CC-NAFVII-004-2023",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              CC-NAFVII-004-2023
+                            </AuditableField>
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Show More/Less Toggle for Capital Call */}
+                    <div className="flex items-center mt-2 ml-2">
+                      <button
+                        onClick={() => setShowAllCapitalCallDetails(prev => !prev)}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                      >
+                        {showAllCapitalCallDetails ? (
+                          <>Show less <ChevronUpIcon className="h-3 w-3" /></>
+                        ) : (
+                          <>Show more <ChevronDownIcon className="h-3 w-3" /></>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </>
     );
   };

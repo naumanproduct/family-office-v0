@@ -21,7 +21,6 @@ import {
   MailIcon,
   FolderIcon,
   LoaderIcon,
-  LinkIcon,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -47,7 +46,6 @@ import { DocumentViewer } from "@/components/document-viewer"
 import { RecordListItem } from "@/components/shared/record-list-item"
 import { RecordCard } from "@/components/shared/record-card"
 import { formatDate } from "@/lib/utils"
-import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 
 // Function to get context-specific files based on task title
 export function getContextualFiles(taskTitle?: string) {
@@ -462,75 +460,130 @@ function FileDetailsPanel({ file, isFullScreen = false }: { file: any; isFullScr
     );
   }
 
-  // Create sections for UnifiedDetailsPanel
-  const sections = [
-    {
-      id: 'details',
-      title: 'File Details',
-      icon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
-      fields: [
-        { label: 'File Name', value: file.fileName || file.name || 'Untitled' },
-        { label: 'Title', value: file.title || file.name || 'Untitled' },
-        { label: 'Description', value: file.description || 'No description provided' },
-        { label: 'Category', value: file.category || 'Uncategorized' },
-        { label: 'Status', value: file.status || 'Unknown' },
-      ],
-    },
-    {
-      id: 'metadata',
-      title: 'Metadata',
-      icon: <TagIcon className="h-4 w-4 text-muted-foreground" />,
-      fields: [
-        { label: 'File Type', value: (file.fileType || file.type || 'FILE').toUpperCase() },
-        { label: 'Size', value: file.fileSize || file.size || 'Unknown' },
-        { label: 'Uploaded By', value: file.uploadedBy || 'Unknown' },
-        { label: 'Upload Date', value: file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : 'Unknown') },
-        { 
-          label: 'Tags', 
-          value: file.tags && Array.isArray(file.tags) && file.tags.length > 0 
-            ? file.tags.map((tag: string) => <Badge key={tag} variant="secondary" className="mr-1 text-xs">{tag}</Badge>) 
-            : 'No tags' 
-        },
-      ],
-    },
-    {
-      id: 'related',
-      title: 'Related',
-      icon: <LinkIcon className="h-4 w-4 text-muted-foreground" />,
-      sectionData: {
-        items: file.relatedTo ? [
-          {
-            id: 1,
-            name: file.relatedTo.name,
-            type: file.relatedTo.type,
-          },
-        ] : [],
-      },
-      hideWhenEmpty: true,
-    },
-  ];
+  // State for collapsible sections
+  const [openSections, setOpenSections] = useState({
+    details: true,
+    metadata: false,
+    related: false,
+  });
 
-  // Placeholder functions for the UnifiedDetailsPanel
-  const navigateToRecord = (recordType: string, id: number) => {
-    console.log(`Navigate to ${recordType} record with ID: ${id}`);
-  };
-
-  const handleAddRecord = (sectionId: string) => {
-    console.log(`Add record to ${sectionId}`);
-  };
-
-  const handleUnlinkRecord = (sectionId: string, id: number) => {
-    console.log(`Unlink ${sectionId} ${id}`);
+  // Toggle function for collapsible sections
+  const toggleSection = (section: 'details' | 'metadata' | 'related') => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   };
 
   return (
-    <UnifiedDetailsPanel
-      sections={sections}
-      isFullScreen={isFullScreen}
-      onNavigateToRecord={navigateToRecord}
-      onAddRecord={handleAddRecord}
-      onUnlinkRecord={handleUnlinkRecord}
-    />
+    <div className={`px-6 py-4 space-y-6 ${isFullScreen ? 'overflow-y-auto max-h-[calc(100vh-73px)]' : ''}`}>
+      {/* Details Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Details</h3>
+          <Button variant="ghost" size="sm" onClick={() => toggleSection('details')}>
+            <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSections.details ? 'rotate-180' : ''}`} />
+          </Button>
+        </div>
+        {openSections.details && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">File Name</Label>
+                <span>{file.fileName || file.name || "Untitled"}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Title</Label>
+                <span>{file.title || file.name || "Untitled"}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Description</Label>
+                <span>{file.description || "No description provided"}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Category</Label>
+                <span>{file.category || "Uncategorized"}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Status</Label>
+                <span>{file.status || "Unknown"}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Metadata Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Metadata</h3>
+          <Button variant="ghost" size="sm" onClick={() => toggleSection('metadata')}>
+            <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSections.metadata ? 'rotate-180' : ''}`} />
+          </Button>
+        </div>
+        {openSections.metadata && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">File Type</Label>
+                <span>{(file.fileType || file.type || "FILE").toUpperCase()}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Size</Label>
+                <span>{file.fileSize || file.size || "Unknown"}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Uploaded By</Label>
+                <span>{file.uploadedBy || "Unknown"}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Upload Date</Label>
+                <span>{file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : "Unknown")}</span>
+              </div>
+              <div className="flex flex-col">
+                <Label className="text-xs text-muted-foreground">Tags</Label>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {file.tags && Array.isArray(file.tags) && file.tags.length > 0 ? (
+                    file.tags.map((tag: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground text-sm">No tags</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Related Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Related</h3>
+          <Button variant="ghost" size="sm" onClick={() => toggleSection('related')}>
+            <ChevronDownIcon className={`h-4 w-4 transition-transform ${openSections.related ? 'rotate-180' : ''}`} />
+          </Button>
+        </div>
+        {openSections.related && (
+          <div className="space-y-4">
+            {file.relatedTo ? (
+              <div className="flex items-center gap-2">
+                {file.relatedTo.type === "Company" ? <BuildingIcon className="h-4 w-4" /> : <UserIcon className="h-4 w-4" />}
+                <span>{file.relatedTo.name}</span>
+                <Badge variant="outline" className="ml-2">
+                  {file.relatedTo.type}
+                </Badge>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">No related records</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
