@@ -52,9 +52,7 @@ import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { Label } from "@/components/ui/label"
 import { UnifiedDetailsPanel, DetailSection, DetailField } from "@/components/shared/unified-details-panel"
-import { SourceHighlightProvider, useSourceHighlight } from "@/components/shared/source-highlight-context"
-import { VerifiableField } from "@/components/shared/verifiable-field"
-import { DocumentSourceHighlight, ConnectionLine, VerificationTooltip } from "@/components/shared/document-highlight"
+import { AuditableField } from "@/components/shared/auditable-field"
 
 interface Tab {
   id: string
@@ -70,28 +68,22 @@ interface DocumentViewerProps {
   startInFullScreen?: boolean // Add this prop to control initial state
 }
 
-// Main DocumentViewer wrapper component
 export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen = false }: DocumentViewerProps) {
-  return (
-    <SourceHighlightProvider>
-      <DocumentViewerContent 
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        file={file}
-        startInFullScreen={startInFullScreen}
-      />
-    </SourceHighlightProvider>
-  );
-}
-
-// DocumentViewerContent contains the actual implementation
-function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen = false }: DocumentViewerProps) {
   const [isFullScreen, setIsFullScreen] = React.useState(startInFullScreen)
   const [activeTab, setActiveTab] = React.useState("details")
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = React.useState(false)
   const [capitalCallFocused, setCapitalCallFocused] = React.useState(false)
   const [showAllCapitalCallDetails, setShowAllCapitalCallDetails] = React.useState(false)
+  
+  // Handle source click for auditability
+  const handleSourceClick = (source: any) => {
+    console.log("Navigate to source:", source)
+    // In a real implementation, this would:
+    // 1. Highlight the specific text in the document viewer
+    // 2. Navigate to the correct page
+    // 3. Show the extracted text context
+  }
   
   // Reset to startInFullScreen when opening
   React.useEffect(() => {
@@ -176,25 +168,7 @@ function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen =
     }
   }, [isFullScreen, activeTab, tabs]) // Include tabs in dependency array
 
-  // Add a ref for the document viewer element to scroll to highlighted sections
-  const documentViewerRef = React.useRef<HTMLDivElement>(null);
-  const { highlight } = useSourceHighlight();
-  
-  // Scroll to highlighted element when highlight changes
-  React.useEffect(() => {
-    if (highlight && documentViewerRef.current) {
-      console.log("Scrolling to highlighted element:", highlight);
-      // In a real implementation, this would calculate the scroll position
-      // based on the highlighted element's position
-      const scrollTop = highlight.documentPosition.rect.top - 200;
-      documentViewerRef.current.scrollTo({
-        top: scrollTop,
-        behavior: 'smooth'
-      });
-    }
-  }, [highlight]);
-
-  // File preview component - update to handle document highlighting
+  // File preview component based on file type
   const FilePreview = ({ file }: { file: any }) => {
     if (!file) {
       return (
@@ -222,14 +196,11 @@ function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen =
     switch (fileType) {
       case "pdf":
         return (
-          <div className="w-full h-full bg-gray-100 overflow-y-auto relative" ref={documentViewerRef}>
-            {/* Add the document source highlight overlay */}
-            <DocumentSourceHighlight highlight={highlight} />
-            
+          <div className="w-full h-full bg-gray-100 overflow-y-auto">
             {/* Mock PDF pages */}
             <div className="max-w-4xl mx-auto py-8 space-y-8">
               {/* Page 1 */}
-              <div className="bg-white shadow-lg mx-4 relative" style={{ aspectRatio: '8.5/11' }}>
+              <div className="bg-white shadow-lg mx-4" style={{ aspectRatio: '8.5/11' }}>
                 <div className="p-16 h-full flex flex-col">
                   {file.documentType === "capital_call" ? (
                     <>
@@ -616,13 +587,274 @@ function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen =
             
             <div className="px-3 pb-3 pt-2">
               <div className="space-y-3">
-                <VerifiableField label="Call Number" value="#4" fieldId="call_number" />
-                <VerifiableField label="Fund Name" value={file.fund?.name || "KKR North America Fund VII"} fieldId="fund_name" />
-                <VerifiableField label="Fund Strategy" value={file.fund?.strategy || "Large Buyout"} fieldId="fund_strategy" />
-                <VerifiableField label="Total Call Amount" value="$8,500,000" fieldId="total_call_amount" className="font-medium" />
-                <VerifiableField label="Your Commitment %" value="2.35%" fieldId="your_commitment_pct" />
-                <VerifiableField label="Your Call Amount" value="$199,750" fieldId="your_call_amount" className="font-medium text-green-700" />
-                <VerifiableField label="Due Date" value="November 15, 2023" fieldId="due_date" className="font-medium text-red-600" />
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Number</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">#4</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Name</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">{file.fund?.name || "KKR North America Fund VII"}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Strategy</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Fund Strategy"
+                      className=""
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 1,
+                        confidence: "high",
+                        extractedText: "Fund Strategy: Large Buyout focused on North American mid-market companies",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      {file.fund?.strategy || "Large Buyout"}
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Total Call Amount</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Total Call Amount"
+                      className="font-medium"
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 1,
+                        confidence: "high",
+                        extractedText: "Total capital call amount for all Limited Partners: $8,500,000",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      $8,500,000
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Commitment %</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Your Commitment %"
+                      className=""
+                      sources={[{
+                        documentName: "GF3-LPA-Final-Executed.pdf",
+                        pageNumber: 12,
+                        confidence: "high",
+                        extractedText: "Limited Partner commitment percentage: 2.35% of total fund commitments",
+                        sourceType: "document",
+                        lastUpdated: "2023-01-15T10:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      2.35%
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Call Amount</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Your Call Amount"
+                      className="font-medium text-green-700"
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 1,
+                        confidence: "high",
+                        extractedText: "Your proportionate share of this capital call is $199,750 based on your commitment percentage of 2.35%",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      $199,750
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Due Date</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Due Date"
+                      className="font-medium text-red-600"
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 1,
+                        confidence: "high",
+                        extractedText: "Capital call payment due date: November 15, 2023",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      November 15, 2023
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Purpose</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Call Purpose"
+                      className=""
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 1,
+                        confidence: "high",
+                        extractedText: "Purpose: TechVantage Solutions acquisition ($8.2M) plus general fund expenses ($0.3M)",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      TechVantage Solutions acquisition ($8.2M) + Fund expenses ($0.3M)
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Settlement Date</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Settlement Date"
+                      className=""
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 1,
+                        confidence: "high",
+                        extractedText: "Settlement date for capital call: November 20, 2023",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      November 20, 2023
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Wire Instructions</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Wire Instructions"
+                      className=""
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 2,
+                        confidence: "high",
+                        extractedText: "Wire transfer instructions: Chase Bank, Account Number: 4471234567",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      Chase Bank - Account: 4471234567
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Type</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Investment Type"
+                      className=""
+                      sources={[{
+                        documentName: "TechVantage-Investment-Memo-Final.pdf",
+                        pageNumber: 3,
+                        confidence: "high",
+                        extractedText: "Investment type: Platform Company Acquisition in technology sector",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-10T14:20:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      Platform Company Acquisition
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Stage</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Investment Stage"
+                      className=""
+                      sources={[{
+                        documentName: "TechVantage-Investment-Memo-Final.pdf",
+                        pageNumber: 3,
+                        confidence: "high",
+                        extractedText: "Investment stage: Growth Capital for expansion and market penetration",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-10T14:20:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      Growth Capital
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Currency</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Call Currency"
+                      className=""
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 1,
+                        confidence: "high",
+                        extractedText: "All amounts are denominated in US Dollars (USD)",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      USD
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Management Fee</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Management Fee"
+                      className=""
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 2,
+                        confidence: "high",
+                        extractedText: "Management fee of $45,000 is included in this capital call",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      $45,000 (included in call)
+                    </AuditableField>
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Reference Number</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    <AuditableField 
+                      fieldName="Reference Number"
+                      className=""
+                      sources={[{
+                        documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                        pageNumber: 1,
+                        confidence: "high",
+                        extractedText: "Reference number for this capital call: CC-NAFVII-004-2023",
+                        sourceType: "document",
+                        lastUpdated: "2023-10-22T09:30:00Z"
+                      }]}
+                      onSourceClick={handleSourceClick}
+                    >
+                      CC-NAFVII-004-2023
+                    </AuditableField>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -680,63 +912,325 @@ function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen =
               {openSections.capitalCall && (
                 <div className="px-3 pb-3 pt-2">
                   <div className="space-y-3">
-                    <VerifiableField label="Call Number" value="#4" fieldId="call_number" />
-                    <VerifiableField label="Fund Name" value={file.fund?.name || "KKR North America Fund VII"} fieldId="fund_name" />
-                    <VerifiableField label="Fund Strategy" value={file.fund?.strategy || "Large Buyout"} fieldId="fund_strategy" />
-                    <VerifiableField label="Total Call Amount" value="$8,500,000" fieldId="total_call_amount" className="font-medium" />
-                    <VerifiableField label="Your Commitment %" value="2.35%" fieldId="your_commitment_pct" />
-                    <VerifiableField label="Your Call Amount" value="$199,750" fieldId="your_call_amount" className="font-medium text-green-700" />
-                    <VerifiableField label="Due Date" value="November 15, 2023" fieldId="due_date" className="font-medium text-red-600" />
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Number</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Call Number"
+                          className=""
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Capital Call Notice #4 - Fourth call for KKR North America Fund VII",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                          onSourceClick={handleSourceClick}
+                        >
+                          #4
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Name</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Fund Name"
+                          className=""
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Fund Name: KKR North America Fund VII",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                          onSourceClick={handleSourceClick}
+                        >
+                          {file.fund?.name || "KKR North America Fund VII"}
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Strategy</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Fund Strategy"
+                          className=""
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Fund Strategy: Large Buyout focused on North American mid-market companies",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                          onSourceClick={handleSourceClick}
+                        >
+                          {file.fund?.strategy || "Large Buyout"}
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Total Call Amount</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Total Call Amount"
+                          className="font-medium"
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Total capital call amount for all Limited Partners: $8,500,000",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                      onSourceClick={handleSourceClick}
+                        >
+                          $8,500,000
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Commitment %</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Your Commitment %"
+                          className=""
+                          sources={[{
+                            documentName: "GF3-LPA-Final-Executed.pdf",
+                            pageNumber: 12,
+                            confidence: "high",
+                            extractedText: "Limited Partner commitment percentage: 2.35% of total fund commitments",
+                            sourceType: "document",
+                            lastUpdated: "2023-01-15T10:30:00Z"
+                          }]}
+                      onSourceClick={handleSourceClick}
+                        >
+                          2.35%
+                        </AuditableField>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Call Amount</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">
+                        <AuditableField 
+                          fieldName="Your Call Amount"
+                          className="font-medium text-green-700"
+                          sources={[{
+                            documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                            pageNumber: 1,
+                            confidence: "high",
+                            extractedText: "Your proportionate share of this capital call is $199,750 based on your commitment percentage of 2.35%",
+                            sourceType: "document",
+                            lastUpdated: "2023-10-22T09:30:00Z"
+                          }]}
+                      onSourceClick={handleSourceClick}
+                        >
+                          $199,750
+                        </AuditableField>
+                      </span>
+                    </div>
                     
                     {showAllCapitalCallDetails && (
                       <>
                         <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Due Date</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Due Date"
+                              className="font-medium text-red-600"
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "Capital call payment due date: November 15, 2023",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              November 15, 2023
+                            </AuditableField>
+                          </span>
+                        </div>
+                        <div className="flex items-center">
                           <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Purpose</span>
-                          <span className="flex-1 text-sm px-2 py-0.5">TechVantage Solutions acquisition ($8.2M) + Fund expenses ($0.3M)</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Call Purpose"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "Purpose: TechVantage Solutions acquisition ($8.2M) plus general fund expenses ($0.3M)",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              TechVantage Solutions acquisition ($8.2M) + Fund expenses ($0.3M)
+                            </AuditableField>
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Settlement Date</span>
-                          <span className="flex-1 text-sm px-2 py-0.5">November 20, 2023</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Settlement Date"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "Settlement date for capital call: November 20, 2023",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              November 20, 2023
+                            </AuditableField>
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Wire Instructions</span>
-                          <span className="flex-1 text-sm px-2 py-0.5">Chase Bank - Account: 4471234567</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Wire Instructions"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 2,
+                                confidence: "high",
+                                extractedText: "Wire transfer instructions: Chase Bank, Account Number: 4471234567",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              Chase Bank - Account: 4471234567
+                            </AuditableField>
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Type</span>
-                          <span className="flex-1 text-sm px-2 py-0.5">Platform Company Acquisition</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Investment Type"
+                              className=""
+                              sources={[{
+                                documentName: "TechVantage-Investment-Memo-Final.pdf",
+                                pageNumber: 3,
+                                confidence: "high",
+                                extractedText: "Investment type: Platform Company Acquisition in technology sector",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-10T14:20:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              Platform Company Acquisition
+                            </AuditableField>
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Stage</span>
-                          <span className="flex-1 text-sm px-2 py-0.5">Growth Capital</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Investment Stage"
+                              className=""
+                              sources={[{
+                                documentName: "TechVantage-Investment-Memo-Final.pdf",
+                                pageNumber: 3,
+                                confidence: "high",
+                                extractedText: "Investment stage: Growth Capital for expansion and market penetration",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-10T14:20:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              Growth Capital
+                            </AuditableField>
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Currency</span>
-                          <span className="flex-1 text-sm px-2 py-0.5">USD</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Call Currency"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "All amounts are denominated in US Dollars (USD)",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              USD
+                            </AuditableField>
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Management Fee</span>
-                          <span className="flex-1 text-sm px-2 py-0.5">$45,000 (included in call)</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Management Fee"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 2,
+                                confidence: "high",
+                                extractedText: "Management fee of $45,000 is included in this capital call",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              $45,000 (included in call)
+                            </AuditableField>
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Reference Number</span>
-                          <span className="flex-1 text-sm px-2 py-0.5">CC-NAFVII-004-2023</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">
+                            <AuditableField 
+                              fieldName="Reference Number"
+                              className=""
+                              sources={[{
+                                documentName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+                                pageNumber: 1,
+                                confidence: "high",
+                                extractedText: "Reference number for this capital call: CC-NAFVII-004-2023",
+                                sourceType: "document",
+                                lastUpdated: "2023-10-22T09:30:00Z"
+                              }]}
+                              onSourceClick={handleSourceClick}
+                            >
+                              CC-NAFVII-004-2023
+                            </AuditableField>
+                          </span>
                         </div>
                       </>
                     )}
-                  </div>
-                  
-                  <div className="flex items-center mt-2">
-                    <button
-                      onClick={() => setShowAllCapitalCallDetails(!showAllCapitalCallDetails)}
-                      className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 ml-2"
-                    >
-                      {showAllCapitalCallDetails ? (
-                        <>Show less <ChevronUpIcon className="h-3 w-3" /></>
-                      ) : (
-                        <>Show more <ChevronDownIcon className="h-3 w-3" /></>
-                      )}
-                    </button>
+                    
+                    {/* Show More/Less Toggle for Capital Call */}
+                    <div className="flex items-center mt-2 ml-2">
+                      <button
+                        onClick={() => setShowAllCapitalCallDetails(prev => !prev)}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                      >
+                        {showAllCapitalCallDetails ? (
+                          <>Show less <ChevronUpIcon className="h-3 w-3" /></>
+                        ) : (
+                          <>Show more <ChevronDownIcon className="h-3 w-3" /></>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -810,6 +1304,7 @@ function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen =
                 size="icon"
                 onClick={() => {
                   setIsFullScreen(false);
+                  onOpenChange(false);
                   // Also exit focus mode if active
                   if (capitalCallFocused) {
                     setCapitalCallFocused(false);
@@ -834,7 +1329,12 @@ function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen =
                 <PrinterIcon className="h-4 w-4 mr-1" />
                 Print
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}
+                title={isRightPanelCollapsed ? "Show details panel (⌘B)" : "Hide details panel (⌘B)"}
+              >
                 <PanelRightIcon className="h-4 w-4" />
               </Button>
             </div>
@@ -929,186 +1429,45 @@ function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen =
     return typeof document !== "undefined" ? createPortal(content, document.body) : null
   }
 
-  // Return with added connection line and tooltip
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const Drawer = isMobile ? Sheet : Sheet;
-  const DrawerContent = isMobile ? SheetContent : SheetContent;
-  const Dialog = isMobile ? Sheet : Sheet;
-  const DialogContent = isMobile ? SheetContent : SheetContent;
-
-  const drawerContent = (
+  return (
     <>
-      {/* Add SheetTitle to fix Radix UI Dialog warning */}
-      <SheetTitle className="sr-only">Document Viewer</SheetTitle>
-      
-      {/* Header */}
-      <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onOpenChange(false)}
-          >
-            <ChevronLeftIcon className="h-4 w-4" />
-          </Button>
-          <Badge variant="outline" className="bg-background">
-            File
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <DownloadIcon className="h-4 w-4 mr-1" />
-            Download
-          </Button>
-          <Button variant="outline" size="sm">
-            <PrinterIcon className="h-4 w-4 mr-1" />
-            Print
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
-            <ExpandIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Tabs - no record header anymore */}
-        <div className="border-b bg-background px-6">
-          <div className="flex relative">
-            <div className="flex flex-1 overflow-x-auto scrollbar-none">
-              {tabs.map((tab, index) => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    // Exit focus mode when changing tabs
-                    if (capitalCallFocused) {
-                      setCapitalCallFocused(false);
-                    }
-                  }}
-                  className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
-                    activeTab === tab.id
-                      ? "border-b-2 border-primary text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  } ${index === 0 ? 'pl-0' : ''}`}
-                >
-                  {tab.icon && <tab.icon className="h-4 w-4 flex-shrink-0" />}
-                  <span>{tab.label}</span>
-                  {tab.count !== null && (
-                    <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
-                      {tab.count}
-                    </Badge>
-                  )}
-                  {activeTab === tab.id && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-primary"></span>}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-0">
-          <div className="mb-4 px-6 pt-6 flex items-center justify-between">
-            {getTabHeading()}
-            
-            {activeTab === "details" && !capitalCallFocused && (
-              <Button variant="default" size="sm" onClick={() => setIsFullScreen(true)}>
-                <EyeIcon className="h-4 w-4 mr-1" />
-                Read
-              </Button>
-            )}
-            {activeTab === "tasks" && !capitalCallFocused && (
-              <Button variant="outline" size="sm">
-                <PlusIcon className="h-4 w-4 mr-1" />
-                Add Task
-              </Button>
-            )}
-            {activeTab === "notes" && !capitalCallFocused && (
-              <Button variant="outline" size="sm">
-                <PlusIcon className="h-4 w-4 mr-1" />
-                Add Note
-              </Button>
-            )}
-          </div>
+      <Sheet open={isOpen && !isFullScreen} onOpenChange={onOpenChange}>
+        <SheetContent side="right" className="flex w-full max-w-[30vw] flex-col p-0 sm:max-w-[30vw] [&>button]:hidden overflow-hidden">
+          {/* Add SheetTitle to fix Radix UI Dialog warning */}
+          <SheetTitle className="sr-only">Document Viewer</SheetTitle>
           
-          {activeTab === "details" && <FileDetailsPanel />}
-          {activeTab === "tasks" && <div className="px-6 pb-6">{renderEmptyTabContent("tasks")}</div>}
-          {activeTab === "notes" && <div className="px-6 pb-6">{renderEmptyTabContent("notes")}</div>}
-        </div>
-      </div>
-    </>
-  );
-
-  const dialogContent = (
-    <>
-      {/* Semi-transparent overlay */}
-      <div className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm" onClick={() => {
-        setIsFullScreen(false)
-        onOpenChange(false)
-      }} />
-      
-      {/* Main container with rounded corners and spacing */}
-      <div className="fixed inset-4 z-[9999] bg-background rounded-xl shadow-xl overflow-hidden">
-        {/* Full Screen Header */}
-        <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setIsFullScreen(false);
-                // Also exit focus mode if active
-                if (capitalCallFocused) {
-                  setCapitalCallFocused(false);
-                }
-              }}
-            >
-              <XIcon className="h-4 w-4" />
-            </Button>
-            <Badge variant="outline" className="bg-background">
-              File
-            </Badge>
-            <span className="text-sm font-medium truncate max-w-[300px]">
-              {file ? file.fileName || file.name || "Untitled" : "Untitled"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <DownloadIcon className="h-4 w-4 mr-1" />
-              Download
-            </Button>
-            <Button variant="outline" size="sm">
-              <PrinterIcon className="h-4 w-4 mr-1" />
-              Print
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setIsRightPanelCollapsed(!isRightPanelCollapsed)}>
-              <PanelRightIcon className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Full Screen Content - Two Column Layout */}
-        <div className="flex h-[calc(100%-73px)] relative">
-          {/* Left Panel - Document Preview */}
-          <div className="flex-1 overflow-y-auto">
-            <FilePreview file={file} />
-          </div>
-
-          {/* Right Panel - Details (same width as drawer to prevent jumping) */}
-          <div className={`${isRightPanelCollapsed ? 'w-0' : 'w-[672px]'} border-l bg-background flex flex-col transition-all duration-300 overflow-hidden`}>
-            {/* Record Header */}
-            <div className="border-b bg-background px-6 py-2">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {file && (file.title || file.name || "Untitled").charAt(0)}
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">{file ? (file.title || file.name || "Untitled") : "Untitled"}</h2>
-                </div>
-              </div>
+          {/* Header */}
+          <div className="flex items-center justify-between border-b bg-muted px-6 py-4">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Badge variant="outline" className="bg-background">
+                File
+              </Badge>
             </div>
-            
-            {/* Tabs */}
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <DownloadIcon className="h-4 w-4 mr-1" />
+                Download
+              </Button>
+              <Button variant="outline" size="sm">
+                <PrinterIcon className="h-4 w-4 mr-1" />
+                Print
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
+                <ExpandIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Tabs - no record header anymore */}
             <div className="border-b bg-background px-6">
               <div className="flex relative">
                 <div className="flex flex-1 overflow-x-auto scrollbar-none">
@@ -1141,72 +1500,41 @@ function DocumentViewerContent({ isOpen, onOpenChange, file, startInFullScreen =
                 </div>
               </div>
             </div>
-            
-            {/* Tab Content - matching drawer layout */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-0">
-                <div className="mb-4 px-6 pt-6 flex items-center justify-between">
-                  {getTabHeading()}
-                  
-                  {activeTab === "details" && !capitalCallFocused && (
-                    <Button variant="default" size="sm" onClick={() => setIsFullScreen(true)}>
-                      <EyeIcon className="h-4 w-4 mr-1" />
-                      Read
-                    </Button>
-                  )}
-                  {activeTab === "tasks" && !capitalCallFocused && (
-                    <Button variant="outline" size="sm">
-                      <PlusIcon className="h-4 w-4 mr-1" />
-                      Add Task
-                    </Button>
-                  )}
-                  {activeTab === "notes" && !capitalCallFocused && (
-                    <Button variant="outline" size="sm">
-                      <PlusIcon className="h-4 w-4 mr-1" />
-                      Add Note
-                    </Button>
-                  )}
-                </div>
+
+            {/* Tab Content */}
+            <div className="p-0">
+              <div className="mb-4 px-6 pt-6 flex items-center justify-between">
+                {getTabHeading()}
                 
-                {activeTab === "details" && <FileDetailsPanel isFullScreen={true} />}
-                {activeTab === "tasks" && <div className="px-6 pb-6">{renderEmptyTabContent("tasks")}</div>}
-                {activeTab === "notes" && <div className="px-6 pb-6">{renderEmptyTabContent("notes")}</div>}
+                {activeTab === "details" && !capitalCallFocused && (
+                  <Button variant="default" size="sm" onClick={() => setIsFullScreen(true)}>
+                    <EyeIcon className="h-4 w-4 mr-1" />
+                    Read
+                  </Button>
+                )}
+                {activeTab === "tasks" && !capitalCallFocused && (
+                  <Button variant="outline" size="sm">
+                    <PlusIcon className="h-4 w-4 mr-1" />
+                    Add Task
+                  </Button>
+                )}
+                {activeTab === "notes" && !capitalCallFocused && (
+                  <Button variant="outline" size="sm">
+                    <PlusIcon className="h-4 w-4 mr-1" />
+                    Add Note
+                  </Button>
+                )}
               </div>
+              
+              {activeTab === "details" && <FileDetailsPanel />}
+              {activeTab === "tasks" && <div className="px-6 pb-6">{renderEmptyTabContent("tasks")}</div>}
+              {activeTab === "notes" && <div className="px-6 pb-6">{renderEmptyTabContent("notes")}</div>}
             </div>
           </div>
-        </div>
-      </>
-    );
+        </SheetContent>
+      </Sheet>
 
-  if (isMobile) {
-    return (
-      <>
-        <Drawer open={isOpen} onOpenChange={onOpenChange}>
-          <DrawerContent className="h-[90vh]">
-            {drawerContent}
-          </DrawerContent>
-        </Drawer>
-        
-        {/* Add the visual connection line and tooltip */}
-        <ConnectionLine highlight={highlight} />
-        {highlight && <VerificationTooltip highlight={highlight} />}
-      </>
-    );
-  } else {
-    return (
-      <>
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-[1000px] w-full p-0" onInteractOutside={(e) => e.preventDefault()}>
-            {dialogContent}
-          </DialogContent>
-        </Dialog>
-        
-        {isFullScreen && <FullScreenContent />}
-        
-        {/* Add the visual connection line and tooltip */}
-        <ConnectionLine highlight={highlight} />
-        {highlight && <VerificationTooltip highlight={highlight} />}
-      </>
-    );
-  }
+      {isOpen && isFullScreen && <FullScreenContent />}
+    </>
+  )
 }

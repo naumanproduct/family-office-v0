@@ -67,6 +67,7 @@ interface MasterDrawerProps {
     setSelectedNote?: (note: any) => void,
     setSelectedMeeting?: (meeting: any) => void,
     setSelectedEmail?: (email: any) => void,
+    setDocumentViewerFile?: (file: any) => void,
   ) => React.ReactNode
   detailsPanel: (isFullScreen?: boolean) => React.ReactNode
   onComposeEmail?: () => void
@@ -274,6 +275,7 @@ export function MasterDrawer({
             setParentTaskForSubtask(null)
           }}
           isInDrawer={true}
+          setDocumentViewerFile={setDocumentViewerFile}
         />
       )
     }
@@ -287,6 +289,7 @@ export function MasterDrawer({
           recordName={title} 
           recordType={recordType}
           isInDrawer={true}
+          setDocumentViewerFile={setDocumentViewerFile}
           onSubtaskClick={(subtask) => {
             setSelectedSubtask(subtask)
             setParentTaskForSubtask(selectedTask)
@@ -297,7 +300,7 @@ export function MasterDrawer({
 
     // Handle note details view (only in non-fullscreen mode)
     if (activeTab === "notes" && selectedNote && !isFullScreen) {
-      return <NoteDetailsView note={selectedNote} onBack={() => setSelectedNote(null)} />
+      return <NoteDetailsView note={selectedNote} onBack={() => setSelectedNote(null)} setDocumentViewerFile={setDocumentViewerFile} />
     }
 
     // Handle meeting details view (only in non-fullscreen mode)
@@ -311,7 +314,7 @@ export function MasterDrawer({
     }
 
     // For other tabs, return the children with the setSelectedTask and setSelectedNote callbacks
-    return children(activeTab, viewMode, setSelectedTask, setSelectedNote, setSelectedMeeting, setSelectedEmail)
+    return children(activeTab, viewMode, setSelectedTask, setSelectedNote, setSelectedMeeting, setSelectedEmail, setDocumentViewerFile)
   }
 
   // Get the appropriate title and subtitle - only change for non-fullscreen mode
@@ -542,7 +545,7 @@ export function MasterDrawer({
                   }
 
                   // For other tabs, pass fullscreen-specific setters
-                  return children(activeTab, viewMode, setFullscreenSelectedTask, setFullscreenSelectedNote, setFullscreenSelectedMeeting, setFullscreenSelectedEmail)
+                  return children(activeTab, viewMode, setFullscreenSelectedTask, setFullscreenSelectedNote, setFullscreenSelectedMeeting, setFullscreenSelectedEmail, setDocumentViewerFile)
                 })()}
               </div>
             </div>
@@ -599,6 +602,7 @@ export function MasterDrawer({
                   recordName={title}
                   recordType={recordType}
                   isInDrawer={true}
+                  setDocumentViewerFile={setDocumentViewerFile}
                   onSubtaskClick={(subtask) => {
                     setFullscreenSelectedSubtask(subtask)
                     setFullscreenParentTaskForSubtask(fullscreenSelectedTask)
@@ -645,7 +649,7 @@ export function MasterDrawer({
               </div>
               {/* Note Details Content */}
               <div className="flex-1 overflow-auto">
-                <NoteDetailsView note={fullscreenSelectedNote} onBack={() => setFullscreenSelectedNote(null)} />
+                <NoteDetailsView note={fullscreenSelectedNote} onBack={() => setFullscreenSelectedNote(null)} setDocumentViewerFile={setDocumentViewerFile} />
               </div>
             </SheetContent>
           </Sheet>
@@ -776,6 +780,7 @@ export function MasterDrawer({
                     setFullscreenParentTaskForSubtask(null)
                   }}
                   isInDrawer={true}
+                  setDocumentViewerFile={setDocumentViewerFile}
                 />
               </div>
             </SheetContent>

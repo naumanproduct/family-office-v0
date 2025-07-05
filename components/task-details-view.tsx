@@ -65,6 +65,7 @@ interface TaskDetailsViewProps {
   onSubtaskClick?: (subtask: any) => void
   isFullScreen?: boolean
   hideSubtasks?: boolean
+  setDocumentViewerFile?: (file: any) => void
 }
 
 export function TaskDetailsView({
@@ -79,6 +80,7 @@ export function TaskDetailsView({
   onSubtaskClick,
   isFullScreen = false,
   hideSubtasks = false,
+  setDocumentViewerFile,
 }: TaskDetailsViewProps) {
   const [commentText, setCommentText] = React.useState("")
   const [taskTitle, setTaskTitle] = React.useState(task.title || "")
@@ -957,6 +959,7 @@ export function TaskDetailsView({
             activeTab="files"
             viewMode={filesViewMode}
             data={transformedFiles}
+            onFileClick={setDocumentViewerFile}
           />
         </>
       );

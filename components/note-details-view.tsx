@@ -34,9 +34,10 @@ interface NoteDetailsViewProps {
   hideAddNotes?: boolean
   isFullScreen?: boolean
   onTabChange?: (tab: string) => void
+  setDocumentViewerFile?: (file: any) => void
 }
 
-export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScreen = false, onTabChange }: NoteDetailsViewProps) {
+export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScreen = false, onTabChange, setDocumentViewerFile }: NoteDetailsViewProps) {
   const [noteTitle, setNoteTitle] = React.useState(note.title || "")
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState("details")
@@ -175,6 +176,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
             activeTab="files"
             viewMode={filesViewMode}
             data={transformedFiles}
+            onFileClick={setDocumentViewerFile}
           />
         </>
       );
