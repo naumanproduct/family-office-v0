@@ -29,6 +29,9 @@ import {
   EyeIcon,
   ChevronRightIcon,
   PanelRightIcon,
+  Maximize2Icon,
+  ArrowLeftIcon,
+  ChevronUpIcon,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -69,6 +72,8 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
   const [activeTab, setActiveTab] = React.useState("details")
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = React.useState(false)
+  const [capitalCallFocused, setCapitalCallFocused] = React.useState(false)
+  const [showAllCapitalCallDetails, setShowAllCapitalCallDetails] = React.useState(false)
   
   // Reset to startInFullScreen when opening
   React.useEffect(() => {
@@ -187,31 +192,88 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
               {/* Page 1 */}
               <div className="bg-white shadow-lg mx-4" style={{ aspectRatio: '8.5/11' }}>
                 <div className="p-16 h-full flex flex-col">
-                  <div className="mb-8">
-                    <h1 className="text-3xl font-bold mb-4">Investment Agreement</h1>
-                    <p className="text-gray-600">Document ID: {file.id || 'DOC-001'}</p>
-                  </div>
-                  
-                  <div className="space-y-4 text-gray-700">
-                    <p className="leading-relaxed">
-                      This Investment Agreement ("Agreement") is entered into as of the date last signed below (the "Effective Date") by and between the parties identified below.
-                    </p>
-                    
-                    <h2 className="text-xl font-semibold mt-6">1. Parties</h2>
-                    <p className="leading-relaxed">
-                      This Agreement is between Family Office Holdings LLC ("Investor") and Portfolio Company Inc. ("Company"), collectively referred to as the "Parties."
-                    </p>
-                    
-                    <h2 className="text-xl font-semibold mt-6">2. Investment Terms</h2>
-                    <p className="leading-relaxed">
-                      Subject to the terms and conditions set forth in this Agreement, Investor agrees to invest the principal amount specified in Schedule A attached hereto.
-                    </p>
-                    
-                    <h2 className="text-xl font-semibold mt-6">3. Representations and Warranties</h2>
-                    <p className="leading-relaxed">
-                      Each Party represents and warrants to the other Party that: (a) it has full corporate power and authority to enter into this Agreement; (b) the execution and delivery of this Agreement has been duly authorized by all necessary corporate action.
-                    </p>
-                  </div>
+                  {file.documentType === "capital_call" ? (
+                    <>
+                      <div className="mb-8">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h1 className="text-3xl font-bold mb-2">CAPITAL CALL NOTICE #4</h1>
+                            <p className="text-lg text-gray-600">{file.fund?.name || "KKR North America Fund VII"}</p>
+                          </div>
+                          <div className="text-right text-sm text-gray-500">
+                            <p>Call Date: October 22, 2023</p>
+                            <p>Reference: CC-NAFVII-004-2023</p>
+                          </div>
+                        </div>
+                        <div className="border-b-2 border-gray-200 pb-4">
+                          <p className="text-gray-600">Fund Strategy: {file.fund?.strategy || "Large Buyout"}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-6 text-gray-700">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <h2 className="text-xl font-semibold mb-3 text-blue-900">Call Summary</h2>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="font-medium">Total Call Amount:</span>
+                              <p className="text-2xl font-bold text-blue-900">$8,500,000</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">Your Call Amount:</span>
+                              <p className="text-2xl font-bold text-green-700">$199,750</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h2 className="text-xl font-semibold mb-3">Investment Details</h2>
+                          <div className="space-y-2">
+                            <p><span className="font-medium">Target Company:</span> TechVantage Solutions Inc.</p>
+                            <p><span className="font-medium">Investment Type:</span> Platform Company Acquisition</p>
+                            <p><span className="font-medium">Investment Amount:</span> $8,200,000</p>
+                            <p><span className="font-medium">Fund Expenses:</span> $300,000</p>
+                          </div>
+                        </div>
+
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <h2 className="text-xl font-semibold mb-3 text-yellow-800">Important Dates</h2>
+                          <div className="space-y-1 text-sm">
+                            <p><span className="font-medium">Due Date:</span> November 15, 2023</p>
+                            <p><span className="font-medium">Settlement Date:</span> November 20, 2023</p>
+                            <p><span className="font-medium">Late Fee Applies:</span> After November 16, 2023</p>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="mb-8">
+                        <h1 className="text-3xl font-bold mb-4">Investment Agreement</h1>
+                        <p className="text-gray-600">Document ID: {file.id || 'DOC-001'}</p>
+                      </div>
+                      
+                      <div className="space-y-4 text-gray-700">
+                        <p className="leading-relaxed">
+                          This Investment Agreement ("Agreement") is entered into as of the date last signed below (the "Effective Date") by and between the parties identified below.
+                        </p>
+                        
+                        <h2 className="text-xl font-semibold mt-6">1. Parties</h2>
+                        <p className="leading-relaxed">
+                          This Agreement is between Family Office Holdings LLC ("Investor") and Portfolio Company Inc. ("Company"), collectively referred to as the "Parties."
+                        </p>
+                        
+                        <h2 className="text-xl font-semibold mt-6">2. Investment Terms</h2>
+                        <p className="leading-relaxed">
+                          Subject to the terms and conditions set forth in this Agreement, Investor agrees to invest the principal amount specified in Schedule A attached hereto.
+                        </p>
+                        
+                        <h2 className="text-xl font-semibold mt-6">3. Representations and Warranties</h2>
+                        <p className="leading-relaxed">
+                          Each Party represents and warrants to the other Party that: (a) it has full corporate power and authority to enter into this Agreement; (b) the execution and delivery of this Agreement has been duly authorized by all necessary corporate action.
+                        </p>
+                      </div>
+                    </>
+                  )}
                   
                   <div className="mt-auto text-center text-gray-400 text-sm">
                     Page 1 of 3
@@ -359,6 +421,19 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
       );
     }
 
+    // State for which sections are open
+    const [openSections, setOpenSections] = React.useState({
+      capitalCall: true // Capital call section is expanded by default
+    });
+    
+    // Toggle a section open/closed
+    const toggleSection = (section: keyof typeof openSections) => {
+      setOpenSections(prev => ({
+        ...prev,
+        [section]: !prev[section]
+      }));
+    };
+
     // Mock data for related entities
     const relatedData = {
       companies: [
@@ -487,17 +562,224 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
     // Mock activities for the file
     const activities = generateFileActivities()
 
+    // Return focused Capital Call view when in focus mode
+    if (capitalCallFocused && file.documentType === "capital_call") {
+      return (
+        <div className="px-6 pb-6">
+          {/* No additional back button needed here - we'll replace the tab heading */}
+          <div className="rounded-lg border border-muted overflow-hidden">
+            <div className="w-full flex items-center justify-between p-3 transition-colors bg-muted/20">
+              <div className="flex items-center gap-2">
+                <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">Capital Call Information</span>
+              </div>
+            </div>
+            
+            <div className="px-3 pb-3 pt-2">
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Number</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">#4</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Name</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">{file.fund?.name || "KKR North America Fund VII"}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Strategy</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">{file.fund?.strategy || "Large Buyout"}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Total Call Amount</span>
+                  <span className="flex-1 text-sm px-2 py-0.5 font-medium">$8,500,000</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Commitment %</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">2.35%</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Call Amount</span>
+                  <span className="flex-1 text-sm px-2 py-0.5 font-medium text-green-700">$199,750</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Purpose</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">TechVantage Solutions acquisition ($8.2M) + Fund expenses ($0.3M)</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Due Date</span>
+                  <span className="flex-1 text-sm px-2 py-0.5 font-medium text-red-600">November 15, 2023</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Settlement Date</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">November 20, 2023</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Wire Instructions</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">Chase Bank - Account: 4471234567</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Type</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">Platform Company Acquisition</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Stage</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">Growth Capital</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Currency</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">USD</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Management Fee</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">$45,000 (included in call)</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Reference Number</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">CC-NAFVII-004-2023</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <UnifiedDetailsPanel
-        sections={sections}
-        isFullScreen={isFullScreen}
-        onNavigateToRecord={navigateToRecord}
-        onAddRecord={handleAddRecord}
-        onUnlinkRecord={handleUnlinkRecord}
-        activityContent={
-          <UnifiedActivitySection activities={activities} />
-        }
-      />
+      <>
+        <UnifiedDetailsPanel
+          sections={sections}
+          isFullScreen={isFullScreen}
+          onNavigateToRecord={navigateToRecord}
+          onAddRecord={handleAddRecord}
+          onUnlinkRecord={handleUnlinkRecord}
+          activityContent={
+            <UnifiedActivitySection activities={activities} />
+          }
+        />
+        
+        {/* Separate Capital Call Information Card with expand/collapse and focus mode */}
+        {file.documentType === "capital_call" && (
+          <div className="px-6 pb-6">
+            <div className="rounded-lg border border-muted overflow-hidden">
+              <button 
+                className="w-full flex items-center justify-between p-3 transition-colors bg-muted/20 group"
+                onClick={() => toggleSection('capitalCall')}
+              >
+                <div className="flex items-center">
+                  {openSections.capitalCall ? (
+                    <ChevronDownIcon className="h-4 w-4 text-muted-foreground mr-2" />
+                  ) : (
+                    <ChevronRightIcon className="h-4 w-4 text-muted-foreground mr-2" />
+                  )}
+                  <div className="flex items-center gap-2">
+                    <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium text-sm">Capital Call Information</span>
+                  </div>
+                </div>
+                
+                {/* Focus button in header row only */}
+                <Button
+                  variant="ghost" 
+                  size="icon"
+                  className="h-6 w-6 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCapitalCallFocused(true);
+                  }}
+                >
+                  <Maximize2Icon className="h-4 w-4" />
+                </Button>
+              </button>
+              
+              {openSections.capitalCall && (
+                <div className="px-3 pb-3 pt-2">
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Number</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">#4</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Name</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">{file.fund?.name || "KKR North America Fund VII"}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Fund Strategy</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">{file.fund?.strategy || "Large Buyout"}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Total Call Amount</span>
+                      <span className="flex-1 text-sm px-2 py-0.5 font-medium">$8,500,000</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Commitment %</span>
+                      <span className="flex-1 text-sm px-2 py-0.5">2.35%</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Your Call Amount</span>
+                      <span className="flex-1 text-sm px-2 py-0.5 font-medium text-green-700">$199,750</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Due Date</span>
+                      <span className="flex-1 text-sm px-2 py-0.5 font-medium text-red-600">November 15, 2023</span>
+                    </div>
+                    
+                    {showAllCapitalCallDetails && (
+                      <>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Purpose</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">TechVantage Solutions acquisition ($8.2M) + Fund expenses ($0.3M)</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Settlement Date</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">November 20, 2023</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Wire Instructions</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">Chase Bank - Account: 4471234567</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Type</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">Platform Company Acquisition</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Investment Stage</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">Growth Capital</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Call Currency</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">USD</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Management Fee</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">$45,000 (included in call)</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Reference Number</span>
+                          <span className="flex-1 text-sm px-2 py-0.5">CC-NAFVII-004-2023</span>
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Show More/Less Toggle for Capital Call */}
+                    <div className="flex items-center mt-2 ml-2">
+                      <button
+                        onClick={() => setShowAllCapitalCallDetails(prev => !prev)}
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                      >
+                        {showAllCapitalCallDetails ? (
+                          <>Show less <ChevronUpIcon className="h-3 w-3" /></>
+                        ) : (
+                          <>Show more <ChevronDownIcon className="h-3 w-3" /></>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </>
     );
   };
 
@@ -519,6 +801,31 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
     )
   }
 
+  // Tab Content Heading that needs to be updated for focus mode
+  const getTabHeading = () => {
+    if (activeTab === "details" && capitalCallFocused && file?.documentType === "capital_call") {
+      return (
+        <div className="flex items-center">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1 text-sm font-medium pl-0 -ml-2" 
+            onClick={() => setCapitalCallFocused(false)}
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Back to Details
+          </Button>
+        </div>
+      );
+    } else {
+      return (
+        <h3 className="text-lg font-semibold">
+          {tabs.find((tab) => tab.id === activeTab)?.label || ""}
+        </h3>
+      );
+    }
+  };
+
   // FullScreen Content
   const FullScreenContent = () => {
     const content = (
@@ -538,15 +845,21 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  setIsFullScreen(false)
-                  onOpenChange(false)
+                  setIsFullScreen(false);
+                  // Also exit focus mode if active
+                  if (capitalCallFocused) {
+                    setCapitalCallFocused(false);
+                  }
                 }}
               >
-                <ChevronLeftIcon className="h-4 w-4" />
+                <XIcon className="h-4 w-4" />
               </Button>
               <Badge variant="outline" className="bg-background">
                 File
               </Badge>
+              <span className="text-sm font-medium truncate max-w-[300px]">
+                {file ? file.fileName || file.name || "Untitled" : "Untitled"}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm">
@@ -557,7 +870,6 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                 <PrinterIcon className="h-4 w-4 mr-1" />
                 Print
               </Button>
-              <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
               <Button
                 variant="ghost"
                 size="icon"
@@ -597,7 +909,13 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                     {tabs.map((tab, index) => (
                       <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => {
+                          setActiveTab(tab.id);
+                          // Exit focus mode when changing tabs
+                          if (capitalCallFocused) {
+                            setCapitalCallFocused(false);
+                          }
+                        }}
                         className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
                           activeTab === tab.id
                             ? "border-b-2 border-primary text-primary"
@@ -622,16 +940,15 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
               <div className="flex-1 overflow-y-auto">
                 <div className="p-0">
                   <div className="mb-4 px-6 pt-6 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">
-                      {tabs.find((tab) => tab.id === activeTab)?.label || ""}
-                    </h3>
-                    {activeTab === "tasks" && (
+                    {getTabHeading()}
+                    
+                    {activeTab === "tasks" && !capitalCallFocused && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4 mr-1" />
                         Add Task
                       </Button>
                     )}
-                    {activeTab === "notes" && (
+                    {activeTab === "notes" && !capitalCallFocused && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4 mr-1" />
                         Add Note
@@ -698,7 +1015,13 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                   {tabs.map((tab, index) => (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        // Exit focus mode when changing tabs
+                        if (capitalCallFocused) {
+                          setCapitalCallFocused(false);
+                        }
+                      }}
                       className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
                         activeTab === tab.id
                           ? "border-b-2 border-primary text-primary"
@@ -722,22 +1045,21 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
             {/* Tab Content */}
             <div className="p-0">
               <div className="mb-4 px-6 pt-6 flex items-center justify-between">
-                <h3 className="text-lg font-semibold">
-                  {tabs.find((tab) => tab.id === activeTab)?.label || ""}
-                </h3>
-                {activeTab === "details" && (
+                {getTabHeading()}
+                
+                {activeTab === "details" && !capitalCallFocused && (
                   <Button variant="default" size="sm" onClick={() => setIsFullScreen(true)}>
                     <EyeIcon className="h-4 w-4 mr-1" />
                     Read
                   </Button>
                 )}
-                {activeTab === "tasks" && (
+                {activeTab === "tasks" && !capitalCallFocused && (
                   <Button variant="outline" size="sm">
                     <PlusIcon className="h-4 w-4 mr-1" />
                     Add Task
                   </Button>
                 )}
-                {activeTab === "notes" && (
+                {activeTab === "notes" && !capitalCallFocused && (
                   <Button variant="outline" size="sm">
                     <PlusIcon className="h-4 w-4 mr-1" />
                     Add Note
