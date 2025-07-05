@@ -1149,25 +1149,50 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
     pageNumber?: number
   }>) => {
     // If user has selected a specific source for this field, use that
+    let selectedSource;
     if (selectedSources[fieldName]) {
       const userSelected = sources.find(s => s.source === selectedSources[fieldName])
-      if (userSelected) return userSelected
+      if (userSelected) selectedSource = userSelected
     }
     
     // Otherwise use priority order: verified > high > medium > low, then by recency
     const priorityOrder = { verified: 4, high: 3, medium: 2, low: 1, calculated: 2 }
     
-    return sources.sort((a, b) => {
-      const aPriority = priorityOrder[a.confidence as keyof typeof priorityOrder] || 0
-      const bPriority = priorityOrder[b.confidence as keyof typeof priorityOrder] || 0
-      
-      if (aPriority !== bPriority) {
-        return bPriority - aPriority
+    if (!selectedSource) {
+      selectedSource = sources.sort((a, b) => {
+        const aPriority = priorityOrder[a.confidence as keyof typeof priorityOrder] || 0
+        const bPriority = priorityOrder[b.confidence as keyof typeof priorityOrder] || 0
+        
+        if (aPriority !== bPriority) {
+          return bPriority - aPriority
+        }
+        
+        // If same priority, sort by recency
+        return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+      })[0]
+    }
+    
+    // Sort sources by date to find previous value
+    const sortedByDate = [...sources].sort((a, b) => 
+      new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+    );
+    
+    // Find previous value (second most recent with different value)
+    let previousValue = null;
+    if (sortedByDate.length > 1) {
+      const currentValue = selectedSource.value;
+      for (const source of sortedByDate) {
+        if (source.value !== currentValue) {
+          previousValue = source.value;
+          break;
+        }
       }
-      
-      // If same priority, sort by recency
-      return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
-    })[0]
+    }
+    
+    return {
+      ...selectedSource,
+      previousValue
+    };
   }
 
   return (
@@ -1279,9 +1304,8 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
               <Table className="table-fixed w-full">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[30%]">Field</TableHead>
-                    <TableHead className="w-[30%]">System Value</TableHead>
-                    <TableHead className="w-[40%]">Selected Value</TableHead>
+                    <TableHead className="w-[40%]">Field</TableHead>
+                    <TableHead className="w-[60%]">Active Value</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1310,22 +1334,14 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                             </div>
                           </TableCell>
                           <TableCell className="py-4 truncate">
-                            <div className="font-medium text-sm truncate">
-                              {/* Show internal value - in this mock, we use the liability data */}
-                              {fieldName === "Current Balance" && liability.currentBalance}
-                              {fieldName === "Original Amount" && liability.originalAmount}
-                              {fieldName === "Interest Rate" && liability.interestRate}
-                              {fieldName === "Maturity Date" && liability.maturityDate}
-                              {!["Current Balance", "Original Amount", "Interest Rate", "Maturity Date"].includes(fieldName) && "—"}
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-4 truncate">
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-col items-start">
                                 <span className="font-medium text-sm truncate">{truthValue.value}</span>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <span>Previous: {truthValue.previousValue || "-"}</span>
+                                </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                {getConfidenceBadge(truthValue.confidence)}
                                 {hasConflict && (
                                   <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-200">
                                     Conflict
@@ -1338,8 +1354,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>Update System Value</DropdownMenuItem>
-                                    <DropdownMenuItem>Keep Selected Value</DropdownMenuItem>
+                                    <DropdownMenuItem>Update Value</DropdownMenuItem>
                                     <DropdownMenuItem>Flag for Review</DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -1396,7 +1411,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                                 )}
                                                 {isActive && (
                                                   <Badge className="bg-primary text-primary-foreground text-xs">
-                                                    Selected
+                                                    Active
                                                   </Badge>
                                                 )}
                                                 {verifiedSources.has(`${fieldName}-${source.source}`) && (
@@ -1433,9 +1448,6 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                               <div className="flex items-center gap-3 mb-1">
                                                 <span className="font-medium text-sm text-foreground">
                                                   {source.source}
-                                                </span>
-                                                <span className="text-xs text-muted-foreground">
-                                                  {source.sourceType}
                                                 </span>
                                                 <TooltipProvider>
                                                   <Tooltip delayDuration={300}>
@@ -1499,7 +1511,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                                         setSourceForField(fieldName, source.source);
                                                       }}
                                                     >
-                                                      Use This Value
+                                                      Set as Active Value
                                                     </DropdownMenuItem>
                                                   )}
                                                   <DropdownMenuItem
@@ -1567,7 +1579,7 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                                                   </div>
                                                   {source.variance && (
                                                     <div className="flex justify-between">
-                                                      <span className="text-sm text-muted-foreground">Variance from System</span>
+                                                      <span className="text-sm text-muted-foreground">Variance from current value</span>
                                                       <span className="text-sm font-medium">{source.variance}</span>
                                                     </div>
                                                   )}
@@ -1634,7 +1646,6 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                 <TableHeader>
                   <TableRow>
                     <TableHead>Source</TableHead>
-                    <TableHead>Type</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Sync</TableHead>
                     <TableHead>Fields</TableHead>
@@ -1645,7 +1656,6 @@ function LiabilityExternalDataContent({ liability, isFullScreen = false }: { lia
                   {externalDataSources.map((source) => (
                     <TableRow key={source.id}>
                       <TableCell className="font-medium text-sm">{source.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{source.type}</TableCell>
                       <TableCell>
                         <Badge variant={getStatusBadgeVariant(source.status)} className="text-xs">
                           {source.status}
