@@ -1,4 +1,5 @@
 "use client"
+import * as React from "react"
 import { useState } from "react"
 import {
   CalendarIcon,
@@ -47,11 +48,133 @@ import { RecordListItem } from "@/components/shared/record-list-item"
 import { RecordCard } from "@/components/shared/record-card"
 import { formatDate } from "@/lib/utils"
 
+// Source Highlight Context - For document-based value verification
+export interface SourceHighlight {
+  fieldId: string;
+  sourceId: string;
+  documentPosition: {
+    page: number;
+    rect: { top: number; left: number; width: number; height: number };
+  };
+  value: string;
+}
+
+export const SourceHighlightContext = React.createContext<{
+  highlight: SourceHighlight | null;
+  setHighlight: (highlight: SourceHighlight | null) => void;
+}>({
+  highlight: null,
+  setHighlight: () => {}
+});
+
+export const SourceHighlightProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [highlight, setHighlight] = useState<SourceHighlight | null>(null);
+  
+  return (
+    <SourceHighlightContext.Provider value={{ highlight, setHighlight }}>
+      {children}
+    </SourceHighlightContext.Provider>
+  );
+};
+
+export const useSourceHighlight = () => React.useContext(SourceHighlightContext);
+
+// Helper function to mock source positions for field values (in a real app, these would come from backend)
+export function getFieldSource(fieldId: string): SourceHighlight | null {
+  // Mock source positions for capital call document fields
+  const sourceMappings: Record<string, Omit<SourceHighlight, 'fieldId'>> = {
+    "call_number": {
+      sourceId: "call_number_doc",
+      documentPosition: { 
+        page: 1, 
+        rect: { top: 170, left: 420, width: 60, height: 24 } 
+      },
+      value: "#4"
+    },
+    "fund_name": {
+      sourceId: "fund_name_doc",
+      documentPosition: { 
+        page: 1, 
+        rect: { top: 180, left: 150, width: 250, height: 24 } 
+      },
+      value: "KKR North America Fund VII"
+    },
+    "fund_strategy": {
+      sourceId: "fund_strategy_doc",
+      documentPosition: { 
+        page: 1, 
+        rect: { top: 210, left: 150, width: 120, height: 24 } 
+      },
+      value: "Large Buyout"
+    },
+    "total_call_amount": {
+      sourceId: "total_call_amount_doc",
+      documentPosition: { 
+        page: 1, 
+        rect: { top: 300, left: 280, width: 100, height: 24 } 
+      },
+      value: "$8,500,000"
+    },
+    "your_commitment_pct": {
+      sourceId: "your_commitment_pct_doc",
+      documentPosition: { 
+        page: 1, 
+        rect: { top: 350, left: 280, width: 60, height: 24 } 
+      },
+      value: "2.35%"
+    },
+    "your_call_amount": {
+      sourceId: "your_call_amount_doc",
+      documentPosition: { 
+        page: 1, 
+        rect: { top: 400, left: 280, width: 100, height: 24 } 
+      },
+      value: "$199,750"
+    },
+    "due_date": {
+      sourceId: "due_date_doc",
+      documentPosition: { 
+        page: 1, 
+        rect: { top: 250, left: 280, width: 150, height: 24 } 
+      },
+      value: "November 15, 2023"
+    }
+  };
+  
+  return fieldId in sourceMappings 
+    ? { fieldId, ...sourceMappings[fieldId] }
+    : null;
+}
+
 // Function to get context-specific files based on task title
 export function getContextualFiles(taskTitle?: string) {
   // Main task: Update capital schedule – Call #4
   if (!taskTitle || taskTitle.includes("Update capital schedule – Call #4")) {
     return [
+      {
+        id: "DOC-4000",
+        title: "KKR North America Fund VII - Capital Call Notice #4",
+        name: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+        fileName: "KKR-NAFVII-Capital-Call-4-Notice.pdf",
+        fileType: "PDF",
+        type: "pdf",
+        fileSize: "1.2 MB",
+        size: "1.2 MB",
+        uploadedAt: "2023-10-22T09:30:00Z",
+        uploadedBy: "KKR Fund Administration",
+        uploadedDate: "Today",
+        category: "Capital Call",
+        tags: ["capital call", "KKR", "fund VII", "notice"],
+        relatedTo: { type: "Fund", name: "KKR North America Fund VII" },
+        status: "Active",
+        description: "Capital call notice #4 for KKR North America Fund VII requesting $8.5M for TechVantage Solutions acquisition and fund expenses.",
+        documentType: "capital_call",
+        fund: {
+          name: "KKR North America Fund VII",
+          fundId: "KKR-NAFVII",
+          strategy: "Large Buyout"
+        }
+      },
       {
         id: "DOC-4001",
         title: "Growth Fund III - Limited Partnership Agreement",
