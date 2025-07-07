@@ -60,7 +60,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
     details: true,
     addNotes: true,
-    notes: true, // Always expanded by default, regardless of isFullScreen
+    notes: true,
   })
 
   // Toggle section open/closed
@@ -283,32 +283,34 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
             activityContent={<NoteActivityContent />}
             isFullScreen={isFullScreen}
             additionalContent={
-              // Add Notes section as additional content - show in both drawer and full-screen
-              <div className="rounded-lg border border-muted overflow-hidden">
-                <button
-                  onClick={() => toggleSection('notes')}
-                  className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-                >
-                  {openSections.notes ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              // Add Notes section as additional content - only show when not in full screen
+              !isFullScreen ? (
+                <div className="rounded-lg border border-muted overflow-hidden">
+                  <button
+                    onClick={() => toggleSection('notes')}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                  >
+                    {openSections.notes ? (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <FileTextIcon className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Notes</span>
+                  </button>
+                  
+                  {openSections.notes && (
+                    <div className="px-4 pb-4 pt-1">
+                      <TypableArea
+                        value={noteText || getContextualNoteContent(note, 'TechVentures Fund III')}
+                        onChange={setNoteText}
+                        placeholder="Add notes..."
+                        showButtons={false}
+                      />
+                    </div>
                   )}
-                  <FileTextIcon className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Notes</span>
-                </button>
-                
-                {openSections.notes && (
-                  <div className="px-4 pb-4 pt-1">
-                    <TypableArea
-                      value={noteText || getContextualNoteContent(note, 'TechVentures Fund III')}
-                      onChange={setNoteText}
-                      placeholder="Add notes..."
-                      showButtons={false}
-                    />
-                  </div>
-                )}
-              </div>
+                </div>
+              ) : null
             }
           />
         </div>
