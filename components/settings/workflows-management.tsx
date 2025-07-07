@@ -222,12 +222,12 @@ export function WorkflowsManagement({
                 <TableRow key={workflow.id} className="cursor-pointer hover:bg-muted/50">
                   <TableCell onClick={() => handleWorkflowClick(workflow)}>
                     <div className="flex items-center gap-3">
-                      <workflow.icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{workflow.name}</span>
+                      <workflow.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="font-medium truncate">{workflow.name}</span>
                     </div>
                   </TableCell>
                   <TableCell onClick={() => handleWorkflowClick(workflow)}>
-                    <span className="text-sm text-muted-foreground leading-relaxed">{workflow.description}</span>
+                    <span className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{workflow.description}</span>
                   </TableCell>
                   <TableCell onClick={() => handleWorkflowClick(workflow)} className="text-center">
                     <Badge variant={getStatusColor(workflow.status)} className="capitalize">

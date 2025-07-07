@@ -701,19 +701,9 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                     Edit
                   </Button>
                 ) : (
-                  <>
-                    <Button variant="outline" size="sm" onClick={() => setIsEditingAutomation(false)}>
-                      Cancel
-                    </Button>
-                    <Button size="sm" onClick={() => {
-                      setIsEditingAutomation(false)
-                      // In a real implementation, this would save the automation
-                      // For now, just close the sheet
-                      setIsOpen(false)
-                    }}>
-                      Save Changes
-                    </Button>
-                  </>
+                  <Button variant="outline" size="sm" onClick={() => setIsEditingAutomation(false)}>
+                    Cancel
+                  </Button>
                 )}
               </div>
             </div>
@@ -2220,7 +2210,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                           }
                         }}
                       >
-                        {selectedBlock ? 'Save' : 'Save Automation'}
+                        {selectedBlock ? 'Save' : 'Save Changes'}
                       </Button>
                     </div>
                   </div>
