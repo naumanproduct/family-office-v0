@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ChevronRight, ChevronDown, ExternalLinkIcon, UnlinkIcon, ChevronUp } from "lucide-react"
+import { ChevronRight, ChevronDown, ExternalLinkIcon, UnlinkIcon, ChevronUp, Maximize2 } from "lucide-react"
 
 export interface DetailField {
   label: string
@@ -40,6 +40,7 @@ interface UnifiedDetailsPanelProps {
   onNavigateToRecord?: (recordType: string, id: number) => void
   onAddRecord?: (sectionId: string) => void
   onUnlinkRecord?: (sectionId: string, id: number) => void
+  onFocusSection?: (sectionId: string) => void
   activityContent?: React.ReactNode
   additionalContent?: React.ReactNode
 }
@@ -54,6 +55,7 @@ export function UnifiedDetailsPanel({
   onNavigateToRecord,
   onAddRecord,
   onUnlinkRecord,
+  onFocusSection,
   activityContent,
   additionalContent
 }: UnifiedDetailsPanelProps) {
@@ -210,6 +212,21 @@ export function UnifiedDetailsPanel({
                           <span className="font-medium text-sm">{section.title}</span>
                         </div>
                       </div>
+                      
+                      {/* Focus button for details section - visible on hover */}
+                      {section.id === 'details' && onFocusSection && (
+                        <Button
+                          variant="ghost" 
+                          size="icon"
+                          className="h-6 w-6 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onFocusSection(section.id);
+                          }}
+                        >
+                          <Maximize2 className="h-4 w-4" />
+                        </Button>
+                      )}
                       
                       {/* Add button - visible on hover */}
                       {section.sectionData && isOpen && (

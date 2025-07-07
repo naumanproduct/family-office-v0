@@ -74,6 +74,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
   const [viewMode, setViewMode] = React.useState<"card" | "list" | "table">("table")
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = React.useState(false)
   const [capitalCallFocused, setCapitalCallFocused] = React.useState(false)
+  const [fileDetailsFocused, setFileDetailsFocused] = React.useState(false)
   const [showAllCapitalCallDetails, setShowAllCapitalCallDetails] = React.useState(false)
   
   // Handle source click for auditability
@@ -569,8 +570,90 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
       console.log(`Navigate to ${recordType} record with ID: ${id}`);
     };
 
+    // Handler for focusing on a section
+    const handleFocusSection = (sectionId: string) => {
+      if (sectionId === 'details') {
+        setFileDetailsFocused(true);
+      }
+    };
+
     // Mock activities for the file
     const activities = generateFileActivities()
+
+    // Return focused File Details view when in focus mode
+    if (fileDetailsFocused) {
+      return (
+        <div className="px-6 pb-6">
+          <div className="rounded-lg border border-muted overflow-hidden">
+            <div className="w-full flex items-center justify-between p-3 transition-colors bg-muted/20">
+              <div className="flex items-center gap-2">
+                <FileIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">File Details</span>
+              </div>
+            </div>
+            
+            <div className="px-3 pb-3 pt-2">
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">File Name</span>
+                  <span className="flex-1 text-sm px-2 py-0.5 font-medium">
+                    {file.fileName || file.name || "Untitled"}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Title</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    {file.title || file.name || "Untitled"}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Description</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    {file.description || "No description provided"}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Category</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    {file.category || "Uncategorized"}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Status</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    {file.status || "Unknown"}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">File Type</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    {(file.fileType || file.type || "FILE").toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Size</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    {file.fileSize || file.size || "Unknown"}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Uploaded By</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    {file.uploadedBy || "Unknown"}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-muted-foreground w-28 shrink-0 ml-2">Upload Date</span>
+                  <span className="flex-1 text-sm px-2 py-0.5">
+                    {file.uploadedDate || (file.uploadedAt ? formatDate(new Date(file.uploadedAt)) : "Unknown")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     // Return focused Capital Call view when in focus mode
     if (capitalCallFocused && file.documentType === "capital_call") {
@@ -870,6 +953,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
           onNavigateToRecord={navigateToRecord}
           onAddRecord={handleAddRecord}
           onUnlinkRecord={handleUnlinkRecord}
+          onFocusSection={handleFocusSection}
           activityContent={
             <UnifiedActivitySection activities={activities} />
           }
@@ -1261,7 +1345,21 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
 
   // Tab Content Heading that needs to be updated for focus mode
   const getTabHeading = () => {
-    if (activeTab === "details" && capitalCallFocused && file?.documentType === "capital_call") {
+    if (activeTab === "details" && fileDetailsFocused) {
+      return (
+        <div className="flex items-center">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1 text-sm font-medium pl-0 -ml-2" 
+            onClick={() => setFileDetailsFocused(false)}
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Back to Details
+          </Button>
+        </div>
+      );
+    } else if (activeTab === "details" && capitalCallFocused && file?.documentType === "capital_call") {
       return (
         <div className="flex items-center">
           <Button 
@@ -1374,6 +1472,9 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                           if (capitalCallFocused) {
                             setCapitalCallFocused(false);
                           }
+                          if (fileDetailsFocused) {
+                            setFileDetailsFocused(false);
+                          }
                         }}
                         className={`relative whitespace-nowrap py-3 px-3 text-sm font-medium flex items-center gap-1 flex-shrink-0 ${
                           activeTab === tab.id
@@ -1401,13 +1502,13 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                   <div className="mb-4 px-6 pt-6 flex items-center justify-between">
                     {getTabHeading()}
                     
-                    {activeTab === "tasks" && !capitalCallFocused && (
+                    {activeTab === "tasks" && !capitalCallFocused && !fileDetailsFocused && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4 mr-1" />
                         Add Task
                       </Button>
                     )}
-                    {activeTab === "notes" && !capitalCallFocused && (
+                    {activeTab === "notes" && !capitalCallFocused && !fileDetailsFocused && (
                       <Button variant="outline" size="sm">
                         <PlusIcon className="h-4 w-4 mr-1" />
                         Add Note

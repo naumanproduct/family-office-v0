@@ -4,10 +4,10 @@ import * as React from "react"
 import { SearchIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
 interface FieldSource {
   documentName: string
@@ -34,7 +34,6 @@ export function AuditableField({
   onSourceClick 
 }: AuditableFieldProps) {
   const [isHovered, setIsHovered] = React.useState(false)
-  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false)
 
   // Mock source data for demonstration
   const mockSource: FieldSource = {
@@ -74,8 +73,8 @@ export function AuditableField({
   }
 
   return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger asChild>
+    <HoverCard openDelay={200} closeDelay={100}>
+      <HoverCardTrigger asChild>
         <span
           className={cn(
             "group relative inline-flex items-center gap-1 transition-all duration-200 cursor-pointer px-1 py-0.5 rounded-sm w-fit",
@@ -94,54 +93,64 @@ export function AuditableField({
             )}
           />
         </span>
-      </PopoverTrigger>
-      <PopoverContent className="w-96 p-4" side="right" align="start">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium text-sm">Data Source</h4>
-            <span className="text-xs text-muted-foreground">
-              Field: {fieldName}
-            </span>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-96 p-0" side="right" align="start">
+        <div className="space-y-0">
+          {/* Header */}
+          <div className="px-4 py-3 border-b bg-muted/30">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium text-sm">Data Source</h4>
+              <span className="text-xs text-muted-foreground">
+                {fieldName}
+              </span>
+            </div>
           </div>
           
-          {actualSources.map((source, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{source.documentName}</span>
-                  <span className="text-xs text-muted-foreground">
-                    Page {source.pageNumber}
-                  </span>
+          {/* Content */}
+          <div className="px-4 py-3 space-y-3">
+            {actualSources.map((source, index) => (
+              <div key={index} className="space-y-3">
+                {/* Source info */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium truncate max-w-[200px]" title={source.documentName}>
+                      {source.documentName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      p. {source.pageNumber}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("text-xs font-medium", getConfidenceColor(source.confidence))}>
+                      {source.confidence.toUpperCase()}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={cn("text-xs font-medium", getConfidenceColor(source.confidence))}>
-                    {source.confidence.toUpperCase()}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {getSourceTypeLabel(source.sourceType)}
-                  </span>
+                
+                {/* Extracted text snippet */}
+                <div className="bg-muted/50 rounded-md p-3">
+                  <p className="text-sm text-muted-foreground italic leading-relaxed">
+                    "{source.extractedText}"
+                  </p>
+                </div>
+                
+                {/* Metadata */}
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{getSourceTypeLabel(source.sourceType)}</span>
+                  <span>{new Date(source.lastUpdated).toLocaleDateString()}</span>
                 </div>
               </div>
-              
-              <div className="bg-gray-50 rounded-md p-3 text-sm">
-                <p className="text-muted-foreground italic">
-                  "{source.extractedText}"
-                </p>
-              </div>
-              
-              <div className="text-xs text-muted-foreground">
-                Last updated: {new Date(source.lastUpdated).toLocaleString()}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
           
-          <div className="pt-2 border-t">
+          {/* Footer */}
+          <div className="px-4 py-2 border-t bg-muted/20">
             <p className="text-xs text-muted-foreground">
-              Click to view source in document
+              Click to view in document
             </p>
           </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      </HoverCardContent>
+    </HoverCard>
   )
 } 
