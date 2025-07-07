@@ -348,14 +348,8 @@ export default function NotesClientPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={() => {
-                  // Map drawer tabs to full screen tabs
-                  const tabMapping: Record<string, string> = {
-                    'details': 'notes',  // Details tab in drawer maps to Notes tab in full screen
-                    'files': 'files',
-                    'tasks': 'tasks'
-                  };
-                  
-                  setActiveTab(tabMapping[drawerActiveTab] || 'notes');
+                  // For notes, always default to "notes" tab in full screen
+                  setActiveTab('notes');
                   setIsFullScreen(true);
                 }}>
                   <ExpandIcon className="h-4 w-4" />
@@ -390,14 +384,8 @@ export default function NotesClientPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={() => {
-                  // Map drawer tabs to full screen tabs
-                  const tabMapping: Record<string, string> = {
-                    'details': 'notes',  // Details tab in drawer maps to Notes tab in full screen
-                    'files': 'files',
-                    'tasks': 'tasks'
-                  };
-                  
-                  setActiveTab(tabMapping[drawerActiveTab] || 'notes');
+                  // For notes, always default to "notes" tab in full screen
+                  setActiveTab('notes');
                   setIsFullScreen(true);
                 }}>
                   <ExpandIcon className="h-4 w-4" />
