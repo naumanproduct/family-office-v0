@@ -469,6 +469,10 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = React.useState(false)
   const [pendingAction, setPendingAction] = React.useState<'close' | 'cancel' | null>(null)
   
+  // Workflow name editing state
+  const [isEditingWorkflowName, setIsEditingWorkflowName] = React.useState(false)
+  const [editingWorkflowName, setEditingWorkflowName] = React.useState(config.name)
+  
   // Track changes for unsaved state
   React.useEffect(() => {
     const hasChanges = JSON.stringify(config) !== JSON.stringify(workflowConfig)
@@ -665,6 +669,30 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
     { id: "automations", label: "Automations", icon: Zap },
   ]
 
+  // Workflow name editing handlers
+  const handleWorkflowNameClick = () => {
+    setIsEditingWorkflowName(true)
+    setEditingWorkflowName(config.name)
+  }
+
+  const handleWorkflowNameSave = () => {
+    setConfig({ ...config, name: editingWorkflowName })
+    setIsEditingWorkflowName(false)
+  }
+
+  const handleWorkflowNameCancel = () => {
+    setEditingWorkflowName(config.name)
+    setIsEditingWorkflowName(false)
+  }
+
+  const handleWorkflowNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleWorkflowNameSave()
+    } else if (e.key === 'Escape') {
+      handleWorkflowNameCancel()
+    }
+  }
+
   return (
     <>
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -701,11 +729,40 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
             <div className="border-b bg-background px-6 py-2">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {workflowName.charAt(0)}
+                  {config.name.charAt(0)}
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold">{workflowName}</h2>
-                  <p className="text-sm text-muted-foreground">Configure workflow settings</p>
+                <div className="flex-1">
+                  {isEditingWorkflowName ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editingWorkflowName}
+                        onChange={(e) => setEditingWorkflowName(e.target.value)}
+                        onKeyDown={handleWorkflowNameKeyDown}
+                        onBlur={handleWorkflowNameSave}
+                        className="text-lg font-semibold h-auto py-1 px-2"
+                        autoFocus
+                      />
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleWorkflowNameSave}>
+                          <CheckIcon className="h-3 w-3" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleWorkflowNameCancel}>
+                          <XIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h2 
+                        className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors"
+                        onClick={handleWorkflowNameClick}
+                        title="Click to edit workflow name"
+                      >
+                        {config.name}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">Configure workflow settings</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -804,32 +861,11 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                 <UnifiedDetailsPanel 
                   sections={[
                     {
-                      id: "workflow-stats",
-                      title: "Workflow Statistics",
-                      icon: <LayoutIcon className="h-4 w-4 text-muted-foreground" />,
-                      fields: [
-                        { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span>, isEditable: false },
-                        { label: "Card Fields", value: `${config.attributes.length} fields configured`, isEditable: false },
-                        { label: "Stages", value: `${config.stages.length} stages configured`, isEditable: false },
-                        { label: "Created", value: "January 15, 2024", isEditable: false },
-                        { label: "Last Modified", value: "Today", isEditable: false },
-                      ],
-                    },
-                    {
                       id: "workflow-info",
                       title: "Workflow Information",
                       icon: <FileTextIcon className="h-4 w-4 text-muted-foreground" />,
                       fields: [
-                        { 
-                          label: "Workflow Name", 
-                          value: (
-                            <Input
-                              value={config.name}
-                              onChange={(e) => setConfig({ ...config, name: e.target.value })}
-                              className="mt-1 w-full"
-                            />
-                          )
-                        },
+                        { label: "Object Type", value: <span className="text-sm capitalize">{config.objectType}</span>, isEditable: false },
                         { 
                           label: "Description", 
                           value: (
@@ -838,9 +874,14 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                               onChange={(e) => setConfig({ ...config, description: e.target.value })}
                               className="resize-none mt-1 w-full"
                               rows={3}
+                              placeholder="Enter workflow description..."
                             />
                           )
                         },
+                        { label: "Card Fields", value: `${config.attributes.length} fields configured`, isEditable: false },
+                        { label: "Stages", value: `${config.stages.length} stages configured`, isEditable: false },
+                        { label: "Created", value: "January 15, 2024", isEditable: false },
+                        { label: "Last Modified", value: "Today", isEditable: false },
                       ],
                     },
                   ]}
