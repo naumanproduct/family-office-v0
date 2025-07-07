@@ -607,135 +607,234 @@ The committee unanimously agreed to proceed with due diligence, with Sarah Johns
     ];
   }
   
-  // Default case - return general notes
+  // Default case - return empty array
   else {
-    return defaultNotes;
+    return [];
   }
 }
 
-// Default mock data, can be overridden by passing data prop
-const defaultNotes: Note[] = [
-  {
-    id: "NOTE-1001",
-    title: "Investment Committee Meeting Notes",
-    topic: "Discussed the new venture capital opportunity with TechFlow Inc. The committee agreed to proceed with due diligence. Key concerns include market competition and burn rate.",
-    createdAt: "2023-10-20T10:30:00Z",
-    updatedAt: "2023-10-20T14:45:00Z",
-    date: "2 days ago",
-    lastModified: "2 days ago",
-    author: "Sarah Johnson",
-    content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+// Function to generate contextual note content based on record and context
+export function getContextualNoteContent(record: any, parentContext?: string, parentTitle?: string) {
+  // If record already has content, return it
+  if (record?.content && record.content.trim() !== '') {
+    return record.content;
+  }
+  
+  // Generate content based on title and context
+  const title = record?.title || record?.name || '';
+  const context = parentContext || parentTitle || '';
+  
+  // TechVentures Fund III - Call rationale
+  if (context.includes('TechVentures Fund III') && title.toLowerCase().includes('call rationale')) {
+    return `TechVentures Fund III - Call #4 Rationale
 
-Key Discussion Points:
-1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
+Date: January 27, 2025
+Fund: TechVentures Fund III
+Call Amount: $2.5M (of $10M total commitment)
 
-2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+Investment Rationale:
 
-3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+1. Portfolio Support Requirements:
+   • CloudTech Solutions requires $1.2M for Series B bridge funding
+   • DataFlow Inc. needs $800K for international expansion
+   • AI Robotics Corp. requesting $500K for R&D acceleration
 
-4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
-   - Technical architecture review and scalability assessment
-   - Customer reference calls with at least 10 enterprise clients
-   - Detailed financial audit including revenue recognition practices
-   - Management team background checks and reference verification
-   - Legal review of IP portfolio and existing contracts
+2. Market Opportunity Assessment:
+   ✓ Enterprise software sector showing 25% YoY growth
+   ✓ Portfolio companies outperforming sector benchmarks
+   ✓ Strong customer acquisition metrics across holdings
+   ✓ Favorable exit environment with recent comparable transactions
 
-5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+3. Portfolio Performance Review:
+   • CloudTech Solutions: 180% revenue growth, $15M ARR
+   • DataFlow Inc: Expanded to 3 new markets, 45% gross margins
+   • AI Robotics Corp: 2 major enterprise contracts signed
+   • Overall portfolio IRR: 28% (target: 20%)
 
-6. Risk Factors Identified:
-   - High customer concentration with top 5 clients representing 35% of revenue
-   - Dependency on key technical talent, particularly the CTO
-   - Potential platform risk with heavy reliance on AWS infrastructure
-   - Increasing competition from well-funded competitors
+4. Capital Deployment Strategy:
+   The Investment Committee approved this follow-on deployment based on:
+   - Proven execution by portfolio management teams
+   - Clear path to Series B/C rounds within 12-18 months
+   - Maintained pro-rata rights protection
+   - Risk-adjusted return projections exceed fund targets
 
-Next Steps:
-- Due diligence team formation by October 25th
-- Initial findings presentation scheduled for November 15th
-- Final investment decision expected by November 30th
+5. Risk Mitigation:
+   • Diversified across 3 portfolio companies
+   • Reserved capital for potential down-rounds
+   • Board representation maintained
+   • Milestone-based funding releases
 
-The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
-  },
-  {
-    id: "NOTE-1002",
-    title: "Tax Planning Strategy 2024",
-    topic: "Review of tax optimization strategies for the family office. Considering establishing a new trust structure for international investments.",
-    createdAt: "2023-10-19T09:15:00Z",
-    updatedAt: "2023-10-19T16:20:00Z",
-    date: "3 days ago",
-    lastModified: "3 days ago",
-    author: "Michael Chen",
-    content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
-
-Key Discussion Points:
-1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
-
-2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
-
-3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
-
-4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
-   - Technical architecture review and scalability assessment
-   - Customer reference calls with at least 10 enterprise clients
-   - Detailed financial audit including revenue recognition practices
-   - Management team background checks and reference verification
-   - Legal review of IP portfolio and existing contracts
-
-5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
-
-6. Risk Factors Identified:
-   - High customer concentration with top 5 clients representing 35% of revenue
-   - Dependency on key technical talent, particularly the CTO
-   - Potential platform risk with heavy reliance on AWS infrastructure
-   - Increasing competition from well-funded competitors
+6. Expected Outcomes:
+   - Bridge funding to achieve Series B milestones
+   - Maintain ownership percentages
+   - Position for potential exits in 18-24 months
+   - Generate 3-5x returns on deployed capital
 
 Next Steps:
-- Due diligence team formation by October 25th
-- Initial findings presentation scheduled for November 15th
-- Final investment decision expected by November 30th
+- Execute capital call notice by February 1st
+- Coordinate with portfolio companies on funding schedules
+- Update LP reporting with deployment rationale
+- Schedule quarterly portfolio review for April
 
-The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
-  },
-  {
-    id: "NOTE-1003",
-    title: "Portfolio Rebalancing Analysis",
-    topic: "Q3 portfolio performance exceeded expectations. Recommend increasing allocation to emerging markets by 5% and reducing fixed income exposure.",
-    createdAt: "2023-10-18T13:45:00Z",
-    updatedAt: "2023-10-18T15:30:00Z",
-    date: "4 days ago",
-    lastModified: "4 days ago",
-    author: "You",
-    content: `The Investment Committee convened on October 20th to review several promising investment opportunities, with particular focus on TechFlow Inc., a B2B SaaS company specializing in workflow automation for enterprise clients.
+This capital call aligns with fund strategy and LP expectations for follow-on support of high-performing portfolio companies.`;
+  }
+  
+  // TechVentures Fund III - other notes
+  if (context.includes('TechVentures Fund III')) {
+    return `TechVentures Fund III - ${title}
+
+Date: ${new Date().toLocaleDateString()}
+Fund: TechVentures Fund III
+
+Key Points:
+
+1. Fund Overview:
+   • Total Fund Size: $100M
+   • Current Deployment: 65% ($65M)
+   • Remaining Capital: $35M
+   • Portfolio Companies: 12 active investments
+
+2. Performance Metrics:
+   • Net IRR: 28.5% (vs. 20% target)
+   • Net Multiple: 2.1x (realized + unrealized)
+   • Top Quartile Performance vs. Vintage Peers
+
+3. Portfolio Highlights:
+   • 3 companies preparing for Series B/C rounds
+   • 2 potential exits identified for 2025
+   • Strong revenue growth across portfolio (avg. 85% YoY)
+   • No write-offs or significant down-rounds
+
+4. Market Environment:
+   • Venture funding environment stabilizing
+   • Enterprise software multiples recovering
+   • Strong M&A activity in target sectors
+   • IPO market showing signs of improvement
+
+5. Strategic Focus:
+   • Support high-performing portfolio companies
+   • Selective new investments in proven themes
+   • Prepare for fund distribution opportunities
+   • Maintain strong LP relationships
+
+This analysis supports continued confidence in fund performance and strategy execution.`;
+  }
+  
+  // Generic note content based on title
+  if (title.toLowerCase().includes('meeting')) {
+    return `Meeting Notes - ${title}
+
+Date: ${new Date().toLocaleDateString()}
+
+Attendees:
+- Investment Committee Members
+- Fund Management Team
+- Advisory Board Representatives
 
 Key Discussion Points:
-1. Market Analysis: TechFlow operates in the rapidly growing workflow automation sector, currently valued at $8.5B with projected CAGR of 23% through 2028. The company has demonstrated strong product-market fit with 150+ enterprise clients including three Fortune 500 companies.
 
-2. Financial Performance: The company achieved $12M ARR in 2023, representing 180% YoY growth. Monthly burn rate is currently $450K with 18 months runway based on existing capital. Gross margins are healthy at 82%, in line with top-tier SaaS companies.
+1. Portfolio Review:
+   • Performance metrics analysis
+   • Company-specific updates
+   • Market conditions assessment
 
-3. Competitive Landscape: Main competitors include established players like Zapier and Make.com, but TechFlow's enterprise-focused approach and superior API integration capabilities provide clear differentiation. The committee noted their recent partnership with Salesforce as a significant competitive advantage.
+2. Strategic Initiatives:
+   • New investment opportunities
+   • Portfolio support requirements
+   • Exit planning considerations
 
-4. Due Diligence Requirements: The committee approved proceeding with comprehensive due diligence, with particular emphasis on:
-   - Technical architecture review and scalability assessment
-   - Customer reference calls with at least 10 enterprise clients
-   - Detailed financial audit including revenue recognition practices
-   - Management team background checks and reference verification
-   - Legal review of IP portfolio and existing contracts
+3. Operational Updates:
+   • Fund administration matters
+   • LP communication schedule
+   • Compliance requirements
 
-5. Investment Terms: Preliminary discussions suggest a Series B round of $40M at a $200M pre-money valuation. Our potential allocation would be $8-10M, representing 4-5% ownership stake post-money.
+4. Action Items:
+   • Follow-up on specific investments
+   • Schedule management presentations
+   • Update investment memos
 
-6. Risk Factors Identified:
-   - High customer concentration with top 5 clients representing 35% of revenue
-   - Dependency on key technical talent, particularly the CTO
-   - Potential platform risk with heavy reliance on AWS infrastructure
-   - Increasing competition from well-funded competitors
+Next Meeting: [To be scheduled]
+
+Notes prepared by: Investment Team`;
+  }
+  
+  if (title.toLowerCase().includes('due diligence') || title.toLowerCase().includes('diligence')) {
+    return `Due Diligence Notes - ${title}
+
+Date: ${new Date().toLocaleDateString()}
+
+Executive Summary:
+Comprehensive due diligence review conducted for potential investment opportunity.
+
+Key Findings:
+
+1. Market Analysis:
+   • Total addressable market size and growth
+   • Competitive landscape assessment
+   • Market positioning and differentiation
+
+2. Financial Performance:
+   • Revenue growth trajectory
+   • Unit economics and margins
+   • Cash flow and burn rate analysis
+
+3. Management Team:
+   • Leadership experience and track record
+   • Team composition and capabilities
+   • Reference checks and background verification
+
+4. Technology/Product:
+   • Product-market fit validation
+   • Technical architecture review
+   • Intellectual property assessment
+
+5. Risk Factors:
+   • Market risks and competitive threats
+   • Operational and execution risks
+   • Financial and regulatory considerations
+
+Recommendation:
+[To be completed based on findings]
 
 Next Steps:
-- Due diligence team formation by October 25th
-- Initial findings presentation scheduled for November 15th
-- Final investment decision expected by November 30th
+- Management presentation
+- Reference calls
+- Final investment committee review`;
+  }
+  
+  // Default content for any other note
+  return `${title}
 
-The committee unanimously agreed to proceed with due diligence, with Sarah Johnson appointed as deal lead and Michael Chen providing technical assessment support.`,
-  },
-];
+Date: ${new Date().toLocaleDateString()}
+
+Overview:
+This note contains important information and analysis relevant to family office operations and investment activities.
+
+Key Points:
+
+1. Background:
+   • Context and relevant background information
+   • Previous related activities or decisions
+   • Current status and developments
+
+2. Analysis:
+   • Detailed analysis of the situation
+   • Key factors and considerations
+   • Risk assessment and implications
+
+3. Recommendations:
+   • Proposed actions or decisions
+   • Timeline and implementation steps
+   • Resource requirements
+
+4. Next Steps:
+   • Immediate action items
+   • Follow-up requirements
+   • Review and monitoring schedule
+
+Notes prepared by: Investment Team
+Last updated: ${new Date().toLocaleDateString()}`;
+}
 
 export type NoteContentProps = {
   data?: any[] // Optional - if not provided, uses default mock data

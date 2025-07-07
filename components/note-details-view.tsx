@@ -24,6 +24,7 @@ import { generateNoteActivities } from "@/components/shared/activity-generators"
 import { UnifiedTaskTable } from "@/components/shared/unified-task-table"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
+import { getContextualNoteContent } from "@/components/shared/note-content"
 import { formatDate } from "@/lib/utils"
 import { UnifiedDetailsPanel } from "@/components/shared/unified-details-panel"
 import { buildStandardDetailSections } from "@/components/shared/detail-section-builder"
@@ -50,7 +51,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
     updatedAt: note?.updatedAt || new Date().toISOString(),
   })
 
-  const [noteText, setNoteText] = React.useState(note?.content || "")
+  const [noteText, setNoteText] = React.useState(note?.content || getContextualNoteContent(note, 'TechVentures Fund III'))
   const [expandedActivity, setExpandedActivity] = React.useState<number | null>(null)
   const [filesViewMode, setFilesViewMode] = React.useState<"table" | "card" | "list">("table")
   const [tasksViewMode, setTasksViewMode] = React.useState<"table" | "card" | "list">(isFullScreen ? "table" : "list")
@@ -301,7 +302,7 @@ export function NoteDetailsView({ note, onBack, hideAddNotes = false, isFullScre
                   {openSections.notes && (
                     <div className="px-4 pb-4 pt-1">
                       <TypableArea
-                        value={noteText}
+                        value={noteText || getContextualNoteContent(note, 'TechVentures Fund III')}
                         onChange={setNoteText}
                         placeholder="Add notes..."
                         showButtons={false}

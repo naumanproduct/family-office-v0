@@ -22,6 +22,7 @@ import { UnifiedActivitySection } from "@/components/shared/unified-activity-sec
 import { generateNoteActivities } from "@/components/shared/activity-generators"
 import { ViewModeSelector } from "@/components/shared/view-mode-selector"
 import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
+import { getContextualNoteContent } from "@/components/shared/note-content"
 import { formatDate } from "@/lib/utils"
 
 export default function NotesClientPage() {
@@ -285,7 +286,7 @@ export default function NotesClientPage() {
                           {openSections.notes && (
                             <div className="px-5 pb-3 pt-2">
                               <TypableArea 
-                                value={selectedNote?.content || ''} 
+                                value={selectedNote?.content || getContextualNoteContent(selectedNote, 'TechVentures Fund III')} 
                                 onChange={(value) => {
                                   // Update the note content
                                   if (selectedNote) {
