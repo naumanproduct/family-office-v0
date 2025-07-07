@@ -53,6 +53,7 @@ import { TabContentRenderer } from "@/components/shared/tab-content-renderer"
 import { Label } from "@/components/ui/label"
 import { UnifiedDetailsPanel, DetailSection, DetailField } from "@/components/shared/unified-details-panel"
 import { AuditableField } from "@/components/shared/auditable-field"
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 
 interface Tab {
   id: string
@@ -662,7 +663,7 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
           {/* No additional back button needed here - we'll replace the tab heading */}
           <div className="rounded-lg border border-muted overflow-hidden">
             <div className="w-full flex items-center justify-between p-3 transition-colors bg-muted/20">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center">
                 <DollarSignIcon className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium text-sm">Capital Call Information</span>
               </div>
@@ -1438,15 +1439,27 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
             </div>
           </div>
 
-          {/* Full Screen Content - Two Column Layout */}
-          <div className="flex h-[calc(100%-73px)] relative">
+          {/* Full Screen Content - Resizable Two Column Layout */}
+          <ResizablePanelGroup direction="horizontal" className="h-[calc(100%-73px)]">
             {/* Left Panel - Document Preview */}
-            <div className="flex-1 overflow-y-auto">
-              <FilePreview file={file} />
-            </div>
+            <ResizablePanel 
+              defaultSize={isRightPanelCollapsed ? 100 : 65} 
+              minSize={isRightPanelCollapsed ? 100 : 30}
+            >
+              <div className="h-full overflow-y-auto">
+                <FilePreview file={file} />
+              </div>
+            </ResizablePanel>
 
-            {/* Right Panel - Details (same width as drawer to prevent jumping) */}
-            <div className={`${isRightPanelCollapsed ? 'w-0' : 'w-[672px]'} border-l bg-background flex flex-col transition-all duration-300 overflow-hidden`}>
+            {/* Resizable Handle */}
+            {!isRightPanelCollapsed && (
+              <ResizableHandle withHandle />
+            )}
+
+            {/* Right Panel - Details */}
+            {!isRightPanelCollapsed && (
+              <ResizablePanel defaultSize={35} minSize={25} maxSize={50}>
+                <div className="border-l bg-background flex flex-col h-full overflow-hidden">
               {/* Record Header */}
               <div className="border-b bg-background px-6 py-2">
                 <div className="flex items-center gap-3">
@@ -1521,8 +1534,10 @@ export function DocumentViewer({ isOpen, onOpenChange, file, startInFullScreen =
                   {activeTab === "notes" && <div className="px-6 pb-6">{renderEmptyTabContent("notes")}</div>}
                 </div>
               </div>
-            </div>
-          </div>
+                </div>
+              </ResizablePanel>
+            )}
+          </ResizablePanelGroup>
         </div>
       </>
     )
