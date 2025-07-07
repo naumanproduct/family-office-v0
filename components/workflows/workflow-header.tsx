@@ -40,6 +40,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import {
   DndContext,
   closestCenter,
@@ -463,6 +464,17 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   } | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
   
+  // Unsaved changes tracking
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false)
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = React.useState(false)
+  const [pendingAction, setPendingAction] = React.useState<'close' | 'cancel' | null>(null)
+  
+  // Track changes for unsaved state
+  React.useEffect(() => {
+    const hasChanges = JSON.stringify(config) !== JSON.stringify(workflowConfig)
+    setHasUnsavedChanges(hasChanges)
+  }, [config, workflowConfig])
+
   // Initialize dropped items when selecting an automation
   React.useEffect(() => {
     if (selectedAutomation && isEditingAutomation) {
@@ -500,8 +512,48 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
 
   const handleSave = () => {
     onSave(config)
+    setHasUnsavedChanges(false)
     // Close the sheet
     setIsOpen(false)
+  }
+
+  // Unsaved changes confirmation handlers
+  const handleCloseRequest = () => {
+    if (hasUnsavedChanges) {
+      setPendingAction('close')
+      setShowUnsavedChangesDialog(true)
+    } else {
+      setIsOpen(false)
+    }
+  }
+
+  const handleCancelRequest = () => {
+    if (hasUnsavedChanges) {
+      setPendingAction('cancel')
+      setShowUnsavedChangesDialog(true)
+    } else {
+      // Reset config to original
+      setConfig(workflowConfig)
+      setIsOpen(false)
+    }
+  }
+
+  const handleConfirmDiscard = () => {
+    if (pendingAction === 'close') {
+      setIsOpen(false)
+    } else if (pendingAction === 'cancel') {
+      // Reset config to original
+      setConfig(workflowConfig)
+      setIsOpen(false)
+    }
+    setHasUnsavedChanges(false)
+    setShowUnsavedChangesDialog(false)
+    setPendingAction(null)
+  }
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedChangesDialog(false)
+    setPendingAction(null)
   }
 
   const handleAttributeDragEnd = (event: DragEndEvent) => {
@@ -614,6 +666,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
   ]
 
   return (
+    <>
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 gap-2" title="Configure Workflow">
@@ -633,7 +686,14 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
-                {/* Save button moved to footer for consistency */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCloseRequest}
+                  className="h-9 w-9"
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
@@ -701,8 +761,20 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
                     Edit
                   </Button>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => setIsEditingAutomation(false)}>
-                    Cancel
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => {
+                      if (hasUnsavedChanges) {
+                        setPendingAction('cancel')
+                        setShowUnsavedChangesDialog(true)
+                      } else {
+                        setIsEditingAutomation(false)
+                      }
+                    }}
+                    className="h-9 w-9"
+                  >
+                    <XIcon className="h-4 w-4" />
                   </Button>
                 )}
               </div>
@@ -1049,12 +1121,7 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
               <div className="flex gap-2 justify-end">
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    // Reset config to original
-                    setConfig(workflowConfig)
-                    // Close sheet
-                    setIsOpen(false)
-                  }}
+                  onClick={handleCancelRequest}
                 >
                   Cancel
                 </Button>
@@ -2221,5 +2288,22 @@ export function WorkflowHeader({ workflowName, workflowConfig, onSave }: Workflo
         </div>
       </SheetContent>
     </Sheet>
+    
+    {/* Unsaved changes confirmation dialog */}
+    <AlertDialog open={showUnsavedChangesDialog} onOpenChange={setShowUnsavedChangesDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Discard changes?</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes to the workflow configuration. Are you sure you want to discard them?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={handleCancelDiscard}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirmDiscard}>Discard</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }
