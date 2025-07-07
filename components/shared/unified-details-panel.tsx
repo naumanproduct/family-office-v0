@@ -112,6 +112,21 @@ export function UnifiedDetailsPanel({
       <div className="space-y-3">
         {fieldsToShow.map((field, index) => {
           const isEditable = field.isEditable !== false; // Default to true if not specified
+          
+          // Special handling for fields with empty labels (like description fields)
+          if (!field.label || field.label.trim() === '') {
+            return (
+              <div key={index} className="ml-2">
+                {field.isLink ? (
+                  <div className={`text-sm text-blue-600 ${isEditable ? 'cursor-pointer hover:bg-muted/50' : ''} px-2 py-0.5 rounded transition-colors`}>{field.value}</div>
+                ) : (
+                  <div className={`text-sm ${isEditable ? 'cursor-pointer hover:bg-muted/50' : ''} px-2 py-0.5 rounded transition-colors`}>{field.value}</div>
+                )}
+              </div>
+            );
+          }
+          
+          // Standard label/value layout for other fields
           return (
             <div key={index} className="flex items-center">
               <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
