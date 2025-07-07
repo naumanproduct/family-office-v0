@@ -63,9 +63,9 @@ export function UnifiedDetailsPanel({
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>(() => {
     const initialState: Record<string, boolean> = {};
     if (isFullScreen) {
-      // In full screen view, only expand "details" section by default
+      // In full screen view, expand "details" section and any "notes" related sections by default
       sections.forEach(section => {
-        initialState[section.id] = section.id === 'details';
+        initialState[section.id] = section.id === 'details' || section.id === 'notes' || section.title.toLowerCase().includes('notes');
       });
     } else {
       // Default to having the first section open
