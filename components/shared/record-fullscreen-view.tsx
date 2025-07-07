@@ -62,8 +62,8 @@ export function RecordFullscreenView({
   onClose,
   activityContent,
 }: RecordFullscreenViewProps) {
-  // State management
-  const [activeTab, setActiveTab] = React.useState("activity")
+  // State management - default to "notes" tab for Note records, otherwise "activity"
+  const [activeTab, setActiveTab] = React.useState(recordType === "Note" ? "notes" : "activity")
   const [tasksViewMode, setTasksViewMode] = React.useState<"card" | "list" | "table">("table")
   const [filesViewMode, setFilesViewMode] = React.useState<"card" | "list" | "table">("table")
   const [notesViewMode, setNotesViewMode] = React.useState<"card" | "list" | "table">("table")
