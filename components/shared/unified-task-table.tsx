@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreVerticalIcon, Zap } from "lucide-react"
+import { MoreVerticalIcon, Zap, Sparkles } from "lucide-react"
 import { RecordCard } from "./record-card"
 import { RecordListItem } from "./record-list-item"
 
@@ -138,6 +138,7 @@ function TableView({
                   <span className="flex items-center gap-1">
                     {item.title}
                     <Zap className="h-3 w-3 text-yellow-500" />
+                    <Sparkles className="h-3 w-3 text-purple-500" />
                   </span>
                 ) : (
                   item.title
@@ -244,6 +245,7 @@ function CardView({
                 <span className="flex items-center gap-1">
                   {item.title}
                   <Zap className="h-3 w-3 text-yellow-500" />
+                  <Sparkles className="h-3 w-3 text-purple-500" />
                 </span>
               ) : (
                 item.title
@@ -319,6 +321,7 @@ function ListView({
                 <span className="flex items-center gap-1">
                   {item.title}
                   <Zap className="h-3 w-3 text-yellow-500" />
+                  <Sparkles className="h-3 w-3 text-purple-500" />
                 </span>
               ) : (
                 item.title
