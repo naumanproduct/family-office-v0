@@ -113,26 +113,24 @@ export function UnifiedDetailsPanel({
         {fieldsToShow.map((field, index) => {
           const isEditable = field.isEditable !== false; // Default to true if not specified
           
-          // Special handling for fields with empty labels (like description fields)
-          if (!field.label || field.label.trim() === '') {
-            return (
-              <div key={index} className="ml-2">
-                {field.isLink ? (
-                  <div className={`text-sm text-blue-600 ${isEditable ? 'cursor-pointer hover:bg-muted/50' : ''} px-2 py-0.5 rounded transition-colors`}>{field.value}</div>
-                ) : (
-                  <div className={`text-sm ${isEditable ? 'cursor-pointer hover:bg-muted/50' : ''} px-2 py-0.5 rounded transition-colors`}>{field.value}</div>
-                )}
-              </div>
-            );
-          }
+          // Check if the field value is a textarea by examining the React element
+          const isTextareaField = React.isValidElement(field.value) && 
+            (field.value.type === 'textarea' ||
+            (typeof field.value.props === 'object' && field.value.props !== null &&
+             'className' in field.value.props &&
+             typeof field.value.props.className === 'string' &&
+             field.value.props.className.includes('resize-none')));
           
-          // Standard label/value layout for other fields
           return (
-            <div key={index} className="flex items-center">
-              <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2">{field.label}</Label>
+            <div key={index} className={`flex ${isTextareaField ? 'items-start' : 'items-center'}`}>
+              <Label className="text-xs text-muted-foreground w-28 shrink-0 ml-2 mt-1">{field.label}</Label>
               <span className="flex-1 px-2 py-0.5">
                 {field.isLink ? (
                   <p className={`text-sm text-blue-600 ${isEditable ? 'cursor-pointer hover:bg-muted/50' : ''} px-2 py-0.5 rounded transition-colors w-fit`}>{field.value}</p>
+                ) : isTextareaField ? (
+                  <div className="w-full">
+                    {field.value}
+                  </div>
                 ) : (
                   <p className={`text-sm ${isEditable ? 'cursor-pointer hover:bg-muted/50' : ''} px-2 py-0.5 rounded transition-colors w-fit`}>{field.value}</p>
                 )}
