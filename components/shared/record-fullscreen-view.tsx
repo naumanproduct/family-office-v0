@@ -309,7 +309,7 @@ export function RecordFullscreenView({
                   recordName={parentTitle || ""}
                   recordType={parentRecordType || ""}
                   isFullScreen={true}
-                  hideSubtasks={true}
+                  hideSubtasks={false}
                 />
               )}
               {recordType === "Note" && (
@@ -412,7 +412,55 @@ export function RecordFullscreenView({
                 <TabContentRenderer
                   activeTab="tasks"
                   viewMode={tasksViewMode}
-                  data={getMockData('tasks')}
+                  data={recordType === "Task" && record.subtasks ? record.subtasks : (
+                    recordType === "Task" && record.title?.includes("Update capital schedule") ? [
+                      {
+                        id: "SUBTASK-1",
+                        title: "Calculate pro-rata allocation for each LP",
+                        description: "Determine each limited partner's share based on their commitment percentage",
+                        status: "To Do",
+                        priority: "High",
+                        assignee: "Michael Chen",
+                        dueDate: "2023-05-18",
+                      },
+                      {
+                        id: "SUBTASK-2", 
+                        title: "Update LP capital accounts in the system",
+                        description: "Record the capital call amounts in each LP's account ledger",
+                        status: "To Do",
+                        priority: "High",
+                        assignee: "Robert Kim",
+                        dueDate: "2023-05-19",
+                      },
+                      {
+                        id: "SUBTASK-3",
+                        title: "Generate capital call notices for LPs",
+                        description: "Create formal call notices with payment instructions and wire details",
+                        status: "To Do",
+                        priority: "Medium",
+                        assignee: "Emily Watson",
+                        dueDate: "2023-05-20",
+                      },
+                      {
+                        id: "SUBTASK-4",
+                        title: "Update fund commitment tracker",
+                        description: "Reflect new called capital amounts and remaining uncalled commitments",
+                        status: "To Do",
+                        priority: "Medium",
+                        assignee: "Michael Chen",
+                        dueDate: "2023-05-21",
+                      },
+                      {
+                        id: "SUBTASK-5",
+                        title: "Reconcile capital schedule with fund accounting",
+                        description: "Ensure capital schedule matches the fund's accounting records",
+                        status: "To Do",
+                        priority: "High",
+                        assignee: "Robert Kim",
+                        dueDate: "2023-05-22",
+                      },
+                    ] : getMockData('tasks')
+                  )}
                   onTaskClick={(task) => {
                     setNestedRecord({ type: 'Task', record: task })
                   }}
