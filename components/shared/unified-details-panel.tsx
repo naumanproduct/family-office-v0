@@ -223,6 +223,11 @@ export function UnifiedDetailsPanel({
                         <div className="flex items-center gap-2">
                           {section.icon}
                           <span className="font-medium text-sm">{section.title}</span>
+                          {section.sectionData?.items && section.sectionData.items.length > 0 && (
+                            <Badge variant="secondary" className="ml-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
+                              {section.sectionData.items.length}
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       
